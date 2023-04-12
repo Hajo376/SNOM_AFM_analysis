@@ -76,11 +76,54 @@ class Plot_Definitions:
 
     
 
-class SimpleManipulation(File_Definitions, Plot_Definitions):
+class Open_Measurement(File_Definitions, Plot_Definitions):
+    """This is the main class. You need to specify the measurement folder containing the individual channels.
+    You can also specify the channels you want to investigate in the initialisation or at a later point using the 'Initialize_Channels' method.
+    You should safe the created measurement instance so you can then call functions on it.
+    For example you can call the 'Display_Channels' method, this will simply display all channels currently in memory.
+    You can use most methods without specifying channels, then the channels in memory will be used.
+    If you specify new channels they will replace the old ones! 
+    Only use methods which do not start with an underscore, those are only ment for usage within the class.
+
+    All currently availabe methods:
+        Initialize_Channels : Change current channels
+        Scale_Channels : Increse pixel amount, important if you want to blurr your data or you want to do some shift.
+            This way you can shift with higher precision.
+        Set_Min_to_Zero : Sets the minimum hight in the channels containing hight to zero.
+        Remove_Subplots : Delete specific (specified by index) subplot from memory.
+        Remove_Last_Subplots : Delete the last subplot from memory.
+        Switch_Supplots : Rearange subplots by switching positions.
+        Display_All_Subplots : Display all suplots which are currently in memory.
+        Display_Channels : Display all channels in memory.
+        Gauss_Filter_Channels : Simple gaussian blurr, should only be used on amplitude, realpart and height channels.
+        Gauss_Filter_Channels_complex : Works additionally for phase, but you need to specify matching amplitude and phase channels.
+        Fourier_Filter_Channels : Simple fourier filter of channels, not yet fully implemented.
+        Save_to_gsf : Save all channels to .gsf files, dont worry manipulated channels will have a filename extension so you dont overwrite the originals.
+        Save_to_txt : Save all channels to .txt files, only use if necessary. gsf is more common and saves space.
+        Synccorrection : Used to correct the phasedrift introduced by using the syncronized scan mode, only availabe in the transmission module. 
+            You need to specify the used wavelength. All phase channels will be corrected and additionaly also the real parts will be created
+        Heigth_Mask_Channels : Simple masking method, based on a height threshold. Works best for leveled data.
+        Correct_Phase_Drift : Correct a linear phasedrift on the y-axis by selecting two points which should have the same phase.
+        Level_Height_Channels : Simple height leveling based on a simple 3-point correction.
+        Shift_Phase : Shift the current phase offset by slider.
+        Realign : Used for realigning long measurements of straight wavegides. Relatively specific use case...
+        Cut_Channels : Select a rectangle of your measurement to cut out.
+            Can be combined with height masking, since if set to 'auto' all black on the outside will be removed automatically.
+        Scalebar : Creates a scalebar in the specified channels. Only for plotting ...
+        Rotate_90_deg : Rotate measurement by 90 deg.
+        Select_Profile : Select a simple profile, for now only horizontal or vertical and over full measurement width or height
+        Select_Profiles : Select multiple profiles ...
+        Select_Profiles_SSH : specific use case ...
+        Display_Profiles : Display all current profiles
+        Display_Flattened_Profile : Display all current profiles and flatten them first, only for phase gradients
+        Display_Phase_Difference : Display phase difference between phase profiles
+        Quadratic_Pixels : This will scale the data automatically if possible, e.g. if you measured with unequal resotution in x and y.
+            Only use if resolution difference is an integer multiple like 50 nm in x and 100 nm or 150 nm in y. 
+        Overlay_Forward_and_Backward_Channels : You are tired of trowing away all the data in the backwards channels? Then use the overlay function!
+            This will try to overlay forward and backward channels and will also try to shift them over each other.
+
     
-    # figsizex = 10
-    # figsizey = 5
-    
+    """
     # reorganize and put the following variables in the init function
     # ToDo
     all_subplots = []
@@ -160,7 +203,6 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         if version_number == '1.6.3359.1':
             File_Definitions.file_type = File_Type.neaspec_version_1_6_3359_1
             File_Definitions.parmeters_type = File_Type.html_neaspec_version_1_6_3359_1
-
 
     def _Initialize_File_Type(self) -> None:
         self._Find_Filetype() # try to find the filetype automatically
@@ -421,7 +463,11 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
             self.y_shifts = None
     
     def Initialize_Channels(self, channels:list) -> None:
-        '''This function will load the data from the specified channels and replace the ones in memory.'''
+        '''This function will load the data from the specified channels and replace the ones in memory.
+        
+        Args:
+            channels [list]: a list containing the channels you want to initialize
+        '''
         self._Initialize_Data(channels)
 
     def _Initialize_Logfile(self) -> str:
@@ -683,7 +729,6 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
             all_data.append(channel_data)
             count+=1
         return all_data, data_dict
-
 
     def _Load_Data_Binary(self, channels) -> list:
         '''Loads all binary data of the specified channels and returns them in a list plus the dictionary for access'''
@@ -1040,6 +1085,12 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         self._Display_Dataset(dataset, channels)
 
     def Gauss_Filter_Channels(self, channels:list=None, sigma=2):
+        """This function will gauss filter the specified channels. If no channels are specified, the ones in memory will be used.
+
+        Args:
+            channels (list, optional): This will overwrite the channels in memory. Defaults to None.
+            sigma (int, optional): The 'width' of the gauss blurr in pixels, you should scale the data before blurring. Defaults to 2.
+        """
         self._Initialize_Data(channels)
         self._Write_to_Logfile('gaussian_filter_sigma', sigma)
         if self.scaling_factor == 1:
@@ -1293,7 +1344,7 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
             print(filepath)
 
     def Save_to_txt(self, channels:list=None, appendix:str='_manipulated'):
-        '''This function is ment to save all specified channels to external .gsf files.
+        '''This function is ment to save all specified channels to external .txt files.
         
         Args:
             channels [list]:    list of the channels to be saved, if not specified, all channels in memory are saved
@@ -1609,13 +1660,13 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         return self._Shift_Phase_Data(data, 0)
 
     def Correct_Phase_Drift(self, channels:list=None, export:bool=False, phase_slope=None, zone:int=1) -> None:
-        '''This function asks the user to click on two point which should have the same phase value.
-        only the slow drift in y-direction will be compensated. Could in futre be extended to include a percentual drift compensation along the x-direction.
+        '''This function asks the user to click on two points which should have the same phase value.
+        Only the slow drift in y-direction will be compensated. Could in future be extended to include a percentual drift compensation along the x-direction.
         But should usually not be necessary.
                 
         Args:
             channels [list]: list of channels, will override the already existing channels
-            export [bool]: do you want to aplly the correction to all phase channels and export them?
+            export [bool]: do you want to aply the correction to all phase channels and export them?
             phase_slope [float]: if you already now the phase slope you can enter it, otherwise leave it out
                                 and it will prompt you with a preview to select two points to calculate the slope from
             zone [int]: defines the area which is used to calculate the mean around the click position in the preview,
@@ -1979,7 +2030,7 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
     def Scalebar(self, channels:list=[], units="m", dimension="si-length", label=None, length_fraction=None, height_fraction=None, width_fraction=None,
             location=None, loc=None, pad=None, border_pad=None, sep=None, frameon=None, color=None, box_color=None, box_alpha=None, scale_loc=None,
             label_loc=None, font_properties=None, label_formatter=None, scale_formatter=None, fixed_value=None, fixed_units=None, animated=False, rotation=None):
-        '''channels contains the list of channels wich should have a scalebar
+        '''Adds a scalebar to all specified channels.
         Args:
             channels [list]: list of channels the scalebar should be added to, will not affect the channels in memory
             various definitions for the scalebar, please look up 'matplotlib_scalebar.scalebar' for more information
@@ -2005,7 +2056,11 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
             count += 1
 
     def Rotate_90_deg(self, orientation:str = 'right'):
-        '''This function will rotate all data in memory by 90 degrees.'''
+        """This function will rotate all data in memory by 90 degrees.
+
+        Args:
+            orientation (str, optional): rotate clockwise ('right') or counter clockwise ('left'). Defaults to 'right'.
+        """
         self._Write_to_Logfile('rotate_90_deg', orientation)
         if orientation == 'right':
             axes=(1,0)
@@ -2083,8 +2138,17 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
             all_profiles.append(profile)
         return all_profiles
 
-    def Select_Profile(self, profile_channel:str, preview_channel:str=None, orientation:Definitions=Definitions.vertical, width=10, phase_orientation=1, coordinates=None):
-        '''This function lets the user select a profile with given width in pixels and displays the data.'''
+    def Select_Profile(self, profile_channel:str, preview_channel:str=None, orientation:Definitions=Definitions.vertical, width:int=10, phase_orientation:int=1, coordinates:list=None):
+        """This function lets the user select a profile with given width in pixels and displays the data.
+
+        Args:
+            profile_channel (str): channel to use for profile data extraction
+            preview_channel (str, optional): channel to preview the profile positions. If not specified the height channel will be used for that. Defaults to None.
+            orientation (Definitions, optional): profiles can be horizontal or vertical. Defaults to Definitions.vertical.
+            width (int, optional): width of the profile in pixels, will calculate the mean. Defaults to 10.
+            phase_orientation (int, optional): only relevant for phase profiles. Necessary for the flattening to work properly. Defaults to 1.
+            coordinates (list, optional): if you already now the position of your profile you can also specify the coordinates and skip the selection. Defaults to None.
+        """
         if preview_channel is None:
             preview_channel = self.height_channel
         if coordinates == None:
@@ -2125,7 +2189,7 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         plt.tight_layout()
         plt.show()
 
-        flattened_profiles = [Phase_Analysis.Flatten_Phase_Profile(profile, phase_orientation) for profile in profiles]
+        flattened_profiles = [phase_analysis.Flatten_Phase_Profile(profile, phase_orientation) for profile in profiles]
         for profile in flattened_profiles:
             xvalues = np.linspace(0, 10, len(profile))
             plt.plot(xvalues, profile)
@@ -2133,7 +2197,7 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         plt.tight_layout()
         plt.show()
 
-        difference_profile = Phase_Analysis.Get_Profile_Difference(profiles[0], profiles[1])
+        difference_profile = phase_analysis.Get_Profile_Difference(profiles[0], profiles[1])
         # difference_profile = Get_Profile_Difference(flattened_profiles[0], flattened_profiles[1])
         xres, yres = self.channel_tag_dict[self.channels.index(profile_channel)][Tag_Type.pixel_area]
         xreal, yreal = self.channel_tag_dict[self.channels.index(profile_channel)][Tag_Type.scan_area]
@@ -2202,7 +2266,16 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         return coordinates
 
     def Select_Profiles(self, profile_channel:str, preview_channel:str=None, orientation:Definitions=Definitions.vertical, width:int=10, coordinates:list=None):
-        '''This function lets the user select a profile with given width in pixels and displays the data.'''
+        """This function lets the user select a profile with given width in pixels and displays the data.
+
+        Args:
+            profile_channel (str): channel to use for profile data extraction
+            preview_channel (str, optional): channel to preview the profile positions. If not specified the height channel will be used for that. Defaults to None.
+            orientation (Definitions, optional): profiles can be horizontal or vertical. Defaults to Definitions.vertical.
+            width (int, optional): width of the profile in pixels, will calculate the mean. Defaults to 10.
+            coordinates (list, optional): if you already now the position of your profile you can also specify the coordinates and skip the selection. Defaults to None.
+
+        """
         if preview_channel is None:
             preview_channel = self.height_channel
         if preview_channel not in self.channels and profile_channel not in self.channels:
@@ -2223,8 +2296,20 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         self.profile_orientation = orientation
         return self.profiles
 
-    def Select_Profiles_SSH(self, profile_channel_amp, profile_channel_phase, preview_channel:str=None, orientation:Definitions=Definitions.vertical, width_amp:int=10, width_phase:int=1, coordinates:list=None):
-        '''This function lets the user select a profile with given width in pixels and displays the data.'''
+    def Select_Profiles_SSH(self, profile_channel_amp:str, profile_channel_phase:str, preview_channel:str=None, orientation:Definitions=Definitions.vertical, width_amp:int=10, width_phase:int=1, coordinates:list=None):
+        """This function lets the user select a profile with given width in pixels and displays the data.
+        Specific function for ssh model measurements. This will create a plot of field per waveguide index for the topological array.
+        The field is calculated from the amplitude profiles times the cosine of the phasedifference to the central waveguide. 
+
+        Args:
+            profile_channel_amp (str): amplitude channel for profile data
+            profile_channel_phase (str): phase channel for profile data
+            preview_channel (str, optional): channel to preview the profile positions. If not specified the height channel will be used for that. Defaults to None.
+            orientation (Definitions, optional): profiles can be horizontal or vertical. Defaults to Definitions.vertical.
+            width_amp (int, optional): width of the amplitude profile in pixels. Defaults to 10.
+            width_phase (int, optional): width of the phase profile in pixels. Defaults to 1.
+            coordinates (list, optional): if you already now the position of your profile you can also specify the coordinates and skip the selection. Defaults to None.
+        """
         if preview_channel is None:
             preview_channel = self.height_channel
         if preview_channel not in self.channels or profile_channel_amp not in self.channels or profile_channel_phase not in self.channels:
@@ -2246,12 +2331,12 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         mean_amp = [np.mean(amp) for amp in amp_profiles]
         reference_index = int((len(phase_profiles)-1)/2)
         # phase_difference_profiles = [Phase_Analysis.Get_Profile_Difference(phase_profiles[reference_index], phase_profiles[i]) for i in range(len(phase_profiles))]
-        flattened_profiles = [Phase_Analysis.Flatten_Phase_Profile(profile, +1) for profile in phase_profiles]
+        flattened_profiles = [phase_analysis.Flatten_Phase_Profile(profile, +1) for profile in phase_profiles]
         self.profile_channel = profile_channel_phase
         self.profile_orientation = orientation
         self._Display_Profile(flattened_profiles)
         # phase_difference_profiles = [Phase_Analysis.Get_Profile_Difference_2(phase_profiles[reference_index], phase_profiles[i]) for i in range(len(phase_profiles))]
-        phase_difference_profiles = [Phase_Analysis.Get_Profile_Difference_2(flattened_profiles[reference_index], flattened_profiles[i]) for i in range(len(flattened_profiles))]
+        phase_difference_profiles = [phase_analysis.Get_Profile_Difference_2(flattened_profiles[reference_index], flattened_profiles[i]) for i in range(len(flattened_profiles))]
         # mean_phase_differences = [np.mean(diff) for diff in phase_difference_profiles]# todo this does not work!
         mean_phase_differences = [np.mean(diff) if np.mean(diff)>0 else np.mean(diff) + np.pi*2 for diff in phase_difference_profiles]# todo this does not work!
         real_per_wg_index = [mean_amp[i]*np.cos(mean_phase_differences[i]) for i in range(len(phase_profiles))]
@@ -2304,24 +2389,38 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         plt.tight_layout()
         plt.show()
 
-    def Display_Profiles(self):
+    def Display_Profiles(self, ylabel:str=None, labels:list=None):
+        """This function will display all current profiles from memory.
+
+        Args:
+            ylabel (str, optional): label of the y axis. The x axis label is in µm per default. Defaults to None.
+            labels (list, optional): the description of the profiles. Will be displayed in the legend. Defaults to None.
+        """
         self._Display_Profile(self.profiles)
 
-    def Display_Flattened_Profile(self, phase_orientation):
-        flattened_profiles = [Phase_Analysis.Flatten_Phase_Profile(profile, phase_orientation) for profile in self.profiles]
+    def Display_Flattened_Profile(self, phase_orientation:int):
+        """This function will flatten all profiles in memory and display them. Only useful for phase profiles!
+
+        Args:
+            phase_orientation (int): direction of the phase, must be '1' or '-1'
+        """
+        flattened_profiles = [phase_analysis.Flatten_Phase_Profile(profile, phase_orientation) for profile in self.profiles]
         self._Display_Profile(flattened_profiles)
 
     def Display_Phase_Difference(self, reference_index:int):
-        difference_profiles = [Phase_Analysis.Get_Profile_Difference(self.profiles[reference_index], self.profiles[i]) for i in range(len(self.profiles)) if i != reference_index]
+        """This function will calculate the phase difference of all profiles relative to the profile specified by the reference index.
+
+        Args:
+            reference_index (int): index of the reference profile. Basically the nth-1 selected profile.
+        """
+        difference_profiles = [phase_analysis.Get_Profile_Difference(self.profiles[reference_index], self.profiles[i]) for i in range(len(self.profiles)) if i != reference_index]
         labels = ['Wg index ' + str(i) for i in range(len(difference_profiles))]
         self._Display_Profile(difference_profiles, 'Phase difference', labels)
 
     def _Get_Mean_Phase_Difference(self, profiles, reference_index:int):
-        difference_profiles = [Phase_Analysis.Get_Profile_Difference(profiles[reference_index], profiles[i]) for i in range(len(profiles)) if i != reference_index]
+        difference_profiles = [phase_analysis.Get_Profile_Difference(profiles[reference_index], profiles[i]) for i in range(len(profiles)) if i != reference_index]
         mean_differences = [np.mean(diff) for diff in difference_profiles]
         return mean_differences
-
-
 
     def _Scale_Data_XY(self, data, scale_x, scale_y) -> np.array:
         XRes = len(data[0])
@@ -2368,66 +2467,7 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
                 self.all_data[self.channels.index(channel)] = self._Scale_Data_XY(self.all_data[self.channels.index(channel)], scale_x, scale_y)
                 self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area] = [XRes*scale_x, YRes*scale_y]
 
-    
-
-    # does it even do anything?
-    def Center_Realpart(self) -> None:
-        if self.file_type== File_Type.standard or self.file_type == File_Type.standard_new:
-            for channel in self.channels:
-                if ('O' in channel) and ('R' in channel):
-                    data = self.all_data[self.channels.index(channel)]
-                    
-        else:
-            print('Not yet implemented')
-            pass
-
-    def Test_Directionality(self, filename, channels:list=None):
-        self._Initialize_Data(channels)
-        
-        # first select the area to retieve the data from, should be a bit away from the coupler to ignore direct laser interactions
-        # but not too far that the signal vanishes
-        # print(self.height_channel)
-        if self.height_channel in self.channels:
-            height_data = self.all_data[self.channels.index(self.height_channel)]
-        else:
-            height_data = self._Load_Data([self.height_channel])[0][0]
-        XRes = len(height_data[0])
-        YRes = len(height_data)
-        # print('selection: ', selection)
-        # set all data outside the selection to zero and apply auto cut feature to cut the data to specified area
-        mask_array = np.zeros((YRes, XRes))
-        for y in range(YRes):
-            if (y > selection[0][1]) and (y < selection[1][1]):
-                for x in range(XRes):
-                    if (x > selection[0][0]) and (x < selection[1][0]):
-                        mask_array[y][x] = 1
-                      
-        height_data = np.multiply(height_data, mask_array)
-        height_data = self._Auto_Cut_Data(height_data)
-        
-        for channel in self.channels:
-            self.all_data[self.channels.index(channel)] = np.multiply(self.all_data[self.channels.index(channel)], mask_array)
-            self.all_data[self.channels.index(channel)] = self._Auto_Cut_Data(self.all_data[self.channels.index(channel)])
-            if channel in self.amp_channels:
-                amp_channel = channel
-            elif (channel in self.phase_channels) or (channel in self.corrected_phase_channels):
-                phase_channel = channel
-        
-        CC_instance = ChiralCoupler(height_data, self.all_data, self.channels)
-        # the height data is used to fit, the result can be used for all following functions
-        CC_instance.Integrate_Amplitude(amp_channel)
-        # CC_instance.Display_Phase_Profile(phase_channel)
-        # CC_instance.Display_Phase_Difference(phase_channel)
-        # CC_instance.Export_Data(amp_channel, filename)
-        CC_instance.Export_Mean_Data(filename)
-        
-
-        # Fit_Decaying_Amplitude()
-        # ChiralCoupler(height_data, amp_data[0], amp_channels[0]).Integrate_Amplitude()
-        # ChiralCoupler(height_data, phase_data[0], phase_channels[0]).Display_Phase_Profile()
-        # ChiralCoupler(height_data, phase_data[0], phase_channels[0]).Display_Phase_Difference()
-
-    def Overlay_Forward_and_Backward_Channels(self, height_channel_forward, height_channel_backward, channels:list=None):
+    def Overlay_Forward_and_Backward_Channels(self, height_channel_forward:str, height_channel_backward:str, channels:list=None):
         """This function is ment to overlay the backwards and forwards version of the specified channels.
         You should only specify the forward version of the channels you want to overlay. The function will create a mean version
         which can then be displayed and saved. Note that the new version will be larger then the previous ones.
@@ -2484,7 +2524,7 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
 
         # get the index which minimized the deviation of the height channels
         # index = Realign.Minimize_Deviation_2D(height_data_forward, height_data_backward, N, False)
-        index = Realign.Minimize_Deviation_2D(height_channel_forward_blurr, height_channel_backward_blurr, N, False)
+        index = realign.Minimize_Deviation_2D(height_channel_forward_blurr, height_channel_backward_blurr, N, False)
         # self.all_data[self.channels.index(height_channel_forward)], self.all_data[self.channels.index(height_channel_backward)] = Realign.Shift_Array_2D_by_Index(height_data_forward, height_data_backward, index)
 
 
@@ -2517,11 +2557,11 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
                     # self.all_data[self.channels.index(height_channel_backward)] = Realign.Minimize_Drift(self.all_data[self.channels.index(height_channel_backward)])
 
                     # shift the data of the forward and backwards channel to match
-                    self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)] = Realign.Shift_Array_2D_by_Index(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)], index)
+                    self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)] = realign.Shift_Array_2D_by_Index(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)], index)
         
 
                     # create mean data and append to all_data
-                    self.all_data.append(Realign.Create_Mean_Array(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)]))
+                    self.all_data.append(realign.Create_Mean_Array(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)]))
                 else:
                     # get current res and size and add the additional res and size due to addition of zeros while shifting
                     XRes, YRes = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area]
@@ -2551,14 +2591,44 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
                     # self.all_data[self.channels.index('R-'+ channel)] = Realign.Minimize_Drift(self.all_data[self.channels.index('R-'+ channel)])
 
                     # shift the data of the forward and backwards channel to match
-                    self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)] = Realign.Shift_Array_2D_by_Index(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)], index)
+                    self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)] = realign.Shift_Array_2D_by_Index(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)], index)
 
                     # create mean data and append to all_data
-                    self.all_data.append(Realign.Create_Mean_Array(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)]))
+                    self.all_data.append(realign.Create_Mean_Array(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)]))
 
                     # XRes, YRes = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area]
                     # XReal, YReal = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.scan_area]
             
+    
+
+# could be exported to external file
+
+def Set_nan_to_zero(data) -> np.array:
+    xres = len(data[0])
+    yres = len(data)
+    for y in range(yres):
+        for x in range(xres):
+            if str(data[y][x]) == 'nan':
+                data[y][x] = 0
+    return data       
+
+# needed for the Realign function
+def Gauss_Function(x, A, mu, sigma, offset):
+    return A*np.exp(-(x-mu)**2/(2.*sigma**2)) + offset
+
+
+# not in use, delete?
+'''
+    def Center_Realpart(self) -> None:
+        if self.file_type== File_Type.standard or self.file_type == File_Type.standard_new:
+            for channel in self.channels:
+                if ('O' in channel) and ('R' in channel):
+                    data = self.all_data[self.channels.index(channel)]
+                    
+        else:
+            print('Not yet implemented')
+            pass
+
     def Create_Horizontal_Profile(self, channel:str, filepath:str=None):
         # self.Display_Channels()
         # print(f'1self.channels: {self.channels}')
@@ -2600,21 +2670,50 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
             file.write(f'{round(x_array[i],9)}\t{round(profile[i]*scaling,5)}\n')
         file.close()
 
+            
+    def Test_Directionality(self, filename, channels:list=None):
+        self._Initialize_Data(channels)
+        
+        # first select the area to retieve the data from, should be a bit away from the coupler to ignore direct laser interactions
+        # but not too far that the signal vanishes
+        # print(self.height_channel)
+        if self.height_channel in self.channels:
+            height_data = self.all_data[self.channels.index(self.height_channel)]
+        else:
+            height_data = self._Load_Data([self.height_channel])[0][0]
+        XRes = len(height_data[0])
+        YRes = len(height_data)
+        # print('selection: ', selection)
+        # set all data outside the selection to zero and apply auto cut feature to cut the data to specified area
+        mask_array = np.zeros((YRes, XRes))
+        for y in range(YRes):
+            if (y > selection[0][1]) and (y < selection[1][1]):
+                for x in range(XRes):
+                    if (x > selection[0][0]) and (x < selection[1][0]):
+                        mask_array[y][x] = 1
+                      
+        height_data = np.multiply(height_data, mask_array)
+        height_data = self._Auto_Cut_Data(height_data)
+        
+        for channel in self.channels:
+            self.all_data[self.channels.index(channel)] = np.multiply(self.all_data[self.channels.index(channel)], mask_array)
+            self.all_data[self.channels.index(channel)] = self._Auto_Cut_Data(self.all_data[self.channels.index(channel)])
+            if channel in self.amp_channels:
+                amp_channel = channel
+            elif (channel in self.phase_channels) or (channel in self.corrected_phase_channels):
+                phase_channel = channel
+        
+        CC_instance = ChiralCoupler(height_data, self.all_data, self.channels)
+        # the height data is used to fit, the result can be used for all following functions
+        CC_instance.Integrate_Amplitude(amp_channel)
+        # CC_instance.Display_Phase_Profile(phase_channel)
+        # CC_instance.Display_Phase_Difference(phase_channel)
+        # CC_instance.Export_Data(amp_channel, filename)
+        CC_instance.Export_Mean_Data(filename)
+        
 
-
-
-def Set_nan_to_zero(data) -> np.array:
-    xres = len(data[0])
-    yres = len(data)
-    for y in range(yres):
-        for x in range(xres):
-            if str(data[y][x]) == 'nan':
-                data[y][x] = 0
-    return data       
-
-# needed for the Realign function
-def Gauss_Function(x, A, mu, sigma, offset):
-    return A*np.exp(-(x-mu)**2/(2.*sigma**2)) + offset
-
-
-
+        # Fit_Decaying_Amplitude()
+        # ChiralCoupler(height_data, amp_data[0], amp_channels[0]).Integrate_Amplitude()
+        # ChiralCoupler(height_data, phase_data[0], phase_channels[0]).Display_Phase_Profile()
+        # ChiralCoupler(height_data, phase_data[0], phase_channels[0]).Display_Phase_Difference()        
+            '''

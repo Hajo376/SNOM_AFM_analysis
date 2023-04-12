@@ -2,7 +2,6 @@ import numpy as np
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from python_manipulation_classes.snom_colormaps import *
 from scipy import signal
 import pathlib
 this_files_path = pathlib.Path(__file__).parent.absolute()
@@ -12,13 +11,40 @@ from tkinter import filedialog
 from datetime import datetime
 
 
-from python_manipulation_classes.python_classes_snom import SimpleManipulation
-from python_manipulation_classes.amp_analysis import AmpAnalysis
-from python_manipulation_classes.phase_analysis import *
-from python_manipulation_classes.get_directionality import ChiralCoupler
-from python_manipulation_classes.rectangle_selector import Select_Rectangle
+from SNOM_AFM_analysis.lib.snom_colormaps import *
+from SNOM_AFM_analysis.python_classes_snom import Open_Measurement
+from SNOM_AFM_analysis.lib.phase_analysis import *
+# from SNOM_AFM_analysis.lib.get_directionality import ChiralCoupler
+from SNOM_AFM_analysis.lib.rectangle_selector import Select_Rectangle
 
-class ChiralCouplers(SimpleManipulation):
+class ChiralCouplers(Open_Measurement):
+    """This class builds on the Open_Measurement base class for snom analysis.
+    This class was initiated for a more detailed analysis of measurements of the chiral couplers.
+    The basic idea is to find the waveguides by reducing the measurement and then fitting the waveguide positions.
+    Once the positions of the waveguides are known we can get the amplitudes and phaseprofiles along the waveguides. 
+    This will be used to calculate the directionality and optionally the phase difference.
+
+    Availabe methods are:
+        Find_Waveguides
+        Fit_Wgs
+        Get_Integration_Width
+        Plot_Data_With_Fit_And_Bounds
+        Extract_WG_Data
+        Extract_WG_Data_with_Errors
+        Data_Mean
+        Data_Mean_with_Errors
+        Export_Mean_Data
+        Integrate_Amplitude
+        Display_Phase_Profile
+        Export_Data
+        Export_All_Data
+        Export_All_Data_single_phase_line
+        Export_All_Data_single_phase_line_with_Errors
+        Load_Extracted_Data
+        Display_Phase_Difference
+        Fit_Sawtooth
+
+    """
     def __init__(self, directory_name, channels:list=None, title=None, autoscale=True, orientation='vertical'):
         self.orientation = orientation
         self.removed_lines = []
@@ -67,8 +93,9 @@ class ChiralCouplers(SimpleManipulation):
         self.Fit_Wgs()
     
     def Fit_Wgs(self, wg_height=65, max_shift=0.05) -> None:
-        '''This fits the data and returns a list with both positions of the waveguides.
-        Like: [row, col_wg1, col_wg2]
+        '''This fits the height channel with two gaussians to find the two waveguide positions for each row.
+        The coefficients will be stored in an instance variable list_of_coefficients. The list will also be saved as .txt.
+        The coefficients will be used later to extract the data from the measurements on the waveguides.
         '''
         # max shift is to limit jumping of the center point
         if self.orientation == 'vertical':
@@ -148,8 +175,6 @@ class ChiralCouplers(SimpleManipulation):
                 print('Filled line: ', self.list_of_coefficients[self.removed_lines[line]])
             start = jump
 
-        
-
     def _Find_Jumps_in_Array(self, array):
         '''finds jumps in ordered list of integers'''
         jumps = []
@@ -160,7 +185,6 @@ class ChiralCouplers(SimpleManipulation):
             last_element = array[i]
         jumps.append(len(array)-1) # append also the last index
         return jumps
-
 
     def _Select_Lines_to_Remove(self):
         # self.removed_areas = []
@@ -207,7 +231,13 @@ class ChiralCouplers(SimpleManipulation):
             print('Please enter n or y!')
             self.Get_Integration_Width()
 
-    def Plot_Data_With_Fit_And_Bounds(self, data, channel) -> None:
+    def Plot_Data_With_Fit_And_Bounds(self, data:np.array, channel:str) -> None:
+        """This method will display the data and additionally show the center of the gaussian fits plus the chosen export width.
+
+        Args:
+            data (np.array): the data to display
+            channel (str): specifies the colormap
+        """
         fig, axis = plt.subplots()    
         # fig.set_figheight(self.figsizey)
         # fig.set_figwidth(self.figsizex) 
@@ -242,7 +272,13 @@ class ChiralCouplers(SimpleManipulation):
         axis.invert_yaxis()
         plt.show()
 
-    def Extract_WG_Data(self, channel):
+    def Extract_WG_Data(self, channel:str):
+        """This function will extract the data of the specified channel for the left and right waveguide. 
+        An instance variable containing both data sets is created (left_wg_data, right_wg_data).
+
+        Args:
+            channel (str): channel to extract the data from
+        """
         wg_positions = [[i, self.list_of_coefficients[i][1], self.list_of_coefficients[i][2]] for i in range(len(self.height_data))]
         # print('wg_positions', wg_positions)
         # print('integ_width: ', integ_width)
@@ -254,7 +290,15 @@ class ChiralCouplers(SimpleManipulation):
             self.left_wg_data.append(self.data_array[self.channels.index(channel)][row][int(wg_left-self.integ_width):int(wg_left+self.integ_width)])
             self.right_wg_data.append(self.data_array[self.channels.index(channel)][row][int(wg_right-self.integ_width):int(wg_right+self.integ_width)])
     
-    def Extract_WG_Data_with_Errors(self, channel):
+    def Extract_WG_Data_with_Errors(self, channel:str):
+        """This function will extract the data of the specified channel for the left and right waveguide. 
+        An instance variable containing both data sets is created (left_wg_data, right_wg_data).
+        Additionally also the area in between the two waveguides is extracted as background_data.
+        The background data will be used for an error estimation.
+
+        Args:
+            channel (str): channel to extract the data from
+        """
         wg_positions = [[i, self.list_of_coefficients[i][1], self.list_of_coefficients[i][2]] for i in range(len(self.height_data))]
         # print('wg_positions', wg_positions)
         # print('integ_width: ', integ_width)
@@ -298,6 +342,9 @@ class ChiralCouplers(SimpleManipulation):
                 self.mean_data.append([channel, left_mean_array, right_mean_array])
     
     def Data_Mean_with_Errors(self) -> None:
+        """This function will create the mean values from the extracted amplitude data. The mean data is stored in a new instance variable mean_data.
+        The phase data is just used to get the phase profile in the center of the waveguide, this leads to more reliable results, as averaging phase typically does not work out well.
+        """
         self.mean_data = []
         # print('in data_mean, print channels: ', self.channels)
         for channel in self.channels:
@@ -459,7 +506,7 @@ class ChiralCouplers(SimpleManipulation):
             channel.split()
             channel_type = channel[2]
             # print('channel type1: ', channel_type)
-            index = channel[1]
+            index = channel[1] # basically the demodulation order of the channel, so 1 for O1A
             # print('index1: ', index)
             # channels must be sorted! amp comes first then phase
             if index not in all_indices and channel_type in allowed_channel_types and channel_type==allowed_channel_types[0]:
@@ -508,7 +555,15 @@ class ChiralCouplers(SimpleManipulation):
                     datafile.write(f'{i}\t{round(data_pairs[j][1][0][i], 5)}\t{round(data_pairs[j][1][1][i], 5)}\t{round(self.left_center_phase[i],3)}\t{round(self.right_center_phase[i],3)}\n')
         print(f'Exported all data to {complete_filename}!')
 
-    def Export_All_Data_single_phase_line_with_Errors(self, filepath=None):
+    def Export_All_Data_single_phase_line_with_Errors(self, filepath:str=None):
+        """This method first extracts the waveguide data by selecting an area in the scan and then fitting the waveguide positions.
+        Subsequently the extracted amplitude data is averaged, for the phase only the values in the middle of the waveguides are used.
+        The averaged profiles and phase data are stored in data_pairs for each demodulation order. This is based on the channels specified earlier and requires that
+        Find_Waveguides was executed prior to this method.
+
+        Args:
+            filepath (str, optional): where to save the extracted data? The filename is created automatically. Defaults to None.
+        """
         self.Data_Mean_with_Errors() # create mean data
         data_pairs = self._Get_Data_Pairs() # get data pairs from the mean data list 
         for j in range(len(data_pairs)):
@@ -588,6 +643,17 @@ class ChiralCouplers(SimpleManipulation):
 
 
 class LoadData():
+    """This class is ment to load the profiles created with the ChiralCouplers class and comsol profiles.
+    From the profiles the directionality can be calculated and compared.
+
+    Args:
+        initialdir (str, optional): initial directory, will be used for the file dialogues.
+        title (str, optional): title, will be used for future plots.
+        autoload (bool, optional): if set to True you will automatically be asked to select data files without having to call Load_Extracted_Data manually.
+        chirality (int, optional): chirality of the measurement/simulation. Important for directionality calculation.
+        pixelsize (float, optional): size of pixels in nm, important for plot labels, defaults to 50nm/scaling
+        with_errors (bool, optional): do you want to include an error estimation based on the background in between the two waveguides? Only for snom measurements.
+    """
     def __init__(self, initialdir=None, title=None, autoload=True, chirality=+1, pixelsize=None, with_errors=True):
         self.initialdir = initialdir
         self.chirality = chirality
@@ -606,7 +672,13 @@ class LoadData():
         if title is not None:
             self.title = title
 
-    def Load_Extracted_Data(self, filepath=None, initialdir=None) -> None:
+    def Load_Extracted_Data(self, filepath:str=None, initialdir:str=None) -> None:
+        """Select the file to extract the data from.
+
+        Args:
+            filepath (str, optional): if not specified you will be prompted with a filedialoge. Defaults to None.
+            initialdir (str, optional): sets the starting directory for the filedialoge. Defaults to None.
+        """
         if initialdir is not None:
             self.initialdir = initialdir
         root = tk.Tk()
@@ -634,7 +706,15 @@ class LoadData():
             self.amp_background = np.genfromtxt(datafile, delimiter='\t', skip_header=2, usecols=5)
             datafile.close()
     
-    def Cut_Data(self, length=4000, from_where='beginning'):
+    def Cut_Data(self, length:float=4000, from_where='beginning'):
+        """This method will cut the loaded profiles to a specific length.
+        Only used for comsol data to remove the strong oscillations in the beginning.
+
+        Args:
+            length  (float, optional): length in nm to remove from the profiles. Careful, the definition of the pixelsize must be correct! Defaults to 4000.
+            from_where (str, optional): from where to remove the specified length, can be either be 'beginning' to remove from the beginning or 'end' to remove from the end.
+                Defaults to 'beginning'.
+        """
         datapoints = len(self.amplitude_left)
         reduced_datapoinst = datapoints-int(length/self.pixelsize)
         amplitude_left = np.zeros(reduced_datapoinst)
@@ -655,6 +735,14 @@ class LoadData():
         self.phase_right = phase_right
 
     def Fit_Amplitudes(self, with_oscillation=False) -> None:
+        """This function fits the amplitude data from the loaded profiles.
+        The data is fitted with exponential function to extract the propagation length and the directionality.
+        The directionalities are saved in the instance variable all_directionalitys. This contains the directionality and an error estimate.
+        Repeated calls of Load_Extracted_Data and Fit_Amplitudes will create a list of directionalites, which can then be saved for a parameter variation.
+
+        Args:
+            with_oscillation (bool, optional): ties to fit the exponential additionally with a decaying oscillation. Defaults to False.
+        """
         root = tk.Tk()
         root.withdraw()  
         x=np.arange(len(self.amplitude_left))      
@@ -723,7 +811,13 @@ class LoadData():
                 directionality_error = Get_Directionality_Uncertainity(left_sum, background, right_sum, background)
         self.all_measured_directionalities.append([directionality, directionality_error])
 
-    def Plot_Propagation_Lengths(self, x_values, x_label) -> None:
+    def Plot_Propagation_Lengths(self, x_values:list, x_label:str) -> None:
+        """This function will plot all propagation lengths in memory, only useful if multiple measurement profiles have been loaded and fitted.
+
+        Args:
+            x_values (list): a predefined list of x-values. This would for example be a list of radii when you want to display the data of a radius variation.
+            x_label (_type_): label for the x-axis
+        """
         
         propagation_lengths_leftwg = [element[0]*0.001 for element in self.all_propagation_lengths]
         propagation_lengths_rightwg = [element[1]*0.001 for element in self.all_propagation_lengths]
@@ -754,7 +848,16 @@ class LoadData():
         plt.legend()
         plt.show()
 
-    def Export_Directionalities(self, datapoints, filepath, variation_type='radius', data_type='snom'):
+    def Export_Directionalities(self, datapoints:list, filepath:str, variation_type:str='radius', data_type:str='snom'):
+        """This method will export the created list of directionalities to a .txt file.
+
+        Args:
+            datapoints (list): list of the parameters which were varied in this measurement sequence
+            filepath (str): complete filepath with '.txt' ending for the directionalities list.
+            variation_type (str, optional): will be included in file header. Defaults to 'radius'.
+            data_type (str, optional): either 'snom' or 'comsol'. Defaults to 'snom'. For 'snom' the directionalities from the exponential fit will be used,
+                for 'comsol' the sum of the data will be used, since sometimes the field is so weak that the fit does not work properly.
+        """
         file = open(filepath, 'w')
         if self.with_errors == True:
             file.write(f'{variation_type}\tfit_directionality\tuncertainty\tsum_directionality\tuncertainty\n')
@@ -857,9 +960,6 @@ class LoadData():
         plt.legend()
         plt.show()
 
-        
-
-
     def Remove_Artificial_Phase(self, phasearray, bounds=1.7):
         new_array = np.zeros((len(phasearray)))
         previous_element = phasearray[0]
@@ -925,6 +1025,7 @@ class LoadData():
         plt.legend()
         plt.show()
 
+
 def Flatten_Profile(data):
     threshold = np.pi*0.8
     flattened_profile = []
@@ -934,8 +1035,6 @@ def Flatten_Profile(data):
             phase_shift += np.pi*2
         flattened_profile.append(data[i]+phase_shift)
     return flattened_profile
-
-
 
 def Damped_Exponenial_Function(x, A, d, B, omega_0, phase, gamma):
     return Exponenial_Function(x, A, d)+Damped_Oscillation_Function(x, B, omega_0, phase, gamma)

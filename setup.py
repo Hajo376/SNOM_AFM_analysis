@@ -12,5 +12,6 @@ setup(
     license="",
     install_requires=["numpy", "matplotlib", "scipy", "pandas"], # these ones cause errors? :, "pathlib", "tkinter", "enum", "datetime", "struct", "os" 
     python_requires=">=3.7",
-    zip_safe=False
+    zip_safe=False,
+    include_package_data=True
 )
