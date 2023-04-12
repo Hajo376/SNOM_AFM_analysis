@@ -25,27 +25,36 @@ class ChiralCouplers(Open_Measurement):
     This will be used to calculate the directionality and optionally the phase difference.
 
     Availabe methods are:
-        Find_Waveguides
-        Fit_Wgs
-        Get_Integration_Width
-        Plot_Data_With_Fit_And_Bounds
-        Extract_WG_Data
-        Extract_WG_Data_with_Errors
-        Data_Mean
-        Data_Mean_with_Errors
-        Export_Mean_Data
-        Integrate_Amplitude
-        Display_Phase_Profile
-        Export_Data
-        Export_All_Data
-        Export_All_Data_single_phase_line
-        Export_All_Data_single_phase_line_with_Errors
-        Load_Extracted_Data
-        Display_Phase_Difference
-        Fit_Sawtooth
+        Find_Waveguides:
+        Fit_Wgs:
+        Get_Integration_Width:
+        Plot_Data_With_Fit_And_Bounds:
+        Extract_WG_Data:
+        Extract_WG_Data_with_Errors:
+        Data_Mean:
+        Data_Mean_with_Errors:
+        Export_Mean_Data:
+        Integrate_Amplitude:
+        Display_Phase_Profile:
+        Export_Data:
+        Export_All_Data:
+        Export_All_Data_single_phase_line:
+        Export_All_Data_single_phase_line_with_Errors:
+        Load_Extracted_Data:
+        Display_Phase_Difference:
+        Fit_Sawtooth:
 
     """
-    def __init__(self, directory_name, channels:list=None, title=None, autoscale=True, orientation='vertical'):
+    def __init__(self, directory_name:str, channels:list=None, title:str=None, autoscale:bool=True, orientation:str='vertical'):
+        """Create a ChiralCouplers object.
+
+        Args:
+            directory_name (str): measurement folder, will be given to Open_Measurement class
+            channels (list, optional): channels to get the profile data from, will be given to Open_Measurement class. Defaults to None.
+            title (_type_, optional): title to be displayed, will be given to Open_Measurement class. Defaults to None.
+            autoscale (bool, optional): autoscale data? Will be given to Open_Measurement class. Defaults to True.
+            orientation (str, optional): orientation of the waveguides, 'vertical' or 'horizontal'. Defaults to 'vertical'.
+        """
         self.orientation = orientation
         self.removed_lines = []
         super().__init__(directory_name, channels, title, autoscale)

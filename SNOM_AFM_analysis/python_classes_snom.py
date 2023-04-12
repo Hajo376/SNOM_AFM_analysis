@@ -136,10 +136,16 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
     y_shifts = None
     scaling_factor = 1
 
-    def __init__(self, directory_name, channels:list=None, title=None, autoscale=True) -> None:
-        '''
-        autoscale will automatically scale the data such that each pixel is quadratic in dimensions.
-        '''
+    def __init__(self, directory_name:str, channels:list=None, title:str=None, autoscale:bool=True) -> None:
+        """Create a measurement object.
+
+        Args:
+            directory_name (str): the directory of the measurement.
+            channels (list, optional): list of channels to load. If none are given, a set of default channels are chosen. Defaults to None.
+            title (str, optional): title to display when plotting. Defaults to None.
+            autoscale (bool, optional): tries to automatically scale the data to have quadratic pixels and undistorted dimensions.
+                Only for data where the x and y resolutions are an integer multiple of each other, e.g. xres=50nm and yres=50nm or 100nm or 150nm. Defaults to True.
+        """
         self.directory_name = directory_name
         self.filename = directory_name.split('/')[-1]
         self.measurement_title = title # If a measurement_title is specified it will precede the automatically created title based on the channel dictionary
