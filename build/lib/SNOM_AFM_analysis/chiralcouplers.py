@@ -25,28 +25,23 @@ class ChiralCouplers(Open_Measurement):
     This will be used to calculate the directionality and optionally the phase difference.
 
     Availabe methods are:
-        Find_Waveguides:
-        Fit_Wgs:
-        Get_Integration_Width:
-        Plot_Data_With_Fit_And_Bounds:
-        Extract_WG_Data:
-        Extract_WG_Data_with_Errors:
-        Data_Mean:
-        Data_Mean_with_Errors:
-        Export_Mean_Data:
-        Integrate_Amplitude:
-        Display_Phase_Profile:
-        Export_Data:
-        Export_All_Data:
-        Export_All_Data_single_phase_line:
-        Export_All_Data_single_phase_line_with_Errors:
-        Load_Extracted_Data:
-        Display_Phase_Difference:
+        Find_Waveguides: Tries to find and fit the two waveguides, must be executed before any data can be extracted or used.
+        Extract_WG_Data: This function will extract the data of the specified channel for the left and right waveguide.
+            Requires Find_Waveguides to be executed beforehand.
+        Extract_WG_Data_with_Errors: This function will extract the data of the specified channel for the left and right waveguide and the background in between.
+            Requires Find_Waveguides to be executed beforehand.
+        Export_All_Data: Exports the Data on the waveguides, averaged amplitude and averaged phase.
+            Requires Find_Waveguides to be executed beforehand.
+        Export_All_Data_single_phase_line: Exports the Data on the waveguides, averaged amplitude and phase in the center.
+            Requires Find_Waveguides to be executed beforehand.
+        Export_All_Data_single_phase_line_with_Errors: Exports the Data on the waveguides, averaged amplitude and phase in the center plus background in between.
+            Requires Find_Waveguides to be executed beforehand.
         Fit_Sawtooth:
 
     """
     def __init__(self, directory_name:str, channels:list=None, title:str=None, autoscale:bool=True, orientation:str='vertical'):
-        """Create a ChiralCouplers object.
+        """Create a ChiralCouplers object. Inherits from Open_Measurement class and can therefore use all functions from that class.
+        Only has additional functionality to analyse chiral couplers measurements or simulations.
 
         Args:
             directory_name (str): measurement folder, will be given to Open_Measurement class
@@ -99,9 +94,9 @@ class ChiralCouplers(Open_Measurement):
         # data used for displaying with the fit to the waveguides, typically the height profile is shown as this is the basis for the fits
         self.display_data = self.height_data
         # finally start the fitting procedure
-        self.Fit_Wgs()
+        self._Fit_Wgs()
     
-    def Fit_Wgs(self, wg_height=65, max_shift=0.05) -> None:
+    def _Fit_Wgs(self, wg_height=65, max_shift=0.05) -> None:
         '''This fits the height channel with two gaussians to find the two waveguide positions for each row.
         The coefficients will be stored in an instance variable list_of_coefficients. The list will also be saved as .txt.
         The coefficients will be used later to extract the data from the measurements on the waveguides.
@@ -134,7 +129,7 @@ class ChiralCouplers(Open_Measurement):
             mean_sigma = np.mean(mean_sigma)
             self.integ_width = int(mean_sigma*2)
             self._Get_Fit_Feedback()
-            self.Get_Integration_Width()
+            self._Get_Integration_Width()
         # save list of coefficients
         # filepath = os.path.normpath(os.path.join(this_files_path, '../chiralcouplers_analysis/extracted_data/fit_coefficients'))# old and too specific
         filepath = os.path.normpath(os.path.join(self.directory_name, '../extracted_data/fit_coefficients'))
@@ -208,7 +203,7 @@ class ChiralCouplers(Open_Measurement):
         print('The removed areas are: ', self.removed_lines)
 
     def _Get_Fit_Feedback(self):
-        self.Plot_Data_With_Fit_And_Bounds(self.height_data, 'Z')
+        self._Plot_Data_With_Fit_And_Bounds(self.height_data, 'Z')
         user_input = input('Are you happy with the current fit? y/n: ')
         if user_input == 'y':
             pass
@@ -219,7 +214,7 @@ class ChiralCouplers(Open_Measurement):
                 #operations like scaling and blurring will be lost...
             elif user_input == '1':
                 self._Select_Lines_to_Remove()
-                self.Fit_Wgs()
+                self._Fit_Wgs()
             else:
                 print('Please enter n or y!')
                 self._Get_Fit_Feedback()
@@ -228,19 +223,19 @@ class ChiralCouplers(Open_Measurement):
             print('Please enter n or y!')
             self._Get_Fit_Feedback()
 
-    def Get_Integration_Width(self) -> None:
-        self.Plot_Data_With_Fit_And_Bounds(self.height_data, 'Z')
+    def _Get_Integration_Width(self) -> None:
+        self._Plot_Data_With_Fit_And_Bounds(self.height_data, 'Z')
         user_input = input(f'Do you like the extraction width? Current width is {self.integ_width} y/n: ')
         if user_input == 'n':
             self.integ_width = int(input('Please enter the new extraction width as an integer: '))
-            self.Get_Integration_Width() # call recursively until user is happy with integ_width
+            self._Get_Integration_Width() # call recursively until user is happy with integ_width
         elif user_input == 'y':
             self._Write_to_Logfile('integ_width', self.integ_width)
         else:
             print('Please enter n or y!')
-            self.Get_Integration_Width()
+            self._Get_Integration_Width()
 
-    def Plot_Data_With_Fit_And_Bounds(self, data:np.array, channel:str) -> None:
+    def _Plot_Data_With_Fit_And_Bounds(self, data:np.array, channel:str) -> None:
         """This method will display the data and additionally show the center of the gaussian fits plus the chosen export width.
 
         Args:
@@ -321,9 +316,9 @@ class ChiralCouplers(Open_Measurement):
             self.right_wg_data.append(self.data_array[self.channels.index(channel)][row][int(wg_right-self.integ_width):int(wg_right+self.integ_width)])
             self.background_data.append(self.data_array[self.channels.index(channel)][row][int(wg_left+self.integ_width*2):int(wg_right-self.integ_width*2)])
 
-    def Data_Mean(self) -> None:
+    def _Data_Mean(self) -> None:
         self.mean_data = []
-        # print('in data_mean, print channels: ', self.channels)
+        # print('in _Data_Mean, print channels: ', self.channels)
         for channel in self.channels:
             if 'Z' not in channel:
                 self.Extract_WG_Data(channel)
@@ -350,12 +345,12 @@ class ChiralCouplers(Open_Measurement):
                     right_mean_array.append(sum_right/(2*self.integ_width))
                 self.mean_data.append([channel, left_mean_array, right_mean_array])
     
-    def Data_Mean_with_Errors(self) -> None:
+    def _Data_Mean_with_Errors(self) -> None:
         """This function will create the mean values from the extracted amplitude data. The mean data is stored in a new instance variable mean_data.
         The phase data is just used to get the phase profile in the center of the waveguide, this leads to more reliable results, as averaging phase typically does not work out well.
         """
         self.mean_data = []
-        # print('in data_mean, print channels: ', self.channels)
+        # print('in _Data_Mean, print channels: ', self.channels)
         for channel in self.channels:
             if 'Z' not in channel:
                 self.Extract_WG_Data_with_Errors(channel)
@@ -387,120 +382,6 @@ class ChiralCouplers(Open_Measurement):
                     right_mean_array.append(sum_right/(2*self.integ_width))
                     background_mean_array.append(sum_background/len(amp_background))
                 self.mean_data.append([channel, left_mean_array, right_mean_array, background_mean_array])
-    
-    def Export_Mean_Data(self, filename):
-        self.Data_Mean()
-        for i in range(len(self.mean_data)):
-            channel = self.mean_data[i][0]
-            self.Export_Data(channel, filename, self.mean_data[i][1], self.mean_data[i][2])
-    '''
-    def Export_Mean_Data_with_Errors(self, filename):
-        self.Data_Mean_with_Errors()
-        for i in range(len(self.channels)):
-            channel = self.mean_data[i][0]
-            self.Export_Data(channel, filename, self.mean_data[i][1], self.mean_data[i][2])
-    '''
-
-    def Integrate_Amplitude(self, channel):
-        if channel in self.channels:
-            self.Plot_Data_With_Fit_And_Bounds(self.data_array[self.channels.index(channel)], channel)
-        else:
-            print(f'This channel ({channel}) is not in memory!')
-            exit()
-        
-        self.Extract_WG_Data(channel)
-        self.amp_left_integ_array = []
-        self.amp_right_integ_array = []
-        for row in range(len(self.data_array[self.channels.index(channel)])):
-            sum_left = 0
-            sum_right = 0
-            amp_left = self.left_wg_data[row]
-            amp_right = self.right_wg_data[row]
-            for j in range(2*self.integ_width):
-                sum_left+=amp_left[j]
-                sum_right+=amp_right[j]
-            # print('sum_left:', sum_left)
-            self.amp_left_integ_array.append(sum_left)
-            self.amp_right_integ_array.append(sum_right)
-        # print('len(data[0])', len(data[0]))
-        # print('len(self.amp_left_integ_array)', len(self.amp_left_integ_array))
-        plt.plot(range(len(self.amp_left_integ_array)), self.amp_left_integ_array, label='left wg')
-        plt.plot(range(len(self.amp_right_integ_array)), self.amp_right_integ_array, label='right wg')
-        plt.title(f'{channel}')
-        plt.legend()
-        plt.show()
-
-    def Display_Phase_Profile(self, channel):
-        if channel in self.channels:
-            self.Plot_Data_With_Fit_And_Bounds(self.data_array[self.channels.index(channel)], channel)
-        else:
-            print(f'This channel ({channel}) is not in memory!')
-            exit()
-        self.Extract_WG_Data(channel)
-        self.phase_left_integ_array = []
-        self.phase_right_integ_array = []
-        for row in range(len(self.data_array[self.channels.index(channel)])):
-            sum_left = 0
-            sum_right = 0
-            phase_left = self.left_wg_data[row]
-            phase_right = self.right_wg_data[row]
-            N = 2*self.integ_width
-            for j in range(N):
-                sum_left+=phase_left[j]
-                sum_right+=phase_right[j]
-            # print('sum_left:', sum_left)
-            self.phase_left_integ_array.append(sum_left/(N))
-            self.phase_right_integ_array.append(sum_right/(N))
-        # print('len(data[0])', len(data[0]))
-        # print('len(phase_left_integ_array)', len(phase_left_integ_array))
-        # plt.plot(range(len(phase_left_integ_array)), phase_left_integ_array, label='left wg')
-        plt.plot(range(len(self.phase_right_integ_array)), self.phase_right_integ_array, label='right wg')
-        '''
-        coeff = self.Fit_Sawtooth(phase_right_integ_array)
-        # x = range(len(phase_left_integ_array))
-        x = np.linspace(0, 1, 500)
-        plt.plot(x*len(phase_left_integ_array), Sawtooth_v2(x, coeff[0], coeff[1]), label='Fit to right wg')
-        '''
-        flattened_profile = Flatten_Profile(self.phase_right_integ_array)
-        p0 = [1, 0]
-        bounds = ([0, -100], [100, 100])
-        coeff, pcov = Fit_Linear_Function(flattened_profile, p0, bounds)
-        plt.plot(range(len(self.phase_right_integ_array)), flattened_profile, label='flattened phase')
-        plt.plot(range(len(self.phase_right_integ_array)), Linear_Function(np.arange(len(self.phase_right_integ_array)), coeff[0], coeff[1]), label='fit: flattened phase')
-        plt.title(f'{channel}')
-        plt.legend()
-        plt.show()
-
-    def Export_Data(self, channel, filename, left_data=None, right_data=None):
-        filepath = os.path.normpath(os.path.join(this_files_path, '../chiralcouplers_analysis/extracted_data'))
-        if 'A' in channel:
-            if left_data==None:
-                left_data = self.amp_left_integ_array
-            if right_data==None:
-                right_data = self.amp_right_integ_array
-            filename_extension = f'{channel}_mean.txt'
-            with open(filepath + '/' + filename + filename_extension, 'w') as datafile:
-                datafile.write('#pixel\tamp leftwg\tamp rightwg\n')
-                for i in range(len(self.amp_left_integ_array)):
-                    datafile.write(f'{i}\t{round(self.amp_left_integ_array[i], 3)}\t{round(self.amp_right_integ_array[i], 3)}\n')
-            # with open(filepath + '/' + f'right_wg_integ_{channel}.txt', 'w') as datafile:
-            #     datafile.write('#pixel\tamp')
-            #     for i in range(len(self.amp_right_integ_array)):
-            #         datafile.write(f'{i}\t{self.amp_right_integ_array[i]}\n')
-        elif 'P' in channel:
-            if left_data==None:
-                left_data = self.phase_left_integ_array
-            if right_data==None:
-                right_data = self.phase_right_integ_array
-            filename_extension = f'{channel}_mean.txt'
-            with open(filepath + '/' + filename + filename_extension, 'w') as datafile:
-                datafile.write('#pixel\tphase leftwg\tphase rightwg')
-                for i in range(len(self.phase_left_integ_array)):
-                    datafile.write(f'{i}\t{round(self.phase_left_integ_array[i], 3)}\t{round(self.phase_right_integ_array[i], 3)}\n')
-            # with open(filepath + '/' + f'right_wg_integ_{channel}.txt', 'w') as datafile:
-            #     datafile.write('#pixel\tamp')
-            #     for i in range(len(self.phase_right_integ_array)):
-            #         datafile.write(f'{i}\t{self.amp_right_integ_array[i]}\n')
 
     def _Get_Data_Pairs(self) -> list:
         all_indices = []
@@ -538,7 +419,7 @@ class ChiralCouplers(Open_Measurement):
         return data_pairs
 
     def Export_All_Data(self):
-        self.Data_Mean() # create mean data
+        self._Data_Mean() # create mean data
         data_pairs = self._Get_Data_Pairs() # get data pairs from the mean data list 
         for j in range(len(data_pairs)):
             filepath = os.path.normpath(os.path.join(this_files_path, '../chiralcouplers_analysis/extracted_data'))
@@ -551,7 +432,7 @@ class ChiralCouplers(Open_Measurement):
         print(f'Exported all data to {filepath}!')
     
     def Export_All_Data_single_phase_line(self, filepath=None):
-        self.Data_Mean() # create mean data
+        self._Data_Mean() # create mean data
         data_pairs = self._Get_Data_Pairs() # get data pairs from the mean data list 
         for j in range(len(data_pairs)):
             if filepath == None:
@@ -573,7 +454,7 @@ class ChiralCouplers(Open_Measurement):
         Args:
             filepath (str, optional): where to save the extracted data? The filename is created automatically. Defaults to None.
         """
-        self.Data_Mean_with_Errors() # create mean data
+        self._Data_Mean_with_Errors() # create mean data
         data_pairs = self._Get_Data_Pairs() # get data pairs from the mean data list 
         for j in range(len(data_pairs)):
             if filepath == None:
@@ -586,84 +467,32 @@ class ChiralCouplers(Open_Measurement):
                     datafile.write(f'{i}\t{round(data_pairs[j][1][0][i], 5)}\t{round(data_pairs[j][1][1][i], 5)}\t{round(self.left_center_phase[i],3)}\t{round(self.right_center_phase[i],3)}\t{round(data_pairs[j][1][2][i], 5)}\n')
         print(f'Exported all data to {complete_filename}!')
 
-    def Load_Extracted_Data(self):
-        root = tk.Tk()
-        root.withdraw()
-        filepath = filedialog.askopenfilename(initialdir=os.path.normpath(os.path.join(this_files_path, '../chiralcouplers_analysis/extracted_data')))
-        datafile = open(filepath, 'r')
-        self.amplitude_left = np.genfromtxt(datafile, delimiter='\t', skip_header=2, usecols=1)
-        datafile.close()
-        datafile = open(filepath, 'r')
-        self.amplitude_right = np.genfromtxt(datafile, delimiter='\t', skip_header=2, usecols=2)
-        datafile.close()
-        datafile = open(filepath, 'r')
-        self.phase_left = np.genfromtxt(datafile, delimiter='\t', skip_header=2, usecols=3)
-        datafile.close()
-        datafile = open(filepath, 'r')
-        self.phase_right = np.genfromtxt(datafile, delimiter='\t', skip_header=2, usecols=4)
-        datafile.close()
-
-    def Display_Phase_Difference(self, channel):
-        if channel in self.channels:
-            self.Plot_Data_With_Fit_And_Bounds(self.data_array[self.channels.index(channel)], channel)
-        else:
-            print(f'This channel ({channel}) is not in memory!')
-            exit()
-        self.Extract_WG_Data(channel)
-        phase_left_integ_array = []
-        phase_right_integ_array = []
-        phase_difference = []
-        for row in range(len(self.left_wg_data)):
-            sum_left = 0
-            sum_right = 0
-            phase_left = self.left_wg_data[row]
-            phase_right = self.right_wg_data[row]
-            N = 2*self.integ_width
-            for j in range(N):
-                sum_left+=phase_left[j]
-                sum_right+=phase_right[j]
-            # print('sum_left:', sum_left)
-            phase_left_integ_array.append(sum_left/(N))
-            phase_right_integ_array.append(sum_right/(N))
-            # phase_difference.append(Get_Smallest_Difference(sum_left/(N), sum_right/(N)))
-            phase_difference.append(Get_Phase_Difference_V2(sum_left/(N), sum_right/(N)))
-
-        # extend the phase range by adding copy shifted down by 2 pi
-        extended_phase_difference = []
-        for phase in phase_difference:
-            extended_phase_difference.append(phase)
-            if phase >= np.pi:
-                extended_phase_difference.append(phase- 2*np.pi)
-        plt.plot(range(len(phase_difference)), phase_difference, 'x', label='phase difference')
-        plt.title(f'{channel}')
-        plt.legend()
-        plt.show()
-
-    def Fit_Sawtooth(self, data):
-        x = np.linspace(0, 1, len(data))
-        n_periods=8
-        period = len(data)/n_periods
-        p0 = [n_periods, 0]
-        bounds = ([1, -100], [100, 100])
-        coeff, var_matrix = curve_fit(Sawtooth_v2, x, data, p0=p0, bounds=bounds)
-        print('Fit of Sawtooth successful!')
-        print(coeff)
-        return coeff
-
 
 class LoadData():
     """This class is ment to load the profiles created with the ChiralCouplers class and comsol profiles.
     From the profiles the directionality can be calculated and compared.
 
-    Args:
-        initialdir (str, optional): initial directory, will be used for the file dialogues.
-        title (str, optional): title, will be used for future plots.
-        autoload (bool, optional): if set to True you will automatically be asked to select data files without having to call Load_Extracted_Data manually.
-        chirality (int, optional): chirality of the measurement/simulation. Important for directionality calculation.
-        pixelsize (float, optional): size of pixels in nm, important for plot labels, defaults to 50nm/scaling
-        with_errors (bool, optional): do you want to include an error estimation based on the background in between the two waveguides? Only for snom measurements.
+    Available functions are:
+        Load_Extracted_Data: Loads the extracted profiles for amp and phase in left and right wg and if with_errors==True also background.
+        Cut_Data: Remove part of the profiles from end or beginning, only used for comsol data to remove oscillations in the beginning.
+        Fit_Amplitudes: This fits the amplitude profiles and creates the propagation lenght and directionality. Subsequent load and fit calls will increment the lists.
+        Plot_Propagation_Lengths: Displays the calculated propagation lengths.
+        Plot_Directionality: Displays the directionalities.
+        Export_Directionalities: Exports the directonalities to .txt file.
+        Plot_Phase_Gradient: Displays the phase profiles in left and right wg in several ways like raw phase, corrected, phase difference and variation.
     """
-    def __init__(self, initialdir=None, title=None, autoload=True, chirality=+1, pixelsize=None, with_errors=True):
+    def __init__(self, initialdir:str=None, title:str=None, autoload:bool=True, chirality:int=+1, pixelsize:float=None, with_errors:bool=True):
+        """This class is ment to load the profiles created with the ChiralCouplers class and comsol profiles.
+        From the profiles the directionality can be calculated and compared.
+
+        Args:
+            initialdir (str, optional): initial directory, will be used for the file dialogues.
+            title (str, optional): title, will be used for future plots.
+            autoload (bool, optional): if set to True you will automatically be asked to select data files without having to call Load_Extracted_Data manually.
+            chirality (int, optional): chirality of the measurement/simulation. Important for directionality calculation.
+            pixelsize (float, optional): size of pixels in nm, important for plot labels, defaults to 50nm/scaling
+            with_errors (bool, optional): do you want to include an error estimation based on the background in between the two waveguides? Only for snom measurements.
+        """
         self.initialdir = initialdir
         self.chirality = chirality
         self.all_propagation_lengths = []
@@ -682,7 +511,7 @@ class LoadData():
             self.title = title
 
     def Load_Extracted_Data(self, filepath:str=None, initialdir:str=None) -> None:
-        """Select the file to extract the data from.
+        """Select the file to load the data from. File format: amp left, amp right, phase left, phase right and if with_errors==True also background, tab delimited, 2 lines header. 
 
         Args:
             filepath (str, optional): if not specified you will be prompted with a filedialoge. Defaults to None.
@@ -886,6 +715,8 @@ class LoadData():
             file.close()
 
     def Plot_Phase_Gradient(self):
+        """Displays the phase in several ways like raw, corrected, flattened with fit, phase difference between left and right wg and varaiations.
+        """
         x_values = np.arange(len(self.phase_left))
         plt.plot(x_values*self.pixelsize*0.001, self.phase_left, 'x', color='tab:blue', label='leftwg')
         plt.plot(x_values*self.pixelsize*0.001, self.phase_right, 'x', color='tab:orange', label='rightwg')
@@ -895,8 +726,8 @@ class LoadData():
         plt.legend()
         plt.show()
 
-        phase_left_cleaned = self.Remove_Artificial_Phase(self.phase_left)
-        phase_right_cleaned = self.Remove_Artificial_Phase(self.phase_right)
+        phase_left_cleaned = self._Remove_Artificial_Phase(self.phase_left)
+        phase_right_cleaned = self._Remove_Artificial_Phase(self.phase_right)
         plt.plot(x_values*self.pixelsize*0.001, phase_left_cleaned, 'x', color='tab:blue', label='leftwg cleaned + flattened')
         plt.plot(x_values*self.pixelsize*0.001, phase_right_cleaned, 'x', color='tab:orange', label='rightwg cleaned + flattened')
         # plt.title(self.title)
@@ -969,7 +800,7 @@ class LoadData():
         plt.legend()
         plt.show()
 
-    def Remove_Artificial_Phase(self, phasearray, bounds=1.7):
+    def _Remove_Artificial_Phase(self, phasearray, bounds=1.7):
         new_array = np.zeros((len(phasearray)))
         previous_element = phasearray[0]
         phaseshift = 0
@@ -991,49 +822,7 @@ class LoadData():
             new_array[i] = element + phaseshift
         return new_array
 
-    def Fit_Decaying_Amplitude(self):
-        with_oscillation = False
-        root = tk.Tk()
-        root.withdraw()
-        filepath = filedialog.askopenfilename(initialdir=os.path.normpath(os.path.join(this_files_path, '../chiralcouplers_analysis/extracted_data')))
-        with open(filepath, 'r') as f:
-            x = np.genfromtxt(f, delimiter='\t', skip_header=1, usecols=0)
-        with open(filepath, 'r') as f:
-            leftwg = np.genfromtxt(f, delimiter='\t', skip_header=1, usecols=1)
-        with open(filepath, 'r') as f:
-            rightwg = np.genfromtxt(f, delimiter='\t', skip_header=1, usecols=2)
-            # data = np.loadtxt(f, delimiter='\t', skip_header=1)
-        # print('x: ', x)
-        # print('leftwg: ', leftwg)
-        plt.plot(x*self.pixelsize*0.001,leftwg, label='leftwg', color='tab:blue') # convert pixels to distance in µm
-        plt.plot(x*self.pixelsize*0.001,rightwg, label='rightwg', color='tab:orange')
-        if with_oscillation == True:
-            p0 = [0.2, 50, 0.1, 0.29, 0, 0.04]
-            # bounds = ([0, -100], [100, 100])
-            coeff_leftwg, var_matrix = curve_fit(Damped_Exponenial_Function, x, leftwg, p0=p0)
-            coeff_rightwg, var_matrix = curve_fit(Damped_Exponenial_Function, x, leftwg, p0=p0)
-            # plt.plot(x, Damped_Oscillation_Function(x, 0.1, 0.29, 0, 0.04)+Exponenial_Function(x, 0.2, 0.01, 0))
-            # plt.plot(x, Damped_Exponenial_Function(x, 0.2, 50, 0.1, 0.29, 0, 0.04), label='initial_guess')
-            plt.plot(x, Damped_Exponenial_Function(x, coeff_leftwg[0], coeff_leftwg[1], coeff_leftwg[2], coeff_leftwg[3], coeff_leftwg[4], coeff_leftwg[5], ), label='fit_leftwg', color='tab:blue')
-            plt.plot(x, Damped_Exponenial_Function(x, coeff_rightwg[0], coeff_rightwg[1], coeff_rightwg[2], coeff_rightwg[3], coeff_rightwg[4], coeff_rightwg[5], ), label='fit_rightwg', color='tab:orange')
-            print('oscillation period leftwg = ', 2*np.pi/(np.sqrt(1-coeff_leftwg[5]**2 )*coeff_leftwg[3])*self.pixelsize, ' nm')
-            print('oscillation period rightwg = ', 2*np.pi/(np.sqrt(1-coeff_rightwg[5]**2 )*coeff_rightwg[3])*self.pixelsize, ' nm')
-        else:
-            p0 = [1, self.pixelsize]
-            coeff_leftwg, var_matrix = curve_fit(Exponenial_Function, x, leftwg, p0=p0)
-            coeff_rightwg, var_matrix = curve_fit(Exponenial_Function, x, rightwg, p0=p0)
-            # plt.plot(x,leftwg, label='leftwg', color='tab:blue')
-            # plt.plot(x,rightwg, label='rightwg', color='tab:orange')
-            plt.plot(x*self.pixelsize*0.001, Exponenial_Function(x, coeff_leftwg[0], coeff_leftwg[1]), '--', label='fit_leftwg', color='tab:blue')
-            plt.plot(x*self.pixelsize*0.001, Exponenial_Function(x, coeff_rightwg[0], coeff_rightwg[1]), '--', label='fit_rightwg', color='tab:orange')
-        print('propagation length leftwg = ', coeff_leftwg[1]*self.pixelsize, ' nm') 
-        print('propagation length rightwg = ', coeff_rightwg[1]*self.pixelsize, ' nm') 
-        # print(coeff)
-        plt.xlabel('$x \ [µm]$')
-        plt.ylabel('$abs(E_z) \ [a.u.]$')
-        plt.legend()
-        plt.show()
-
+    
 
 def Flatten_Profile(data):
     threshold = np.pi*0.8
@@ -1122,3 +911,233 @@ def Get_Phase_Difference_V2(value1, value2):
 
 def Get_Directionality_Uncertainity(high_amp, high_amp_uncert, low_amp, low_amp_uncert):
     return (2*high_amp)/((high_amp**2 + low_amp**2)**2)*np.sqrt((low_amp**2*high_amp_uncert)**2 + (high_amp*low_amp*low_amp_uncert)**2) # simply gaussian error propagation
+
+
+# unused?
+'''
+    def Fit_Decaying_Amplitude(self):
+        with_oscillation = False
+        root = tk.Tk()
+        root.withdraw()
+        filepath = filedialog.askopenfilename(initialdir=os.path.normpath(os.path.join(this_files_path, '../chiralcouplers_analysis/extracted_data')))
+        with open(filepath, 'r') as f:
+            x = np.genfromtxt(f, delimiter='\t', skip_header=1, usecols=0)
+        with open(filepath, 'r') as f:
+            leftwg = np.genfromtxt(f, delimiter='\t', skip_header=1, usecols=1)
+        with open(filepath, 'r') as f:
+            rightwg = np.genfromtxt(f, delimiter='\t', skip_header=1, usecols=2)
+            # data = np.loadtxt(f, delimiter='\t', skip_header=1)
+        # print('x: ', x)
+        # print('leftwg: ', leftwg)
+        plt.plot(x*self.pixelsize*0.001,leftwg, label='leftwg', color='tab:blue') # convert pixels to distance in µm
+        plt.plot(x*self.pixelsize*0.001,rightwg, label='rightwg', color='tab:orange')
+        if with_oscillation == True:
+            p0 = [0.2, 50, 0.1, 0.29, 0, 0.04]
+            # bounds = ([0, -100], [100, 100])
+            coeff_leftwg, var_matrix = curve_fit(Damped_Exponenial_Function, x, leftwg, p0=p0)
+            coeff_rightwg, var_matrix = curve_fit(Damped_Exponenial_Function, x, leftwg, p0=p0)
+            # plt.plot(x, Damped_Oscillation_Function(x, 0.1, 0.29, 0, 0.04)+Exponenial_Function(x, 0.2, 0.01, 0))
+            # plt.plot(x, Damped_Exponenial_Function(x, 0.2, 50, 0.1, 0.29, 0, 0.04), label='initial_guess')
+            plt.plot(x, Damped_Exponenial_Function(x, coeff_leftwg[0], coeff_leftwg[1], coeff_leftwg[2], coeff_leftwg[3], coeff_leftwg[4], coeff_leftwg[5], ), label='fit_leftwg', color='tab:blue')
+            plt.plot(x, Damped_Exponenial_Function(x, coeff_rightwg[0], coeff_rightwg[1], coeff_rightwg[2], coeff_rightwg[3], coeff_rightwg[4], coeff_rightwg[5], ), label='fit_rightwg', color='tab:orange')
+            print('oscillation period leftwg = ', 2*np.pi/(np.sqrt(1-coeff_leftwg[5]**2 )*coeff_leftwg[3])*self.pixelsize, ' nm')
+            print('oscillation period rightwg = ', 2*np.pi/(np.sqrt(1-coeff_rightwg[5]**2 )*coeff_rightwg[3])*self.pixelsize, ' nm')
+        else:
+            p0 = [1, self.pixelsize]
+            coeff_leftwg, var_matrix = curve_fit(Exponenial_Function, x, leftwg, p0=p0)
+            coeff_rightwg, var_matrix = curve_fit(Exponenial_Function, x, rightwg, p0=p0)
+            # plt.plot(x,leftwg, label='leftwg', color='tab:blue')
+            # plt.plot(x,rightwg, label='rightwg', color='tab:orange')
+            plt.plot(x*self.pixelsize*0.001, Exponenial_Function(x, coeff_leftwg[0], coeff_leftwg[1]), '--', label='fit_leftwg', color='tab:blue')
+            plt.plot(x*self.pixelsize*0.001, Exponenial_Function(x, coeff_rightwg[0], coeff_rightwg[1]), '--', label='fit_rightwg', color='tab:orange')
+        print('propagation length leftwg = ', coeff_leftwg[1]*self.pixelsize, ' nm') 
+        print('propagation length rightwg = ', coeff_rightwg[1]*self.pixelsize, ' nm') 
+        # print(coeff)
+        plt.xlabel('$x \ [µm]$')
+        plt.ylabel('$abs(E_z) \ [a.u.]$')
+        plt.legend()
+        plt.show()
+
+    def Fit_Sawtooth(self, data):
+        x = np.linspace(0, 1, len(data))
+        n_periods=8
+        period = len(data)/n_periods
+        p0 = [n_periods, 0]
+        bounds = ([1, -100], [100, 100])
+        coeff, var_matrix = curve_fit(Sawtooth_v2, x, data, p0=p0, bounds=bounds)
+        print('Fit of Sawtooth successful!')
+        print(coeff)
+        return coeff
+
+
+    def Display_Phase_Profile(self, channel):
+        if channel in self.channels:
+            self._Plot_Data_With_Fit_And_Bounds(self.data_array[self.channels.index(channel)], channel)
+        else:
+            print(f'This channel ({channel}) is not in memory!')
+            exit()
+        self.Extract_WG_Data(channel)
+        self.phase_left_integ_array = []
+        self.phase_right_integ_array = []
+        for row in range(len(self.data_array[self.channels.index(channel)])):
+            sum_left = 0
+            sum_right = 0
+            phase_left = self.left_wg_data[row]
+            phase_right = self.right_wg_data[row]
+            N = 2*self.integ_width
+            for j in range(N):
+                sum_left+=phase_left[j]
+                sum_right+=phase_right[j]
+            # print('sum_left:', sum_left)
+            self.phase_left_integ_array.append(sum_left/(N))
+            self.phase_right_integ_array.append(sum_right/(N))
+        # print('len(data[0])', len(data[0]))
+        # print('len(phase_left_integ_array)', len(phase_left_integ_array))
+        # plt.plot(range(len(phase_left_integ_array)), phase_left_integ_array, label='left wg')
+        plt.plot(range(len(self.phase_right_integ_array)), self.phase_right_integ_array, label='right wg')
+        
+        # coeff = self.Fit_Sawtooth(phase_right_integ_array)
+        # x = range(len(phase_left_integ_array))
+        # x = np.linspace(0, 1, 500)
+        # plt.plot(x*len(phase_left_integ_array), Sawtooth_v2(x, coeff[0], coeff[1]), label='Fit to right wg')
+        
+        flattened_profile = Flatten_Profile(self.phase_right_integ_array)
+        p0 = [1, 0]
+        bounds = ([0, -100], [100, 100])
+        coeff, pcov = Fit_Linear_Function(flattened_profile, p0, bounds)
+        plt.plot(range(len(self.phase_right_integ_array)), flattened_profile, label='flattened phase')
+        plt.plot(range(len(self.phase_right_integ_array)), Linear_Function(np.arange(len(self.phase_right_integ_array)), coeff[0], coeff[1]), label='fit: flattened phase')
+        plt.title(f'{channel}')
+        plt.legend()
+        plt.show()
+
+    
+
+    def Integrate_Amplitude(self, channel):
+        if channel in self.channels:
+            self._Plot_Data_With_Fit_And_Bounds(self.data_array[self.channels.index(channel)], channel)
+        else:
+            print(f'This channel ({channel}) is not in memory!')
+            exit()
+        
+        self.Extract_WG_Data(channel)
+        self.amp_left_integ_array = []
+        self.amp_right_integ_array = []
+        for row in range(len(self.data_array[self.channels.index(channel)])):
+            sum_left = 0
+            sum_right = 0
+            amp_left = self.left_wg_data[row]
+            amp_right = self.right_wg_data[row]
+            for j in range(2*self.integ_width):
+                sum_left+=amp_left[j]
+                sum_right+=amp_right[j]
+            # print('sum_left:', sum_left)
+            self.amp_left_integ_array.append(sum_left)
+            self.amp_right_integ_array.append(sum_right)
+        # print('len(data[0])', len(data[0]))
+        # print('len(self.amp_left_integ_array)', len(self.amp_left_integ_array))
+        plt.plot(range(len(self.amp_left_integ_array)), self.amp_left_integ_array, label='left wg')
+        plt.plot(range(len(self.amp_right_integ_array)), self.amp_right_integ_array, label='right wg')
+        plt.title(f'{channel}')
+        plt.legend()
+        plt.show()
+
+
+    def Export_Data(self, channel, filename, left_data=None, right_data=None):
+        filepath = os.path.normpath(os.path.join(this_files_path, '../chiralcouplers_analysis/extracted_data'))
+        if 'A' in channel:
+            if left_data==None:
+                left_data = self.amp_left_integ_array
+            if right_data==None:
+                right_data = self.amp_right_integ_array
+            filename_extension = f'{channel}_mean.txt'
+            with open(filepath + '/' + filename + filename_extension, 'w') as datafile:
+                datafile.write('#pixel\tamp leftwg\tamp rightwg\n')
+                for i in range(len(self.amp_left_integ_array)):
+                    datafile.write(f'{i}\t{round(self.amp_left_integ_array[i], 3)}\t{round(self.amp_right_integ_array[i], 3)}\n')
+            # with open(filepath + '/' + f'right_wg_integ_{channel}.txt', 'w') as datafile:
+            #     datafile.write('#pixel\tamp')
+            #     for i in range(len(self.amp_right_integ_array)):
+            #         datafile.write(f'{i}\t{self.amp_right_integ_array[i]}\n')
+        elif 'P' in channel:
+            if left_data==None:
+                left_data = self.phase_left_integ_array
+            if right_data==None:
+                right_data = self.phase_right_integ_array
+            filename_extension = f'{channel}_mean.txt'
+            with open(filepath + '/' + filename + filename_extension, 'w') as datafile:
+                datafile.write('#pixel\tphase leftwg\tphase rightwg')
+                for i in range(len(self.phase_left_integ_array)):
+                    datafile.write(f'{i}\t{round(self.phase_left_integ_array[i], 3)}\t{round(self.phase_right_integ_array[i], 3)}\n')
+            # with open(filepath + '/' + f'right_wg_integ_{channel}.txt', 'w') as datafile:
+            #     datafile.write('#pixel\tamp')
+            #     for i in range(len(self.phase_right_integ_array)):
+            #         datafile.write(f'{i}\t{self.amp_right_integ_array[i]}\n')
+
+    def Export_Mean_Data(self, filename):
+        self._Data_Mean()
+        for i in range(len(self.mean_data)):
+            channel = self.mean_data[i][0]
+            self.Export_Data(channel, filename, self.mean_data[i][1], self.mean_data[i][2])
+    
+    def Export_Mean_Data_with_Errors(self, filename):
+        self._Data_Mean_with_Errors()
+        for i in range(len(self.channels)):
+            channel = self.mean_data[i][0]
+            self.Export_Data(channel, filename, self.mean_data[i][1], self.mean_data[i][2])
+
+    def Load_Extracted_Data(self):
+        root = tk.Tk()
+        root.withdraw()
+        filepath = filedialog.askopenfilename(initialdir=os.path.normpath(os.path.join(this_files_path, '../chiralcouplers_analysis/extracted_data')))
+        datafile = open(filepath, 'r')
+        self.amplitude_left = np.genfromtxt(datafile, delimiter='\t', skip_header=2, usecols=1)
+        datafile.close()
+        datafile = open(filepath, 'r')
+        self.amplitude_right = np.genfromtxt(datafile, delimiter='\t', skip_header=2, usecols=2)
+        datafile.close()
+        datafile = open(filepath, 'r')
+        self.phase_left = np.genfromtxt(datafile, delimiter='\t', skip_header=2, usecols=3)
+        datafile.close()
+        datafile = open(filepath, 'r')
+        self.phase_right = np.genfromtxt(datafile, delimiter='\t', skip_header=2, usecols=4)
+        datafile.close()
+
+    # should be included as external functionality, plot profiles, 
+    def Display_Phase_Difference(self, channel):
+        if channel in self.channels:
+            self._Plot_Data_With_Fit_And_Bounds(self.data_array[self.channels.index(channel)], channel)
+        else:
+            print(f'This channel ({channel}) is not in memory!')
+            exit()
+        self.Extract_WG_Data(channel)
+        phase_left_integ_array = []
+        phase_right_integ_array = []
+        phase_difference = []
+        for row in range(len(self.left_wg_data)):
+            sum_left = 0
+            sum_right = 0
+            phase_left = self.left_wg_data[row]
+            phase_right = self.right_wg_data[row]
+            N = 2*self.integ_width
+            for j in range(N):
+                sum_left+=phase_left[j]
+                sum_right+=phase_right[j]
+            # print('sum_left:', sum_left)
+            phase_left_integ_array.append(sum_left/(N))
+            phase_right_integ_array.append(sum_right/(N))
+            # phase_difference.append(Get_Smallest_Difference(sum_left/(N), sum_right/(N)))
+            phase_difference.append(Get_Phase_Difference_V2(sum_left/(N), sum_right/(N)))
+
+        # extend the phase range by adding copy shifted down by 2 pi
+        extended_phase_difference = []
+        for phase in phase_difference:
+            extended_phase_difference.append(phase)
+            if phase >= np.pi:
+                extended_phase_difference.append(phase- 2*np.pi)
+        plt.plot(range(len(phase_difference)), phase_difference, 'x', label='phase difference')
+        plt.title(f'{channel}')
+        plt.legend()
+        plt.show()
+
+'''
