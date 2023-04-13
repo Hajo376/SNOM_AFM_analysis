@@ -1,42 +1,25 @@
 ##########################################################################
 # This code was created by Hans-Joachim Schill, University of Bonn, 2022 #
 ##########################################################################
-from ast import Try
-from operator import lt
 from scipy.ndimage import gaussian_filter
+from scipy.optimize import curve_fit
 from struct import *
 import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-from datetime import datetime
-from scipy.optimize import curve_fit
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_point_clicker import clicker# used for getting coordinates from images
 from matplotlib_scalebar.scalebar import ScaleBar # used for creating scale bars
+import numpy as np
+import pandas as pd # used for getting data out of html files
+from datetime import datetime
 from enum import Enum, auto
 
-
-# from python_manipulation_classes.get_bounds import Get_Reduced_Data  # legacy method based on pyqtgraph
-from SNOM_AFM_analysis.lib.rectangle_selector import Select_Rectangle
-from SNOM_AFM_analysis.lib.phase_analysis import Flatten_Phase_Profile, Get_Profile_Difference
+# import own functionality
 from SNOM_AFM_analysis.lib.snom_colormaps import *
-
-# Definitions for plotting
-SMALL_SIZE = 8
-MEDIUM_SIZE = 10
-BIGGER_SIZE = 12
-'''
-SMALL_SIZE = 12
-MEDIUM_SIZE = 16
-BIGGER_SIZE = 20
-'''
-plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
-plt.rc('axes', titlesize=BIGGER_SIZE)     # fontsize of the axes title
-plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
-plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
-plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
-plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
-plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+from SNOM_AFM_analysis.lib.rectangle_selector import Select_Rectangle
+from SNOM_AFM_analysis.lib.get_directionality import ChiralCoupler
+from SNOM_AFM_analysis.lib import realign
+from SNOM_AFM_analysis.lib import profile
+from SNOM_AFM_analysis.lib import phase_analysis
 
 class Definitions(Enum):
     vertical = auto()
@@ -48,10 +31,14 @@ class File_Type(Enum):
     standard_new = auto()
     aachen_ascii = auto()
     aachen_gsf = auto()
+    neaspec_version_1_6_3359_1 = auto()
     # for the parameters:
     html = auto()
     txt = auto()
     html_new = auto()# new software version creates slightly different html file
+    html_neaspec_version_1_6_3359_1 = auto()
+    comsol_gsf = auto()
+    comsol_txt = auto()
 
 class Tag_Type(Enum):
     # Tag types:
@@ -78,9 +65,54 @@ class Plot_Definitions:
     tight_layout = True
     colorbar_width = 10 # in percent, standard is 5 or 10
     hspace = 0.4 #standard is 0.4
+    # Define Plot font sizes
+    font_size_default = 8
+    font_size_axes_title = 12
+    font_size_axes_label = 10
+    font_size_tick_labels = 8
+    font_size_legend = 8
+    font_size_fig_title = 12
 
-class SimpleManipulation(File_Definitions, Plot_Definitions):
+class Open_Measurement(File_Definitions, Plot_Definitions):
+    """This is the main class. You need to specify the measurement folder containing the individual channels.
+    You can also specify the channels you want to investigate in the initialisation or at a later point using the 'Initialize_Channels' method.
+    You should safe the created measurement instance so you can then call functions on it.
+    For example you can call the 'Display_Channels' method, this will simply display all channels currently in memory.
+    You can use most methods without specifying channels, then the channels in memory will be used.
+    If you specify new channels they will replace the old ones! 
+    Only use methods which do not start with an underscore, those are only ment for usage within the class.
+
+    All currently availabe methods:
+        Initialize_Channels : Change current channels
+        Scale_Channels : Increse pixel amount, important if you want to blurr your data or you want to do some shift.
+            This way you can shift with higher precision.
+        Set_Min_to_Zero : Sets the minimum hight in the channels containing hight to zero.
+        Remove_Subplots : Delete specific (specified by index) subplot from memory.
+        Remove_Last_Subplots : Delete the last subplot from memory.
+        Switch_Supplots : Rearange subplots by switching positions.
+        Display_All_Subplots : Display all suplots which are currently in memory.
+        Display_Channels : Display all channels in memory.
+        Gauss_Filter_Channels : Simple gaussian blurr, should only be used on amplitude, realpart and height channels.
+        Fourier_Filter_Channels : Simple fourier filter of channels, not yet fully implemented.
+        Save_to_gsf : Save all channels to .gsf files, dont worry manipulated channels will have a filename extension so you dont overwrite the originals.
+        Save_to_txt : Save all channels to .txt files, only use if necessary. gsf is more common and saves space.
+        Heigth_Mask_Channels : Simple masking method, based on a height threshold. Works best for leveled data.
+        Level_Height_Channels : Simple height leveling based on a simple 3-point correction.
+        Realign : Used for realigning long measurements of straight wavegides. Relatively specific use case...
+        Cut_Channels : Select a rectangle of your measurement to cut out.
+            Can be combined with height masking, since if set to 'auto' all black on the outside will be removed automatically.
+        Scalebar : Creates a scalebar in the specified channels. Only for plotting ...
+        Rotate_90_deg : Rotate measurement by 90 deg.
+        Select_Profile : Select a simple profile, for now only horizontal or vertical and over full measurement width or height
+        Select_Profiles : Select multiple profiles ...
+        Display_Profiles : Display all current profiles
+        Quadratic_Pixels : This will scale the data automatically if possible, e.g. if you measured with unequal resotution in x and y.
+            Only use if resolution difference is an integer multiple like 50 nm in x and 100 nm or 150 nm in y. 
+        Overlay_Forward_and_Backward_Channels : You are tired of trowing away all the data in the backwards channels? Then use the overlay function!
+            This will try to overlay forward and backward channels and will also try to shift them over each other.
+
     
+    """
     # reorganize and put the following variables in the init function
     # ToDo
     all_subplots = []
@@ -93,10 +125,16 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
     y_shifts = None
     scaling_factor = 1
 
-    def __init__(self, directory_name, channels:list=None, title=None, autoscale=True) -> None:
-        '''
-        autoscale will automatically scale the data such that each pixel is quadratic in dimensions.
-        '''
+    def __init__(self, directory_name:str, channels:list=None, title:str=None, autoscale:bool=True) -> None:
+        """Create a measurement object.
+
+        Args:
+            directory_name (str): the directory of the measurement.
+            channels (list, optional): list of channels to load. If none are given, a set of default channels are chosen. Defaults to None.
+            title (str, optional): title to display when plotting. Defaults to None.
+            autoscale (bool, optional): tries to automatically scale the data to have quadratic pixels and undistorted dimensions.
+                Only for data where the x and y resolutions are an integer multiple of each other, e.g. xres=50nm and yres=50nm or 100nm or 150nm. Defaults to True.
+        """
         self.directory_name = directory_name
         self.filename = directory_name.split('/')[-1]
         self.measurement_title = title # If a measurement_title is specified it will precede the automatically created title based on the channel dictionary
@@ -115,6 +153,7 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         # The dictionary and self.channels are not identical as self.channels only contains the raw channel information, whereas the dictionary is modified to contain
         # the information of which modifications like scaling, filtering ... have been applied.
         self.all_data, self.all_data_dict = self._Load_Data(self.channels)
+        # print(self.all_data)
         if autoscale == True:
             self.Quadratic_Pixels()
 
@@ -122,33 +161,55 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         '''This function aims at finding specific characteristics in the filename to idendify the filetype.
         For example the difference in File_Type.standard and File_Type.standard_new are an additional ' raw' at the end of the filename.'''
         try:
-            f=open(f"{self.directory_name}/{self.filename} O1A.gsf","br")
+            f_1=open(f"{self.directory_name}/{self.filename} O1A.gsf","br")
         except:
             # filetype is at least not standard
             try:
-                f=open(f"{self.directory_name}/{self.filename} O1A raw.gsf","br")
+                f_2=open(f"{self.directory_name}/{self.filename} O1A raw.gsf","br")
             except:
-                print("The correct filetype could automatically be found. Please try again and specifiy the filetype.")
+                try:
+                    f_3=open(f"{self.directory_name}/{self.filename}_parameters.txt","r")
+                except:
+                    print("The correct filetype could automatically be found. Please try again and specifiy the filetype.")
+                else:
+                    f_3.close()
+                    File_Definitions.file_type = File_Type.comsol_gsf
+                    File_Definitions.parmeters_type = File_Type.comsol_txt
             else:
-                f.close()
+                f_2.close()
                 File_Definitions.file_type = File_Type.standard_new
                 File_Definitions.parmeters_type = File_Type.html_new
         else:
-            f.close()
+            f_1.close()
             File_Definitions.file_type = File_Type.standard
             File_Definitions.parmeters_type = File_Type.html
+        #alternative way: get the software version from the last entry in the .txt file
+        parameters = self.directory_name + '/' + self.filename + '.txt' #standard snom files, not for aachen files
+        file = open(parameters, 'r', encoding="utf-8")
+        parameter_list = file.read()
+        file.close()
+        parameter_list = parameter_list.split('\n')
+        # print(parameter_list)
+        # print(parameter_list[-2])
+        version_number = parameter_list[-2].split('\t')[-1]
+        print('version_number:      ', version_number)
+        if version_number != ['']:
+            self.version_number = version_number
+        if version_number == '1.6.3359.1':
+            File_Definitions.file_type = File_Type.neaspec_version_1_6_3359_1
+            File_Definitions.parmeters_type = File_Type.html_neaspec_version_1_6_3359_1
 
     def _Initialize_File_Type(self) -> None:
         self._Find_Filetype() # try to find the filetype automatically
         self.file_type = File_Definitions.file_type
         self.parameters_type = File_Definitions.parmeters_type
-        if self.file_type == File_Type.standard or self.file_type == File_Type.standard_new:
+        if self.file_type == File_Type.standard or self.file_type == File_Type.standard_new or self.file_type == File_Type.neaspec_version_1_6_3359_1:
             self.height_channel = "Z C"
-            self.all_channels = ["O1A","O1P","O2A","O2P","O3A","O3P","O4A","O4P","O5A","O5P"]
-            self.phase_channels = ['O1P','O2P','O3P','O4P','O5P']
-            self.corrected_phase_channels = ['O1P_corrected','O2P_corrected','O3P_corrected','O4P_corrected','O5P_corrected']
-            self.amp_channels = ['O1A','O2A','O3A','O4A','O5A']
-            self.real_channels = ['O1R', 'O2R', 'O3R', 'O4R', 'O5R']
+            self.all_channels = ["O1A","O1P","O2A","O2P","O3A","O3P","O4A","O4P","O5A","O5P","R-O1A","R-O1P","R-O2A","R-O2P","R-O3A","R-O3P","R-O4A","R-O4P","R-O5A","R-O5P"]
+            self.phase_channels = ['O1P','O2P','O3P','O4P','O5P', 'R-O1P','R-O2P','R-O3P','R-O4P','R-O5P']
+            self.corrected_phase_channels = ['O1P_corrected','O2P_corrected','O3P_corrected','O4P_corrected','O5P_corrected', 'R-O1P_corrected','R-O2P_corrected','R-O3P_corrected','R-O4P_corrected','R-O5P_corrected']
+            self.amp_channels = ['O1A','O2A','O3A','O4A','O5A', 'R-O1A','R-O2A','R-O3A','R-O4A','R-O5A']
+            self.real_channels = ['O1R', 'O2R', 'O3R', 'O4R', 'R-O5R', 'R-O1R', 'R-O2R', 'R-O3R', 'R-O4R', 'R-O5R']
             self.preview_ampchannel = 'O2A'
             self.preview_phasechannel = 'O2P'
             self.height_indicator = 'Z'
@@ -165,11 +226,24 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
             self.height_indicator = 'MT'
             self.amp_indicator = 'abs'
             self.phase_indicator = 'arg'
+        elif self.file_type == File_Type.comsol_gsf:
+            self.all_channels = ['abs', 'arg', 'real']
+            self.phase_channels = ['arg']
+            self.amp_channels = ['abs']
+            self.real_channels = ['real']
+            self.height_channel = None
+            self.preview_ampchannel = 'abs'
+            self.preview_phasechannel = 'arg'
+            self.height_indicator = None
+            self.amp_indicator = 'abs'
+            self.phase_indicator = 'arg'
 
     def _Create_Tag_Dict(self):
         # create tag_dict for each channel individually? if manipulated channels are loaded they might have different diffrent resolution
         # only center_pos, scan_area, pixel_area and rotation must be stored for each channel individually but rotation is not stored in the original .gsf files
         # but rotation could be added in the newly created .gsf files
+        print(f'self.parameters_type: {self.parameters_type}')
+        print(f'self.file_type:       {self.file_type}')
         if self.parameters_type == File_Type.html:
             all_tables = pd.read_html("".join([self.directory_name,"/",self.filename,".html"]))
             tables = all_tables[0]
@@ -198,6 +272,19 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
                 Tag_Type.tip_amplitude: float(tables[2][15]),
                 Tag_Type.tapping_amplitude: float(tables[2][16])
             }
+        elif self.parameters_type == File_Type.html_neaspec_version_1_6_3359_1:
+            all_tables = pd.read_html("".join([self.directory_name,"/",self.filename,".html"]))
+            tables = all_tables[0]
+            self.measurement_tag_dict = {
+                Tag_Type.center_pos: [float(tables[2][3]), float(tables[3][3])],
+                Tag_Type.rotation: int(tables[2][4]),
+                Tag_Type.scan_area: [float(tables[2][5]), float(tables[3][5])],
+                Tag_Type.pixel_area: [int(tables[2][6]), int(tables[3][6])],
+                Tag_Type.integration_time: float(tables[2][8]),
+                Tag_Type.tip_frequency: float(tables[2][12]),
+                Tag_Type.tip_amplitude: float(tables[2][13]),
+                Tag_Type.tapping_amplitude: float(tables[2][14])
+            }
         elif self.parameters_type == File_Type.txt:
 
             parameters = self.directory_name + '/' + self.filename + '.parameters.txt'
@@ -224,15 +311,40 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
                 Tag_Type.tip_amplitude: None,
                 Tag_Type.tapping_amplitude: None
             }
+        elif self.parameters_type == File_Type.comsol_txt:
+            parameters = self.directory_name + '/' + self.filename + '_parameters.txt'
+            file = open(parameters, 'r')
+            parameter_list = file.read()
+            file.close()
+            # print(parameter_list)
+            parameter_list = parameter_list.split('\n')
+            parameter_list = [element.split('=') for element in parameter_list]
+            # center_pos = [float(parameter_list[7][1]), float(parameter_list[8][1])]
+            # rotation = float(parameter_list[9][1])
+            scan_area = [float(parameter_list[2][1]), float(parameter_list[3][1])]
+            pixel_area = [int(parameter_list[0][1]), int(parameter_list[1][1])]
+            # integration_time = float(parameter_list[6][1])
+            # tip_frequency = float(parameter_list[10][1])
+            self.measurement_tag_dict = {
+                Tag_Type.scan_type: None,
+                Tag_Type.center_pos: None,
+                Tag_Type.rotation: None,
+                Tag_Type.scan_area: scan_area,
+                Tag_Type.pixel_area: pixel_area,
+                Tag_Type.integration_time: None,
+                Tag_Type.tip_frequency: None,
+                Tag_Type.tip_amplitude: None,
+                Tag_Type.tapping_amplitude: None
+            }
 
     def _Create_Channels_Tag_Dict(self):
-        if (self.file_type == File_Type.standard) or (self.file_type == File_Type.standard_new) or (self.file_type == File_Type.aachen_gsf):
+        if (self.file_type == File_Type.standard) or (self.file_type == File_Type.standard_new) or (self.file_type == File_Type.aachen_gsf) or (self.file_type == File_Type.comsol_gsf) or (self.file_type == File_Type.neaspec_version_1_6_3359_1):
             cod="latin1"
             # get the tag values from each .gsf file individually
             self.channel_tag_dict = []
             for channel in self.channels:
-                if self.file_type == File_Type.standard_new and '_corrected' not in channel:
-                    if channel == 'Z C':
+                if (self.file_type == File_Type.standard_new or self.file_type==File_Type.neaspec_version_1_6_3359_1) and '_corrected' not in channel:
+                    if ' C' in channel or '_manipulated' in channel: #channel == 'Z C' or channel == 'R-Z C':
                         filepath = self.directory_name + '/' + self.filename + ' ' + channel + '.gsf'
                     else:
                         filepath = self.directory_name + '/' + self.filename + ' ' + channel + ' raw.gsf'
@@ -285,7 +397,8 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
                     self.channel_tag_dict.append(channel_dict)
             else:
                 print('channel tag dict for this filetype is not yet implemented')
-
+    '''
+    # old version picky on the ' ' characters
     def _Get_Tagval(self, content, tag):
         """This function gets the value of the tag listed in the file header"""
         taglength=len(tag)
@@ -294,19 +407,46 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         tagdataend=tagdatastart+tagdatalength
         tagval=float(content[tagdatastart:tagdataend])
         return tagval
-
-    def _Initialize_Data(self, channels) -> None:
+    '''
+    def _Get_Tagval(self, content, tag):
+        """This function gets the value of the tag listed in the file header"""
+        # print('trying to split the content')
+        # print(content)
+        content_array = content.split('\n')
+        # print(content_array[0:5])
+        tag_array = []
+        tagval = 0# if no tag val can be found return 0
+        for element in content_array:
+            if len(element) > 50: # its probably not part of the header anymore...
+                break
+            elif '=' not in element:
+                pass
+            else:
+                tag_pair = element.split('=')
+                # print(f'tag_pair = {tag_pair}')
+                tag_name = tag_pair[0].replace(' ', '')# remove possible ' ' characters
+                tag_val = tag_pair[1].replace(' ', '')# remove possible ' ' characters
+                tag_array.append([tag_name, tag_val])
+        for i in range(len(tag_array)):
+            if tag_array[i][0] == tag:
+                tagval = float(tag_array[i][1])
+        return tagval
+    
+    def _Initialize_Data(self, channels=None) -> None:
         '''This function initializes the data in memory. If no channels are specified the already existing data is used,
         which is created automatically in the instance init method. If channels are specified, the instance data is overwritten.
         Channels must be specified as a list of channels.'''
+        # print(f'initialising channels: {channels}')
         if channels == None:
             #none means the channels specified in the instance creation should be used
             pass
         else:
-            self.all_data, self.all_data_dict = self._Load_Data(channels)
             self.channels = channels
             # update the channel tag dictionary, makes the program compatible with differrently sized datasets, like original data plus manipulated, eg. cut data
             self._Create_Channels_Tag_Dict()
+            self.all_data, self.all_data_dict = self._Load_Data(channels)
+            xres = len(self.all_data[0][0])
+            yres = len(self.all_data[0])
             # reset all the instance variables dependent on the data, but nor the ones responsible for plotting
             self.scaling_factor = 1
             if self.autoscale == True:
@@ -318,7 +458,11 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
             self.y_shifts = None
     
     def Initialize_Channels(self, channels:list) -> None:
-        '''This function will load the data from the specified channels and replace the ones in memory.'''
+        '''This function will load the data from the specified channels and replace the ones in memory.
+        
+        Args:
+            channels [list]: a list containing the channels you want to initialize
+        '''
         self._Initialize_Data(channels)
 
     def _Initialize_Logfile(self) -> str:
@@ -344,8 +488,8 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         # print('self.scaling_factor_x: ', self.scaling_factor_x)
         # print('self.XRes: ', self.XRes)
         # print('self.YRes: ', self.YRes)
-        print('self.channels: ', self.channels)
-        print('self.all_subplots[-1]: ', [element[3] for element in self.all_subplots])
+        # print('self.channels: ', self.channels)
+        # print('self.all_subplots[-1]: ', [element[3] for element in self.all_subplots])
 
     def _Scale_Array(self, array, scaling) -> np.array:
         '''This function scales a given 2D Array, it thus creates 'scaling'**2 subpixels per pixel.
@@ -374,22 +518,31 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         self._Write_to_Logfile('scaling', scaling)
         self.scaling_factor = scaling
         dataset = self.all_data
+        channel_tag_dict = self.channel_tag_dict
         yres = len(dataset[0])
         xres = len(dataset[0][0])
         # self.all_data = np.zeros((len(dataset), yres*scaling, xres*scaling))
+        # re initialize data storage and channel_tag_dict, since resolution is changed
         self.all_data = []
-        for h in range(len(dataset)):
-            array = dataset[h]
+        self.channel_tag_dict = []
+        for channel in self.channels:
+            array = dataset[self.channels.index(channel)]
             scaled_array = self._Scale_Array(array, scaling)
             self.all_data.append(scaled_array)
+            XReal, YReal = channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area]
+            channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area] = [XReal*scaling, YReal*scaling]
+            self.channel_tag_dict.append(channel_tag_dict[self.channels.index(channel)])
 
     def _Gauss_Blurr_Data(self, array, sigma) -> np.array:
         '''Applies a gaussian blurr to the specified array, with a specified sigma. The blurred data is returned as a list.'''
         return gaussian_filter(array, sigma)
 
-    def _Load_Data(self, channels) -> list:
+    def _Load_Data(self, channels:list) -> list:
         '''Loads all binary data of the specified channels and returns them in a list plus the dictionary with the channel information.
         Height data is automatically converted to nm. '''
+        if self.file_type == File_Type.comsol_gsf:
+            return self._Load_Data_comsol(channels)
+        # print('load data for self.channels: ', self.channels)
         # datasize=int(self.XRes*self.YRes*4)
         #create a list containing all the lists of the individual channels
         all_binary_data = []
@@ -398,13 +551,18 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         # data_dict = {}
         # all_data = np.zeros((len(channels), self.YRes, self.XRes))
         all_data = []
-        if self.file_type==File_Type.standard or self.file_type==File_Type.standard_new:
+        if self.file_type==File_Type.standard or self.file_type==File_Type.standard_new or self.file_type ==File_Type.neaspec_version_1_6_3359_1:
             for i in range(len(channels)):
-                print(channels[i])
-                if self.file_type==File_Type.standard_new and '_corrected' not in channels[i]:
-                    if channels[i] == 'Z C':
+                # print(channels[i])
+                if (self.file_type==File_Type.standard_new or self.file_type==File_Type.neaspec_version_1_6_3359_1) and '_corrected' not in channels[i]:
+                    # print(f'load data for file_type: {self.file_type}, channel: {channels[i]}')
+                    if ' C' in channels[i] or '_manipulated' in channels[i]: #channels[i] == 'Z C' or channels[i] == 'R-Z C':
+                        # print(f"trying to open {self.directory_name}/{self.filename} {channels[i]}.gsf")
+                        # print('channels: ', channels)
                         f=open(f"{self.directory_name}/{self.filename} {channels[i]}.gsf","br")
                     else:
+                        # print(f"trying to open {self.directory_name}/{self.filename} {channels[i]} raw.gsf")
+                        # print('channels: ', channels)
                         f=open(f"{self.directory_name}/{self.filename} {channels[i]} raw.gsf","br")
                 else:
                     f=open(f"{self.directory_name}/{self.filename} {channels[i]}.gsf","br")
@@ -414,13 +572,22 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
                 data_dict.append(channels[i])
             count = 0
             for channel in channels:
+                # if _manipulated in channel name use channel dict, because resolution etc could be different to original data
+                if '_manipulated' in channel:
+                    # print('2 load data for self.channels: ', self.channels)
+                    # print(f'channel tag dict: {self.channel_tag_dict}')
+                    XRes, YRes = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area]
+                    # print(f'2in load data, XRes, YRes: {XRes, YRes}')
                 # print(self.channel_tag_dict[self.channels.index(channel)])
                 # print(self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area])
                 # dont remember why i added the following but it leads to problems
                 # if channel in self.channels:
                 #     XRes, YRes = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area]
-                # else:
-                XRes, YRes = self.measurement_tag_dict[Tag_Type.pixel_area]
+                else:
+                    XRes, YRes = self.measurement_tag_dict[Tag_Type.pixel_area]
+                    # print(f'3in load data, XRes, YRes: {XRes, YRes}')
+                # print(f'in load data, XRes, YRes: {XRes, YRes}')
+                # print(f'channel: {channel}')
                 
                 datasize=int(XRes*YRes*4)
                 channel_data = np.zeros((YRes, XRes))
@@ -431,7 +598,7 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
                 if 'A' in channel:
                     rounding_decimal = 5
                 if 'Z' in channel:
-                    print('channel: ', channel)
+                    # print('channel: ', channel)
                     scaling = 1000000000#convert to nm
                 if 'P' in channel:
                     # normal phase data ranges from -pi to pi and gets shifted by +pi
@@ -517,6 +684,47 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
                 count+=1
         return all_data, data_dict
 
+    def _Load_Data_comsol(self, channels):
+        # datasize=int(self.XRes*self.YRes*4)
+        #create a list containing all the lists of the individual channels
+        all_binary_data = []
+        #safe the information about which channel is which list in a dictionary
+        data_dict = []
+        # data_dict = {}
+        # all_data = np.zeros((len(channels), self.YRes, self.XRes))
+        all_data = []
+        for i in range(len(channels)):
+            # print(channels[i])
+            f=open(f"{self.directory_name}/{self.filename} {channels[i]}.gsf","br")
+            binarydata=f.read()
+            f.close()
+            all_binary_data.append(binarydata)
+            data_dict.append(channels[i])
+        count = 0
+        for channel in channels:
+            XRes, YRes = self.measurement_tag_dict[Tag_Type.pixel_area]
+            
+            datasize=int(XRes*YRes*4)
+            channel_data = np.zeros((YRes, XRes))
+            reduced_binarydata=all_binary_data[count][-datasize:]
+            phaseoffset = 0
+            rounding_decimal = 2
+            scaling = 1
+            if 'abs' in channel:
+                rounding_decimal = 5
+            if 'arg' in channel:
+                # normal phase data ranges from -pi to pi and gets shifted by +pi
+                phaseoffset = np.pi
+            if 'real' in channel:
+                rounding_decimal = 4
+            for y in range(0,YRes):
+                for x in range(0,XRes):
+                    pixval=unpack("f",reduced_binarydata[4*(y*XRes+x):4*(y*XRes+x+1)])[0]
+                    channel_data[y][x] = round(pixval*scaling + phaseoffset, rounding_decimal)
+            all_data.append(channel_data)
+            count+=1
+        return all_data, data_dict
+
     def _Load_Data_Binary(self, channels) -> list:
         '''Loads all binary data of the specified channels and returns them in a list plus the dictionary for access'''
         #create a list containing all the lists of the individual channels
@@ -548,25 +756,25 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         '''This function adds the specified data to the list of subplots. The list of subplots contains the data, the colormap,
         the colormap label and a title, which are generated from the channel information. The same array is also returned,
         so it can also be iterated by an other function to only plot the data of interest.'''
-        if self.file_type == File_Type.standard or self.file_type == File_Type.standard_new:
+        if self.file_type == File_Type.standard or self.file_type == File_Type.standard_new or self.file_type==File_Type.neaspec_version_1_6_3359_1:
             if 'A' in channel:
                 cmap=SNOM_amplitude
-                label = 'amplitude [a.u.]'
+                label = 'Amplitude [a.u.]'
                 title = f'Amplitude {channel}'
             elif 'P' in channel:
                 if 'positive' in channel:
                     cmap = SNOM_phase
-                    title = f'positively corrected phase O{channel[1]}P'
+                    title = f'Positively corrected phase O{channel[1]}P'
                 elif 'negative' in channel:
                     cmap = SNOM_phase
-                    title = f'negatively corrected phase O{channel[1]}P'
+                    title = f'Negatively corrected phase O{channel[1]}P'
                 else:
                     cmap=SNOM_phase
                     title = f'Phase {channel}'
-                label = 'phase'
+                label = 'Phase'
             elif 'Z' in channel:
-                cmap='gray'
-                label = 'height [nm]'
+                cmap=SNOM_height
+                label = 'Height [nm]'
                 title = f'Height {channel}'
             elif 'R' in channel:
                 cmap=SNOM_realpart
@@ -575,31 +783,44 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         elif self.file_type == File_Type.aachen_ascii or self.file_type == File_Type.aachen_gsf:
             if 'abs' in channel and not 'MT' in channel:
                 cmap=SNOM_amplitude
-                label = 'amplitude [a.u.]'
+                label = 'Amplitude [a.u.]'
                 title = f'Amplitude {channel}'
             elif 'arg' in channel:
                 if 'positive' in channel:
                     cmap = SNOM_phase
-                    title = f'positively corrected phase O{channel[1]}P' # ToDo
+                    title = f'Positively corrected phase O{channel[1]}P' # ToDo
                 elif 'negative' in channel:
                     cmap = SNOM_phase
-                    title = f'negatively corrected phase O{channel[1]}P'
+                    title = f'Negatively corrected phase O{channel[1]}P'
                 else:
                     cmap=SNOM_phase
                     title = f'Phase {channel}'
                 label = 'phase'
             elif 'MT' in channel:
-                cmap='gray'
-                label = 'height [nm]'
+                cmap=SNOM_height
+                label = 'Height [nm]'
                 title = f'Height {channel}'
+        elif self.file_type == File_Type.comsol_gsf:
+            if 'abs' in channel:
+                cmap=SNOM_amplitude
+                label = 'Amplitude [a.u.]'
+                title = f'Amplitude {channel}'
+            elif 'arg' in channel:
+                cmap=SNOM_phase
+                title = f'Phase {channel}'
+                label = 'phase'
+            elif 'real' in channel:
+                cmap=SNOM_realpart
+                label = 'E [a.u.]'
+                title = f'Realpart {channel}'
         elif 'fft' in channel:
             cmap='viridis'
-            label = 'intensity [a.u.]'
+            label = 'Intensity [a.u.]'
             title =  f'Fourier Transform {channel}'
         elif 'gauss' in channel:
             title = f'Gauss blurred {channel}'
         else:
-            print('Unknown channel')
+            print('In _Add_Subplot(), encountered unknown channel')
             exit()
         # subplots.append([data, cmap, label, title])
         if self.measurement_title != None:
@@ -641,6 +862,14 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         # print('Number of subplots: {}'.format(number_of_subplots))
         #specify the way the subplots are organized
         nrows = int((number_of_subplots-1)/np.sqrt(number_of_axis))+1
+        # set the plotting font sizes:
+        plt.rc('font', size=self.font_size_default)          # controls default text sizes
+        plt.rc('axes', titlesize=self.font_size_axes_title)     # fontsize of the axes title
+        plt.rc('axes', labelsize=self.font_size_axes_label)    # fontsize of the x and y labels
+        plt.rc('xtick', labelsize=self.font_size_tick_labels)    # fontsize of the tick labels
+        plt.rc('ytick', labelsize=self.font_size_tick_labels)    # fontsize of the tick labels
+        plt.rc('legend', fontsize=self.font_size_legend)    # legend fontsize
+        plt.rc('figure', titlesize=self.font_size_fig_title)  # fontsize of the figure title
 
         if nrows >=2:
             ncols = int(np.sqrt(number_of_axis))
@@ -668,7 +897,7 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         fig.set_figwidth(self.figsizex) 
         counter = 0
 
-        
+        #start the plotting process
         for row in range(nrows):
             for col in range(ncols):
                 if counter < number_of_subplots:
@@ -691,17 +920,20 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
                             location, loc, pad, border_pad, sep, frameon, color, box_color, box_alpha, scale_loc,
                             label_loc, font_properties, label_formatter, scale_formatter, fixed_value, fixed_units, animated, rotation) 
                         axis.add_artist(scalebar)
-                        print('added a scalebar')
-                    if 'R_corrected' in title:
+                        # print('added a scalebar')
+                    #center the colorscale for real data around 0
+                    if ('R_corrected' in title) or ('real' in title):
+                        if 'real' in title:
+                            data = Set_nan_to_zero(data) #comsol data can contain nan values which are problematic for min and max
                         flattened_data = data.flatten()
                         min_real = min(flattened_data)
                         max_real = max(flattened_data)
-                        print('min: ', min_real)
-                        print('max: ', max_real)
+                        # print('min: ', min_real)
+                        # print('max: ', max_real)
                         if abs(min_real) > abs(max_real):
                             limit = abs(min_real)
                         else: limit = abs(max_real)
-                        print('limit: ', limit)
+                        # print('limit: ', limit)
                         img = axis.pcolormesh(data, cmap=cmap, vmin=-limit, vmax=limit)
                     else:
                         img = axis.pcolormesh(data, cmap=cmap)
@@ -772,7 +1004,7 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
                         scalebar = self.scalebar[counter][1]
                         axis.add_artist(scalebar)'''
 
-        #turn off all unneeded axis
+        #turn off all unneeded axes
         counter = 0
         for row in range(nrows):
             for col in range(int(np.sqrt(number_of_axis))):
@@ -848,6 +1080,12 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         self._Display_Dataset(dataset, channels)
 
     def Gauss_Filter_Channels(self, channels:list=None, sigma=2):
+        """This function will gauss filter the specified channels. If no channels are specified, the ones in memory will be used.
+
+        Args:
+            channels (list, optional): This will overwrite the channels in memory. Defaults to None.
+            sigma (int, optional): The 'width' of the gauss blurr in pixels, you should scale the data before blurring. Defaults to 2.
+        """
         self._Initialize_Data(channels)
         self._Write_to_Logfile('gaussian_filter_sigma', sigma)
         if self.scaling_factor == 1:
@@ -859,6 +1097,40 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         for i in range(len(self.channels)):
             self.all_data[i] = self._Gauss_Blurr_Data(self.all_data[i], sigma)
             self.all_data_dict[i] += '_gauss'
+                
+    def _Fourier_Filter_Array(self, complex_array) -> np.array:
+        '''
+        Takes a complex array and returns the fourier transformed complex array
+        '''
+        FS_compl = np.fft.fftn(complex_array)
+        return FS_compl
+    
+    def Fourier_Filter_Channels(self, channels:list=None) -> None:
+        '''This function applies the Fourier filter to all data in memory or specified channels
+                
+        Args:
+            channels [list]: list of channels, will override the already existing channels
+        '''
+        self._Initialize_Data(channels)
+        self._Write_to_Logfile('fourier_filter', True)
+        channels_to_filter = []
+        for i in range(len(self.amp_channels)):
+            if (self.amp_channels[i] in self.channels) and (self.phase_channels[i] in self.channels):
+                channels_to_filter.append(self.channels.index(self.amp_channels[i]))
+                channels_to_filter.append(self.channels.index(self.phase_channels[i]))
+            else:
+                print('In order to apply the fourier_filter amplitude and phase of the same channel number must be in the channels list!')
+        for i in range(int(len(channels_to_filter)/2)):
+            amp = self.all_data[channels_to_filter[i]]
+            phase = self.all_data[channels_to_filter[i+1]]
+            compl = np.add(amp*np.cos(phase), 1J*amp*np.sin(phase))
+            FS_compl = self._Fourier_Filter_Array(compl)
+            FS_compl_abs = np.absolute(FS_compl)
+            FS_compl_angle = self._Get_Compl_Angle(FS_compl)
+            self.all_data[channels_to_filter[i]] = np.log(np.abs(np.fft.fftshift(FS_compl_abs))**2)
+            self.all_data_dict[channels_to_filter[i]] = self.all_data_dict[channels_to_filter[i]] + '_fft'
+            self.all_data[channels_to_filter[i+1]] = FS_compl_angle
+            self.all_data_dict[channels_to_filter[i+1]] = self.all_data_dict[channels_to_filter[i+1]] + '_fft'
     
     def _Create_Header(self, channel, data=None, filetype='gsf'):
         # data = self.all_data[self.channels.index(channel)]
@@ -866,7 +1138,8 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         if data is None:
             # channel is not in memory, so the standard values will be used
             data = self._Load_Data([channel])[0][0]
-            XReal, YReal = self.measurement_tag_dict[Tag_Type.scan_area]
+            # XReal, YReal = self.measurement_tag_dict[Tag_Type.scan_area]# change to self.channel_dat_dict?
+            XReal, YReal = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.scan_area]# change to self.channel_dat_dict?
             rotation = self.measurement_tag_dict[Tag_Type.rotation]
             XOffset, YOffset = self.measurement_tag_dict[Tag_Type.center_pos]
         else: 
@@ -883,10 +1156,10 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         elif filetype=='txt':
             header = 'Simple Textfile, floats seperated by spaces\n'
         # round everything to nm
-        header += f'XRes={round(XRes,9)}\nYRes={round(YRes,9)}\n'
+        header += f'XRes={int(XRes)}\nYRes={int(YRes)}\n'
         header += f'XReal={round(XReal,9)}\nYReal={round(YReal,9)}\n'
         header += f'XYUnits=m\n'
-        header += f'XOffset={round(XOffset,9)}\nYOffset={round(YOffset,9)}\n'
+        header += f'XOffset={round(XOffset*pow(10, -6),9)}\nYOffset={round(YOffset*pow(10, -6),9)}\n'
         header += f'Rotation={round(rotation)}\n'
         if self.height_indicator in channel:
             header += 'ZUnits=nm\n'
@@ -923,13 +1196,13 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
             file.write(NUL) # the NUL marks the end of the header and konsists of 0 characters in the first dataline
             for y in range(YRes):
                 for x in range(XRes):
-                    file.write(pack('f', round(data[y][x], 2)))
+                    file.write(pack('f', round(data[y][x], 5)))
             file.close()
             print(f'successfully saved channel {channel} to .gsf')
             print(filepath)
 
     def Save_to_txt(self, channels:list=None, appendix:str='_manipulated'):
-        '''This function is ment to save all specified channels to external .gsf files.
+        '''This function is ment to save all specified channels to external .txt files.
         
         Args:
             channels [list]:    list of the channels to be saved, if not specified, all channels in memory are saved
@@ -954,7 +1227,7 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
             file.close()
             print(f'successfully saved channel {channel} to .txt')
             print(filepath)
-    
+
     def _Get_Channel_Scaling(self, channel_id) -> int :
         '''This function checks if an instance channel is scaled and returns the scaling factor.'''
         channel_yres = len(self.all_data[channel_id])
@@ -982,6 +1255,14 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         elif user_input == 'n':
             user_bool = False
         return user_bool
+
+    def _User_Input(self, message:str):
+        """This function confronts the user with the specified message and returns the user input
+
+        Args:
+            message (str): the message to display
+        """
+        return input(message)
 
     def _Create_Mask_Array(self, height_data, threshold) -> np.array:
         '''This function takes the height data and a threshold value to create a mask array containing 0 and 1 values.
@@ -1117,7 +1398,7 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
 
     def _Height_Levelling_3Point(self, height_data, zone=1) -> np.array:
         fig, ax = plt.subplots()
-        ax.pcolormesh(height_data, cmap='gray')
+        ax.pcolormesh(height_data, cmap=SNOM_height)
         klicker = clicker(ax, ["event"], markers=["x"])
         ax.legend()
         ax.axis('scaled')
@@ -1166,7 +1447,7 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
             if self.height_indicator in channel:
                 self.all_data[self.channels.index(channel)] = self._Height_Levelling_3Point(self.all_data[self.channels.index(channel)])
                 self.all_data_dict[self.channels.index(channel)] += '_leveled' 
-                
+            
     def _Fit_Horizontal_WG(self, data):
         YRes = len(data)
         XRes = len(data[0])
@@ -1186,7 +1467,7 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
             coeff, var_matrix = curve_fit(Gauss_Function, range(0, YRes), cutline, p0=p0, bounds=bounds)
             list_of_coefficients.append(coeff)
             p0 = coeff #set the starting parameters for the next fit
-        print("fit succsessful")
+        # print("fit succsessful")
         return align_points, list_of_coefficients
 
     def _Shift_Data(self, data, y_shifts) -> np.array:
@@ -1254,7 +1535,7 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         fig, axis = plt.subplots()    
         fig.set_figheight(self.figsizey)
         fig.set_figwidth(self.figsizex) 
-        cmap = 'gray'
+        cmap = SNOM_height
         img = axis.pcolormesh(height_data, cmap=cmap)
         # axis.invert_yaxis()
         divider = make_axes_locatable(axis)
@@ -1380,7 +1661,7 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
     def Scalebar(self, channels:list=[], units="m", dimension="si-length", label=None, length_fraction=None, height_fraction=None, width_fraction=None,
             location=None, loc=None, pad=None, border_pad=None, sep=None, frameon=None, color=None, box_color=None, box_alpha=None, scale_loc=None,
             label_loc=None, font_properties=None, label_formatter=None, scale_formatter=None, fixed_value=None, fixed_units=None, animated=False, rotation=None):
-        '''channels contains the list of channels wich should have a scalebar
+        '''Adds a scalebar to all specified channels.
         Args:
             channels [list]: list of channels the scalebar should be added to, will not affect the channels in memory
             various definitions for the scalebar, please look up 'matplotlib_scalebar.scalebar' for more information
@@ -1406,7 +1687,11 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
             count += 1
 
     def Rotate_90_deg(self, orientation:str = 'right'):
-        '''This function will rotate all data in memory by 90 degrees.'''
+        """This function will rotate all data in memory by 90 degrees.
+
+        Args:
+            orientation (str, optional): rotate clockwise ('right') or counter clockwise ('left'). Defaults to 'right'.
+        """
         self._Write_to_Logfile('rotate_90_deg', orientation)
         if orientation == 'right':
             axes=(1,0)
@@ -1429,13 +1714,13 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
             # data = self.all_data[self.channels.index(channel)]
             self.all_data.append(np.rot90(all_data[self.channels.index(channel)], axes=axes))
 
-    def _Get_Positions_from_Plot(self, data, channel) -> list:
+    def _Get_Positions_from_Plot(self, channel, data, coordinates:list=None, orientation=None) -> list:
         if self.phase_indicator in channel:
             cmap = SNOM_phase
         elif self.amp_indicator in channel:
             cmap = SNOM_amplitude
         elif self.height_indicator in channel:
-            cmap = 'gray'
+            cmap = SNOM_height
 
         fig, ax = plt.subplots()
         img = ax.pcolormesh(data, cmap=cmap)
@@ -1448,6 +1733,8 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         cbar.ax.set_ylabel(channel, rotation=270)
         ax.legend()
         ax.axis('scaled')
+        if coordinates != None and orientation != None:
+            self._Plot_Profile_Lines(data, ax, coordinates, orientation)
         plt.title('Please select one or more points to continue.')
         plt.tight_layout()
         plt.show()
@@ -1455,7 +1742,7 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         klick_coordinates = [[round(element[0]), round(element[1])] for element in klicker_coords]
         return klick_coordinates
 
-    def _Get_Profile(self, data, coordinates, orientation, width) -> list:
+    def _Get_Profile(self, data, coordinates:list, orientation:Definitions, width:int) -> list:
         YRes = len(data)
         XRes = len(data[0])
         all_profiles = []
@@ -1482,18 +1769,27 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
             all_profiles.append(profile)
         return all_profiles
 
-    def Select_Profile(self, profile_channel:str, preview_channel:str=None, orientation:Definitions=Definitions.vertical, width=10, phase_orientation=1, coordinates=None):
-        '''This function lets the user select a profile with given width in pixels and displays the data.'''
+    def Select_Profile(self, profile_channel:str, preview_channel:str=None, orientation:Definitions=Definitions.vertical, width:int=10, phase_orientation:int=1, coordinates:list=None):
+        """This function lets the user select a profile with given width in pixels and displays the data.
+
+        Args:
+            profile_channel (str): channel to use for profile data extraction
+            preview_channel (str, optional): channel to preview the profile positions. If not specified the height channel will be used for that. Defaults to None.
+            orientation (Definitions, optional): profiles can be horizontal or vertical. Defaults to Definitions.vertical.
+            width (int, optional): width of the profile in pixels, will calculate the mean. Defaults to 10.
+            phase_orientation (int, optional): only relevant for phase profiles. Necessary for the flattening to work properly. Defaults to 1.
+            coordinates (list, optional): if you already now the position of your profile you can also specify the coordinates and skip the selection. Defaults to None.
+        """
         if preview_channel is None:
             preview_channel = self.height_channel
         if coordinates == None:
             previewdata = self.all_data[self.channels.index(preview_channel)]
-            coordinates = self._Get_Positions_from_Plot(previewdata, preview_channel)
-            print('The coordinates you selected are:', coordinates)
+            coordinates = self._Get_Positions_from_Plot(preview_channel, previewdata)
+            # print('The coordinates you selected are:', coordinates)
 
         profiledata = self.all_data[self.channels.index(profile_channel)]
 
-        cmap = 'gray'
+        cmap = SNOM_phase
         fig, ax = plt.subplots()
         img = ax.pcolormesh(profiledata, cmap=cmap)
         ax.invert_yaxis()
@@ -1501,7 +1797,7 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         cax = divider.append_axes("right", size="5%", pad=0.05)
         cbar = plt.colorbar(img, cax=cax)
         cbar.ax.get_yaxis().labelpad = 15
-        cbar.ax.set_ylabel('height [nm]', rotation=270)
+        cbar.ax.set_ylabel('phase', rotation=270)
         ax.legend()
         ax.axis('scaled')
         xcoord = [coord[0] for coord in coordinates]
@@ -1515,24 +1811,166 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
         plt.show()
         # it would be nice to be able to add non pcolormesh plots to the subplotslist
         # self.all_subplots.append()
-        #get the current values for the scan area and resolution
-        XRes, YRes = self.channel_tag_dict[self.channels.index(profile_channel)][Tag_Type.pixel_area]
-        XReal, YReal = self.channel_tag_dict[self.channels.index(profile_channel)][Tag_Type.scan_area]
+
         profiles = self._Get_Profile(profiledata, coordinates, orientation, width)
         for profile in profiles:
-            if orientation == Definitions.horizontal:
-                values = np.arange(len(profile))*XReal/XRes*pow(10,6)# convert m to µm
-            elif orientation == Definitions.vertical:
-                values = np.arange(len(profile))*YReal/YRes*pow(10,6)# convert m to µm
-            plt.plot(values, profile)
-        plt.title('Height profile')
-        if orientation == Definitions.vertical:
-            plt.xlabel('y-pos [µm]')
-        elif orientation == Definitions.horizontal:
-            plt.xlabel('x-pos [µm]')
-        plt.ylabel('height [nm]')
+            xvalues = np.linspace(0, 10, len(profile))
+            plt.plot(xvalues, profile, 'x')
+        plt.title('Phase profiles')
         plt.tight_layout()
         plt.show()
+
+        flattened_profiles = [phase_analysis.Flatten_Phase_Profile(profile, phase_orientation) for profile in profiles]
+        for profile in flattened_profiles:
+            xvalues = np.linspace(0, 10, len(profile))
+            plt.plot(xvalues, profile)
+        plt.title('Flattened phase profiles')
+        plt.tight_layout()
+        plt.show()
+
+        difference_profile = phase_analysis.Get_Profile_Difference(profiles[0], profiles[1])
+        # difference_profile = Get_Profile_Difference(flattened_profiles[0], flattened_profiles[1])
+        xres, yres = self.channel_tag_dict[self.channels.index(profile_channel)][Tag_Type.pixel_area]
+        xreal, yreal = self.channel_tag_dict[self.channels.index(profile_channel)][Tag_Type.scan_area]
+        xvalues = [i*yreal/yres/self.scaling_factor for i in range(yres*self.scaling_factor)]
+        # xvalues = np.linspace(0, 10, len(difference_profile))
+        plt.plot(xvalues, difference_profile)
+        plt.xlabel('Y [µm]')
+        plt.ylabel('Phase difference')
+        plt.ylim(ymin=0, ymax=2*np.pi)
+        plt.title('Phase difference')
+        plt.tight_layout()
+        plt.show()
+
+    def _Plot_Data_and_Profile_pos(self, channel, data, coordinates, orientation):
+        if self.phase_indicator in channel:
+            cmap = SNOM_phase
+        elif self.amp_indicator in channel:
+            cmap = SNOM_amplitude
+        elif self.height_indicator in channel:
+            cmap = SNOM_height
+        fig, ax = plt.subplots()
+        img = ax.pcolormesh(data, cmap=cmap)
+        ax.invert_yaxis()
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+        cbar = plt.colorbar(img, cax=cax)
+        cbar.ax.get_yaxis().labelpad = 15
+        cbar.ax.set_ylabel('phase', rotation=270)
+        ax.legend()
+        ax.axis('scaled')
+        self._Plot_Profile_Lines(data, ax, coordinates, orientation)
+        plt.title('You chose the following line profiles')
+        plt.tight_layout()
+        plt.show()
+
+    def _Plot_Profile_Lines(self, data, ax, coordinates, orientation):
+        xcoord = [coord[0] for coord in coordinates]
+        ycoord = [coord[1] for coord in coordinates]
+        if orientation == Definitions.vertical:
+            ax.vlines(xcoord, ymin=0, ymax=len(data))
+        elif orientation == Definitions.horizontal:
+            ax.hlines(ycoord, xmin=0, xmax=len(data[0]))
+
+    def _Get_Profiles_Coordinates(self, profile_channel, profiledata, preview_channel, previewdata, orientation, redo:bool=False, coordinates=None, redo_coordinates=None):
+        if redo == False:
+            coordinates = self._Get_Positions_from_Plot(preview_channel, previewdata)
+        else:
+            display_coordinates = [coordinates[i] for i in range(len(coordinates)) if i not in redo_coordinates]# remove coordinates to redo and plot the other ones while selecton is active
+            redone_coordinates = self._Get_Positions_from_Plot(preview_channel, previewdata, display_coordinates, orientation)
+            count = 0
+            for index in redo_coordinates:
+                coordinates[index] = redone_coordinates[count]
+                count += 1
+
+        self._Plot_Data_and_Profile_pos(profile_channel, profiledata, coordinates, orientation)
+        print('Are you satisfied with the profile positions? Or would you like to change one ore more profile positions?')
+        user_input_bool = self._User_Input_Bool() 
+        if user_input_bool == False:
+            user_input = self._User_Input('Please enter the indices of the profiles you like to redo, separated by a space character e.g. (0 1 3 11 ...)\nYour indices: ') 
+            redo_coordinates = user_input.split(' ')
+            redo_coordinates = [int(coord) for coord in redo_coordinates]
+            print('coordinates to redo: ', redo_coordinates)
+            print('Please select the new positons only for the indices you selected and in the same ordering, those were: ', redo_coordinates)
+            coordinates = self._Get_Profiles_Coordinates(profile_channel, profiledata, preview_channel, previewdata, orientation, redo=True, coordinates=coordinates, redo_coordinates=redo_coordinates)
+        
+        return coordinates
+
+    def Select_Profiles(self, profile_channel:str, preview_channel:str=None, orientation:Definitions=Definitions.vertical, width:int=10, coordinates:list=None):
+        """This function lets the user select a profile with given width in pixels and displays the data.
+
+        Args:
+            profile_channel (str): channel to use for profile data extraction
+            preview_channel (str, optional): channel to preview the profile positions. If not specified the height channel will be used for that. Defaults to None.
+            orientation (Definitions, optional): profiles can be horizontal or vertical. Defaults to Definitions.vertical.
+            width (int, optional): width of the profile in pixels, will calculate the mean. Defaults to 10.
+            coordinates (list, optional): if you already now the position of your profile you can also specify the coordinates and skip the selection. Defaults to None.
+
+        """
+        if preview_channel is None:
+            preview_channel = self.height_channel
+        if preview_channel not in self.channels and profile_channel not in self.channels:
+            print('The channels for preview and the profiles were not found in the memory, they will be loaded automatically.\nBe aware that all prior modifications will get deleted.')  
+            self._Initialize_Data([profile_channel, preview_channel])#this will negate any modifications done prior like blurr...
+        profiledata = self.all_data[self.channels.index(profile_channel)]
+        previewdata = self.all_data[self.channels.index(preview_channel)]
+
+        if coordinates == None:
+            coordinates = self._Get_Profiles_Coordinates(profile_channel, profiledata, preview_channel, previewdata, orientation)
+        
+        print('The final profiles are shown in this plot.')
+        self._Plot_Data_and_Profile_pos(profile_channel, profiledata, coordinates, orientation)
+        # get the profile data and save to class variables
+        # additional infos are also stored and can be used by plotting and analysis functions
+        self.profiles = self._Get_Profile(profiledata, coordinates, orientation, width)
+        self.profile_channel = profile_channel
+        self.profile_orientation = orientation
+        return self.profiles
+        
+    def _Display_Profile(self, profiles, ylabel=None, labels=None):
+        if self.profile_orientation == Definitions.horizontal:
+            xrange = self.channel_tag_dict[self.channels.index(self.profile_channel)][Tag_Type.scan_area][0]
+            x_center_pos = self.channel_tag_dict[self.channels.index(self.profile_channel)][Tag_Type.center_pos][0]
+            xres = self.channel_tag_dict[self.channels.index(self.profile_channel)][Tag_Type.pixel_area][0]# for now only profiles with lenght equal to scan dimensions are allowed
+            xvalues = [x_center_pos - xrange/2 + x*(xrange/xres) for x in range(xres)]
+            xlabel = 'X [µm]'
+            title = 'Horizontal profiles of channel ' + self.profile_channel
+        elif self.profile_orientation == Definitions.vertical:
+            yrange = self.channel_tag_dict[self.channels.index(self.profile_channel)][Tag_Type.scan_area][1]
+            y_center_pos = self.channel_tag_dict[self.channels.index(self.profile_channel)][Tag_Type.center_pos][1]
+            yres = self.channel_tag_dict[self.channels.index(self.profile_channel)][Tag_Type.pixel_area][1]# for now only profiles with lenght equal to scan dimensions are allowed
+            xvalues = [y_center_pos - yrange/2 + y*(yrange/yres) for y in range(yres)]
+            xlabel = 'Y [µm]'
+            title = 'Vertical profiles of channel ' + self.profile_channel
+        # find out y label:
+        if ylabel == None:
+            if self.phase_indicator in self.profile_channel:
+                ylabel = 'Phase'
+            elif self.amp_indicator in self.profile_channel:
+                ylabel = 'Amplitude [arb.u.]'
+            elif self.height_indicator in self.profile_channel:
+                ylabel = 'Height [nm]'
+        for profile in profiles:
+            if labels == None:
+                plt.plot(xvalues, profile, 'x')
+            else:
+                plt.plot(xvalues, profile, 'x', label=labels[profiles.index(profile)])
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        plt.title(title)
+        if labels != None:
+            plt.legend()
+        plt.tight_layout()
+        plt.show()
+
+    def Display_Profiles(self, ylabel:str=None, labels:list=None):
+        """This function will display all current profiles from memory.
+
+        Args:
+            ylabel (str, optional): label of the y axis. The x axis label is in µm per default. Defaults to None.
+            labels (list, optional): the description of the profiles. Will be displayed in the legend. Defaults to None.
+        """
+        self._Display_Profile(self.profiles)
 
     def _Scale_Data_XY(self, data, scale_x, scale_y) -> np.array:
         XRes = len(data[0])
@@ -1578,12 +2016,153 @@ class SimpleManipulation(File_Definitions, Plot_Definitions):
                 # print('scale y: ', scale_y)
                 self.all_data[self.channels.index(channel)] = self._Scale_Data_XY(self.all_data[self.channels.index(channel)], scale_x, scale_y)
                 self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area] = [XRes*scale_x, YRes*scale_y]
+
+    def Overlay_Forward_and_Backward_Channels(self, height_channel_forward:str, height_channel_backward:str, channels:list=None):
+        """This function is ment to overlay the backwards and forwards version of the specified channels.
+        You should only specify the forward version of the channels you want to overlay. The function will create a mean version
+        which can then be displayed and saved. Note that the new version will be larger then the previous ones.
+
+        Args:
+            height_channel_forward (str): usual corrected height channel
+            height_channel_backward (str): backwards height channel
+            channels (list, optional): a list of all channels to be overlayed. Defaults to None.
+        """
+        all_channels = []
+        for channel in channels:
+            # print('extension: ', channel, 'R-' + channel)
+            all_channels.extend([channel, 'R-' + channel])
+        all_channels.extend([height_channel_forward, height_channel_backward])
+        # print('specified channels to overlay: ', channels)
+        # print('all channels:', all_channels)
+        self._Initialize_Data(all_channels)
+        # print('after initialisation' , self.channels)
+
+        self.Set_Min_to_Zero([height_channel_forward, height_channel_backward])
         
+        #scale and blurr channels for better overlap
+        self.Scale_Channels()
+        # self.Gauss_Filter_Channels()
+        # self.Gauss_Filter_Channels_complex()
+
+        height_data_forward = self.all_data[self.channels.index(height_channel_forward)]
+        height_data_backward = self.all_data[self.channels.index(height_channel_backward)]
         
+        #gauss blurr the data used for the alignment, so it might be a litte more precise
+        height_channel_forward_blurr = self._Gauss_Blurr_Data(height_data_forward, 2)
+        height_channel_backward_blurr = self._Gauss_Blurr_Data(height_data_backward, 2)
+
+        # array_1 = height_data_forward[0]
+        # array_2 = height_data_backward[0]
+
+        '''
+        mean_deviation_array = Realign.Calculate_Squared_Deviation(array_1, array_2)
+        mean_deviation = np.mean(mean_deviation_array)
+        x = range(len(array_1))
+        plt.plot(x, array_1, label='array_2')
+        plt.plot(x, array_2, label='array_1')
+        plt.plot(x, mean_deviation_array, label="Mean deviation_array")
+        plt.hlines(mean_deviation, label="Mean deviation", xmin=0, xmax=len(array_1))
+        plt.legend()
+        plt.show()
+        '''
+
+        # try to optimize by shifting second array and minimizing mean deviation
+        N = 5*self.scaling_factor #maximum iterations, scaled if pixelnumber was increased
+
+        # Realign.Minimize_Deviation_1D(array_1, array_2, n_tries=N)
+        # Realign.Minimize_Deviation_2D(height_data_forward, height_data_backward, n_tries=N)
+
+        # get the index which minimized the deviation of the height channels
+        # index = Realign.Minimize_Deviation_2D(height_data_forward, height_data_backward, N, False)
+        index = realign.Minimize_Deviation_2D(height_channel_forward_blurr, height_channel_backward_blurr, N, False)
+        # self.all_data[self.channels.index(height_channel_forward)], self.all_data[self.channels.index(height_channel_backward)] = Realign.Shift_Array_2D_by_Index(height_data_forward, height_data_backward, index)
+
+
+        # print('trying to create mean data')
+        # print(self.channels)
+        for channel in channels:
+            if 'R-' not in channel:
+                #test:
+                if 'Z' in channel:
+                    # get current res and size and add the additional res and size due to addition of zeros while shifting
+                    XRes, YRes = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area]
+                    XReal, YReal = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.scan_area]
+                    XRes_new = XRes + abs(index)# absolute value? index can be negative, but resolution can only increase, same for real dimensions
+                    XReal_new = XReal + XReal/XRes*abs(index)
+                    
+                    # create channel_dict for new mean data 
+                    self.channel_tag_dict.append(self.channel_tag_dict[self.channels.index(channel)])
+                    self.channel_tag_dict[-1][Tag_Type.pixel_area] = [XRes_new, YRes]
+                    self.channel_tag_dict[-1][Tag_Type.scan_area] = [XReal_new, YReal]
+
+                    # also create data dict entry
+                    self.all_data_dict.append(self.all_data_dict[self.channels.index(channel)] + '_overlaid')
+
+                    # add new channel to channels
+                    self.channels.append(channel + '_overlaid')
+
+                    #test realign (per scan) based on minimization of differences 
+                    #not usable right now, drift compensation might lead to differently sized data
+                    # self.all_data[self.channels.index(height_channel_forward)] = Realign.Minimize_Drift(self.all_data[self.channels.index(height_channel_forward)], display=False)
+                    # self.all_data[self.channels.index(height_channel_backward)] = Realign.Minimize_Drift(self.all_data[self.channels.index(height_channel_backward)])
+
+                    # shift the data of the forward and backwards channel to match
+                    self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)] = realign.Shift_Array_2D_by_Index(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)], index)
+        
+
+                    # create mean data and append to all_data
+                    self.all_data.append(realign.Create_Mean_Array(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)]))
+                else:
+                    # get current res and size and add the additional res and size due to addition of zeros while shifting
+                    XRes, YRes = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area]
+                    XReal, YReal = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.scan_area]
+                    XRes_new = XRes + abs(index)# absolute value? index can be negative, but resolution can only increase, same for real dimensions
+                    XReal_new = XReal + XReal/XRes*abs(index)
+                    
+                    # create channel_dict for new mean data 
+                    # print(self.channels)
+                    # print(self.channel_tag_dict)
+                    # print(self.channel_tag_dict[self.channels.index(channel)])
+                    self.channel_tag_dict.append(self.channel_tag_dict[self.channels.index(channel)])
+                    # print('old data dict: ', self.channel_tag_dict[-2])
+                    # print('n#ew data dict: ', self.channel_tag_dict[-1])
+                    # print('new data dict pixel area: ', self.channel_tag_dict[-1][Tag_Type.pixel_area])
+                    self.channel_tag_dict[-1][Tag_Type.pixel_area] = [XRes_new, YRes]
+                    self.channel_tag_dict[-1][Tag_Type.scan_area] = [XReal_new, YReal]
+
+                    # also create data dict entry
+                    self.all_data_dict.append(self.all_data_dict[self.channels.index(channel)] + '_overlaid')
+
+                    # add new channel to channels
+                    self.channels.append(channel + '_overlaid')
+                    
+                    #test realign (per scan) based on minimization of differences 
+                    # self.all_data[self.channels.index(channel)] = Realign.Minimize_Drift(self.all_data[self.channels.index(channel)], display=False)
+                    # self.all_data[self.channels.index('R-'+ channel)] = Realign.Minimize_Drift(self.all_data[self.channels.index('R-'+ channel)])
+
+                    # shift the data of the forward and backwards channel to match
+                    self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)] = realign.Shift_Array_2D_by_Index(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)], index)
+
+                    # create mean data and append to all_data
+                    self.all_data.append(realign.Create_Mean_Array(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)]))
+
+                    # XRes, YRes = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area]
+                    # XReal, YReal = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.scan_area]
+            
+    
+
+# could be exported to external file
+
+def Set_nan_to_zero(data) -> np.array:
+    xres = len(data[0])
+    yres = len(data)
+    for y in range(yres):
+        for x in range(xres):
+            if str(data[y][x]) == 'nan':
+                data[y][x] = 0
+    return data       
 
 # needed for the Realign function
 def Gauss_Function(x, A, mu, sigma, offset):
     return A*np.exp(-(x-mu)**2/(2.*sigma**2)) + offset
-
-
 

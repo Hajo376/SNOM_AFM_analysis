@@ -2,6 +2,7 @@ setup.py
 SNOM_AFM_analysis/__init__.py
 SNOM_AFM_analysis/chiralcouplers.py
 SNOM_AFM_analysis/python_classes_afm.py
+SNOM_AFM_analysis/python_classes_afm_old.py
 SNOM_AFM_analysis/python_classes_snom.py
 SNOM_AFM_analysis.egg-info/PKG-INFO
 SNOM_AFM_analysis.egg-info/SOURCES.txt
