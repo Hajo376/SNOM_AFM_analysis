@@ -218,8 +218,11 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self.height_channel = "Z C"
             self.all_channels = ["O1A","O1P","O2A","O2P","O3A","O3P","O4A","O4P","O5A","O5P","R-O1A","R-O1P","R-O2A","R-O2P","R-O3A","R-O3P","R-O4A","R-O4P","R-O5A","R-O5P"]
             self.phase_channels = ['O1P','O2P','O3P','O4P','O5P', 'R-O1P','R-O2P','R-O3P','R-O4P','R-O5P']
+            self.overlayed_phase_channels = [channel+'_overlaid_manipulated' for channel in self.phase_channels]
             self.corrected_phase_channels = ['O1P_corrected','O2P_corrected','O3P_corrected','O4P_corrected','O5P_corrected', 'R-O1P_corrected','R-O2P_corrected','R-O3P_corrected','R-O4P_corrected','R-O5P_corrected']
+            self.corrected_overlayed_phase_channels = [channel+'_overlaid_manipulated' for channel in self.corrected_phase_channels]
             self.amp_channels = ['O1A','O2A','O3A','O4A','O5A', 'R-O1A','R-O2A','R-O3A','R-O4A','R-O5A']
+            self.overlayed_amp_channels = [channel+'_overlaid_manipulated' for channel in self.amp_channels]
             self.real_channels = ['O1R', 'O2R', 'O3R', 'O4R', 'R-O5R', 'R-O1R', 'R-O2R', 'R-O3R', 'R-O4R', 'R-O5R']
             self.preview_ampchannel = 'O2A'
             self.preview_phasechannel = 'O2P'
@@ -1130,6 +1133,10 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         channels_to_filter = []
         # if optical channels should be blurred, the according amp and phase data are used to get the complex values and blurr those
         # before backconversion to amp and phase, the realpart could also be returned in future... ToDo
+        print(f'self.channels: {self.channels}')
+        print(f'self.overlayed_amp_channels: {self.overlayed_amp_channels}')
+        print(f'self.overlayed_phase_channels: {self.overlayed_phase_channels}')
+        print(f'self.corrected_overlayed_phase_channels: {self.corrected_overlayed_phase_channels}')
         for i in range(len(self.phase_channels)):
             if (self.amp_channels[i] in self.channels):
                 if (self.phase_channels[i] in self.channels):
@@ -1138,7 +1145,15 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 elif (self.corrected_phase_channels[i] in self.channels):
                     channels_to_filter.append(self.channels.index(self.amp_channels[i]))
                     channels_to_filter.append(self.channels.index(self.corrected_phase_channels[i]))
+            elif self.overlayed_amp_channels[i] in self.channels:
+                if self.overlayed_phase_channels[i] in self.channels:
+                    channels_to_filter.append(self.channels.index(self.overlayed_amp_channels[i]))
+                    channels_to_filter.append(self.channels.index(self.overlayed_phase_channels[i]))
+                elif self.corrected_overlayed_phase_channels[i] in self.channels:
+                    channels_to_filter.append(self.channels.index(self.overlayed_amp_channels[i]))
+                    channels_to_filter.append(self.channels.index(self.corrected_overlayed_phase_channels[i]))
         
+        # should not be necessary anymore since backwards channesl are now included in standart channle lists
         # also for backwards direction:
         for i in range(len(self.phase_channels)):
             if ('R-' + self.amp_channels[i] in self.channels):
@@ -1148,6 +1163,9 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 elif ('R-' + self.corrected_phase_channels[i] in self.channels):
                     channels_to_filter.append(self.channels.index('R-' + self.amp_channels[i]))
                     channels_to_filter.append(self.channels.index('R-' + self.corrected_phase_channels[i]))
+        print(f'channels to filter: {channels_to_filter}')
+        for i in range(len(channels_to_filter)):
+            print(self.channels[channels_to_filter[i]])
         # if not at least one pair is found:
         if len(channels_to_filter) == 0:
             print('In order to apply the gaussian_filter amplitude and phase of the same channel number must be in the channels list!')
@@ -1165,7 +1183,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         
         for i in range(int(len(channels_to_filter)/2)):
             # print(f'channel {self.channels[channels_to_filter[2*i]]} is blurred!')
-            if self.channels[channels_to_filter[2*i]] in self.amp_channels or (self.channels[channels_to_filter[2*i]] in ['R-' + element for element in self.amp_channels]):
+            if (self.channels[channels_to_filter[2*i]] in self.amp_channels) or (self.channels[channels_to_filter[2*i]] in ['R-' + element for element in self.amp_channels]) or (self.channels[channels_to_filter[2*i]] in self.overlayed_amp_channels):
                 amp = self.all_data[channels_to_filter[2*i]]
                 phase = self.all_data[channels_to_filter[2*i+1]]
                 # compl = np.add(amp*np.cos(phase), 1J*amp*np.sin(phase))
@@ -2331,24 +2349,32 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         print('The final profiles are shown in this plot.')
         self._Plot_Data_and_Profile_pos(profile_channel_phase, profiledata_phase, coordinates, orientation)
         self._Plot_Data_and_Profile_pos(profile_channel_amp, profiledata_amp, coordinates, orientation)
+        self.profile_channel = profile_channel_phase
+        self.profile_orientation = orientation
+
         # get the profile data for amp and phase
         phase_profiles = self._Get_Profile(profiledata_phase, coordinates, orientation, width_phase)
+        # test:
+        self._Display_Profile([phase_profiles[6], phase_profiles[16]])
+
         amp_profiles = self._Get_Profile(profiledata_amp, coordinates, orientation, width_amp)
         mean_amp = [np.mean(amp) for amp in amp_profiles]
         reference_index = int((len(phase_profiles)-1)/2)
         # phase_difference_profiles = [Phase_Analysis.Get_Profile_Difference(phase_profiles[reference_index], phase_profiles[i]) for i in range(len(phase_profiles))]
         flattened_profiles = [phase_analysis.Flatten_Phase_Profile(profile, +1) for profile in phase_profiles]
-        self.profile_channel = profile_channel_phase
-        self.profile_orientation = orientation
-        self._Display_Profile(flattened_profiles)
+        self._Display_Profile(flattened_profiles, linestyle='-', title='Flattened phase profiles') # display the flattened profiles
         # phase_difference_profiles = [Phase_Analysis.Get_Profile_Difference_2(phase_profiles[reference_index], phase_profiles[i]) for i in range(len(phase_profiles))]
         phase_difference_profiles = [phase_analysis.Get_Profile_Difference_2(flattened_profiles[reference_index], flattened_profiles[i]) for i in range(len(flattened_profiles))]
+        self._Display_Profile(phase_difference_profiles, linestyle='-', title='Phase difference to center wg') # display the phase difference profiles, no jumps close to 2 pi should occure or the average will lead to false values!
         # mean_phase_differences = [np.mean(diff) for diff in phase_difference_profiles]# todo this does not work!
         mean_phase_differences = [np.mean(diff) if np.mean(diff)>0 else np.mean(diff) + np.pi*2 for diff in phase_difference_profiles]# todo this does not work!
         real_per_wg_index = [mean_amp[i]*np.cos(mean_phase_differences[i]) for i in range(len(phase_profiles))]
+        intensity_per_wg_index = [val**2 for val in real_per_wg_index]
         wg_indices = np.arange(-reference_index, reference_index+1)
         # print(wg_indices)
-        plt.plot(wg_indices, real_per_wg_index, label='Real per wg index')
+        fig = plt.figure(figsize=[4,2])
+        plt.plot(wg_indices, real_per_wg_index, '-o', label='Real per wg index')
+        plt.hlines(0, xmin=-10, xmax=10, linestyles='--')
         plt.ylabel(r'E$_z$ [arb.u]')
         plt.xlabel('Waveguide index')
         # plt.ylim([-0.04,0.04])
@@ -2357,23 +2383,37 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         plt.legend()
         plt.tight_layout()
         plt.show()
+
+        #same for intensity: hm not thought throu...
+        # plt.plot(wg_indices, real_per_wg_index, '-o', label='Intensity per wg index')
+        # plt.hlines(0, xmin=-10, xmax=10, linestyles='--')
+        # plt.ylabel(r'I$_z$ [arb.u]')
+        # plt.xlabel('Waveguide index')
+        # # plt.ylim([-0.04,0.04])
+        
+        # plt.xticks(range(-reference_index, reference_index, 2))
+        # plt.legend()
+        # plt.tight_layout()
+        # plt.show()
         
 
-    def _Display_Profile(self, profiles, ylabel=None, labels=None):
+    def _Display_Profile(self, profiles, ylabel=None, labels=None, linestyle='x', title=None):
         if self.profile_orientation == Definitions.horizontal:
             xrange = self.channel_tag_dict[self.channels.index(self.profile_channel)][Tag_Type.scan_area][0]
             x_center_pos = self.channel_tag_dict[self.channels.index(self.profile_channel)][Tag_Type.center_pos][0]
             xres = self.channel_tag_dict[self.channels.index(self.profile_channel)][Tag_Type.pixel_area][0]# for now only profiles with lenght equal to scan dimensions are allowed
             xvalues = [x_center_pos - xrange/2 + x*(xrange/xres) for x in range(xres)]
             xlabel = 'X [µm]'
-            title = 'Horizontal profiles of channel ' + self.profile_channel
+            if title == None:
+                title = 'Horizontal profiles of channel ' + self.profile_channel
         elif self.profile_orientation == Definitions.vertical:
             yrange = self.channel_tag_dict[self.channels.index(self.profile_channel)][Tag_Type.scan_area][1]
             y_center_pos = self.channel_tag_dict[self.channels.index(self.profile_channel)][Tag_Type.center_pos][1]
             yres = self.channel_tag_dict[self.channels.index(self.profile_channel)][Tag_Type.pixel_area][1]# for now only profiles with lenght equal to scan dimensions are allowed
             xvalues = [y_center_pos - yrange/2 + y*(yrange/yres) for y in range(yres)]
             xlabel = 'Y [µm]'
-            title = 'Vertical profiles of channel ' + self.profile_channel
+            if title == None:
+                title = 'Vertical profiles of channel ' + self.profile_channel
         # find out y label:
         if ylabel == None:
             if self.phase_indicator in self.profile_channel:
@@ -2383,15 +2423,16 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             elif self.height_indicator in self.profile_channel:
                 ylabel = 'Height [nm]'
         for profile in profiles:
+            index = profiles.index(profile)
             if labels == None:
-                plt.plot(xvalues, profile, 'x')
+                plt.plot(xvalues, profile, linestyle, label=f'Profile index: {index}')
             else:
-                plt.plot(xvalues, profile, 'x', label=labels[profiles.index(profile)])
+                plt.plot(xvalues, profile, linestyle, label=labels[profiles.index(profile)])
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
         plt.title(title)
-        if labels != None:
-            plt.legend()
+        # if labels != None:
+        plt.legend()
         plt.tight_layout()
         plt.show()
 
@@ -2498,7 +2539,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         #scale and blurr channels for better overlap
         self.Scale_Channels()
         # self.Gauss_Filter_Channels()
-        # self.Gauss_Filter_Channels_complex()
+        self.Gauss_Filter_Channels_complex()
 
         height_data_forward = self.all_data[self.channels.index(height_channel_forward)]
         height_data_backward = self.all_data[self.channels.index(height_channel_backward)]
