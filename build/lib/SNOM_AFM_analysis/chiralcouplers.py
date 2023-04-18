@@ -467,6 +467,28 @@ class ChiralCouplers(Open_Measurement):
                     datafile.write(f'{i}\t{round(data_pairs[j][1][0][i], 5)}\t{round(data_pairs[j][1][1][i], 5)}\t{round(self.left_center_phase[i],3)}\t{round(self.right_center_phase[i],3)}\t{round(data_pairs[j][1][2][i], 5)}\n')
         print(f'Exported all data to {complete_filename}!')
 
+    def Export_Amplitude_with_Errors(self, filepath:str=None):
+        """This method first extracts the waveguide data by selecting an area in the scan and then fitting the waveguide positions.
+        Subsequently the extracted amplitude data is averaged.
+        The averaged profiles are stored in data_pairs for each demodulation order. This is based on the channels specified earlier and requires that
+        Find_Waveguides was executed prior to this method.
+
+        Args:
+            filepath (str, optional): where to save the extracted data? The filename is created automatically. Defaults to None.
+        """
+        self._Data_Mean_with_Errors() # create mean data
+        data_pairs = self._Get_Data_Pairs() # get data pairs from the mean data list 
+        for j in range(len(data_pairs)):
+            if filepath == None:
+                filepath = os.path.normpath(os.path.join(this_files_path, '../chiralcouplers_analysis/extracted_data'))
+            filename = f'{self.filename}_all_data_O{data_pairs[j][0]}_center_phase_with_errors.txt'
+            complete_filename = filepath + '/' + filename
+            with open(complete_filename, 'w') as datafile:
+                datafile.write('#pixel\tamp leftwg\tamp rightwg\tamp background\n')
+                for i in range(len(data_pairs[j][1][0])):
+                    datafile.write(f'{i}\t{round(data_pairs[j][1][0][i], 5)}\t{round(data_pairs[j][1][1][i], 5)}\t{round(data_pairs[j][1][2][i], 5)}\n')
+        print(f'Exported amp data to {complete_filename}!')
+
 
 class LoadData():
     """This class is ment to load the profiles created with the ChiralCouplers class and comsol profiles.

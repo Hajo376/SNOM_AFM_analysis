@@ -52,6 +52,7 @@ class Tag_Type(Enum):
     tip_frequency = auto()
     tip_amplitude = auto()
     tapping_amplitude = auto()
+    pixel_scaling = auto()
 
 class File_Definitions:
     #standard file definitions
@@ -134,7 +135,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
     lower_y_bound = None
     align_points = None
     y_shifts = None
-    scaling_factor = 1
+    # scaling_factor = 1 # change such that each channel has his own scaling factor
 
     def __init__(self, directory_name:str, channels:list=None, title:str=None, autoscale:bool=True) -> None:
         """Create a measurement object.
@@ -382,7 +383,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     Tag_Type.center_pos: [float(XOffset), float(YOffset)],
                     Tag_Type.rotation: float(Rotation),
                     Tag_Type.pixel_area: [int(XRes), int(YRes)],
-                    Tag_Type.scan_area: [float(XReal), float(YReal)] 
+                    Tag_Type.scan_area: [float(XReal), float(YReal)],
+                    Tag_Type.pixel_scaling: 1
                 }
                 self.channel_tag_dict.append(channel_dict)
             pass
@@ -462,7 +464,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             xres = len(self.all_data[0][0])
             yres = len(self.all_data[0])
             # reset all the instance variables dependent on the data, but nor the ones responsible for plotting
-            self.scaling_factor = 1
+            # self.scaling_factor = 1
             if self.autoscale == True:
                 self.Quadratic_Pixels()
             self.mask_array = [] # not shure if it's best to reset the mask...
@@ -498,8 +500,6 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         # print('test:')
         # print('self.directory_name: ', self.directory_name)
         # print('self.filename: ', self.filename)
-        # print('self.scaling_factor_y: ', self.scaling_factor_y)
-        # print('self.scaling_factor_x: ', self.scaling_factor_x)
         # print('self.XRes: ', self.XRes)
         # print('self.YRes: ', self.YRes)
         # print('self.channels: ', self.channels)
@@ -528,24 +528,27 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             scaling [int]: defines scaling factor per axis. Each pixel will be scaled to scaling**2 pixels.
         '''
         # ToDo: reimplement scaling dependent on axis, x and y independently
-        self._Initialize_Data(channels)
+        # self._Initialize_Data(channels)
+        if channels is None:
+            channels = self.channels
         self._Write_to_Logfile('scaling', scaling)
-        self.scaling_factor = scaling
-        dataset = self.all_data
-        channel_tag_dict = self.channel_tag_dict
-        yres = len(dataset[0])
-        xres = len(dataset[0][0])
+        # self.scaling_factor = scaling
+        # dataset = self.all_data
+        # channel_tag_dict = self.channel_tag_dict
+        # yres = len(dataset[0])
+        # xres = len(dataset[0][0])
         # self.all_data = np.zeros((len(dataset), yres*scaling, xres*scaling))
         # re initialize data storage and channel_tag_dict, since resolution is changed
-        self.all_data = []
-        self.channel_tag_dict = []
-        for channel in self.channels:
-            array = dataset[self.channels.index(channel)]
-            scaled_array = self._Scale_Array(array, scaling)
-            self.all_data.append(scaled_array)
-            XReal, YReal = channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area]
-            channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area] = [XReal*scaling, YReal*scaling]
-            self.channel_tag_dict.append(channel_tag_dict[self.channels.index(channel)])
+        # self.all_data = []
+        # self.channel_tag_dict = []
+        for channel in channels:
+            if channel in self.channels:
+                self.all_data[self.channels.index(channel)] = self._Scale_Array(self.all_data[self.channels.index(channel)], scaling)
+                XReal, YReal = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area]
+                self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area] = [XReal*scaling, YReal*scaling]
+                self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_scaling] = scaling
+            else:
+                print(f'Channel {channel} is not in memory! Please initiate the channels you want to use first!')
 
     def _Gauss_Blurr_Data(self, array, sigma) -> np.array:
         '''Applies a gaussian blurr to the specified array, with a specified sigma. The blurred data is returned as a list.'''
@@ -1078,89 +1081,116 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         This function displays all the subplots which have been created until this point.
         '''
         self._Plot_Subplots(self.all_subplots)
-        
+
     def Display_Channels(self, channels:list=None) -> None:
-        '''This function displays the channels in memory or the specified ones without any modifications
+        '''This function displays the channels in memory or the specified ones.
                 
         Args:
-            channels [list]: list of channels, will override the already existing channels
+            channels [list]: List of channels to display. If not specified all channels from memory will be plotted. Defaults to None.
 
         '''
         if channels == None:
             dataset = self.all_data
-            channels = self.all_data_dict
+            plot_channels_dict = self.all_data_dict
+            # plot_channels = self.channels
         else:
-            dataset, dict = self._Load_Data(channels)
-        self._Display_Dataset(dataset, channels)
+            dataset = []
+            plot_channels_dict = []
+            # plot_channels = []
+            for channel in channels:
+                if channel in self.channels:
+                    dataset.append(self.all_data[self.channels.index(channel)])
+                    plot_channels_dict.append(self.all_data_dict[self.channels.index(channel)])
+                    # plot_channels.append(channel)
+                else: 
+                    print(f'Channel {channel} is not in memory! Please initiate the channels you want to display first!')
+                    print(self.channels)
+
+            # dataset, dict = self._Load_Data(channels)
+        self._Display_Dataset(dataset, plot_channels_dict)
+        # self._Display_Dataset(dataset, plot_channels)
 
     def Gauss_Filter_Channels(self, channels:list=None, sigma=2):
         """This function will gauss filter the specified channels. If no channels are specified, the ones in memory will be used.
+        Filtered channels will get the appendix '_gauss'.
 
         Args:
-            channels (list, optional): This will overwrite the channels in memory. Defaults to None.
+            channels (list, optional): List of channels to blurr, if not specified all channels will be blurred. Should not be used for phase. Defaults to None.
             sigma (int, optional): The 'width' of the gauss blurr in pixels, you should scale the data before blurring. Defaults to 2.
         """
-        self._Initialize_Data(channels)
+        # self._Initialize_Data(channels) # remove initialization and only filter specified channels
+        if channels is None:
+            channels = self.channels
         self._Write_to_Logfile('gaussian_filter_sigma', sigma)
-        if self.scaling_factor == 1:
-            print('The data is not yet scaled! Do you want to scale the data?')
-            user_input = self._User_Input_Bool()
-            if user_input == True:
-                self.Scale_Channels()
+        
         # start the blurring:
-        for i in range(len(self.channels)):
-            self.all_data[i] = self._Gauss_Blurr_Data(self.all_data[i], sigma)
-            self.all_data_dict[i] += '_gauss'
+        for channel in channels:
+            if channel in self.channels:
+                channel_index = self.channels.index(channel)
+                # check pixel scaling from channel tag dict for each channel
+                pixel_scaling = self.channel_tag_dict[channel_index][Tag_Type.pixel_scaling]
+                if pixel_scaling == 1:
+                    print(f'The data in channel {channel} is not yet scaled! Do you want to scale the data?')
+                    user_input = self._User_Input_Bool()
+                    if user_input == True:
+                        self.Scale_Channels([channel])
+                self.all_data[channel_index] = self._Gauss_Blurr_Data(self.all_data[channel_index], sigma)
+                self.all_data_dict[channel_index] += '_gauss'
+                self.channels[channel_index] = channel + '_gauss'
+            else: 
+                print(f'Channel {channel} is not in memory! Please initiate the channels you want to use first!')
 
     def Gauss_Filter_Channels_complex(self, channels:list=None, sigma=2) -> None:
         '''This function gauss filters the instance channels. For optical channels, amplitude and phase have to be specified!
         Please make shure you scale your data prior to calling this function rather improve the visibility than loosing to much information
+        Filtered channels will get the appendix '_gauss'.
                 
         Args:
-            channels [list]: list of channels, will override the already existing channels
+            channels [list]: list of channels to blurr, must contain amplitude and phase of same channels.
             sigma [int]: the sigma used for blurring the data, bigger sigma means bigger blurr radius
 
         '''
-        self._Initialize_Data(channels)
+        # self._Initialize_Data(channels) # remove initialization and only filter specified channels
         self._Write_to_Logfile('gaussian_filter_complex_sigma', sigma)
         #check if data is scaled, this should be done prior to blurring
-        if self.scaling_factor == 1:
-            print('The data is not yet scaled! Do you want to scale the data?')
-            user_input = self._User_Input_Bool()
-            if user_input == True:
-                self.Scale_Channels()
-        
+        # check pixel scaling from channel tag dict for each channel
+            
+        if channels is None:
+            channels = self.channels
+        for channel in channels:
+            if channel not in self.channels:
+                print(f'Channel {channel} is not in memory! Please initiate the channels you want to use first!')
         channels_to_filter = []
         # if optical channels should be blurred, the according amp and phase data are used to get the complex values and blurr those
         # before backconversion to amp and phase, the realpart could also be returned in future... ToDo
-        print(f'self.channels: {self.channels}')
-        print(f'self.overlayed_amp_channels: {self.overlayed_amp_channels}')
-        print(f'self.overlayed_phase_channels: {self.overlayed_phase_channels}')
-        print(f'self.corrected_overlayed_phase_channels: {self.corrected_overlayed_phase_channels}')
+        # print(f'self.channels: {self.channels}')
+        # print(f'self.overlayed_amp_channels: {self.overlayed_amp_channels}')
+        # print(f'self.overlayed_phase_channels: {self.overlayed_phase_channels}')
+        # print(f'self.corrected_overlayed_phase_channels: {self.corrected_overlayed_phase_channels}')
         for i in range(len(self.phase_channels)):
-            if (self.amp_channels[i] in self.channels):
-                if (self.phase_channels[i] in self.channels):
+            if (self.amp_channels[i] in channels):
+                if (self.phase_channels[i] in channels):
                     channels_to_filter.append(self.channels.index(self.amp_channels[i]))
                     channels_to_filter.append(self.channels.index(self.phase_channels[i]))
-                elif (self.corrected_phase_channels[i] in self.channels):
+                elif (self.corrected_phase_channels[i] in channels):
                     channels_to_filter.append(self.channels.index(self.amp_channels[i]))
                     channels_to_filter.append(self.channels.index(self.corrected_phase_channels[i]))
-            elif self.overlayed_amp_channels[i] in self.channels:
-                if self.overlayed_phase_channels[i] in self.channels:
+            elif self.overlayed_amp_channels[i] in channels:
+                if self.overlayed_phase_channels[i] in channels:
                     channels_to_filter.append(self.channels.index(self.overlayed_amp_channels[i]))
                     channels_to_filter.append(self.channels.index(self.overlayed_phase_channels[i]))
-                elif self.corrected_overlayed_phase_channels[i] in self.channels:
+                elif self.corrected_overlayed_phase_channels[i] in channels:
                     channels_to_filter.append(self.channels.index(self.overlayed_amp_channels[i]))
                     channels_to_filter.append(self.channels.index(self.corrected_overlayed_phase_channels[i]))
         
         # should not be necessary anymore since backwards channesl are now included in standart channle lists
         # also for backwards direction:
         for i in range(len(self.phase_channels)):
-            if ('R-' + self.amp_channels[i] in self.channels):
-                if ('R-' + self.phase_channels[i] in self.channels):
+            if ('R-' + self.amp_channels[i] in channels):
+                if ('R-' + self.phase_channels[i] in channels):
                     channels_to_filter.append(self.channels.index('R-' + self.amp_channels[i]))
                     channels_to_filter.append(self.channels.index('R-' + self.phase_channels[i]))
-                elif ('R-' + self.corrected_phase_channels[i] in self.channels):
+                elif ('R-' + self.corrected_phase_channels[i] in channels):
                     channels_to_filter.append(self.channels.index('R-' + self.amp_channels[i]))
                     channels_to_filter.append(self.channels.index('R-' + self.corrected_phase_channels[i]))
         print(f'channels to filter: {channels_to_filter}')
@@ -1172,18 +1202,25 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             print('Otherwise only height cannels will be filtered!')
         # add all channels which are not optical to the 'to filter' list
         # print('channels_to_filter:', channels_to_filter)
-        for channel in self.channels:
+        for channel in channels:
             # if (channel not in self.amp_channels) and ((self.phase_channels[i] not in self.channels) or (self.corrected_phase_channels[i] not in self.channels)):
             if self.height_indicator in channel:
                 channels_to_filter.append(self.channels.index(channel))
                 channels_to_filter.append(self.channels.index(channel))# just add twice for now, change later! ToDo
             elif self.channels.index(channel) not in channels_to_filter:
-                print(f'You wanted to blurr {self.channels.index(channel)}, but that is not implemented!')
+                print(f'You wanted to blurr {channel}, but that is not implemented! 1')
         # print('channels_to_filter:', channels_to_filter)
         
         for i in range(int(len(channels_to_filter)/2)):
             # print(f'channel {self.channels[channels_to_filter[2*i]]} is blurred!')
             if (self.channels[channels_to_filter[2*i]] in self.amp_channels) or (self.channels[channels_to_filter[2*i]] in ['R-' + element for element in self.amp_channels]) or (self.channels[channels_to_filter[2*i]] in self.overlayed_amp_channels):
+                pixel_scaling_amp = self.channel_tag_dict[channels_to_filter[2*i]][Tag_Type.pixel_scaling]
+                pixel_scaling_phase = self.channel_tag_dict[channels_to_filter[2*i+1]][Tag_Type.pixel_scaling]
+                if pixel_scaling_amp == 1 and pixel_scaling_phase == 1:
+                    print('The data is not yet scaled! Do you want to scale the data?')
+                    user_input = self._User_Input_Bool()
+                    if user_input == True:
+                        self.Scale_Channels([self.channels[channels_to_filter[2*i]], self.channels[channels_to_filter[2*i+1]]])
                 amp = self.all_data[channels_to_filter[2*i]]
                 phase = self.all_data[channels_to_filter[2*i+1]]
                 # compl = np.add(amp*np.cos(phase), 1J*amp*np.sin(phase))
@@ -1199,17 +1236,26 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
 
                 self.all_data[channels_to_filter[2*i]] = amp_blurred
                 self.all_data_dict[channels_to_filter[2*i]] = self.all_data_dict[channels_to_filter[2*i]] + '_gauss'
+                self.channels[channels_to_filter[2*i]] += '_gauss'
                 self.all_data[channels_to_filter[2*i+1]] = phase_blurred
                 self.all_data_dict[channels_to_filter[2*i+1]] = self.all_data_dict[channels_to_filter[2*i+1]] + '_gauss'
+                self.channels[channels_to_filter[2*i+1]] += '_gauss'
 
             elif self.height_indicator in self.channels[channels_to_filter[2*i]]:
+                pixel_scaling = self.channel_tag_dict[channels_to_filter[2*i]][Tag_Type.pixel_scaling]
+                if pixel_scaling == 1:
+                    print('The data is not yet scaled! Do you want to scale the data?')
+                    user_input = self._User_Input_Bool()
+                    if user_input == True:
+                        self.Scale_Channels([self.channels[channels_to_filter[2*i]]])
                 height = self.all_data[channels_to_filter[2*i]]
                 height_blurred = self._Gauss_Blurr_Data(height, sigma)
                 self.all_data[channels_to_filter[2*i]] = height_blurred
                 self.all_data_dict[channels_to_filter[2*i]] = self.all_data_dict[channels_to_filter[2*i]] + '_gauss'
+                self.channels[channels_to_filter[2*i]] += '_gauss'
             
             else:
-                print(f'You wanted to blurr {self.channels[channels_to_filter[2*i]]}, but that is not implemented!')
+                print(f'You wanted to blurr {self.channels[channels_to_filter[2*i]]}, but that is not implemented! 2')
                 
     def _Get_Compl_Angle(self, compl_number_array) -> np.array:
         '''This function returns the angles of a clomplex number array.'''
@@ -1696,7 +1742,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             zone [int]: defines the area which is used to calculate the mean around the click position in the preview,
                         0 means only the click position, 1 means the nearest 9 ...
         '''
-        zone = int(zone*self.scaling_factor/4) #automatically enlargen the zone if the data has been scaled by more than a factor of 4
+        # zone = int(zone*self.scaling_factor/4) #automatically enlargen the zone if the data has been scaled by more than a factor of 4
         self._Initialize_Data(channels)
         phase_data = None
         if self.preview_phasechannel in self.channels:
@@ -2069,7 +2115,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         for channel in self.channels:
             XRes = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area][0]
             XReal = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.scan_area][0]
-            dx = XReal/(XRes*self.scaling_factor)
+            pixel_scaling = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_scaling]
+            dx = XReal/(XRes*pixel_scaling)
             scalebar_var = [dx, units, dimension, label, length_fraction, height_fraction, width_fraction,
                             location, loc, pad, border_pad, sep, frameon, color, box_color, box_alpha, scale_loc,
                             label_loc, font_properties, label_formatter, scale_formatter, fixed_value, fixed_units, animated, rotation]
@@ -2225,7 +2272,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         # difference_profile = Get_Profile_Difference(flattened_profiles[0], flattened_profiles[1])
         xres, yres = self.channel_tag_dict[self.channels.index(profile_channel)][Tag_Type.pixel_area]
         xreal, yreal = self.channel_tag_dict[self.channels.index(profile_channel)][Tag_Type.scan_area]
-        xvalues = [i*yreal/yres/self.scaling_factor for i in range(yres*self.scaling_factor)]
+        pixel_scaling = self.channel_tag_dict[self.channels.index(profile_channel)][Tag_Type.pixel_scaling]
+        xvalues = [i*yreal/yres/pixel_scaling for i in range(yres*pixel_scaling)]
         # xvalues = np.linspace(0, 10, len(difference_profile))
         plt.plot(xvalues, difference_profile)
         plt.xlabel('Y [µm]')
@@ -2539,7 +2587,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         #scale and blurr channels for better overlap
         self.Scale_Channels()
         # self.Gauss_Filter_Channels()
-        self.Gauss_Filter_Channels_complex()
+        # self.Gauss_Filter_Channels_complex()
 
         height_data_forward = self.all_data[self.channels.index(height_channel_forward)]
         height_data_backward = self.all_data[self.channels.index(height_channel_backward)]
@@ -2564,7 +2612,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         '''
 
         # try to optimize by shifting second array and minimizing mean deviation
-        N = 5*self.scaling_factor #maximum iterations, scaled if pixelnumber was increased
+        pixel_scaling = self.channel_tag_dict[0][Tag_Type.pixel_scaling] # does not matter which channel to get the scaling from since all have been scaled
+        N = 5*pixel_scaling #maximum iterations, scaled if pixelnumber was increased
 
         # Realign.Minimize_Deviation_1D(array_1, array_2, n_tries=N)
         # Realign.Minimize_Deviation_2D(height_data_forward, height_data_backward, n_tries=N)
@@ -2646,7 +2695,68 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     # XRes, YRes = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area]
                     # XReal, YReal = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.scan_area]
             
-    
+    def Overlay_Forward_and_Backward_Channels_V2(self, height_channel_forward:str, height_channel_backward:str, channels:list=None):
+        """
+        Caution! This variant is ment to keep the scan size identical!
+
+        This function is ment to overlay the backwards and forwards version of the specified channels.
+        You should only specify the forward version of the channels you want to overlay. The function will create a mean version
+        which can then be displayed and saved. Note that the new version will be larger then the previous ones.
+
+        Args:
+            height_channel_forward (str): usual corrected height channel
+            height_channel_backward (str): backwards height channel
+            channels (list, optional): a list of all channels to be overlayed. Defaults to None.
+        """
+        all_channels = []
+        for channel in channels:
+            all_channels.extend([channel, 'R-' + channel])
+        all_channels.extend([height_channel_forward, height_channel_backward])
+        self._Initialize_Data(all_channels)
+        self.Set_Min_to_Zero([height_channel_forward, height_channel_backward])
+        
+        #scale channels for more precise overlap
+        self.Scale_Channels()
+        height_data_forward = self.all_data[self.channels.index(height_channel_forward)]
+        height_data_backward = self.all_data[self.channels.index(height_channel_backward)]
+        
+        #gauss blurr the data used for the alignment, so it might be a litte more precise
+        height_channel_forward_blurr = self._Gauss_Blurr_Data(height_data_forward, 2)
+        height_channel_backward_blurr = self._Gauss_Blurr_Data(height_data_backward, 2)
+
+        # try to optimize by shifting second array and minimizing mean deviation
+        pixel_scaling = self.channel_tag_dict[0][Tag_Type.pixel_scaling] # does not matter which channel to get the scaling from since all have been scaled
+        N = 5*pixel_scaling #maximum iterations, scaled if pixelnumber was increased
+
+        # get the index which minimized the deviation of the height channels
+        index = realign.Minimize_Deviation_2D(height_channel_forward_blurr, height_channel_backward_blurr, N, False)
+
+        for channel in channels:
+            if 'R-' not in channel:
+                if 'Z' in channel:
+                    # create channel_dict for new mean data 
+                    self.channel_tag_dict.append(self.channel_tag_dict[self.channels.index(channel)])
+
+                    # also create data dict entry
+                    self.all_data_dict.append(self.all_data_dict[self.channels.index(channel)] + '_overlaid')
+
+                    # add new channel to channels
+                    self.channels.append(channel + '_overlaid')
+        
+                    # create mean data and append to all_data
+                    self.all_data.append(realign.Create_Mean_Array_V2(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)], index))
+                else:
+                    # create channel_dict for new mean data 
+                    self.channel_tag_dict.append(self.channel_tag_dict[self.channels.index(channel)])
+
+                    # also create data dict entry
+                    self.all_data_dict.append(self.all_data_dict[self.channels.index(channel)] + '_overlaid')
+
+                    # add new channel to channels
+                    self.channels.append(channel + '_overlaid')
+                    
+                    # create mean data and append to all_data
+                    self.all_data.append(realign.Create_Mean_Array_V2(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)], index))
 
 # could be exported to external file
 

@@ -76,7 +76,7 @@ def Shift_Array_2D_by_Index(array_1, array_2, index) -> tuple:
     array_2_new = np.zeros((y_res, x_res_new))
     for y in range(y_res):
         test_1, test_2 = _Shift_Array_1D_by_Index(array_1[y], array_2[y], index)
-        print(f'len test1: {len(test_1)}, len test 2: {len(test_2)}')
+        # print(f'len test1: {len(test_1)}, len test 2: {len(test_2)}')
         array_1_new[y] = test_1
         array_2_new[y] = test_2
         # array_1_new[y], array_2_new[y] = _Shift_Array_1D_by_Index(array_1[y], array_2[y], index)
@@ -96,6 +96,32 @@ def Create_Mean_Array(array_1, array_2):
                 new_array[y][x] = (array_1[y][x] + array_2[y][x])/2
         return new_array
 
+def Create_Mean_Array_V2(array_1, array_2, index):
+    """This variant is meant to keep the size of the original array!
+
+    Args:
+        array_1 (_type_): _description_
+        array_2 (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    #check if dimensions are identical
+    if len(array_1) != len(array_2) and len(array_1[0]) != len(array_2[0]):
+        print('The length of the given arrays is not identical.')
+        exit()
+    else:
+        x_res = len(array_1[0])
+        y_res = len(array_1)
+        new_array = np.zeros((y_res, x_res))
+        for y in range(y_res):
+            if index > 0:
+                for x in range(x_res - index):
+                    new_array[y][x] = (array_1[y][x+index] + array_2[y][x])/2
+            if index < 0:
+                for x in range(x_res - abs(index)):
+                    new_array[y][x] = (array_1[y][x] + array_2[y][x+abs(index)])/2
+        return new_array
 
 def Minimize_Deviation_1D(array_1, array_2, n_tries=5, display=True) -> int:
     """This function tries to find the optimal shift between two arrays to find the lowest deviation. Best to use leveled data.
