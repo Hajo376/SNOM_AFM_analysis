@@ -128,13 +128,13 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
     # reorganize and put the following variables in the init function
     # ToDo
     all_subplots = []
-    mask_array = []
-    scalebar = [] # specifiy the channels to add the scalebar to, should contain the channel plus the scalbar object in a nested list
+    # mask_array = []
+    # scalebar = [] # specifiy the channels to add the scalebar to, should contain the channel plus the scalbar object in a nested list
     # piezo motion distortion correction:
-    upper_y_bound = None
-    lower_y_bound = None
-    align_points = None
-    y_shifts = None
+    # upper_y_bound = None
+    # lower_y_bound = None
+    # align_points = None
+    # y_shifts = None
     # scaling_factor = 1 # change such that each channel has his own scaling factor
 
     def __init__(self, directory_name:str, channels:list=None, title:str=None, autoscale:bool=True) -> None:
@@ -156,18 +156,19 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         if channels == None: # the standard channels which will be used if no channels are specified
             channels = [self.preview_ampchannel, self.preview_phasechannel, self.height_channel]
         self.channels = channels
-        self._Create_Tag_Dict()
-        self._Create_Channels_Tag_Dict()
-        self.XRes, self.YRes = self.measurement_tag_dict[Tag_Type.pixel_area]
-        self.XReal, self.YReal = self.measurement_tag_dict[Tag_Type.scan_area] # in µm
+        self._Create_Measurement_Tag_Dict()
+        # just initialize data here?
+        # self._Create_Channels_Tag_Dict()
+        self._Initialize_Data(self.channels)
+        
         # Create a variable containing the data of the specified channels which can be varied later on with e.g. the gaussian_filter and subsequent methods
         # Aditionally a dictionary is created which contains the channel information
         # The dictionary and self.channels are not identical as self.channels only contains the raw channel information, whereas the dictionary is modified to contain
         # the information of which modifications like scaling, filtering ... have been applied.
-        self.all_data, self.all_data_dict = self._Load_Data(self.channels)
+        # self.all_data, self.all_data_dict = self._Load_Data(self.channels)
         # print(self.all_data)
-        if autoscale == True:
-            self.Quadratic_Pixels()
+        # if autoscale == True:
+        #     self.Quadratic_Pixels()
 
     def _Find_Filetype(self) -> None:
         '''This function aims at finding specific characteristics in the filename to idendify the filetype.
@@ -253,7 +254,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self.amp_indicator = 'abs'
             self.phase_indicator = 'arg'
 
-    def _Create_Tag_Dict(self):
+    def _Create_Measurement_Tag_Dict(self):
         # create tag_dict for each channel individually? if manipulated channels are loaded they might have different diffrent resolution
         # only center_pos, scan_area, pixel_area and rotation must be stored for each channel individually but rotation is not stored in the original .gsf files
         # but rotation could be added in the newly created .gsf files
@@ -351,6 +352,9 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 Tag_Type.tip_amplitude: None,
                 Tag_Type.tapping_amplitude: None
             }
+        # only used by synccorrection, every other function should use the channels tag dict version, as pixel resolution could vary
+        self.XRes, self.YRes = self.measurement_tag_dict[Tag_Type.pixel_area]
+        self.XReal, self.YReal = self.measurement_tag_dict[Tag_Type.scan_area] # in µm
 
     def _Create_Channels_Tag_Dict(self):
         if (self.file_type == File_Type.standard) or (self.file_type == File_Type.standard_new) or (self.file_type == File_Type.aachen_gsf) or (self.file_type == File_Type.comsol_gsf) or (self.file_type == File_Type.neaspec_version_1_6_3359_1):
@@ -467,11 +471,13 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             # self.scaling_factor = 1
             if self.autoscale == True:
                 self.Quadratic_Pixels()
+            # initialize instance variables:
             self.mask_array = [] # not shure if it's best to reset the mask...
             self.upper_y_bound = None
             self.lower_y_bound = None
             self.align_points = None
             self.y_shifts = None
+            self.scalebar = []
     
     def Initialize_Channels(self, channels:list) -> None:
         '''This function will load the data from the specified channels and replace the ones in memory.
@@ -1112,7 +1118,6 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
 
     def Gauss_Filter_Channels(self, channels:list=None, sigma=2):
         """This function will gauss filter the specified channels. If no channels are specified, the ones in memory will be used.
-        Filtered channels will get the appendix '_gauss'.
 
         Args:
             channels (list, optional): List of channels to blurr, if not specified all channels will be blurred. Should not be used for phase. Defaults to None.
@@ -1136,14 +1141,13 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                         self.Scale_Channels([channel])
                 self.all_data[channel_index] = self._Gauss_Blurr_Data(self.all_data[channel_index], sigma)
                 self.all_data_dict[channel_index] += '_gauss'
-                self.channels[channel_index] = channel + '_gauss'
+                # self.channels[channel_index] = channel + '_gauss'
             else: 
                 print(f'Channel {channel} is not in memory! Please initiate the channels you want to use first!')
 
     def Gauss_Filter_Channels_complex(self, channels:list=None, sigma=2) -> None:
         '''This function gauss filters the instance channels. For optical channels, amplitude and phase have to be specified!
         Please make shure you scale your data prior to calling this function rather improve the visibility than loosing to much information
-        Filtered channels will get the appendix '_gauss'.
                 
         Args:
             channels [list]: list of channels to blurr, must contain amplitude and phase of same channels.
@@ -1193,9 +1197,9 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 elif ('R-' + self.corrected_phase_channels[i] in channels):
                     channels_to_filter.append(self.channels.index('R-' + self.amp_channels[i]))
                     channels_to_filter.append(self.channels.index('R-' + self.corrected_phase_channels[i]))
-        print(f'channels to filter: {channels_to_filter}')
-        for i in range(len(channels_to_filter)):
-            print(self.channels[channels_to_filter[i]])
+        # print(f'channels to filter: {channels_to_filter}')
+        # for i in range(len(channels_to_filter)):
+        #     print(self.channels[channels_to_filter[i]])
         # if not at least one pair is found:
         if len(channels_to_filter) == 0:
             print('In order to apply the gaussian_filter amplitude and phase of the same channel number must be in the channels list!')
@@ -1236,10 +1240,10 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
 
                 self.all_data[channels_to_filter[2*i]] = amp_blurred
                 self.all_data_dict[channels_to_filter[2*i]] = self.all_data_dict[channels_to_filter[2*i]] + '_gauss'
-                self.channels[channels_to_filter[2*i]] += '_gauss'
+                # self.channels[channels_to_filter[2*i]] += '_gauss'
                 self.all_data[channels_to_filter[2*i+1]] = phase_blurred
                 self.all_data_dict[channels_to_filter[2*i+1]] = self.all_data_dict[channels_to_filter[2*i+1]] + '_gauss'
-                self.channels[channels_to_filter[2*i+1]] += '_gauss'
+                # self.channels[channels_to_filter[2*i+1]] += '_gauss'
 
             elif self.height_indicator in self.channels[channels_to_filter[2*i]]:
                 pixel_scaling = self.channel_tag_dict[channels_to_filter[2*i]][Tag_Type.pixel_scaling]
@@ -2001,49 +2005,69 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self.all_data.append(shifted_data)
             self.all_data_dict[i] += '_shifted'
 
-    def Cut_Channels(self, channels:list=None, autocut:bool=False) -> None:
+    def Cut_Channels(self, channels:list=None, preview_channel:str=None, autocut:bool=False, coords:list=None) -> None:
         '''This function cuts the specified channels to the specified region.
-
-        Careful! Will not yet affect the scan size, so the pixelsize will be altered... ToDo
 
         Args:
             channels [list]: list of channels, will override the already existing channels 
             autocut [bool]: if set to 'True' the program will automatically try to remove zero lines and columns, which can result from masking
+            coords (list, optional): If you already now the coordinates ([[x1,y1], [x2,y2], [x3,y3], [x4,y4]]) to which you want to cut your data. Defaults to None.
         '''
-        self._Initialize_Data(channels)
+        # self._Initialize_Data(channels)
+        if channels is None:
+            channels = self.channels # if nothing is specified, the cut will be applied to all channels in memory!
         # check if height channel in channels and apply mask to it, until now it has not been masked in order to show the mask in the image
-        if (self.height_channel in self.channels) and (len(self.mask_array) > 0):
-            self.all_data[self.channels.index(self.height_channel)] = np.multiply(self.all_data[self.channels.index(self.height_channel)], self.mask_array)
-        if autocut == True:
-            self._Auto_Cut_Channels()
-            self._Write_to_Logfile('auto_cut', True)
-        else:
-            if self.height_channel in self.channels:
-                data = self.all_data[self.channels.index(self.height_channel)]
-                channel = self.height_channel
+        if preview_channel is None:
+            if (self.height_channel in channels):
+                preview_channel = self.height_channel
             else:
-                data = self.all_data[0]
-                channel = self.channels[0]
-            # get the coordinates of the selection rectangle
-            coords = Select_Rectangle(data, channel)
-            self._Write_to_Logfile('cut_coords', coords)
-            # use the selection to create a mask and multiply to all channels, then apply auto_cut function
-            yres = len(data)
-            xres = len(data[0])
-            mask_array = np.zeros((yres, xres))
-            for y in range(yres):
-                if y in range(coords[0][1], coords[1][1]):
-                    for x in range(xres):
-                        if x in range(coords[0][0], coords[1][0]):
-                            mask_array[y][x] = 1
-            for channel in self.channels:
-                self.all_data[self.channels.index(channel)] = np.multiply(self.all_data[self.channels.index(channel)], mask_array)
-            self._Auto_Cut_Channels()
+                preview_channel = channels[0]
+
+        # apply the already existing mask if possible.    
+        if (len(self.mask_array) > 0):
+            for channel in channels:
+                index = self.channels.index(channel)
+                self.all_data[index] = np.multiply(self.all_data[index], self.mask_array)
+                # self.channels[index] += '_reduced'
+        else:
+            if autocut == True:
+                self._Auto_Cut_Channels(channels)
+                self._Write_to_Logfile('auto_cut', True)
+            else:
+                # if self.height_channel in self.channels:
+                #     data = self.all_data[self.channels.index(self.height_channel)]
+                #     channel = self.height_channel
+                # else:
+                #     data = self.all_data[0]
+                #     channel = self.channels[0]
+                data = self.all_data[self.channels.index(preview_channel)]
+                # get the coordinates of the selection rectangle
+                if coords is None:
+                    coords = Select_Rectangle(data, preview_channel)
+                self._Write_to_Logfile('cut_coords', coords)
+                # use the selection to create a mask and multiply to all channels, then apply auto_cut function
+                yres = len(data)
+                xres = len(data[0])
+                self.mask_array = np.zeros((yres, xres))
+                for y in range(yres):
+                    if y in range(coords[0][1], coords[1][1]):
+                        for x in range(xres):
+                            if x in range(coords[0][0], coords[1][0]):
+                                self.mask_array[y][x] = 1
+                for channel in channels:
+                    index = self.channels.index(channel)
+                    # set all values outside of the mask to zero and then cut all zero away from the outside with _Auto_Cut_Channels(channels)
+                    self.all_data[index] = np.multiply(self.all_data[index], self.mask_array)
+                    # self.channels[index] += '_reduced'
+                self._Auto_Cut_Channels(channels)
         
-    def _Auto_Cut_Channels(self) -> None:
+    def _Auto_Cut_Channels(self, channels:list=None) -> None:
         '''This function automatically cuts away all rows and lines which are only filled with zeros.
         This function applies to all channels in memory.
         '''
+        if channels is None:
+            channels = self.channels
+        
         # get the new size of the reduced channels
         reduced_data = self._Auto_Cut_Data(self.all_data[0])
         yres = len(reduced_data)
@@ -2052,11 +2076,27 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         all_data = self.all_data
         # reinitialize self.all_data, all channels must have the same size
         # self.all_data = np.zeros((len(all_data), yres, xres))
-        self.all_data = []
-        for i in range(len(self.channels)):
-            reduced_data = self._Auto_Cut_Data(all_data[i])
-            self.all_data.append(reduced_data)
-            self.all_data_dict[i] += '_reduced'
+        # self.all_data = []
+        # for i in range(len(self.channels)):
+        #     reduced_data = self._Auto_Cut_Data(all_data[i])
+        #     self.all_data.append(reduced_data)
+        #     self.all_data_dict[i] += '_reduced'
+        for channel in channels:
+            index = self.channels.index(channel)
+            # get the old size of the data
+            xres, yres = self.channel_tag_dict[index][Tag_Type.pixel_area]
+            xreal, yreal = self.channel_tag_dict[index][Tag_Type.scan_area]
+            self.all_data[index] = self._Auto_Cut_Data(self.all_data[index])
+            xres_new = len(self.all_data[index][0])
+            yres_new = len(self.all_data[index])
+            xreal_new = xreal*xres_new/xres
+            yreal_new = yreal*yres_new/yres
+            # save new resolution and scan area in channel tag dict:
+            self.channel_tag_dict[index][Tag_Type.pixel_area] = [xres_new, yres_new]
+            self.channel_tag_dict[index][Tag_Type.scan_area] = [xreal_new, yreal_new]
+            # add new appendix to channel
+            self.all_data_dict[index] += '_reduced'
+
  
     def _Auto_Cut_Data(self, data) -> np.array:
         '''This function cuts the data and removes zero values from the outside.'''
