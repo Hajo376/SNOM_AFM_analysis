@@ -54,16 +54,27 @@ class ChiralCouplers(Open_Measurement):
         self.removed_lines = []
         super().__init__(directory_name, channels, title, autoscale)
     
-    def Find_Waveguides(self, channels:list=None):
+    def Find_Waveguides(self, preview_channel:str=None, channels:list=None, integration_width:int=None):
+        """First lets you select an area of a measurement to reduce to. For chiral couplers to get rid of the bend part.
+        Then it will try to fit the two waveguides. The fit results can then be used to export the data on the waveguides.
+
+        Args:
+            preview_channel (str, optional): Channel to preview the selection area, should have identical geometry and resolution as the other channels. Defaults to None.
+            channels (list, optional): List of channels if you want to initialize the data at this point. If not specified the channels in memory will be used. Defaults to None.
+        """
         self._Initialize_Data(channels)
-        
+        self.integration_width = integration_width
         # first select the area to retieve the data from, should be a bit away from the coupler to ignore direct laser interactions
         # but not too far that the signal vanishes
         # print(self.height_channel)
-        if self.height_channel in self.channels:
-            height_data = self.all_data[self.channels.index(self.height_channel)]
+        if preview_channel is not None:
+            if preview_channel in self.channels:
+                height_data = self.all_data[self.channels.index(preview_channel)]
         else:
-            height_data = self._Load_Data([self.height_channel])[0][0]
+            if self.height_channel in self.channels:
+                height_data = self.all_data[self.channels.index(self.height_channel)]
+            else:
+                height_data = self._Load_Data([self.height_channel])[0][0]
         XRes = len(height_data[0])
         YRes = len(height_data)
         selection = Select_Rectangle(height_data, self.height_channel)
@@ -105,7 +116,8 @@ class ChiralCouplers(Open_Measurement):
         if self.orientation == 'vertical':
             width = len(self.height_data[0])
             max_shift = max_shift*width
-            p0 = [wg_height, (width)/4, (width)/4*3, 5, 0]
+            # p0 = [wg_height, (width)/4, (width)/4*3, 5, 0]
+            p0 = [wg_height, (width)/5, (width)/5*4, 5, 0]
             bounds = ([wg_height-15, 0, width/2, 2, -1000], [wg_height+15, width/2, width, 25, 1000])
             self.list_of_coefficients = []
             print('starting the fitting procedure')
@@ -125,14 +137,20 @@ class ChiralCouplers(Open_Measurement):
                 # interpolate missing lines by linear function between first fit before and afterwards
                 self._Fill_Removed_Lines()
 
+
             mean_sigma = [self.list_of_coefficients[i][3] for i in range(len(self.list_of_coefficients))]
             mean_sigma = np.mean(mean_sigma)
-            self.integ_width = int(mean_sigma*2)
-            self._Get_Fit_Feedback()
-            self._Get_Integration_Width()
+            if self.integration_width is None:
+                self.integ_width = int(mean_sigma*2)
+                self._Get_Fit_Feedback() #asks if the fit went nicely, otherwise the user can repeat the fit
+                self._Get_Integration_Width()
+            else:
+                self.integ_width = self.integration_width
+                self._Get_Fit_Feedback() #asks if the fit went nicely, otherwise the user can repeat the fit
         # save list of coefficients
         # filepath = os.path.normpath(os.path.join(this_files_path, '../chiralcouplers_analysis/extracted_data/fit_coefficients'))# old and too specific
-        filepath = os.path.normpath(os.path.join(self.directory_name, '../extracted_data/fit_coefficients'))
+        # filepath = os.path.normpath(os.path.join(self.directory_name, '../extracted_data/fit_coefficients'))
+        filepath = os.path.normpath(os.path.join(self.directory_name, '../extracted_data_with_overlay/fit_coefficients'))
         file = open(filepath + '/' + self.filename + '.txt', 'w')
         now = datetime.now()
         current_datetime = now.strftime("%d/%m/%Y %H:%M:%S")
@@ -647,7 +665,9 @@ class LoadData():
                 directionality_error = Get_Directionality_Uncertainity(area_right, background, area_left, background)
             elif self.chirality == -1:
                 directionality_error = Get_Directionality_Uncertainity(area_left, background, area_right, background)
-        self.all_directionalitys.append([directionality, directionality_error])
+            self.all_directionalitys.append([directionality, directionality_error])
+        else:
+            self.all_directionalitys.append(directionality)
         self._Get_Measured_Directionality()
         # print(coeff)
         plt.xlabel('$x \ [µm]$')
@@ -669,7 +689,9 @@ class LoadData():
                 directionality_error = Get_Directionality_Uncertainity(right_sum, background, left_sum, background)
             elif self.chirality == -1:
                 directionality_error = Get_Directionality_Uncertainity(left_sum, background, right_sum, background)
-        self.all_measured_directionalities.append([directionality, directionality_error])
+            self.all_measured_directionalities.append([directionality, directionality_error])
+        else:
+            self.all_measured_directionalities.append(directionality)
 
     def Plot_Propagation_Lengths(self, x_values:list, x_label:str) -> None:
         """This function will plot all propagation lengths in memory, only useful if multiple measurement profiles have been loaded and fitted.
@@ -844,8 +866,6 @@ class LoadData():
             new_array[i] = element + phaseshift
         return new_array
 
-    
-
 def Flatten_Profile(data):
     threshold = np.pi*0.8
     flattened_profile = []
@@ -862,8 +882,6 @@ def Damped_Exponenial_Function(x, A, d, B, omega_0, phase, gamma):
 def Exponenial_Function(x, A, d, offset):
     offset = 0#for now
     return A*np.exp(-(x)/(2*d))+offset # this is for the electric field, for intensity the /2 should be removed
-
-
 
 def Damped_Oscillation_Function(t, A, omega_0, phase, gamma):
     '''Damped oscillation function

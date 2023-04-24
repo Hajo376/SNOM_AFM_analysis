@@ -220,11 +220,11 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self.height_channel = "Z C"
             self.all_channels = ["O1A","O1P","O2A","O2P","O3A","O3P","O4A","O4P","O5A","O5P","R-O1A","R-O1P","R-O2A","R-O2P","R-O3A","R-O3P","R-O4A","R-O4P","R-O5A","R-O5P"]
             self.phase_channels = ['O1P','O2P','O3P','O4P','O5P', 'R-O1P','R-O2P','R-O3P','R-O4P','R-O5P']
-            self.overlayed_phase_channels = [channel+'_overlaid_manipulated' for channel in self.phase_channels]
+            self.overlain_phase_channels = [channel+'_overlain_manipulated' for channel in self.phase_channels]
             self.corrected_phase_channels = ['O1P_corrected','O2P_corrected','O3P_corrected','O4P_corrected','O5P_corrected', 'R-O1P_corrected','R-O2P_corrected','R-O3P_corrected','R-O4P_corrected','R-O5P_corrected']
-            self.corrected_overlayed_phase_channels = [channel+'_overlaid_manipulated' for channel in self.corrected_phase_channels]
+            self.corrected_overlain_phase_channels = [channel+'_overlain_manipulated' for channel in self.corrected_phase_channels]
             self.amp_channels = ['O1A','O2A','O3A','O4A','O5A', 'R-O1A','R-O2A','R-O3A','R-O4A','R-O5A']
-            self.overlayed_amp_channels = [channel+'_overlaid_manipulated' for channel in self.amp_channels]
+            self.overlayed_amp_channels = [channel+'_overlain_manipulated' for channel in self.amp_channels]
             self.real_channels = ['O1R', 'O2R', 'O3R', 'O4R', 'R-O5R', 'R-O1R', 'R-O2R', 'R-O3R', 'R-O4R', 'R-O5R']
             self.preview_ampchannel = 'O2A'
             self.preview_phasechannel = 'O2P'
@@ -356,12 +356,15 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         self.XRes, self.YRes = self.measurement_tag_dict[Tag_Type.pixel_area]
         self.XReal, self.YReal = self.measurement_tag_dict[Tag_Type.scan_area] # in µm
 
-    def _Create_Channels_Tag_Dict(self):
+    def _Create_Channels_Tag_Dict(self, channels:list=None):
+        if channels == None:
+            channels = self.channels
         if (self.file_type == File_Type.standard) or (self.file_type == File_Type.standard_new) or (self.file_type == File_Type.aachen_gsf) or (self.file_type == File_Type.comsol_gsf) or (self.file_type == File_Type.neaspec_version_1_6_3359_1):
             cod="latin1"
             # get the tag values from each .gsf file individually
-            self.channel_tag_dict = []
-            for channel in self.channels:
+            if channels == self.channels:
+                self.channel_tag_dict = []
+            for channel in channels:
                 if (self.file_type == File_Type.standard_new or self.file_type==File_Type.neaspec_version_1_6_3359_1) and '_corrected' not in channel:
                     if ' C' in channel or '_manipulated' in channel: #channel == 'Z C' or channel == 'R-Z C':
                         filepath = self.directory_name + '/' + self.filename + ' ' + channel + '.gsf'
@@ -394,7 +397,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             pass
         else:
             if self.parameters_type == File_Type.txt:
-                self.channel_tag_dict = []
+                if channels == self.channels:
+                    self.channel_tag_dict = []
                 parameters = self.directory_name + '/' + self.filename + '.parameters.txt'
                 file = open(parameters, 'r')
                 parameter_list = file.read()
@@ -413,7 +417,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                         Tag_Type.scan_area: scan_area
                     }
                 # for this file type all channels must be of same size
-                for channel in self.channels:
+                for channel in channels:
                     self.channel_tag_dict.append(channel_dict)
             else:
                 print('channel tag dict for this filetype is not yet implemented')
@@ -486,6 +490,24 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             channels [list]: a list containing the channels you want to initialize
         '''
         self._Initialize_Data(channels)
+
+    def Add_Channels(self, channels:list) -> None:
+        """This function will add the specified channels to memory without changing the already existing ones.
+
+        Args:
+            channels (list): Channels to add to memory.
+        """
+        self.channels += channels
+        # update the channel tag dictionary, makes the program compatible with differrently sized datasets, like original data plus manipulated, eg. cut data
+        self._Create_Channels_Tag_Dict(channels)
+        all_data, channels_label = self._Load_Data(channels)
+        for i in range(len(channels)):
+            self.all_data.append(all_data[i])
+            self.channels_label.append(channels_label[i])
+        # reset all the instance variables dependent on the data, but nor the ones responsible for plotting
+        # self.scaling_factor = 1
+        if self.autoscale == True:
+            self.Quadratic_Pixels(channels)
 
     def _Initialize_Logfile(self) -> str:
         logfile_path = self.directory_name + '/python_manipulation_log.txt'
@@ -1178,8 +1200,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         # before backconversion to amp and phase, the realpart could also be returned in future... ToDo
         # print(f'self.channels: {self.channels}')
         # print(f'self.overlayed_amp_channels: {self.overlayed_amp_channels}')
-        # print(f'self.overlayed_phase_channels: {self.overlayed_phase_channels}')
-        # print(f'self.corrected_overlayed_phase_channels: {self.corrected_overlayed_phase_channels}')
+        # print(f'self.overlain_phase_channels: {self.overlain_phase_channels}')
+        # print(f'self.corrected_overlain_phase_channels: {self.corrected_overlain_phase_channels}')
         for i in range(len(self.phase_channels)):
             if (self.amp_channels[i] in channels):
                 if (self.phase_channels[i] in channels):
@@ -1189,12 +1211,12 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     channels_to_filter.append(self.channels.index(self.amp_channels[i]))
                     channels_to_filter.append(self.channels.index(self.corrected_phase_channels[i]))
             elif self.overlayed_amp_channels[i] in channels:
-                if self.overlayed_phase_channels[i] in channels:
+                if self.overlain_phase_channels[i] in channels:
                     channels_to_filter.append(self.channels.index(self.overlayed_amp_channels[i]))
-                    channels_to_filter.append(self.channels.index(self.overlayed_phase_channels[i]))
-                elif self.corrected_overlayed_phase_channels[i] in channels:
+                    channels_to_filter.append(self.channels.index(self.overlain_phase_channels[i]))
+                elif self.corrected_overlain_phase_channels[i] in channels:
                     channels_to_filter.append(self.channels.index(self.overlayed_amp_channels[i]))
-                    channels_to_filter.append(self.channels.index(self.corrected_overlayed_phase_channels[i]))
+                    channels_to_filter.append(self.channels.index(self.corrected_overlain_phase_channels[i]))
         
         # should not be necessary anymore since backwards channesl are now included in standart channle lists
         # also for backwards direction:
@@ -1317,45 +1339,6 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self.channels_label[channels_to_filter[i]] = self.channels_label[channels_to_filter[i]] + '_fft'
             self.all_data[channels_to_filter[i+1]] = FS_compl_angle
             self.channels_label[channels_to_filter[i+1]] = self.channels_label[channels_to_filter[i+1]] + '_fft'
-    
-    def _Create_Synccorr_Preview(self, channel, wavelength, scanangle) -> None:
-        '''
-        This function is part of the Synccorrection and creates a preview of the corrected data.
-        channel specifies which channel should be used for the preview.
-        Wavelength must be given in µm.
-        Scanangle is the rotation angle of the scan in radians.
-        '''
-        phasedir_positive = 1
-        phasedir_negative = -1
-        phase_data = self._Load_Data([channel])[0][0]
-        YRes = len(phase_data)
-        XRes = len(phase_data[0])
-        phase_positive = np.zeros((YRes, XRes))
-        phase_negative = np.zeros((YRes, XRes))
-        phase_no_correction = np.zeros((YRes, XRes))
-        for y in range(0,YRes):
-            for x in range(0,XRes):
-                xreal=x*self.XReal/XRes
-                yreal=y*self.YReal/YRes
-                #phase accumulated by movement of parabolic mirror only depends on 'x' direction
-                phase_no_correction[y][x] = phase_data[y][x]# + np.pi
-                phase_positive[y][x] = np.mod(phase_data[y][x] - phasedir_positive*(np.cos(-scanangle)*xreal + np.sin(-scanangle)*yreal)/wavelength*2*np.pi, 2*np.pi)
-                # phase_positive[y][x] = np.mod(phase_data[y][x] + np.pi - phasedir_positive*(np.cos(-scanangle)*xreal + np.sin(-scanangle)*yreal)/wavelength*2*np.pi, 2*np.pi)
-                phase_negative[y][x] = np.mod(phase_data[y][x] - phasedir_negative*(np.cos(-scanangle)*xreal + np.sin(-scanangle)*yreal)/wavelength*2*np.pi, 2*np.pi)
-                # phase_negative[y][x] = np.mod(phase_data[y][x] + np.pi - phasedir_negative*(np.cos(-scanangle)*xreal + np.sin(-scanangle)*yreal)/wavelength*2*np.pi, 2*np.pi)
-        #create plots of the uncorrected and corrected images
-        subplots = []
-        subplots.append(self._Add_Subplot(phase_no_correction, channel))
-        subplots.append(self._Add_Subplot(phase_positive, channel + '_positive'))
-        subplots.append(self._Add_Subplot(phase_negative, channel + '_negative'))
-        self._Plot_Subplots(subplots)
-        # remove the preview subplots from the subplot memory after plotting
-        self.Remove_Last_Subplots(3)
-        #ask the user to chose a correction direction
-        phasedir = self._Gen_From_Input_Phasedir()
-        #start the correction
-        # self.Synccorrection(wavelength, phasedir)
-        return phasedir
 
     def _Create_Header(self, channel, data=None, filetype='gsf'):
         # data = self.all_data[self.channels.index(channel)]
@@ -1387,7 +1370,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         header += f'XOffset={round(XOffset*pow(10, -6),9)}\nYOffset={round(YOffset*pow(10, -6),9)}\n'
         header += f'Rotation={round(rotation)}\n'
         if self.height_indicator in channel:
-            header += 'ZUnits=nm\n'
+            header += 'ZUnits=m\n'
         else:
             header += 'ZUnits=\n'
         header += f'Title={self.measurement_title}\n'
@@ -1419,9 +1402,14 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             file = open(filepath, 'bw')
             file.write(header.encode('utf-8'))
             file.write(NUL) # the NUL marks the end of the header and konsists of 0 characters in the first dataline
-            for y in range(YRes):
-                for x in range(XRes):
-                    file.write(pack('f', round(data[y][x], 5)))
+            if self.height_indicator in channel:
+                for y in range(YRes):
+                    for x in range(XRes):
+                        file.write(pack('f', round(data[y][x],5)*pow(10,-9)))
+            else:
+                for y in range(YRes):
+                    for x in range(XRes):
+                        file.write(pack('f', round(data[y][x], 5)))
             file.close()
             print(f'successfully saved channel {channel} to .gsf')
             print(filepath)
@@ -1452,6 +1440,46 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             file.close()
             print(f'successfully saved channel {channel} to .txt')
             print(filepath)
+    
+    def _Create_Synccorr_Preview(self, channel, wavelength, scanangle) -> None:
+        '''
+        This function is part of the Synccorrection and creates a preview of the corrected data.
+        channel specifies which channel should be used for the preview.
+        Wavelength must be given in µm.
+        Scanangle is the rotation angle of the scan in radians.
+        '''
+        phasedir_positive = 1
+        phasedir_negative = -1
+        # phase_data = self._Load_Data([channel])[0][0]
+        phase_data = self.all_data[self.channels.index(channel)]
+        YRes = len(phase_data)
+        XRes = len(phase_data[0])
+        phase_positive = np.zeros((YRes, XRes))
+        phase_negative = np.zeros((YRes, XRes))
+        phase_no_correction = np.zeros((YRes, XRes))
+        for y in range(0,YRes):
+            for x in range(0,XRes):
+                xreal=x*self.XReal/XRes
+                yreal=y*self.YReal/YRes
+                #phase accumulated by movement of parabolic mirror only depends on 'x' direction
+                phase_no_correction[y][x] = phase_data[y][x]# + np.pi
+                phase_positive[y][x] = np.mod(phase_data[y][x] - phasedir_positive*(np.cos(-scanangle)*xreal + np.sin(-scanangle)*yreal)/wavelength*2*np.pi, 2*np.pi)
+                # phase_positive[y][x] = np.mod(phase_data[y][x] + np.pi - phasedir_positive*(np.cos(-scanangle)*xreal + np.sin(-scanangle)*yreal)/wavelength*2*np.pi, 2*np.pi)
+                phase_negative[y][x] = np.mod(phase_data[y][x] - phasedir_negative*(np.cos(-scanangle)*xreal + np.sin(-scanangle)*yreal)/wavelength*2*np.pi, 2*np.pi)
+                # phase_negative[y][x] = np.mod(phase_data[y][x] + np.pi - phasedir_negative*(np.cos(-scanangle)*xreal + np.sin(-scanangle)*yreal)/wavelength*2*np.pi, 2*np.pi)
+        #create plots of the uncorrected and corrected images
+        subplots = []
+        subplots.append(self._Add_Subplot(phase_no_correction, channel))
+        subplots.append(self._Add_Subplot(phase_positive, channel + '_positive'))
+        subplots.append(self._Add_Subplot(phase_negative, channel + '_negative'))
+        self._Plot_Subplots(subplots)
+        # remove the preview subplots from the subplot memory after plotting
+        self.Remove_Last_Subplots(3)
+        #ask the user to chose a correction direction
+        phasedir = self._Gen_From_Input_Phasedir()
+        #start the correction
+        # self.Synccorrection(wavelength, phasedir)
+        return phasedir
 
     def Synccorrection(self, wavelength:float, phasedir:int=None) -> None:
         '''This function corrects all the phase channels for the linear phase gradient
@@ -1468,14 +1496,18 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         if self.autoscale == True:
             print('careful! The synccorretion does not work when autoscale is enabled.')
             exit()
+        all_channels = self.phase_channels + self.amp_channels
+        print(all_channels)
+        self._Initialize_Data(all_channels)
+        print(self.channels)
         scanangle = self.measurement_tag_dict[Tag_Type.rotation]*np.pi/180
         if phasedir == None:
             phasedir = self._Create_Synccorr_Preview(self.preview_phasechannel, wavelength, scanangle)
         self._Write_to_Logfile('synccorrection_wavelength', wavelength)
         self._Write_to_Logfile('synccorrection_phasedir', phasedir)
-        all_channels = self.all_channels
-        dataset, dict = self._Load_Data(all_channels)
-        header, NUL = self._Create_Header(self.preview_phasechannel) # channel for header just important to distinguish z axis unit either nm or nothing
+        # all_channels = self.all_channels
+        # dataset, dict = self._Load_Data(all_channels)
+        header, NUL = self._Create_Header(self.preview_phasechannel) # channel for header just important to distinguish z axis unit either m or nothing
         for channel in self.phase_channels:
             i = self.phase_channels.index(channel)
             phasef = open(self.directory_name + '/' + self.filename + ' ' + channel + '_corrected.gsf', 'bw')
@@ -1492,11 +1524,12 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     xreal=x*self.XReal/self.XRes
                     yreal=y*self.YReal/self.YRes
                     #open the phase, add pi to change the range from 0 to 2 pi and then substract the linear phase gradient, which depends on the scanangle!
-                    # amppixval = dataset[2*i+1][y][x]
-                    amppixval = dataset[2*i][y][x]
-                    phasepixval = np.mod(dataset[2*i+1][y][x] + np.pi - phasedir*(np.cos(-scanangle)*xreal + np.sin(-scanangle)*yreal)/wavelength*2*np.pi, 2*np.pi)
-                    realpixval = amppixval*np.cos(phasepixval)
-                    phasef.write(pack("f",phasepixval))
+                    # amppixval = dataset[2*i][y][x]
+                    amppixval = self.all_data[self.channels.index(self.amp_channels[i])][y][x]
+                    phasepixval = self.all_data[self.channels.index(self.phase_channels[i])][y][x]
+                    phasepixval_corr = np.mod(phasepixval + np.pi - phasedir*(np.cos(-scanangle)*xreal + np.sin(-scanangle)*yreal)/wavelength*2*np.pi, 2*np.pi)
+                    realpixval = amppixval*np.cos(phasepixval_corr)
+                    phasef.write(pack("f",phasepixval_corr))
                     realf.write(pack("f",realpixval))
             phasef.close()
             realf.close()
@@ -2701,10 +2734,10 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     self.channel_tag_dict[-1][Tag_Type.scan_area] = [XReal_new, YReal]
 
                     # also create data dict entry
-                    self.channels_label.append(self.channels_label[self.channels.index(channel)] + '_overlaid')
+                    self.channels_label.append(self.channels_label[self.channels.index(channel)] + '_overlain')
 
                     # add new channel to channels
-                    self.channels.append(channel + '_overlaid')
+                    self.channels.append(channel + '_overlain')
 
                     #test realign (per scan) based on minimization of differences 
                     #not usable right now, drift compensation might lead to differently sized data
@@ -2736,10 +2769,10 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     self.channel_tag_dict[-1][Tag_Type.scan_area] = [XReal_new, YReal]
 
                     # also create data dict entry
-                    self.channels_label.append(self.channels_label[self.channels.index(channel)] + '_overlaid')
+                    self.channels_label.append(self.channels_label[self.channels.index(channel)] + '_overlain')
 
                     # add new channel to channels
-                    self.channels.append(channel + '_overlaid')
+                    self.channels.append(channel + '_overlain')
                     
                     #test realign (per scan) based on minimization of differences 
                     # self.all_data[self.channels.index(channel)] = Realign.Minimize_Drift(self.all_data[self.channels.index(channel)], display=False)
@@ -2760,17 +2793,18 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
 
         This function is ment to overlay the backwards and forwards version of the specified channels.
         You should only specify the forward version of the channels you want to overlay. The function will create a mean version
-        which can then be displayed and saved. Note that the new version will be larger then the previous ones.
+        which can then be displayed and saved.
 
         Args:
-            height_channel_forward (str): usual corrected height channel
-            height_channel_backward (str): backwards height channel
-            channels (list, optional): a list of all channels to be overlayed. Defaults to None.
+            height_channel_forward (str): Usual corrected height channel
+            height_channel_backward (str): Backwards height channel
+            channels (list, optional): List of all channels to be overlayed. Only specify the forward direction. Defaults to None.
         """
         all_channels = []
         for channel in channels:
             all_channels.extend([channel, 'R-' + channel])
-        all_channels.extend([height_channel_forward, height_channel_backward])
+        if height_channel_forward not in channels:
+            all_channels.extend([height_channel_forward, height_channel_backward])
         self._Initialize_Data(all_channels)
         self.Set_Min_to_Zero([height_channel_forward, height_channel_backward])
         
@@ -2797,10 +2831,10 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     self.channel_tag_dict.append(self.channel_tag_dict[self.channels.index(channel)])
 
                     # also create data dict entry
-                    self.channels_label.append(self.channels_label[self.channels.index(channel)] + '_overlaid')
+                    self.channels_label.append(self.channels_label[self.channels.index(channel)] + '_overlain')
 
                     # add new channel to channels
-                    self.channels.append(channel + '_overlaid')
+                    self.channels.append(channel + '_overlain')
         
                     # create mean data and append to all_data
                     self.all_data.append(realign.Create_Mean_Array_V2(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)], index))
@@ -2809,10 +2843,10 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     self.channel_tag_dict.append(self.channel_tag_dict[self.channels.index(channel)])
 
                     # also create data dict entry
-                    self.channels_label.append(self.channels_label[self.channels.index(channel)] + '_overlaid')
+                    self.channels_label.append(self.channels_label[self.channels.index(channel)] + '_overlain')
 
                     # add new channel to channels
-                    self.channels.append(channel + '_overlaid')
+                    self.channels.append(channel + '_overlain')
                     
                     # create mean data and append to all_data
                     self.all_data.append(realign.Create_Mean_Array_V2(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)], index))
