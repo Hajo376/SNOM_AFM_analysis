@@ -385,17 +385,25 @@ class ChiralCouplers(Open_Measurement):
                         right_phase=self.right_wg_data[row][int(self.integ_width/2)]
                         self.left_center_phase.append(left_phase)
                         self.right_center_phase.append(right_phase)
-                    sum_left = 0
-                    sum_right = 0
-                    sum_background = 0
-                    amp_left = self.left_wg_data[row]
-                    amp_right = self.right_wg_data[row]
-                    amp_background = self.background_data[row]
-                    for j in range(2*self.integ_width):
-                        sum_left+=amp_left[j]
-                        sum_right+=amp_right[j]
-                    for j in range(len(amp_background)):
-                        sum_background+=amp_background[j]
+                    elif 'A' in channel or 'R' in channel or 'I' in channel: # amplitude, realpart and imaginary part
+                        sum_left = 0
+                        sum_right = 0
+                        sum_background = 0
+                        amp_left = self.left_wg_data[row]
+                        amp_right = self.right_wg_data[row]
+                        amp_background = self.background_data[row]
+                        for j in range(2*self.integ_width):
+                            sum_left+=amp_left[j]
+                            sum_right+=amp_right[j]
+                        for j in range(len(amp_background)):
+                            sum_background+=amp_background[j]
+                    # change background if channel is realpart:
+                    if 'R' in channel or 'I' in channel:
+                        # for now get the mean of the absolute values
+                        abs_values = [abs(element) for element in amp_background]
+                        sum_background = np.mean(abs_values)
+                    else:
+                        print('The channel cannot be identified properly. In _Data_Mean_with_Errors')
                     left_mean_array.append(sum_left/(2*self.integ_width))
                     right_mean_array.append(sum_right/(2*self.integ_width))
                     background_mean_array.append(sum_background/len(amp_background))
@@ -485,6 +493,50 @@ class ChiralCouplers(Open_Measurement):
                     datafile.write(f'{i}\t{round(data_pairs[j][1][0][i], 5)}\t{round(data_pairs[j][1][1][i], 5)}\t{round(self.left_center_phase[i],3)}\t{round(self.right_center_phase[i],3)}\t{round(data_pairs[j][1][2][i], 5)}\n')
         print(f'Exported all data to {complete_filename}!')
 
+    def Export_Realpart_with_Errors(self, filepath:str=None):
+        self._Data_Mean_with_Errors() # create mean data
+        for i in range(len(self.mean_data)):
+            channel = self.mean_data[i][0]
+            if 'R' in channel:
+                if filepath == None:
+                    filepath = os.path.normpath(os.path.join(this_files_path, '../chiralcouplers_analysis/extracted_data'))
+                filename = f'{self.filename}_all_data_{channel}_realpart_with_errors.txt'
+                complete_filename = filepath + '/' + filename
+                with open(complete_filename, 'w') as datafile:
+                    datafile.write('#pixel\treal leftwg\treal rightwg\treal background\n')
+                    for j in range(len(self.mean_data[i][1])):
+                        datafile.write(f'{j}\t{round(self.mean_data[i][1][j],5)}\t{round(self.mean_data[i][2][j],5)}\t{round(self.mean_data[i][3][j],5)}\n')
+        print(f'Exported all data to {complete_filename}!')
+    
+    def Export_Complex_Data_with_Errors(self, filepath:str=None):
+        """Exports realpart and imaginary part if those channels are in memory.
+
+        Args:
+            filepath (str, optional): _description_. Defaults to None.
+        """
+        self._Data_Mean_with_Errors() # create mean data
+        for i in range(len(self.mean_data)):
+            channel = self.mean_data[i][0]
+            if 'R' in channel:
+                demodulation = channel[:2]
+                real_channel = channel
+                imag_channel = channel.replace('R', 'I')
+                if imag_channel in self.channels:
+                    for l in range(len(self.mean_data)):
+                        if imag_channel == self.mean_data[l][0]:
+                            k = l # get the channel index of the imag channel, to later refer to the data
+                            print(k)
+                            break
+                    if filepath == None:
+                        filepath = os.path.normpath(os.path.join(this_files_path, '../chiralcouplers_analysis/extracted_data'))
+                    filename = f'{self.filename}_all_data_{demodulation}_complex_with_errors.txt'
+                    complete_filename = filepath + '/' + filename
+                    with open(complete_filename, 'w') as datafile:
+                        datafile.write('#pixel\treal leftwg\treal rightwg\treal background\timag leftwg\timag rightwg\timag background\n')
+                        for j in range(len(self.mean_data[i][1])):
+                            datafile.write(f'{j}\t{round(self.mean_data[i][1][j],5)}\t{round(self.mean_data[i][2][j],5)}\t{round(self.mean_data[i][3][j],5)}\t{round(self.mean_data[k][1][j],5)}\t{round(self.mean_data[k][2][j],5)}\t{round(self.mean_data[k][3][j],5)}\n')
+        print(f'Exported all data to {complete_filename}!')
+
     def Export_Amplitude_with_Errors(self, filepath:str=None):
         """This method first extracts the waveguide data by selecting an area in the scan and then fitting the waveguide positions.
         Subsequently the extracted amplitude data is averaged.
@@ -550,7 +602,7 @@ class LoadData():
         if title is not None:
             self.title = title
 
-    def Load_Extracted_Data(self, filepath:str=None, initialdir:str=None) -> None:
+    def Load_Extracted_Data(self, filepath:str=None, initialdir:str=None, no_phase:bool=False) -> None:
         """Select the file to load the data from. File format: amp left, amp right, phase left, phase right and if with_errors==True also background, tab delimited, 2 lines header. 
 
         Args:
@@ -573,15 +625,59 @@ class LoadData():
         datafile = open(filepath, 'r')
         self.amplitude_right = np.genfromtxt(datafile, delimiter='\t', skip_header=2, usecols=2)
         datafile.close()
+        if no_phase is False:
+            datafile = open(filepath, 'r')
+            self.phase_left = np.genfromtxt(datafile, delimiter='\t', skip_header=2, usecols=3)
+            datafile.close()
+            datafile = open(filepath, 'r')
+            self.phase_right = np.genfromtxt(datafile, delimiter='\t', skip_header=2, usecols=4)
+            datafile.close()
+            if self.with_errors == True:
+                datafile = open(filepath, 'r')
+                self.amp_background = np.genfromtxt(datafile, delimiter='\t', skip_header=2, usecols=5)
+                datafile.close()
+        else:
+            if self.with_errors == True:
+                datafile = open(filepath, 'r')
+                self.amp_background = np.genfromtxt(datafile, delimiter='\t', skip_header=2, usecols=3)
+                datafile.close()
+
+    def Load_Extracted_Complex_Data(self, filepath:str=None, initialdir:str=None) -> None:
+        """Select the file to load the data from. File format: real left, real right, imag left, imag right and if with_errors==True also background, tab delimited, 2 lines header. 
+
+        Args:
+            filepath (str, optional): if not specified you will be prompted with a filedialoge. Defaults to None.
+            initialdir (str, optional): sets the starting directory for the filedialoge. Defaults to None.
+        """
+        if initialdir is not None:
+            self.initialdir = initialdir
+        root = tk.Tk()
+        root.withdraw()
+        if filepath is None:
+            if self.initialdir == None:
+                filepath = filedialog.askopenfilename(initialdir=this_files_path)
+            else:
+                filepath = filedialog.askopenfilename(initialdir=os.path.normpath(os.path.join(this_files_path, self.initialdir)))
+        self.filename = filepath.split('/')[-1]
         datafile = open(filepath, 'r')
-        self.phase_left = np.genfromtxt(datafile, delimiter='\t', skip_header=2, usecols=3)
+        self.real_left = np.genfromtxt(datafile, delimiter='\t', skip_header=2, usecols=1)
         datafile.close()
         datafile = open(filepath, 'r')
-        self.phase_right = np.genfromtxt(datafile, delimiter='\t', skip_header=2, usecols=4)
+        self.real_right = np.genfromtxt(datafile, delimiter='\t', skip_header=2, usecols=2)
         datafile.close()
+
         if self.with_errors == True:
             datafile = open(filepath, 'r')
-            self.amp_background = np.genfromtxt(datafile, delimiter='\t', skip_header=2, usecols=5)
+            self.real_background = np.genfromtxt(datafile, delimiter='\t', skip_header=2, usecols=3)
+            datafile.close()
+            datafile = open(filepath, 'r')
+            self.imag_left = np.genfromtxt(datafile, delimiter='\t', skip_header=2, usecols=4)
+            datafile.close()
+            datafile = open(filepath, 'r')
+            self.imag_right = np.genfromtxt(datafile, delimiter='\t', skip_header=2, usecols=5)
+            datafile.close()
+            datafile = open(filepath, 'r')
+            self.imag_background = np.genfromtxt(datafile, delimiter='\t', skip_header=2, usecols=6)
             datafile.close()
     
     def Cut_Data(self, length:float=4000, from_where='beginning'):
@@ -612,7 +708,7 @@ class LoadData():
         self.phase_left = phase_left
         self.phase_right = phase_right
 
-    def Fit_Amplitudes(self, with_oscillation=False) -> None:
+    def Fit_Amplitudes(self, with_oscillation=False, show_plot=False, full_integration=True) -> None:
         """This function fits the amplitude data from the loaded profiles.
         The data is fitted with exponential function to extract the propagation length and the directionality.
         The directionalities are saved in the instance variable all_directionalitys. This contains the directionality and an error estimate.
@@ -620,6 +716,7 @@ class LoadData():
 
         Args:
             with_oscillation (bool, optional): ties to fit the exponential additionally with a decaying oscillation. Defaults to False.
+            show_plot (bool, optional): Do you want to display the fit to the amplitude data? Defaults to False.
         """
         root = tk.Tk()
         root.withdraw()  
@@ -652,8 +749,14 @@ class LoadData():
         print('propagation length rightwg = ', coeff_rightwg[1]*self.pixelsize, ' nm') 
         self.all_propagation_lengths.append([coeff_leftwg[1]*self.pixelsize, coeff_rightwg[1]*self.pixelsize])
         # calculate area under exp. function from 0 to inf for left and right wg:
-        area_left = 2*coeff_leftwg[0]*coeff_leftwg[1]
-        area_right = 2*coeff_rightwg[0]*coeff_rightwg[1]
+        if full_integration is True:
+            area_left = 2*coeff_leftwg[0]*coeff_leftwg[1]
+            area_right = 2*coeff_rightwg[0]*coeff_rightwg[1]
+        else:
+            # alternative: calculate area only in interval given by the data 
+            L = max(x)
+            area_left = 2*coeff_leftwg[0]*coeff_leftwg[1]*(1-np.exp(-L/(2*coeff_leftwg[1])))
+            area_right = 2*coeff_rightwg[0]*coeff_rightwg[1]*(1-np.exp(-L/(2*coeff_rightwg[1])))
         if self.chirality == 1:
             directionality = (area_right**2)/(area_left**2 + area_right**2)
         elif self.chirality == -1:
@@ -673,11 +776,205 @@ class LoadData():
         plt.xlabel('$x \ [µm]$')
         plt.ylabel('$abs(E_z) \ [a.u.]$')
         plt.legend()
-        plt.show()
+        if show_plot is True:
+            plt.show()
+        else:
+            plt.cla()
+
+
+    def Fit_Realpart(self, show_plot=False) -> None:
+        """This function fits the real data from the loaded profiles.
+        The data is fitted with exponentially decaying oscillation to extract the directionality.
+        The directionalities are saved in the instance variable all_directionalitys. This contains the directionality and an error estimate.
+        Repeated calls of Load_Extracted_Data and Fit_Realpart will create a list of directionalites, which can then be saved for a parameter variation.
+
+        Args:
+            show_plot (bool, optional): Do you want to display the fit to the amplitude data? Defaults to False.
+        """
+        root = tk.Tk()
+        root.withdraw()  
+        x=np.arange(len(self.amplitude_left))      
+        plt.plot(x*self.pixelsize*0.001,self.amplitude_left, label='leftwg', color='tab:blue') # convert pixels to distance in µm
+        plt.plot(x*self.pixelsize*0.001,self.amplitude_right, label='rightwg', color='tab:orange')
+        # plt.plot(x*self.pixelsize*0.001, Damped_Oscillation_Function(x, 0.03, 0.075, 0, 0.015), color='blue')
+        # plt.plot(x*self.pixelsize*0.001, Damped_Oscillation_Function(x, 0.03, 0.077, 0, 0.015), color='red')
+        # plt.plot(x*self.pixelsize*0.001, Damped_Oscillation_Function(x, 0.03, 0.079, 0, 0.015), color='green')
+        # plt.plot(x*self.pixelsize*0.001, Damped_Oscillation_Function(x, 0.03, 0.085, 0, 0.015), color='yellow')
+        p0 = [0.03, 0.077, 0, 0.015]
+        coeff_leftwg, pcov_left = curve_fit(Damped_Oscillation_Function, x, self.amplitude_left, p0=p0)
+        coeff_rightwg, pcov_right = curve_fit(Damped_Oscillation_Function, x, self.amplitude_right, p0=p0)
+        plt.plot(x*self.pixelsize*0.001, Damped_Oscillation_Function(x, coeff_leftwg[0], coeff_leftwg[1], coeff_leftwg[2], coeff_leftwg[3]), '--', label='fit_leftwg', color='tab:blue')
+        plt.plot(x*self.pixelsize*0.001, Damped_Oscillation_Function(x, coeff_rightwg[0], coeff_rightwg[1], coeff_rightwg[2], coeff_rightwg[3]), '--', label='fit_rightwg', color='tab:orange')
+        perr_left = np.sqrt(np.diag(pcov_left))
+        perr_right = np.sqrt(np.diag(pcov_right))
+        print(f'Errors: {perr_left}, {perr_right}')
+        # p0 = [1, self.pixelsize, 0]
+        # coeff_leftwg, var_matrix = curve_fit(Damped_Oscillation_Function, x, self.amplitude_left, p0=p0)
+        # coeff_rightwg, var_matrix = curve_fit(Damped_Oscillation_Function, x, self.amplitude_right, p0=p0)
+        # print('offset leftwg: ', coeff_leftwg[2])
+        # print('offset rightwg: ', coeff_rightwg[2])
+        # plt.plot(x,leftwg, label='leftwg', color='tab:blue')
+        # plt.plot(x,rightwg, label='rightwg', color='tab:orange')
+        # plt.plot(x*self.pixelsize*0.001, Damped_Oscillation_Function(x, coeff_leftwg[0], coeff_leftwg[1], coeff_leftwg[2]), '--', label='fit_leftwg', color='tab:blue')
+        # plt.plot(x*self.pixelsize*0.001, Damped_Oscillation_Function(x, coeff_rightwg[0], coeff_rightwg[1], coeff_rightwg[2]), '--', label='fit_rightwg', color='tab:orange')
+        
+        # print('propagation length leftwg = ', coeff_leftwg[1]*self.pixelsize, ' nm') 
+        # print('propagation length rightwg = ', coeff_rightwg[1]*self.pixelsize, ' nm') 
+        # self.all_propagation_lengths.append([coeff_leftwg[1]*self.pixelsize, coeff_rightwg[1]*self.pixelsize])
+        # calculate area under exp. function from 0 to inf for left and right wg:
+
+        # get amplitude from fit coeff
+        amp_left = coeff_leftwg[0]
+        amp_right = coeff_rightwg[0]
+        if self.chirality == 1:
+            directionality = (amp_right**2)/(amp_left**2 + amp_right**2)
+        elif self.chirality == -1:
+            directionality = (amp_left**2)/(amp_left**2 + amp_right**2)
+        print(f'Directionality = {directionality}')
+        if self.with_errors == True:
+            # sum all background amplitudes to get background area
+            background = np.mean(self.amp_background) # for now the uncertainty for left and right is just the background sum
+            print('Background: ', background)
+            # uncertainty on amplitude from fit roughly factor of 10 more than background. Use fit uncert...
+            if self.chirality == 1:
+                # directionality_error = Get_Directionality_Uncertainity(amp_right, background, amp_left, background)
+                directionality_error = Get_Directionality_Uncertainity(amp_right, perr_right[0], amp_left, perr_left[0])
+            elif self.chirality == -1:
+                # directionality_error = Get_Directionality_Uncertainity(amp_left, background, amp_right, background)
+                directionality_error = Get_Directionality_Uncertainity(amp_left, perr_left[0], amp_right, perr_right[0])
+            self.all_directionalitys.append([directionality, directionality_error])
+        else:
+            self.all_directionalitys.append(directionality)
+        self._Get_Measured_Directionality()
+        # print(coeff)
+        
+        plt.xlabel('$x [µm]$')
+        plt.ylabel('$Re(E_z) [a.u.]$')
+        plt.legend()
+        if show_plot is True:
+            plt.show()
+        else:
+            plt.cla()
     
+    def Fit_Complex_Data(self, show_plot=False, polar_plot=True) -> None:
+        """This function fits the real data from the loaded profiles.
+        The data is fitted with exponentially decaying oscillation to extract the directionality.
+        The directionalities are saved in the instance variable all_directionalitys. This contains the directionality and an error estimate.
+        Repeated calls of Load_Extracted_Data and Fit_Realpart will create a list of directionalites, which can then be saved for a parameter variation.
+
+        Args:
+            show_plot (bool, optional): Do you want to display the fit to the amplitude data? Defaults to False.
+        """
+        root = tk.Tk()
+        root.withdraw()  
+        x=np.arange(len(self.real_left))      
+        plt.plot(x*self.pixelsize*0.001,self.real_left, label='leftwg', color='tab:blue') # convert pixels to distance in µm
+        plt.plot(x*self.pixelsize*0.001,self.real_right, label='rightwg', color='tab:orange')
+        plt.plot(x*self.pixelsize*0.001,self.imag_left, label='leftwg', color='tab:red') # convert pixels to distance in µm
+        plt.plot(x*self.pixelsize*0.001,self.imag_right, label='rightwg', color='tab:purple')
+        amplitude_left = np.sqrt(self.real_left**2+self.imag_left**2)
+        amplitude_right = np.sqrt(self.real_right**2+self.imag_right**2)
+        plt.plot(x*self.pixelsize*0.001,amplitude_left, label='leftwg', color='tab:olive') # convert pixels to distance in µm
+        plt.plot(x*self.pixelsize*0.001,amplitude_right, label='rightwg', color='tab:cyan')
+        
+        p0 = [0.03, 0.077, 0, 0.015]
+        real_coeff_leftwg, real_pcov_left = curve_fit(Damped_Oscillation_Function, x, self.real_left, p0=p0)
+        real_coeff_rightwg, real_pcov_right = curve_fit(Damped_Oscillation_Function, x, self.real_right, p0=p0)
+        imag_coeff_leftwg, imag_pcov_left = curve_fit(Damped_Oscillation_Function, x, self.imag_left, p0=p0)
+        imag_coeff_rightwg, imag_pcov_right = curve_fit(Damped_Oscillation_Function, x, self.imag_right, p0=p0)
+        plt.plot(x*self.pixelsize*0.001, Damped_Oscillation_Function(x, real_coeff_leftwg[0], real_coeff_leftwg[1], real_coeff_leftwg[2], real_coeff_leftwg[3]), '--', label='fit_leftwg', color='tab:blue')
+        plt.plot(x*self.pixelsize*0.001, Damped_Oscillation_Function(x, real_coeff_rightwg[0], real_coeff_rightwg[1], real_coeff_rightwg[2], real_coeff_rightwg[3]), '--', label='fit_rightwg', color='tab:orange')
+        plt.plot(x*self.pixelsize*0.001, Damped_Oscillation_Function(x, imag_coeff_leftwg[0], imag_coeff_leftwg[1], imag_coeff_leftwg[2], imag_coeff_leftwg[3]), '--', label='fit_leftwg', color='tab:red')
+        plt.plot(x*self.pixelsize*0.001, Damped_Oscillation_Function(x, imag_coeff_rightwg[0], imag_coeff_rightwg[1], imag_coeff_rightwg[2], imag_coeff_rightwg[3]), '--', label='fit_rightwg', color='tab:purple')
+        real_perr_left = np.sqrt(np.diag(real_pcov_left))
+        real_perr_right = np.sqrt(np.diag(real_pcov_right))
+        imag_perr_left = np.sqrt(np.diag(imag_pcov_left))
+        imag_perr_right = np.sqrt(np.diag(imag_pcov_right))
+
+
+        amplitude_from_fit_leftwg = np.sqrt(Damped_Oscillation_Function(x, real_coeff_leftwg[0], real_coeff_leftwg[1], real_coeff_leftwg[2], real_coeff_leftwg[3])**2+Damped_Oscillation_Function(x, imag_coeff_leftwg[0], imag_coeff_leftwg[1], imag_coeff_leftwg[2], imag_coeff_leftwg[3])**2)
+        amplitude_from_fit_rightwg = np.sqrt(Damped_Oscillation_Function(x, real_coeff_rightwg[0], real_coeff_rightwg[1], real_coeff_rightwg[2], real_coeff_rightwg[3])**2+Damped_Oscillation_Function(x, imag_coeff_rightwg[0], imag_coeff_rightwg[1], imag_coeff_rightwg[2], imag_coeff_rightwg[3])**2)
+        plt.plot(x*self.pixelsize*0.001,amplitude_from_fit_leftwg, '--', label='leftwg', color='tab:olive') # convert pixels to distance in µm
+        plt.plot(x*self.pixelsize*0.001,amplitude_from_fit_rightwg, '--', label='rightwg', color='tab:cyan')
+
+        # get real from fit coeff
+        amp_left = real_coeff_leftwg[0]
+        amp_right = real_coeff_rightwg[0]
+        if self.chirality == 1:
+            directionality = (amp_right**2)/(amp_left**2 + amp_right**2)
+        elif self.chirality == -1:
+            directionality = (amp_left**2)/(amp_left**2 + amp_right**2)
+        print(f'Directionality = {directionality}')
+        if self.with_errors == True:
+            # sum all background reals to get background area
+            real_background = np.mean(self.real_background) # for now the uncertainty for left and right is just the background sum
+            imag_background = np.mean(self.imag_background) # for now the uncertainty for left and right is just the background sum
+            print('Background: ', real_background)
+            # uncertainty on real from fit roughly factor of 10 more than background. Use fit uncert...
+            if self.chirality == 1:
+                # directionality_error = Get_Directionality_Uncertainity(amp_right, background, amp_left, background)
+                directionality_error = Get_Directionality_Uncertainity(amp_right, real_perr_right[0], amp_left, real_perr_left[0])
+            elif self.chirality == -1:
+                # directionality_error = Get_Directionality_Uncertainity(amp_left, background, amp_right, background)
+                directionality_error = Get_Directionality_Uncertainity(amp_left, real_perr_left[0], amp_right, real_perr_right[0])
+            self.all_directionalitys.append([directionality, directionality_error])
+        else:
+            self.all_directionalitys.append(directionality)
+        # self._Get_Measured_Directionality()
+        # print(coeff)
+        
+        plt.xlabel('$x [µm]$')
+        plt.ylabel('$Re(E_z) [a.u.]$')
+        plt.legend()
+        if show_plot is True:
+            plt.show()
+        else:
+            plt.cla()
+        if polar_plot is True:
+            # setting the axes
+            # projection as polar
+            plt.axes(projection = 'polar')
+            
+            # creating an array
+            # containing the radian values
+            # rads = np.arange(0, 2 * np.pi, 0.001) 
+            radii = amplitude_from_fit_leftwg
+            radii_right = amplitude_from_fit_rightwg
+            # np.sqrt(1-gamma**2)*omega_0*t = 2*pi
+            tmax = len(x)
+            omega_0 = real_coeff_leftwg[1]
+            print('omega_0: ', omega_0)
+            # n_periods = tmax/omega_0/(2*np.pi)
+            n_periods = 6
+            print('number of periods: ', n_periods)
+            print('len(x): ', len(x))
+            # rads = np.arange(0, n_periods*2 * np.pi, 0.01)
+            rads = np.linspace(0, n_periods*2 * np.pi, len(x))
+            rads_right = np.linspace(np.pi/2, n_periods*2 * np.pi +(np.pi/2) , len(x))
+            print(rads)
+            
+            # plotting the spiral
+            for i in range(len(rads)):
+                rad = rads[i]
+                # print(rad)
+                r = radii[i]
+                r_right = radii_right[i]
+                # print(r)
+                # r = rad
+                plt.polar(rad, r, 'g.')
+                # plt.polar(rad, amplitude_left[i], 'g.')
+                plt.polar(rads_right[i], r_right, 'r.')
+                # plt.polar(rad, amplitude_right[i], 'r.')
+                
+            # display the polar plot
+            plt.show()
+
     def _Get_Measured_Directionality(self):
-        left_sum = np.sum(self.amplitude_left)
-        right_sum = np.sum(self.amplitude_right)
+        # make shure data is only positive, so it also works for realpart
+        left_data = [abs(element) for element in self.amplitude_left]
+        right_data = [abs(element) for element in self.amplitude_right]
+        left_sum = np.sum(left_data)
+        right_sum = np.sum(right_data)
         if self.chirality == 1:
             directionality = (right_sum**2)/(left_sum**2 + right_sum**2)
         elif self.chirality == -1:

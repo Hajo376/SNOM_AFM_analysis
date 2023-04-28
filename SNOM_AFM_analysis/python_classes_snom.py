@@ -651,7 +651,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     if '_corrected' in channel:
                         # if the data is from a corrected channel it is already shifted
                         phaseoffset = 0
-                if 'R' in channel:
+                if 'R' in channel or 'I' in channel:
                     rounding_decimal = 4
                 for y in range(0,YRes):
                     for x in range(0,XRes):
@@ -830,7 +830,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 cmap=SNOM_height
                 label = 'Height [nm]'
                 title = f'Height {channel}'
-            elif 'R' in channel:
+            elif 'R' in channel or 'real' in channel or 'I' in channel:
                 cmap=SNOM_realpart
                 label = 'E [a.u.]'
                 title = f'Realpart {channel}'
@@ -976,7 +976,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                         axis.add_artist(scalebar)
                         # print('added a scalebar')
                     #center the colorscale for real data around 0
-                    if ('R_corrected' in title) or ('real' in title):
+                    if ('R_corrected' in title) or ('real' in title) or 'R' in title or 'I':
                         if 'real' in title:
                             data = Set_nan_to_zero(data) #comsol data can contain nan values which are problematic for min and max
                         flattened_data = data.flatten()
@@ -2850,6 +2850,82 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     
                     # create mean data and append to all_data
                     self.all_data.append(realign.Create_Mean_Array_V2(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)], index))
+
+    def Manually_Create_Complex_Channel(self, amp_channel:str, phase_channel:str, complex_type:str=None) -> None:
+        """This function will manually create a realpart channel depending on the amp and phase channel you give.
+        The channels don't have to be in memory. If they are not they will be loaded but not added to memory, only the realpart will be added.
+        Carful, only for expert users!
+
+        Args:
+            amp_channel (str): Amplitude channel.
+            phase_channel (str): Phase channel.
+            complex_type (str, optional): Type of the data you want to create. 'real' creates the realpart, 'imag' the imaginary part.
+                If not specified both will be created. Defaults to None.
+
+        Returns:
+            None
+        """
+        # check if channels match, check for data type (amp, phase) and demodulation order
+        if self.amp_indicator not in amp_channel or self.phase_indicator not in phase_channel:
+            print('The specified channels are not specified as needed!')
+            exit()
+        demodulation = amp_channel[1:2]
+        if demodulation not in phase_channel:
+            print('The channels you specified are not from the same demodulation order!\nProceeding anyways...')
+        # check if channels are in memory, if not load the data
+        if amp_channel not in self.channels:
+            amp_data, amp_dict = self._Load_Data(amp_channel)
+        else:
+            amp_data = self.all_data[self.channels.index(amp_channel)]
+            amp_dict = self.channel_tag_dict[self.channels.index(amp_channel)]
+        if phase_channel not in self.channels:
+            phase_data, phase_dict = self._Load_Data(phase_channel)
+        else:
+            phase_data = self.all_data[self.channels.index(phase_channel)]
+            phase_dict = self.channel_tag_dict[self.channels.index(phase_channel)]
+        # check if size is identical:
+        xres_amp, yres_amp = amp_dict[Tag_Type.pixel_area]
+        xres_phase, yres_phase = phase_dict[Tag_Type.pixel_area]
+        if xres_amp != xres_phase or yres_amp != yres_phase:
+            print('The data of the specified channels has different resolution!')
+            exit()
+        
+        # create complex data:
+        real_data = np.zeros((yres_amp, xres_amp))
+        imag_data = np.zeros((yres_amp, xres_amp))
+        for y in range(yres_amp):
+            for x in range(xres_amp):
+                real_data[y][x] = amp_data[y][x]*np.cos(phase_data[y][x])
+                imag_data[y][x] = amp_data[y][x]*np.sin(phase_data[y][x])
+        # create realpart and imaginary part channel and dict and add to memory
+        real_channel = f'O{demodulation}R_manipulated' # make shure not to overwrite the realpart created by the Synccorrection
+        imag_channel = f'O{demodulation}I_manipulated' # make shure not to overwrite the imagpart created by the Synccorrection
+        real_channel_dict = amp_dict
+        imag_channel_dict = amp_dict
+
+        if complex_type is 'real':
+            self.channels.append(real_channel)
+            self.all_data.append(real_data)
+            self.channel_tag_dict.append(real_channel_dict)
+            self.channels_label.append(real_channel)
+        elif complex_type is 'imag':
+            self.channels.append(imag_channel)
+            self.all_data.append(imag_data)
+            self.channel_tag_dict.append(imag_channel_dict)
+            self.channels_label.append(imag_channel)
+        elif complex_type is None:
+            # just save both
+            self.channels.append(real_channel)
+            self.all_data.append(real_data)
+            self.channel_tag_dict.append(real_channel_dict)
+            self.channels_label.append(real_channel)
+
+            self.channels.append(imag_channel)
+            self.all_data.append(imag_data)
+            self.channel_tag_dict.append(imag_channel_dict)
+            self.channels_label.append(imag_channel)
+
+
 
 # could be exported to external file
 
