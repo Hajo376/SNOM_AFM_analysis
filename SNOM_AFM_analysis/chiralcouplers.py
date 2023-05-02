@@ -781,7 +781,6 @@ class LoadData():
         else:
             plt.cla()
 
-
     def Fit_Realpart(self, show_plot=False) -> None:
         """This function fits the real data from the loaded profiles.
         The data is fitted with exponentially decaying oscillation to extract the directionality.
@@ -856,7 +855,7 @@ class LoadData():
         else:
             plt.cla()
     
-    def Fit_Complex_Data(self, show_plot=False, polar_plot=True) -> None:
+    def Fit_Complex_Data(self, show_plot=False, polar_plot=False) -> None:
         """This function fits the real data from the loaded profiles.
         The data is fitted with exponentially decaying oscillation to extract the directionality.
         The directionalities are saved in the instance variable all_directionalitys. This contains the directionality and an error estimate.
@@ -872,10 +871,11 @@ class LoadData():
         plt.plot(x*self.pixelsize*0.001,self.real_right, label='rightwg', color='tab:orange')
         plt.plot(x*self.pixelsize*0.001,self.imag_left, label='leftwg', color='tab:red') # convert pixels to distance in µm
         plt.plot(x*self.pixelsize*0.001,self.imag_right, label='rightwg', color='tab:purple')
-        amplitude_left = np.sqrt(self.real_left**2+self.imag_left**2)
-        amplitude_right = np.sqrt(self.real_right**2+self.imag_right**2)
-        plt.plot(x*self.pixelsize*0.001,amplitude_left, label='leftwg', color='tab:olive') # convert pixels to distance in µm
-        plt.plot(x*self.pixelsize*0.001,amplitude_right, label='rightwg', color='tab:cyan')
+        self.amplitude_left = np.sqrt(self.real_left**2+self.imag_left**2)
+        self.amplitude_right = np.sqrt(self.real_right**2+self.imag_right**2)
+        self.amp_background = np.sqrt(self.real_background**2+self.imag_background**2)
+        plt.plot(x*self.pixelsize*0.001,self.amplitude_left, label='leftwg', color='tab:olive') # convert pixels to distance in µm
+        plt.plot(x*self.pixelsize*0.001,self.amplitude_right, label='rightwg', color='tab:cyan')
         
         p0 = [0.03, 0.077, 0, 0.015]
         real_coeff_leftwg, real_pcov_left = curve_fit(Damped_Oscillation_Function, x, self.real_left, p0=p0)
@@ -900,6 +900,13 @@ class LoadData():
         # get real from fit coeff
         amp_left = real_coeff_leftwg[0]
         amp_right = real_coeff_rightwg[0]
+        # alternative get amp from sum of amplitudes (from overlay of real and imag)
+        sum_left = sum(amplitude_from_fit_leftwg)
+        sum_right = sum(amplitude_from_fit_rightwg)
+        # overwrite amp from fitparameter
+        amp_left = sum_left
+        amp_right = sum_right
+
         if self.chirality == 1:
             directionality = (amp_right**2)/(amp_left**2 + amp_right**2)
         elif self.chirality == -1:
@@ -920,7 +927,7 @@ class LoadData():
             self.all_directionalitys.append([directionality, directionality_error])
         else:
             self.all_directionalitys.append(directionality)
-        # self._Get_Measured_Directionality()
+        self._Get_Measured_Directionality() # calculates directionality from the amplitude which was calculated from the real and imag data
         # print(coeff)
         
         plt.xlabel('$x [µm]$')
