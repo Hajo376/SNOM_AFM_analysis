@@ -74,6 +74,21 @@ class Plot_Definitions:
     font_size_tick_labels = 8
     font_size_legend = 8
     font_size_fig_title = 12
+    #definitions for color bar ranges:
+    height_cbar_range = True
+    vmin_height = 0
+    vmax_height = 0
+    amp_cbar_range = True
+    vmin_amp = 1 # to make shure that the values will be initialized with the first plotting command
+    vmax_amp = -1
+    # phase_cbar_range = True
+    full_phase_range = True # this will overwrite the cbar
+    # vmin_phase = 0
+    # vmax_phase = 0
+    real_cbar_range = True
+    vmin_real = 0
+    vmax_real = 0
+    
 
     
 
@@ -481,8 +496,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self.lower_y_bound = None
             self.align_points = None
             self.y_shifts = None
-            self.scalebar = []
-    
+            self.scalebar = []    
+
     def Initialize_Channels(self, channels:list) -> None:
         '''This function will load the data from the specified channels and replace the ones in memory.
         
@@ -976,22 +991,48 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                         axis.add_artist(scalebar)
                         # print('added a scalebar')
                     #center the colorscale for real data around 0
-                    if ('R_corrected' in title) or ('real' in title) or 'R' in title or 'I':
+                    # get minima and maxima from data:
+                    flattened_data = data.flatten()
+                    min_data = min(flattened_data)
+                    max_data = max(flattened_data)
+                    # print('min: ', min_data)
+                    # print('max: ', max_data)
+
+                    if ('R_corrected' in title) or ('real' in title) or 'R' in title or 'I' in title: # for real part or imaginary part data
                         if 'real' in title:
                             data = Set_nan_to_zero(data) #comsol data can contain nan values which are problematic for min and max
-                        flattened_data = data.flatten()
-                        min_real = min(flattened_data)
-                        max_real = max(flattened_data)
-                        # print('min: ', min_real)
-                        # print('max: ', max_real)
-                        if abs(min_real) > abs(max_real):
+                        if abs(min_data) > abs(max_data):
                             limit = abs(min_real)
-                        else: limit = abs(max_real)
-                        # print('limit: ', limit)
-                        img = axis.pcolormesh(data, cmap=cmap, vmin=-limit, vmax=limit)
+                        else: limit = abs(max_data)
+                        if abs(limit) > abs(Plot_Definitions.vmax_real):
+                            Plot_Definitions.vmin_real = -limit
+                            Plot_Definitions.vmax_real = limit
+                        if Plot_Definitions.real_cbar_range is True:
+                            img = axis.pcolormesh(data, cmap=cmap, vmin=Plot_Definitions.vmin_real, vmax=Plot_Definitions.vmax_real)
+                        else:
+                            img = axis.pcolormesh(data, cmap=cmap, vmin=-limit, vmax=limit)
                     else:
-                        img = axis.pcolormesh(data, cmap=cmap)
-                    if ('Z' in title) and ('_masked' in title) and ('_reduced' not in title):
+                        if cmap == SNOM_phase and Plot_Definitions.full_phase_range is True: # for phase data
+                            print('plotting full range phase')
+                            vmin = 0
+                            vmax = 2*np.pi
+                            img = axis.pcolormesh(data, cmap=cmap, vmin=vmin, vmax=vmax)
+                        elif cmap == SNOM_amplitude and Plot_Definitions.amp_cbar_range is True:
+                            if min_data < Plot_Definitions.vmin_amp: Plot_Definitions.vmin_amp = min_data # update the min and max values in Plot_Definitions if new values are outside of range
+                            if max_data > Plot_Definitions.vmax_amp: Plot_Definitions.vmax_amp = max_data
+                            vmin = Plot_Definitions.vmin_amp
+                            vmax = Plot_Definitions.vmax_amp
+                            img = axis.pcolormesh(data, cmap=cmap, vmin=vmin, vmax=vmax)
+                        elif cmap == SNOM_height and Plot_Definitions.height_cbar_range is True:
+                            if min_data < Plot_Definitions.vmin_height: Plot_Definitions.vmin_height = min_data # update the min and max values in Plot_Definitions if new values are outside of range
+                            if max_data > Plot_Definitions.vmax_height: Plot_Definitions.vmax_height = max_data
+                            vmin = Plot_Definitions.vmin_height
+                            vmax = Plot_Definitions.vmax_height
+                            img = axis.pcolormesh(data, cmap=cmap, vmin=vmin, vmax=vmax)
+                        else:
+                            print('not plotting full range phase')
+                            img = axis.pcolormesh(data, cmap=cmap)
+                    if (cmap == SNOM_height) and ('_masked' in title) and ('_reduced' not in title):
                         # create a white border around the masked area, but show the full unmasked height data
                         border_width = 1
                         yres = len(data)
@@ -1070,7 +1111,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         plt.subplots_adjust(hspace=self.hspace)
         if self.tight_layout == True:
             plt.tight_layout()
-        plt.show()
+        if self.show_plot:
+            plt.show()
     
     def Switch_Supplots(self, first_id:int=None, second_id:int=None) -> None:
         '''
@@ -1119,13 +1161,14 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         '''
         self._Plot_Subplots(self.all_subplots)
 
-    def Display_Channels(self, channels:list=None) -> None:
+    def Display_Channels(self, channels:list=None, show_plot:bool=True) -> None:
         '''This function displays the channels in memory or the specified ones.
                 
         Args:
             channels (list, optional): List of channels to display. If not specified all channels from memory will be plotted. Defaults to None.
 
         '''
+        self.show_plot = show_plot
         if channels == None:
             dataset = self.all_data
             plot_channels_dict = self.channels_label
