@@ -186,8 +186,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         #     self.Quadratic_Pixels()
 
     def _Find_Filetype(self) -> None:
-        '''This function aims at finding specific characteristics in the filename to idendify the filetype.
-        For example the difference in File_Type.standard and File_Type.standard_new are an additional ' raw' at the end of the filename.'''
+        """This function aims at finding specific characteristics in the filename to idendify the filetype.
+        For example the difference in File_Type.standard and File_Type.standard_new are an additional ' raw' at the end of the filename."""
         try:
             f_1=open(f"{self.directory_name}/{self.filename} O1A.gsf","br")
         except:
@@ -472,9 +472,9 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         return tagval
     
     def _Initialize_Data(self, channels=None) -> None:
-        '''This function initializes the data in memory. If no channels are specified the already existing data is used,
+        """This function initializes the data in memory. If no channels are specified the already existing data is used,
         which is created automatically in the instance init method. If channels are specified, the instance data is overwritten.
-        Channels must be specified as a list of channels.'''
+        Channels must be specified as a list of channels."""
         # print(f'initialising channels: {channels}')
         if channels == None:
             #none means the channels specified in the instance creation should be used
@@ -499,11 +499,11 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self.scalebar = []    
 
     def Initialize_Channels(self, channels:list) -> None:
-        '''This function will load the data from the specified channels and replace the ones in memory.
+        """This function will load the data from the specified channels and replace the ones in memory.
         
         Args:
             channels [list]: a list containing the channels you want to initialize
-        '''
+        """
         self._Initialize_Data(channels)
 
     def Add_Channels(self, channels:list) -> None:
@@ -549,8 +549,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         # print('self.all_subplots[-1]: ', [element[3] for element in self.all_subplots])
 
     def _Scale_Array(self, array, scaling) -> np.array:
-        '''This function scales a given 2D Array, it thus creates 'scaling'**2 subpixels per pixel.
-        The scaled array is returned.'''
+        """This function scales a given 2D Array, it thus creates 'scaling'**2 subpixels per pixel.
+        The scaled array is returned."""
         yres = len(array)
         xres = len(array[0])
         scaled_array = np.zeros((yres*scaling, xres*scaling))
@@ -564,12 +564,12 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         return scaled_array
 
     def Scale_Channels(self, channels:list=None, scaling:int=4) -> None:
-        '''This function scales all the data in memory or the specified channels.
+        """This function scales all the data in memory or the specified channels.
                 
         Args:
             channels (list, optional): List of channels to scale. If not specified all channels in memory will be scaled. Defaults to None.
             scaling (int, optional): Defines scaling factor. Each pixel will be scaled to scaling**2 subpixels. Defaults to 4.
-        '''
+        """
         # ToDo: reimplement scaling dependent on axis, x and y independently
         # self._Initialize_Data(channels)
         if channels is None:
@@ -594,12 +594,12 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 print(f'Channel {channel} is not in memory! Please initiate the channels you want to use first!')
 
     def _Gauss_Blurr_Data(self, array, sigma) -> np.array:
-        '''Applies a gaussian blurr to the specified array, with a specified sigma. The blurred data is returned as a list.'''
+        """Applies a gaussian blurr to the specified array, with a specified sigma. The blurred data is returned as a list."""
         return gaussian_filter(array, sigma)
 
     def _Load_Data(self, channels:list) -> list:
-        '''Loads all binary data of the specified channels and returns them in a list plus the dictionary with the channel information.
-        Height data is automatically converted to nm. '''
+        """Loads all binary data of the specified channels and returns them in a list plus the dictionary with the channel information.
+        Height data is automatically converted to nm. """
         if self.file_type == File_Type.comsol_gsf:
             return self._Load_Data_comsol(channels)
         # print('load data for self.channels: ', self.channels)
@@ -786,7 +786,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         return all_data, data_dict
 
     def _Load_Data_Binary(self, channels) -> list:
-        '''Loads all binary data of the specified channels and returns them in a list plus the dictionary for access'''
+        """Loads all binary data of the specified channels and returns them in a list plus the dictionary for access"""
         #create a list containing all the lists of the individual channels
         all_binary_data = []
         #safe the information about which channel is which list in a dictionary
@@ -800,11 +800,11 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         return all_binary_data, data_dict
 
     def Set_Min_to_Zero(self, channels:list=None) -> None:
-        '''This function sets the min value of the specified channels to zero.
+        """This function sets the min value of the specified channels to zero.
                 
         Args:
             channels (list, optional): List of channels to set min value to zero. If not specified this will apply to all height channels in memory. Defaults to None.
-        '''
+        """
         if channels is None:
             channels = []
             for channel in self.channels:
@@ -822,9 +822,9 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 print('At least one of the specified channels is not in memory! You probably should initialize the channels first.')
 
     def _Add_Subplot(self, data, channel, scalebar=None) -> list:
-        '''This function adds the specified data to the list of subplots. The list of subplots contains the data, the colormap,
+        """This function adds the specified data to the list of subplots. The list of subplots contains the data, the colormap,
         the colormap label and a title, which are generated from the channel information. The same array is also returned,
-        so it can also be iterated by an other function to only plot the data of interest.'''
+        so it can also be iterated by an other function to only plot the data of interest."""
         if self.file_type == File_Type.standard or self.file_type == File_Type.standard_new or self.file_type==File_Type.neaspec_version_1_6_3359_1:
             if 'A' in channel:
                 cmap=SNOM_amplitude
@@ -902,30 +902,30 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             return [data, cmap, label, title]
     
     def Remove_Subplots(self, index_array:list) -> None:
-        '''This function removes the specified subplot from the memory.
+        """This function removes the specified subplot from the memory.
         
         Args:
             index_array [list]: The indices of the subplots to remove from the plot list
-        '''
+        """
         #sort the index array in descending order and delete the corresponding plots from the memory
         index_array.sort(reverse=True)
         for index in index_array:
             del self.all_subplots[index]
 
     def Remove_Last_Subplots(self, times:int=1) -> None:
-        '''This function removes the last added subplots from the memory.
+        """This function removes the last added subplots from the memory.
         Times specifies how often the last subplot should be removed.
         Times=1 means only the last, times=2 means the two last, ...
         
         Args:
             times [int]: how many subplots should be removed from the end of the list?
-        '''
+        """
         for i in range(times):
             self.all_subplots.pop()
 
     def _Plot_Subplots(self, subplots) -> None:
-        '''This function plots the subplots. The plots are created in a grid, by default the grid is optimized for 3 by 3. The layout changes dependent on the number of subplots
-        of subplots and also the dimensions. Wider subplots are prefferably created vertically, otherwise they are plotted horizontally. Probably subject to future changes...'''
+        """This function plots the subplots. The plots are created in a grid, by default the grid is optimized for 3 by 3. The layout changes dependent on the number of subplots
+        of subplots and also the dimensions. Wider subplots are prefferably created vertically, otherwise they are plotted horizontally. Probably subject to future changes..."""
         number_of_axis = 9
         number_of_subplots = len(subplots)
         # print('Number of subplots: {}'.format(number_of_subplots))
@@ -1115,7 +1115,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             plt.show()
     
     def Switch_Supplots(self, first_id:int=None, second_id:int=None) -> None:
-        '''
+        """
         This function changes the position of the subplots.
         The first and second id corresponds to the positions of the two subplots which should be switched.
         This function will be repea you are satisfied.
@@ -1123,7 +1123,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         Args:
             first_id [int]: the first id of the two subplots which should be switched
             second_id [int]: the second id of the two subplots which should be switched
-        '''
+        """
         if (first_id == None) or (second_id == None):
             first_id = int(input('Please enter the id of the first image: '))
             second_id = int(input('Please enter the id of the second image: '))
@@ -1142,10 +1142,10 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 self.Switch_Supplots()
 
     def _Display_Dataset(self, dataset, channels) -> None:
-        '''Add all data contained in dataset as subplots to one figure.
+        """Add all data contained in dataset as subplots to one figure.
         The data has to be shaped beforehand!
         channels should contain the information which channel is stored at which position in the dataset.
-        '''
+        """
         subplots = []
         for i in range(len(dataset)):
             scalebar = None
@@ -1156,18 +1156,18 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         self._Plot_Subplots(subplots)
 
     def Display_All_Subplots(self) -> None:
-        '''
+        """
         This function displays all the subplots which have been created until this point.
-        '''
+        """
         self._Plot_Subplots(self.all_subplots)
 
     def Display_Channels(self, channels:list=None, show_plot:bool=True) -> None:
-        '''This function displays the channels in memory or the specified ones.
+        """This function displays the channels in memory or the specified ones.
                 
         Args:
             channels (list, optional): List of channels to display. If not specified all channels from memory will be plotted. Defaults to None.
 
-        '''
+        """
         self.show_plot = show_plot
         if channels == None:
             dataset = self.all_data
@@ -1220,14 +1220,14 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 print(f'Channel {channel} is not in memory! Please initiate the channels you want to use first!')
 
     def Gauss_Filter_Channels_complex(self, channels:list=None, sigma=2) -> None:
-        '''This function gauss filters the instance channels. For optical channels, amplitude and phase have to be specified!
+        """This function gauss filters the instance channels. For optical channels, amplitude and phase have to be specified!
         Please make shure you scale your data prior to calling this function rather improve the visibility than loosing to much information
                 
         Args:
             channels [list]: list of channels to blurr, must contain amplitude and phase of same channels.
             sigma [int]: the sigma used for blurring the data, bigger sigma means bigger blurr radius
 
-        '''
+        """
         # self._Initialize_Data(channels) # remove initialization and only filter specified channels
         self._Write_to_Logfile('gaussian_filter_complex_sigma', sigma)
         #check if data is scaled, this should be done prior to blurring
@@ -1336,7 +1336,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 print(f'You wanted to blurr {self.channels[channels_to_filter[2*i]]}, but that is not implemented! 2')
                 
     def _Get_Compl_Angle(self, compl_number_array) -> np.array:
-        '''This function returns the angles of a clomplex number array.'''
+        """This function returns the angles of a clomplex number array."""
         YRes = len(compl_number_array)
         XRes = len(compl_number_array[0])
         realpart = compl_number_array.real
@@ -1357,11 +1357,11 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         return FS_compl
     
     def Fourier_Filter_Channels(self, channels:list=None) -> None:
-        '''This function applies the Fourier filter to all data in memory or specified channels
+        """This function applies the Fourier filter to all data in memory or specified channels
                 
         Args:
             channels [list]: list of channels, will override the already existing channels
-        '''
+        """
         self._Initialize_Data(channels)
         self._Write_to_Logfile('fourier_filter', True)
         channels_to_filter = []
@@ -1426,13 +1426,13 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         return header, NUL
 
     def Save_to_gsf(self, channels:list=None, appendix:str='_manipulated'):
-        '''This function is ment to save all specified channels to external .gsf files.
+        """This function is ment to save all specified channels to external .gsf files.
         
         Args:
             channels [list]:    list of the channels to be saved, if not specified, all channels in memory are saved
                                 Careful! The data will be saved as it is right now, so with all the manipulations.
                                 Therefor the data will have an '_manipulated' appendix in the filename.
-        '''
+        """
         self._Write_to_Logfile('save_to_gsf_appendix', appendix)
         if channels == None:
             channels = self.channels
@@ -1458,13 +1458,13 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             print(filepath)
 
     def Save_to_txt(self, channels:list=None, appendix:str='_manipulated'):
-        '''This function is ment to save all specified channels to external .txt files.
+        """This function is ment to save all specified channels to external .txt files.
         
         Args:
             channels [list]:    list of the channels to be saved, if not specified, all channels in memory are saved
                                 Careful! The data will be saved as it is right now, so with all the manipulations.
                                 Therefor the data will have an '_manipulated' appendix in the filename.
-        '''
+        """
         self._Write_to_Logfile('save_to_txt_appendix', appendix)
         if channels == None:
             channels = self.channels
@@ -1485,12 +1485,12 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             print(filepath)
     
     def _Create_Synccorr_Preview(self, channel, wavelength, scanangle) -> None:
-        '''
+        """
         This function is part of the Synccorrection and creates a preview of the corrected data.
         channel specifies which channel should be used for the preview.
         Wavelength must be given in µm.
         Scanangle is the rotation angle of the scan in radians.
-        '''
+        """
         phasedir_positive = 1
         phasedir_negative = -1
         # phase_data = self._Load_Data([channel])[0][0]
@@ -1525,17 +1525,17 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         return phasedir
 
     def Synccorrection(self, wavelength:float, phasedir:int=None) -> None:
-        '''This function corrects all the phase channels for the linear phase gradient
+        """This function corrects all the phase channels for the linear phase gradient
         which stems from the synchronized measurement mode.
         The wavelength must be given in µm.
         The phasedir is either 1 or -1. If you are unshure about the direction just leave the parameter out.
         You will be shown a preview for both directions and then you must choose the correct one.
                 
         Args:
-            wavelenght [float]: please enter the wavelength in µm
-            phasedir [int]: the phase direction, leave out if not known and you will be prompted with a preview and can select the appropriate direction
+            wavelenght [float]: please enter the wavelength in µm.
+            phasedir [int]: the phase direction, leave out if not known and you will be prompted with a preview and can select the appropriate direction.
 
-        '''
+        """
         if self.autoscale == True:
             print('careful! The synccorretion does not work when autoscale is enabled.')
             exit()
@@ -1578,9 +1578,9 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             realf.close()
 
     def _Gen_From_Input_Phasedir(self) -> int:
-        '''
+        """
         This function asks the user to input a phase direction, input must be either n or p, for negative or positive respectively.
-        '''
+        """
         phasedir = input('Did you prefer the negative or positive phase direction? Please enter either \'n\' or \'p\'\n')
         if phasedir == 'n':
             return -1
@@ -1591,14 +1591,14 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self._Gen_From_Input_Phasedir()
     
     def _Get_Channel_Scaling(self, channel_id) -> int :
-        '''This function checks if an instance channel is scaled and returns the scaling factor.'''
+        """This function checks if an instance channel is scaled and returns the scaling factor."""
         channel_yres = len(self.all_data[channel_id])
         # channel_xres = len(self.all_data[channel_id][0])
         return int(channel_yres/self.YRes)
 
     def _Create_Height_Mask_Preview(self, mask_array) -> None:
-        '''This function creates a preview of the height masking.
-        The preview is based on all channels in the instance'''
+        """This function creates a preview of the height masking.
+        The preview is based on all channels in the instance"""
         channels = self.channels
         dataset = self.all_data
         subplots = []
@@ -1610,7 +1610,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         self.Remove_Last_Subplots(3)
         
     def _User_Input_Bool(self) -> bool: 
-        '''This function asks the user to input yes or no and returns a boolean value.'''
+        """This function asks the user to input yes or no and returns a boolean value."""
         user_input = input('Please type y for yes or n for no. \nInput: ')
         if user_input == 'y':
             user_bool = True
@@ -1627,8 +1627,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         return input(message)
 
     def _Create_Mask_Array(self, height_data, threshold) -> np.array:
-        '''This function takes the height data and a threshold value to create a mask array containing 0 and 1 values.
-        '''
+        """This function takes the height data and a threshold value to create a mask array containing 0 and 1 values.
+        """
         height_flattened = height_data.flatten()
         height_threshold = threshold*(max(height_flattened)-min(height_flattened))+min(height_flattened)
 
@@ -1645,7 +1645,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         return mask_array
 
     def _Get_Height_Treshold(self, height_data, mask_array, threshold) -> float:
-        '''This function returns the height threshold value dependent on the user input'''
+        """This function returns the height threshold value dependent on the user input"""
         self._Create_Height_Mask_Preview(mask_array)
         print('Do you want to use these parameters to mask the data?')
         mask_data = self._User_Input_Bool()
@@ -1665,7 +1665,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         return threshold
 
     def Heigth_Mask_Channels(self, channels:list=None, mask_channel=None, threshold=0.5, mask_data=False, export:bool=False) -> None:
-        '''
+        """
         The treshold factor should be between 0 and 1. It sets the threshold for the height pixels.
         Every pixel below threshold will be set to 0. This also applies for all other channels. 
         You can either specify specific channels to mask or if you don't specify channels,
@@ -1679,7 +1679,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             mask_data [bool]: if you want to apply the mask directly with the specified threshold change to 'True',
                             otherwise you will be prompted with a preview and can then change the threshold iteratively
             export [bool]: if you want to apply the mask to all channels and export them change to 'True'
-        '''
+        """
         if export == True:
             channels = self.all_channels
         self._Initialize_Data(channels)
@@ -1732,7 +1732,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 self.channels_label[i] = self.channels_label[i] + '_masked'
 
     def _Check_Pixel_Position(self, xres, yres, x, y) -> bool:
-        '''This function checks if the pixel position is within the bounds'''
+        """This function checks if the pixel position is within the bounds"""
         if x < 0 or x > xres:
             return False
         elif y < 0 or y > yres:
@@ -1740,10 +1740,10 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         else: return True
 
     def _Get_Mean_Value(self, data, x_coord, y_coord, zone) -> float:
-        '''This function returns the mean value of the pixel and its nearest neighbors.
+        """This function returns the mean value of the pixel and its nearest neighbors.
         The zone specifies the number of neighbors. 1 means the pixel and the 8 nearest pixels.
         2 means zone 1 plus the next 16, so a total of 25 with the pixel in the middle. 
-        '''
+        """
         xres = len(data[0])
         yres = len(data)
         size = 2*zone + 1
@@ -1798,9 +1798,9 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         return leveled_height_data
 
     def _Shift_Phase_Data(self, data, shift) -> np.array:
-        '''This function adds a phaseshift to the specified phase data. The phase data is automatically kept in the 0 to 2 pi range.
+        """This function adds a phaseshift to the specified phase data. The phase data is automatically kept in the 0 to 2 pi range.
         Could in future be extended to show a live view of the phase data while it can be modified by a slider...
-        e.g. by shifting the colorscale in the preview rather than the actual data...'''
+        e.g. by shifting the colorscale in the preview rather than the actual data..."""
         yres = len(data)
         xres = len(data[0])
         for y in range(yres):
@@ -1809,8 +1809,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         return data
 
     def _Level_Phase_Slope(self, data, slope) -> np.array:
-        '''This function substracts a linear phase gradient in y direction from the specified phase data.
-        '''
+        """This function substracts a linear phase gradient in y direction from the specified phase data.
+        """
         yres = len(data)
         xres = len(data[0])
         for y in range(yres):
@@ -1819,7 +1819,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         return self._Shift_Phase_Data(data, 0)
 
     def Correct_Phase_Drift(self, channels:list=None, export:bool=False, phase_slope=None, zone:int=1) -> None:
-        '''This function asks the user to click on two points which should have the same phase value.
+        """This function asks the user to click on two points which should have the same phase value.
         Only the slow drift in y-direction will be compensated. Could in future be extended to include a percentual drift compensation along the x-direction.
         But should usually not be necessary.
                 
@@ -1830,7 +1830,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                                 and it will prompt you with a preview to select two points to calculate the slope from
             zone [int]: defines the area which is used to calculate the mean around the click position in the preview,
                         0 means only the click position, 1 means the nearest 9 ...
-        '''
+        """
         # zone = int(zone*self.scaling_factor/4) #automatically enlargen the zone if the data has been scaled by more than a factor of 4
         self._Initialize_Data(channels)
         phase_data = None
@@ -1925,12 +1925,12 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                         exit()
 
     def Level_Height_Channels(self, channels:list=None) -> None:
-        '''This function levels all height channels which are either user specified or in the instance memory.
+        """This function levels all height channels which are either user specified or in the instance memory.
         The leveling will prompt the user with a preview to select 3 points for getting the coordinates of the leveling plane.
         
         Args:
             channels (list, optional): List of channels to level. If not specified all channels in memory will be used. Defaults to None.
-        '''
+        """
         # self._Initialize_Data(channels)
         if channels is None:
             channels = self.channels
@@ -1940,7 +1940,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 self.channels_label[self.channels.index(channel)] += '_leveled' 
 
     def Shift_Phase(self, shift:float=None, channels:list=None) -> None:
-        '''This function will prompt the user with a preview of the first phase channel in memory.
+        """This function will prompt the user with a preview of the first phase channel in memory.
         Under the preview is a slider, by changing the slider value the phase preview will shift accordingly.
         If you are satisfied with the shift, hit the 'accept' button. The preview will close and the shift will
         be applied to all phase channels in memory.
@@ -1949,7 +1949,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             shift (float, optional): If you know the shift value already, you can enter values between 0 and 2*Pi
             channels (list, optional): List of channels to apply the shift to, only phase channels will be shifted though.
                 If not specified all channels in memory will be used. Defaults to None.
-        '''
+        """
         if channels is None:
             channels = self.channels
         # self._Initialize_Data(channels)
@@ -2018,7 +2018,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         return data_shifted
 
     def Realign(self, channels:list=None):
-        '''This function corrects the drift of the piezo motor. As of now it needs to be fitted to a region of the sample which is assumed to be straight.
+        """This function corrects the drift of the piezo motor. As of now it needs to be fitted to a region of the sample which is assumed to be straight.
         In the future this could be implemented with a general map containing the distortion created by the piezo motor, if it turns out to be constant...
         Anyways, you will be prompted with a preview of the height data, please select an area of the scan with only one 'straight' waveguide. 
         The bounds for the fitting routine are based on the lower and upper limit of this selection.
@@ -2028,7 +2028,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         Args:  
             channels [list]: list of channels, will override the already existing channels
         
-        '''
+        """
         self._Initialize_Data(channels)
         # store the bounds in the instance so the plotting algorithm can access them
         # get the bounds from drawing a rectangle:
@@ -2096,7 +2096,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self.channels_label[i] += '_shifted'
 
     def Cut_Channels(self, channels:list=None, preview_channel:str=None, autocut:bool=False, coords:list=None, reset_mask:bool=False) -> None:
-        '''This function cuts the specified channels to the specified region. If no coordinates are specified you will be prompted with a window to select an area.
+        """This function cuts the specified channels to the specified region. If no coordinates are specified you will be prompted with a window to select an area.
         If you created a mask previously for this instance the old mask will be reused! Otherwise you should manually change the reset_mask parameter to True.
 
         Args:
@@ -2106,7 +2106,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             autocut (bool, optional): If set to 'True' the program will automatically try to remove zero lines and columns, which can result from masking.
             coords (list, optional): If you already now the coordinates ([[x1,y1], [x2,y2], [x3,y3], [x4,y4]]) to which you want to cut your data. Defaults to None.
             reset_mask (bool, optional): If you dont want to reuse an old mask set to True. Defaults to False.
-        '''
+        """
         # self._Initialize_Data(channels)
         if channels is None:
             channels = self.channels # if nothing is specified, the cut will be applied to all channels in memory!
@@ -2159,9 +2159,9 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 self._Auto_Cut_Channels(channels)
         
     def _Auto_Cut_Channels(self, channels:list=None) -> None:
-        '''This function automatically cuts away all rows and lines which are only filled with zeros.
+        """This function automatically cuts away all rows and lines which are only filled with zeros.
         This function applies to all channels in memory.
-        '''
+        """
         if channels is None:
             channels = self.channels
         
@@ -2195,7 +2195,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self.channels_label[index] += '_reduced'
 
     def _Auto_Cut_Data(self, data) -> np.array:
-        '''This function cuts the data and removes zero values from the outside.'''
+        """This function cuts the data and removes zero values from the outside."""
         xres = len(data[0])
         yres = len(data)
         # find empty columns and rows to delete:
@@ -2236,11 +2236,11 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
     def Scalebar(self, channels:list=[], units="m", dimension="si-length", label=None, length_fraction=None, height_fraction=None, width_fraction=None,
             location=None, loc=None, pad=None, border_pad=None, sep=None, frameon=None, color=None, box_color=None, box_alpha=None, scale_loc=None,
             label_loc=None, font_properties=None, label_formatter=None, scale_formatter=None, fixed_value=None, fixed_units=None, animated=False, rotation=None):
-        '''Adds a scalebar to all specified channels.
+        """Adds a scalebar to all specified channels.
         Args:
             channels (list): List of channels the scalebar should be added to.
             various definitions for the scalebar, please look up 'matplotlib_scalebar.scalebar' for more information
-        '''
+        """
         
         # scalebar = ScaleBar(dx, units, dimension, label, length_fraction, height_fraction, width_fraction,
             # location, loc, pad, border_pad, sep, frameon, color, box_color, box_alpha, scale_loc,
@@ -2664,12 +2664,12 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         return new_data
 
     def Quadratic_Pixels(self, channels:list=None):
-        '''This function scales the data such that each pixel is quadratic, eg. the physical dimensions are equal.
+        """This function scales the data such that each pixel is quadratic, eg. the physical dimensions are equal.
         This is important because the pixels will be set to quadratic in the plotting function.
         
         Args:
             channels [list]: list of channels the scaling should be applied to. If not specified the scaling will be applied to all channels
-        '''
+        """
         self._Write_to_Logfile('quadratic_pixels', True)
         if channels == None:
             channels = self.channels
