@@ -1013,7 +1013,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                             img = axis.pcolormesh(data, cmap=cmap, vmin=-limit, vmax=limit)
                     else:
                         if cmap == SNOM_phase and Plot_Definitions.full_phase_range is True: # for phase data
-                            print('plotting full range phase')
+                            # print('plotting full range phase')
                             vmin = 0
                             vmax = 2*np.pi
                             img = axis.pcolormesh(data, cmap=cmap, vmin=vmin, vmax=vmax)
@@ -1030,7 +1030,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                             vmax = Plot_Definitions.vmax_height
                             img = axis.pcolormesh(data, cmap=cmap, vmin=vmin, vmax=vmax)
                         else:
-                            print('not plotting full range phase')
+                            # print('not plotting full range phase')
                             img = axis.pcolormesh(data, cmap=cmap)
                     if (cmap == SNOM_height) and ('_masked' in title) and ('_reduced' not in title):
                         # create a white border around the masked area, but show the full unmasked height data
@@ -1484,13 +1484,14 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             print(f'successfully saved channel {channel} to .txt')
             print(filepath)
     
-    def _Create_Synccorr_Preview(self, channel, wavelength, scanangle) -> None:
+    def _Create_Synccorr_Preview(self, channel, wavelength, nouserinput=False) -> None:
         """
         This function is part of the Synccorrection and creates a preview of the corrected data.
         channel specifies which channel should be used for the preview.
         Wavelength must be given in µm.
         Scanangle is the rotation angle of the scan in radians.
         """
+        scanangle = self.measurement_tag_dict[Tag_Type.rotation]*np.pi/180
         phasedir_positive = 1
         phasedir_negative = -1
         # phase_data = self._Load_Data([channel])[0][0]
@@ -1519,10 +1520,11 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         # remove the preview subplots from the subplot memory after plotting
         self.Remove_Last_Subplots(3)
         #ask the user to chose a correction direction
-        phasedir = self._Gen_From_Input_Phasedir()
+        if nouserinput is False:
+            phasedir = self._Gen_From_Input_Phasedir()
+            return phasedir
         #start the correction
         # self.Synccorrection(wavelength, phasedir)
-        return phasedir
 
     def Synccorrection(self, wavelength:float, phasedir:int=None) -> None:
         """This function corrects all the phase channels for the linear phase gradient
@@ -1532,20 +1534,20 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         You will be shown a preview for both directions and then you must choose the correct one.
                 
         Args:
-            wavelenght [float]: please enter the wavelength in µm.
-            phasedir [int]: the phase direction, leave out if not known and you will be prompted with a preview and can select the appropriate direction.
+            wavelenght (float): please enter the wavelength in µm.
+            phasedir (int): the phase direction, leave out if not known and you will be prompted with a preview and can select the appropriate direction.
 
         """
         if self.autoscale == True:
             print('careful! The synccorretion does not work when autoscale is enabled.')
             exit()
         all_channels = self.phase_channels + self.amp_channels
-        print(all_channels)
+        # print(all_channels)
         self._Initialize_Data(all_channels)
-        print(self.channels)
+        # print(self.channels)
         scanangle = self.measurement_tag_dict[Tag_Type.rotation]*np.pi/180
         if phasedir == None:
-            phasedir = self._Create_Synccorr_Preview(self.preview_phasechannel, wavelength, scanangle)
+            phasedir = self._Create_Synccorr_Preview(self.preview_phasechannel, wavelength)
         self._Write_to_Logfile('synccorrection_wavelength', wavelength)
         self._Write_to_Logfile('synccorrection_phasedir', phasedir)
         # all_channels = self.all_channels
@@ -2946,12 +2948,12 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         real_channel_dict = amp_dict
         imag_channel_dict = amp_dict
 
-        if complex_type is 'real':
+        if complex_type == 'real':
             self.channels.append(real_channel)
             self.all_data.append(real_data)
             self.channel_tag_dict.append(real_channel_dict)
             self.channels_label.append(real_channel)
-        elif complex_type is 'imag':
+        elif complex_type == 'imag':
             self.channels.append(imag_channel)
             self.all_data.append(imag_data)
             self.channel_tag_dict.append(imag_channel_dict)
