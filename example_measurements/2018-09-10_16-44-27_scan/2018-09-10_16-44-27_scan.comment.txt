@@ -1,0 +1,1 @@
+Au Reference, MIRCAT QCL3 @ 890 cm-1, P=2,9 mW, I=, Est: 42nm, Offset Sweep: zuerst alle runter: O1,O2,O3,O4->'-'

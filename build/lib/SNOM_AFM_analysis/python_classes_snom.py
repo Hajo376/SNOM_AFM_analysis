@@ -35,7 +35,7 @@ class File_Type(Enum):
     neaspec_version_1_6_3359_1 = auto()
     # for the parameters:
     html = auto()
-    txt = auto()
+    txt = auto() # only for aachen style txt?!
     html_new = auto()# new software version creates slightly different html file
     html_neaspec_version_1_6_3359_1 = auto()
     comsol_gsf = auto()
@@ -198,7 +198,14 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 try:
                     f_3=open(f"{self.directory_name}/{self.filename}_parameters.txt","r")
                 except:
-                    print("The correct filetype could automatically be found. Please try again and specifiy the filetype.")
+                    try:
+                        f_4=open(f"{self.directory_name}/{self.filename}_O1-F-abs.ascii", 'r')
+                    except:
+                        print("The correct filetype could not automatically be found. Please try again and specifiy the filetype.")
+                    else:
+                        f_4.close()
+                        File_Definitions.file_type = File_Type.aachen_ascii
+                        File_Definitions.parmeters_type = File_Type.txt
                 else:
                     f_3.close()
                     File_Definitions.file_type = File_Type.comsol_gsf
@@ -212,20 +219,24 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             File_Definitions.file_type = File_Type.standard
             File_Definitions.parmeters_type = File_Type.html
         #alternative way: get the software version from the last entry in the .txt file
-        parameters = self.directory_name + '/' + self.filename + '.txt' #standard snom files, not for aachen files
-        file = open(parameters, 'r', encoding="utf-8")
-        parameter_list = file.read()
-        file.close()
-        parameter_list = parameter_list.split('\n')
-        # print(parameter_list)
-        # print(parameter_list[-2])
-        version_number = parameter_list[-2].split('\t')[-1]
-        print('version_number:      ', version_number)
-        if version_number != ['']:
-            self.version_number = version_number
-        if version_number == '1.6.3359.1':
-            File_Definitions.file_type = File_Type.neaspec_version_1_6_3359_1
-            File_Definitions.parmeters_type = File_Type.html_neaspec_version_1_6_3359_1
+        try:
+            parameters = self.directory_name + '/' + self.filename + '.txt' #standard snom files, not for aachen files
+            file = open(parameters, 'r', encoding="utf-8")
+        except:
+            pass
+        else:
+            parameter_list = file.read()
+            file.close()
+            parameter_list = parameter_list.split('\n')
+            # print(parameter_list)
+            # print(parameter_list[-2])
+            version_number = parameter_list[-2].split('\t')[-1]
+            print('version_number:      ', version_number)
+            if version_number != ['']:
+                self.version_number = version_number
+            if version_number == '1.6.3359.1':
+                File_Definitions.file_type = File_Type.neaspec_version_1_6_3359_1
+                File_Definitions.parmeters_type = File_Type.html_neaspec_version_1_6_3359_1
 
     def _Initialize_File_Type(self) -> None:
         self._Find_Filetype() # try to find the filetype automatically
@@ -702,7 +713,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 for y in range(0,YRes):
                     for x in range(0,XRes):
                         datalist[y][x] = round(datalist[y][x]*scaling + phaseoffset, rounding_decimal)
-                all_data[i] = datalist
+                # all_data[i] = datalist #old
+                all_data.append(datalist)
                 data_dict.append(channels[i])
 
         elif self.file_type == File_Type.aachen_gsf:
@@ -2948,12 +2960,12 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         real_channel_dict = amp_dict
         imag_channel_dict = amp_dict
 
-        if complex_type is 'real':
+        if complex_type == 'real':
             self.channels.append(real_channel)
             self.all_data.append(real_data)
             self.channel_tag_dict.append(real_channel_dict)
             self.channels_label.append(real_channel)
-        elif complex_type is 'imag':
+        elif complex_type == 'imag':
             self.channels.append(imag_channel)
             self.all_data.append(imag_data)
             self.channel_tag_dict.append(imag_channel_dict)
