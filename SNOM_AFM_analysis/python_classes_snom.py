@@ -243,26 +243,23 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         self.file_type = File_Definitions.file_type
         self.parameters_type = File_Definitions.parmeters_type
         if self.file_type == File_Type.standard or self.file_type == File_Type.standard_new or self.file_type == File_Type.neaspec_version_1_6_3359_1:
-            self.height_channel = "Z C"
-            self.all_channels = ["O1A","O1P","O2A","O2P","O3A","O3P","O4A","O4P","O5A","O5P","R-O1A","R-O1P","R-O2A","R-O2P","R-O3A","R-O3P","R-O4A","R-O4P","R-O5A","R-O5P"]
+            self.all_channels = ['O1A','O1P','O2A','O2P','O3A','O3P','O4A','O4P','O5A','O5P','R-O1A','R-O1P','R-O2A','R-O2P','R-O3A','R-O3P','R-O4A','R-O4P','R-O5A','R-O5P']
             self.phase_channels = ['O1P','O2P','O3P','O4P','O5P', 'R-O1P','R-O2P','R-O3P','R-O4P','R-O5P']
-            self.overlain_phase_channels = [channel+'_overlain_manipulated' for channel in self.phase_channels]
-            self.corrected_phase_channels = ['O1P_corrected','O2P_corrected','O3P_corrected','O4P_corrected','O5P_corrected', 'R-O1P_corrected','R-O2P_corrected','R-O3P_corrected','R-O4P_corrected','R-O5P_corrected']
-            self.corrected_overlain_phase_channels = [channel+'_overlain_manipulated' for channel in self.corrected_phase_channels]
             self.amp_channels = ['O1A','O2A','O3A','O4A','O5A', 'R-O1A','R-O2A','R-O3A','R-O4A','R-O5A']
-            self.overlayed_amp_channels = [channel+'_overlain_manipulated' for channel in self.amp_channels]
             self.real_channels = ['O1R', 'O2R', 'O3R', 'O4R', 'R-O5R', 'R-O1R', 'R-O2R', 'R-O3R', 'R-O4R', 'R-O5R']
+            self.height_channel = 'Z C'
             self.preview_ampchannel = 'O2A'
             self.preview_phasechannel = 'O2P'
             self.height_indicator = 'Z'
             self.amp_indicator = 'A'
             self.phase_indicator = 'P'
+            self.backwards_indicator = 'R-'
         elif self.file_type == File_Type.aachen_ascii or self.file_type == File_Type.aachen_gsf:
-            self.all_channels = ["O1-F-abs","O1-F-arg","O2-F-abs","O2-F-arg","O3-F-abs","O3-F-arg","O4-F-abs","O4-F-arg"]
+            self.all_channels = ['O1-F-abs','O1-F-arg','O2-F-abs','O2-F-arg','O3-F-abs','O3-F-arg','O4-F-abs','O4-F-arg']
             self.phase_channels = ['O1-F-arg','O2-F-arg','O3-F-arg','O4-F-arg']
             self.amp_channels = ['O1-F-abs','O2-F-abs','O3-F-abs','O4-F-abs']
             self.real_channels = ['O1-F-real','O2-F-real','O3-F-real','O4-F-real',]
-            self.height_channel = "MT-F-abs"
+            self.height_channel = 'MT-F-abs'
             self.preview_ampchannel = 'O2-F-abs'
             self.preview_phasechannel = 'O2-F-arg'
             self.height_indicator = 'MT'
@@ -279,6 +276,15 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self.height_indicator = None
             self.amp_indicator = 'abs'
             self.phase_indicator = 'arg'
+        #create also lists for the overlain channels
+        self.overlain_phase_channels = [channel+'_overlain_manipulated' for channel in self.phase_channels]
+        self.overlayed_amp_channels = [channel+'_overlain_manipulated' for channel in self.amp_channels]
+        # self.corrected_phase_channels = ['O1P_corrected','O2P_corrected','O3P_corrected','O4P_corrected','O5P_corrected', 'R-O1P_corrected','R-O2P_corrected','R-O3P_corrected','R-O4P_corrected','R-O5P_corrected']
+        self.corrected_phase_channels = [channel+'_corrected' for channel in self.phase_channels]
+        self.corrected_overlain_phase_channels = [channel+'_overlain_manipulated' for channel in self.corrected_phase_channels]
+
+
+
 
     def _Create_Measurement_Tag_Dict(self):
         # create tag_dict for each channel individually? if manipulated channels are loaded they might have different diffrent resolution
@@ -383,6 +389,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         self.XReal, self.YReal = self.measurement_tag_dict[Tag_Type.scan_area] # in µm
 
     def _Create_Channels_Tag_Dict(self, channels:list=None):
+        # ToDo optimize everything so new filetypes dont need so much extra copies
         if channels == None:
             channels = self.channels
         if (self.file_type == File_Type.standard) or (self.file_type == File_Type.standard_new) or (self.file_type == File_Type.aachen_gsf) or (self.file_type == File_Type.comsol_gsf) or (self.file_type == File_Type.neaspec_version_1_6_3359_1):
@@ -396,6 +403,12 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                         filepath = self.directory_name + '/' + self.filename + ' ' + channel + '.gsf'
                     else:
                         filepath = self.directory_name + '/' + self.filename + ' ' + channel + ' raw.gsf'
+                # elif self.file_type == File_Type.aachen_ascii:
+                #     if '_corrected' in channel or '_manipulated' in channel: 
+                #         filepath = self.directory_name + '/' + self.filename + ' ' + channel + '.gsf'
+                #     else:
+                #         filepath = self.directory_name + '/' + self.filename + '_' + channel + '.ascii'
+                #         cod = None
                 else:
                     filepath = self.directory_name + '/' + self.filename + ' ' + channel + '.gsf'
                 file = open(filepath, 'r', encoding=cod)
@@ -422,7 +435,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 self.channel_tag_dict.append(channel_dict)
             pass
         else:
-            if self.parameters_type == File_Type.txt:
+            if self.parameters_type == File_Type.txt: #only for aachen files
                 if channels == self.channels:
                     self.channel_tag_dict = []
                 parameters = self.directory_name + '/' + self.filename + '.parameters.txt'
@@ -440,7 +453,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                         Tag_Type.center_pos: center_pos,
                         Tag_Type.rotation: rotation,
                         Tag_Type.pixel_area: pixel_area,
-                        Tag_Type.scan_area: scan_area
+                        Tag_Type.scan_area: scan_area,
+                        Tag_Type.pixel_scaling: 1
                     }
                 # for this file type all channels must be of same size
                 for channel in channels:
@@ -692,7 +706,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 string_data = file.read()
                 datalist = string_data.split('\n')
                 datalist = [element.split(' ') for element in datalist]
-                datalist = np.array(datalist[:-1], dtype=np.float)# convert list to np.array and strings to float
+                datalist = np.array(datalist[:-1], dtype=float)#, dtype=np.float convert list to np.array and strings to float
                 channel = channels[i]
                 phaseoffset = 0
                 rounding_decimal = 2
@@ -1010,7 +1024,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     # print('min: ', min_data)
                     # print('max: ', max_data)
 
-                    if ('R_corrected' in title) or ('real' in title) or 'R' in title or 'I' in title: # for real part or imaginary part data
+                    if ('R_corrected' in title) or ('real' in title) or ('R' in title and self.backwards_indicator not in title) or 'I' in title: # for real part or imaginary part data
                         if 'real' in title:
                             data = Set_nan_to_zero(data) #comsol data can contain nan values which are problematic for min and max
                         if abs(min_data) > abs(max_data):
@@ -1304,6 +1318,9 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         for i in range(int(len(channels_to_filter)/2)):
             # print(f'channel {self.channels[channels_to_filter[2*i]]} is blurred!')
             if (self.channels[channels_to_filter[2*i]] in self.amp_channels) or (self.channels[channels_to_filter[2*i]] in ['R-' + element for element in self.amp_channels]) or (self.channels[channels_to_filter[2*i]] in self.overlayed_amp_channels):
+                # print(self.channel_tag_dict) # ToDo remove
+                # print(self.file_type) # ToDo remove
+                # print(self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_scaling] = scaling)
                 pixel_scaling_amp = self.channel_tag_dict[channels_to_filter[2*i]][Tag_Type.pixel_scaling]
                 pixel_scaling_phase = self.channel_tag_dict[channels_to_filter[2*i+1]][Tag_Type.pixel_scaling]
                 if pixel_scaling_amp == 1 and pixel_scaling_phase == 1:

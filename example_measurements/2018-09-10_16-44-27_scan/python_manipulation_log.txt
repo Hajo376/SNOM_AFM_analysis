@@ -22,3 +22,74 @@ quadratic_pixels = True
 05/07/2023 11:31:28
 filename = 2018-09-10_16-44-27_scan
 quadratic_pixels = True
+05/07/2023 12:47:08
+filename = 2018-09-10_16-44-27_scan
+05/07/2023 12:47:32
+filename = 2018-09-10_16-44-27_scan
+quadratic_pixels = True
+05/07/2023 12:58:06
+filename = 2018-09-10_16-44-27_scan
+quadratic_pixels = True
+set_min_to_zero = True
+05/07/2023 12:58:29
+filename = 2018-09-10_16-44-27_scan
+quadratic_pixels = True
+set_min_to_zero = True
+05/07/2023 12:59:10
+filename = 2018-09-10_16-44-27_scan
+quadratic_pixels = True
+gaussian_filter_complex_sigma = 2
+05/07/2023 13:03:31
+filename = 2018-09-10_16-44-27_scan
+quadratic_pixels = True
+gaussian_filter_complex_sigma = 2
+05/07/2023 13:03:59
+filename = 2018-09-10_16-44-27_scan
+quadratic_pixels = True
+gaussian_filter_complex_sigma = 2
+05/07/2023 13:04:14
+filename = 2018-09-10_16-44-27_scan
+quadratic_pixels = True
+scaling = 4
+05/07/2023 13:04:32
+filename = 2018-09-10_16-44-27_scan
+quadratic_pixels = True
+gaussian_filter_complex_sigma = 2
+05/07/2023 13:14:19
+filename = 2018-09-10_16-44-27_scan
+quadratic_pixels = True
+gaussian_filter_complex_sigma = 2
+05/07/2023 13:17:12
+filename = 2018-09-10_16-44-27_scan
+quadratic_pixels = True
+gaussian_filter_complex_sigma = 2
+05/07/2023 13:18:12
+filename = 2018-09-10_16-44-27_scan
+quadratic_pixels = True
+gaussian_filter_complex_sigma = 2
+05/07/2023 13:19:21
+filename = 2018-09-10_16-44-27_scan
+quadratic_pixels = True
+gaussian_filter_complex_sigma = 2
+05/07/2023 13:24:23
+filename = 2018-09-10_16-44-27_scan
+quadratic_pixels = True
+gaussian_filter_complex_sigma = 2
+05/07/2023 13:25:48
+filename = 2018-09-10_16-44-27_scan
+quadratic_pixels = True
+scaling = 4
+gaussian_filter_complex_sigma = 2
+05/07/2023 13:31:46
+filename = 2018-09-10_16-44-27_scan
+quadratic_pixels = True
+gaussian_filter_complex_sigma = 2
+scaling = 4
+05/07/2023 14:24:50
+filename = 2018-09-10_16-44-27_scan
+quadratic_pixels = True
+gaussian_filter_complex_sigma = 2
+scaling = 4
+05/07/2023 14:25:08
+filename = 2018-09-10_16-44-27_scan
+quadratic_pixels = True

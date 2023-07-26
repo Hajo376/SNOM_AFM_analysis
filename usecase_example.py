@@ -163,19 +163,20 @@ def Synccorrection():
     Measurement.Display_Channels(['O2P_corrected', 'O2A', 'Z C'])
 
 def Complete_Example_1():
-    directory_name = 'testdata/2022-04-25 1227 PH pentamer_840nm_s50_2'
+    directory_name = 'example_measurements/2022-04-25 1227 PH pentamer_840nm_s50_2'
     channels = ['O2P', 'O2A', 'Z C']
     Measurement = Open_Measurement(directory_name, channels)
-    Measurement.Set_Min_to_Zero(['Z C'])
-    Measurement.Display_Channels()
+    # Measurement.Set_Min_to_Zero(['Z C'])
+    # Measurement.Display_Channels()
     Measurement.Scale_Channels()
     Measurement.Gauss_Filter_Channels_complex()
-    Measurement.Shift_Phase()
-    Measurement.Heigth_Mask_Channels()
+    # Measurement.Shift_Phase()
+    # Measurement.Heigth_Mask_Channels()
+    Measurement.Scalebar(['Z C'])
     Measurement.Display_Channels()
-    Measurement.Cut_Channels(autocut=True) # autocut will remove all empty lines and columns
-    Measurement.Display_Channels()
-    Measurement.Display_All_Subplots()
+    # Measurement.Cut_Channels(autocut=True) # autocut will remove all empty lines and columns
+    # Measurement.Display_Channels()
+    # Measurement.Display_All_Subplots()
 
 def Test_Aachen_files():
     # File_Definitions.file_type = File_Type.aachen_gsf
@@ -188,9 +189,12 @@ def Test_Aachen_files():
 
     Measurement = Open_Measurement(directory_name, channels)
     Plot_Definitions.full_phase_range = False
-    Measurement.Display_Channels()
+    # Measurement.Display_Channels()
+    # Measurement.Set_Min_to_Zero()
     # Measurement.Scale_Channels()
     # Measurement.Gauss_Filter_Channels_complex() # will blurr the complex values of the specified channels, if optical
+    Measurement.Scalebar(['MT-F-abs'])
+    Measurement.Display_Channels()
     # Measurement.Gauss_Filter_Channels() # not ideal, will just blurr all channels independently
     # Measurement.Correct_Phase_Drift()
     # Measurement.Shift_Phase()
@@ -199,7 +203,6 @@ def Test_Aachen_files():
     # Measurement.Cut_Channels()
     # Measurement.Set_Min_to_Zero(['MT-F-abs'])
     # Measurement.Level_Height_Channels()
-    # Measurement.Scalebar(['MT-F-abs'])
     # Measurement.Display_Channels()
     # Measurement.Remove_Subplots([1])
     # Measurement.Remove_Last_Subplots(2)
@@ -237,8 +240,8 @@ def main():
     # Test_Rectangle_Selector()
     # Correct_Phase_Drift()
     # Synccorrection()
-    # Complete_Example_1()
-    Test_Aachen_files()
+    Complete_Example_1()
+    # Test_Aachen_files()
     # Test_Export_to_gsf()
 
 

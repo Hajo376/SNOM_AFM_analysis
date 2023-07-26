@@ -1,0 +1,28 @@
+11/08/2022 20:17:09
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+phase_shift = 1.8275611109825243
+11/08/2022 20:17:34
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+phase_shift = 5.633721441293236
+05/07/2023 13:30:05
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+gaussian_filter_complex_sigma = 2
+05/07/2023 14:25:56
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+gaussian_filter_complex_sigma = 2
+scaling = 4
+05/07/2023 14:26:24
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+05/07/2023 14:26:33
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+scaling = 4
+gaussian_filter_complex_sigma = 2
+05/07/2023 14:30:08
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+scaling = 4
+gaussian_filter_complex_sigma = 2
