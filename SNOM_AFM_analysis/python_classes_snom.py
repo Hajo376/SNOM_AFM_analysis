@@ -246,7 +246,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self.all_channels = ['O1A','O1P','O2A','O2P','O3A','O3P','O4A','O4P','O5A','O5P','R-O1A','R-O1P','R-O2A','R-O2P','R-O3A','R-O3P','R-O4A','R-O4P','R-O5A','R-O5P']
             self.phase_channels = ['O1P','O2P','O3P','O4P','O5P', 'R-O1P','R-O2P','R-O3P','R-O4P','R-O5P']
             self.amp_channels = ['O1A','O2A','O3A','O4A','O5A', 'R-O1A','R-O2A','R-O3A','R-O4A','R-O5A']
-            self.real_channels = ['O1R', 'O2R', 'O3R', 'O4R', 'R-O5R', 'R-O1R', 'R-O2R', 'R-O3R', 'R-O4R', 'R-O5R']
+            self.real_channels = ['O1Re', 'O2Re', 'O3Re', 'O4Re', 'R-O5Re', 'R-O1Re', 'R-O2Re', 'R-O3Re', 'R-O4Re', 'R-O5Re']
+            self.imag_channels = ['O1Im', 'O2Im', 'O3Im', 'O4Im', 'R-O5Im', 'R-O1Im', 'R-O2Im', 'R-O3Im', 'R-O4Im', 'R-O5Im']
             self.height_channel = 'Z C'
             self.preview_ampchannel = 'O2A'
             self.preview_phasechannel = 'O2P'
@@ -254,6 +255,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self.amp_indicator = 'A'
             self.phase_indicator = 'P'
             self.backwards_indicator = 'R-'
+            self.real_indicator = 'Re'
+            self.imag_indicator = 'Im'
         elif self.file_type == File_Type.aachen_ascii or self.file_type == File_Type.aachen_gsf:
             self.all_channels = ['O1-F-abs','O1-F-arg','O2-F-abs','O2-F-arg','O3-F-abs','O3-F-arg','O4-F-abs','O4-F-arg']
             self.phase_channels = ['O1-F-arg','O2-F-arg','O3-F-arg','O4-F-arg']
@@ -276,6 +279,13 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self.height_indicator = None
             self.amp_indicator = 'abs'
             self.phase_indicator = 'arg'
+            self.real_indicator = 'real'
+        
+        # additional definitions independent of filetype:
+        self.filter_gauss_indicator = 'gauss'
+        self.filter_fourier_indicator = 'fft'
+
+
         #create also lists for the overlain channels
         self.overlain_phase_channels = [channel+'_overlain_manipulated' for channel in self.phase_channels]
         self.overlayed_amp_channels = [channel+'_overlain_manipulated' for channel in self.amp_channels]
@@ -680,18 +690,18 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 phaseoffset = 0
                 rounding_decimal = 2
                 scaling = 1
-                if 'A' in channel:
+                if self.amp_indicator in channel:
                     rounding_decimal = 5
-                if 'Z' in channel:
+                if self.height_indicator in channel:
                     # print('channel: ', channel)
                     scaling = 1000000000#convert to nm
-                if 'P' in channel:
+                if self.phase_indicator in channel:
                     # normal phase data ranges from -pi to pi and gets shifted by +pi
                     phaseoffset = np.pi
                     if '_corrected' in channel:
                         # if the data is from a corrected channel it is already shifted
                         phaseoffset = 0
-                if 'R' in channel or 'I' in channel:
+                if self.real_indicator in channel or self.imag_indicator in channel:
                     rounding_decimal = 4
                 for y in range(0,YRes):
                     for x in range(0,XRes):
@@ -711,16 +721,16 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 phaseoffset = 0
                 rounding_decimal = 2
                 scaling = 1
-                if ('abs' in channel) and ('MT' not in channel):
+                if (self.amp_indicator in channel) and (self.height_indicator not in channel):
                     rounding_decimal = 5
-                if 'arg' in channel:
+                if self.phase_indicator in channel:
                     phaseoffset = np.pi
                     flattened_data = datalist.flatten()# ToDo just for now, in future the voltages have to be converted
                     phaseoffset = min(flattened_data)
                     if '_corrected' in channel:
                         # if the data is from a corrected channel it is already shifted
                         phaseoffset = 0
-                if 'MT' in channel:
+                if self.height_indicator in channel:
                     scaling = pow(10, 9)
                 XRes = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area][0]
                 YRes = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area][1]
@@ -747,16 +757,16 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 reduced_binarydata=all_binary_data[count][-datasize:]
                 phaseoffset = 0
                 rounding_decimal = 2
-                if ('abs' in channel) and ('MT' not in channel):
+                if (self.amp_indicator in channel) and (self.height_indicator not in channel):
                     rounding_decimal = 5
                     scaling = pow(10, 6)
-                if 'arg' in channel:
+                if self.phase_indicator in channel:
                     phaseoffset = np.pi
                     
                     if '_corrected' in channel:
                         # if the data is from a corrected channel it is already shifted
                         phaseoffset = 0
-                if 'MT' in channel:
+                if self.height_indicator in channel:
 
                     # scaling_factor = 1000000000
                     scaling = pow(10, 9)
@@ -796,12 +806,12 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             phaseoffset = 0
             rounding_decimal = 2
             scaling = 1
-            if 'abs' in channel:
+            if self.amp_indicator in channel:
                 rounding_decimal = 5
-            if 'arg' in channel:
+            if self.phase_indicator in channel:
                 # normal phase data ranges from -pi to pi and gets shifted by +pi
                 phaseoffset = np.pi
-            if 'real' in channel:
+            if self.real_indicator in channel or self.imag_indicator in channel:
                 rounding_decimal = 4
             for y in range(0,YRes):
                 for x in range(0,XRes):
@@ -851,12 +861,62 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         """This function adds the specified data to the list of subplots. The list of subplots contains the data, the colormap,
         the colormap label and a title, which are generated from the channel information. The same array is also returned,
         so it can also be iterated by an other function to only plot the data of interest."""
+        if self.amp_indicator in channel:
+            cmap=SNOM_amplitude
+            label = 'Amplitude [a.u.]'
+            title = f'Amplitude {channel}'
+        elif self.phase_indicator in channel:
+            if 'positive' in channel:
+                cmap = SNOM_phase
+                title = f'Positively corrected phase O{channel[1]}P'
+            elif 'negative' in channel:
+                cmap = SNOM_phase
+                title = f'Negatively corrected phase O{channel[1]}P'
+            else:
+                cmap=SNOM_phase
+                title = f'Phase {channel}'
+            label = 'Phase'
+        elif self.height_indicator in channel:
+            cmap=SNOM_height
+            label = 'Height [nm]'
+            title = f'Height {channel}'
+        elif self.real_indicator in channel or self.imag_indicator in channel:
+            cmap=SNOM_realpart
+            label = 'E [a.u.]'
+            if self.real_indicator in channel:
+                title = f'Real part {channel}'
+            else:
+                title = f'Imaginary part {channel}'
+        
+        
+        
+        elif self.filter_fourier_indicator in channel:
+            cmap='viridis'
+            label = 'Intensity [a.u.]'
+            title =  f'Fourier Transform {channel}'
+        elif self.filter_gauss_indicator in channel:
+            title = f'Gauss blurred {channel}'
+        else:
+            print('In _Add_Subplot(), encountered unknown channel')
+            exit()
+        # subplots.append([data, cmap, label, title])
+        if self.measurement_title != None:
+            title = self.measurement_title + title
+        if scalebar != None:
+            self.all_subplots.append([np.copy(data), cmap, label, title, scalebar])
+            return [data, cmap, label, title, scalebar]
+        else:
+            self.all_subplots.append([np.copy(data), cmap, label, title])
+            return [data, cmap, label, title]
+        
+        #old:
+        '''
         if self.file_type == File_Type.standard or self.file_type == File_Type.standard_new or self.file_type==File_Type.neaspec_version_1_6_3359_1:
-            if 'A' in channel:
+            if self.amp_indicator in channel:
                 cmap=SNOM_amplitude
                 label = 'Amplitude [a.u.]'
                 title = f'Amplitude {channel}'
-            elif 'P' in channel:
+            elif self.phase_indicator in channel:
                 if 'positive' in channel:
                     cmap = SNOM_phase
                     title = f'Positively corrected phase O{channel[1]}P'
@@ -867,14 +927,18 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     cmap=SNOM_phase
                     title = f'Phase {channel}'
                 label = 'Phase'
-            elif 'Z' in channel:
+            elif self.height_indicator in channel:
                 cmap=SNOM_height
                 label = 'Height [nm]'
                 title = f'Height {channel}'
-            elif 'R' in channel or 'real' in channel or 'I' in channel:
+            elif self.real_indicator in channel or self.imag_indicator in channel:
                 cmap=SNOM_realpart
                 label = 'E [a.u.]'
-                title = f'Realpart {channel}'
+                if self.real_indicator in channel:
+                    title = f'Real part {channel}'
+                else:
+                    title = f'Imaginary part {channel}'
+
         elif self.file_type == File_Type.aachen_ascii or self.file_type == File_Type.aachen_gsf:
             if 'abs' in channel and not 'MT' in channel:
                 cmap=SNOM_amplitude
@@ -908,24 +972,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 cmap=SNOM_realpart
                 label = 'E [a.u.]'
                 title = f'Realpart {channel}'
-        elif 'fft' in channel:
-            cmap='viridis'
-            label = 'Intensity [a.u.]'
-            title =  f'Fourier Transform {channel}'
-        elif 'gauss' in channel:
-            title = f'Gauss blurred {channel}'
-        else:
-            print('In _Add_Subplot(), encountered unknown channel')
-            exit()
-        # subplots.append([data, cmap, label, title])
-        if self.measurement_title != None:
-            title = self.measurement_title + title
-        if scalebar != None:
-            self.all_subplots.append([np.copy(data), cmap, label, title, scalebar])
-            return [data, cmap, label, title, scalebar]
-        else:
-            self.all_subplots.append([np.copy(data), cmap, label, title])
-            return [data, cmap, label, title]
+        '''
     
     def Remove_Subplots(self, index_array:list) -> None:
         """This function removes the specified subplot from the memory.
@@ -1024,11 +1071,11 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     # print('min: ', min_data)
                     # print('max: ', max_data)
 
-                    if ('R_corrected' in title) or ('real' in title) or ('R' in title and self.backwards_indicator not in title) or 'I' in title: # for real part or imaginary part data
-                        if 'real' in title:
+                    if self.real_indicator in title or self.imag_indicator in title: # for real part or imaginary part data
+                        if self.file_type == File_Type.comsol_gsf:
                             data = Set_nan_to_zero(data) #comsol data can contain nan values which are problematic for min and max
                         if abs(min_data) > abs(max_data):
-                            limit = abs(min_real)
+                            limit = abs(min_data)
                         else: limit = abs(max_data)
                         if abs(limit) > abs(Plot_Definitions.vmax_real):
                             Plot_Definitions.vmin_real = -limit
@@ -1240,8 +1287,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     if user_input == True:
                         self.Scale_Channels([channel])
                 self.all_data[channel_index] = self._Gauss_Blurr_Data(self.all_data[channel_index], sigma)
-                self.channels_label[channel_index] += '_gauss'
-                # self.channels[channel_index] = channel + '_gauss'
+                self.channels_label[channel_index] += '_' + self.filter_gauss_indicator
+                # self.channels[channel_index] = channel + '_' + self.filter_gauss_indicator
             else: 
                 print(f'Channel {channel} is not in memory! Please initiate the channels you want to use first!')
 
@@ -1290,13 +1337,13 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         # should not be necessary anymore since backwards channesl are now included in standart channle lists
         # also for backwards direction:
         for i in range(len(self.phase_channels)):
-            if ('R-' + self.amp_channels[i] in channels):
-                if ('R-' + self.phase_channels[i] in channels):
-                    channels_to_filter.append(self.channels.index('R-' + self.amp_channels[i]))
-                    channels_to_filter.append(self.channels.index('R-' + self.phase_channels[i]))
-                elif ('R-' + self.corrected_phase_channels[i] in channels):
-                    channels_to_filter.append(self.channels.index('R-' + self.amp_channels[i]))
-                    channels_to_filter.append(self.channels.index('R-' + self.corrected_phase_channels[i]))
+            if (self.backwards_indicator + self.amp_channels[i] in channels):
+                if (self.backwards_indicator + self.phase_channels[i] in channels):
+                    channels_to_filter.append(self.channels.index(self.backwards_indicator + self.amp_channels[i]))
+                    channels_to_filter.append(self.channels.index(self.backwards_indicator + self.phase_channels[i]))
+                elif (self.backwards_indicator + self.corrected_phase_channels[i] in channels):
+                    channels_to_filter.append(self.channels.index(self.backwards_indicator + self.amp_channels[i]))
+                    channels_to_filter.append(self.channels.index(self.backwards_indicator + self.corrected_phase_channels[i]))
         # print(f'channels to filter: {channels_to_filter}')
         # for i in range(len(channels_to_filter)):
         #     print(self.channels[channels_to_filter[i]])
@@ -1317,7 +1364,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         
         for i in range(int(len(channels_to_filter)/2)):
             # print(f'channel {self.channels[channels_to_filter[2*i]]} is blurred!')
-            if (self.channels[channels_to_filter[2*i]] in self.amp_channels) or (self.channels[channels_to_filter[2*i]] in ['R-' + element for element in self.amp_channels]) or (self.channels[channels_to_filter[2*i]] in self.overlayed_amp_channels):
+            if (self.channels[channels_to_filter[2*i]] in self.amp_channels) or (self.channels[channels_to_filter[2*i]] in [self.backwards_indicator + element for element in self.amp_channels]) or (self.channels[channels_to_filter[2*i]] in self.overlayed_amp_channels):
                 # print(self.channel_tag_dict) # ToDo remove
                 # print(self.file_type) # ToDo remove
                 # print(self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_scaling] = scaling)
@@ -1342,11 +1389,11 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 phase_blurred = self._Get_Compl_Angle(compl_blurred)
 
                 self.all_data[channels_to_filter[2*i]] = amp_blurred
-                self.channels_label[channels_to_filter[2*i]] = self.channels_label[channels_to_filter[2*i]] + '_gauss'
-                # self.channels[channels_to_filter[2*i]] += '_gauss'
+                self.channels_label[channels_to_filter[2*i]] = self.channels_label[channels_to_filter[2*i]] + '_' + self.filter_gauss_indicator
+                # self.channels[channels_to_filter[2*i]] += '_' + self.filter_gauss_indicator
                 self.all_data[channels_to_filter[2*i+1]] = phase_blurred
-                self.channels_label[channels_to_filter[2*i+1]] = self.channels_label[channels_to_filter[2*i+1]] + '_gauss'
-                # self.channels[channels_to_filter[2*i+1]] += '_gauss'
+                self.channels_label[channels_to_filter[2*i+1]] = self.channels_label[channels_to_filter[2*i+1]] + '_' + self.filter_gauss_indicator
+                # self.channels[channels_to_filter[2*i+1]] += '_' + self.filter_gauss_indicator
 
             elif self.height_indicator in self.channels[channels_to_filter[2*i]]:
                 pixel_scaling = self.channel_tag_dict[channels_to_filter[2*i]][Tag_Type.pixel_scaling]
@@ -1358,8 +1405,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 height = self.all_data[channels_to_filter[2*i]]
                 height_blurred = self._Gauss_Blurr_Data(height, sigma)
                 self.all_data[channels_to_filter[2*i]] = height_blurred
-                self.channels_label[channels_to_filter[2*i]] = self.channels_label[channels_to_filter[2*i]] + '_gauss'
-                self.channels[channels_to_filter[2*i]] += '_gauss'
+                self.channels_label[channels_to_filter[2*i]] = self.channels_label[channels_to_filter[2*i]] + '_' + self.filter_gauss_indicator
+                self.channels[channels_to_filter[2*i]] += '_' + self.filter_gauss_indicator
             
             else:
                 print(f'You wanted to blurr {self.channels[channels_to_filter[2*i]]}, but that is not implemented! 2')
@@ -2740,8 +2787,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         """
         all_channels = []
         for channel in channels:
-            # print('extension: ', channel, 'R-' + channel)
-            all_channels.extend([channel, 'R-' + channel])
+            # print('extension: ', channel, self.backwards_indicator + channel)
+            all_channels.extend([channel, self.backwards_indicator + channel])
         all_channels.extend([height_channel_forward, height_channel_backward])
         # print('specified channels to overlay: ', channels)
         # print('all channels:', all_channels)
@@ -2793,9 +2840,9 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         # print('trying to create mean data')
         # print(self.channels)
         for channel in channels:
-            if 'R-' not in channel:
+            if self.backwards_indicator not in channel:
                 #test:
-                if 'Z' in channel:
+                if self.height_indicator in channel:
                     # get current res and size and add the additional res and size due to addition of zeros while shifting
                     XRes, YRes = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area]
                     XReal, YReal = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.scan_area]
@@ -2819,11 +2866,11 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     # self.all_data[self.channels.index(height_channel_backward)] = Realign.Minimize_Drift(self.all_data[self.channels.index(height_channel_backward)])
 
                     # shift the data of the forward and backwards channel to match
-                    self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)] = realign.Shift_Array_2D_by_Index(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)], index)
+                    self.all_data[self.channels.index(channel)], self.all_data[self.channels.index(self.backwards_indicator+ channel)] = realign.Shift_Array_2D_by_Index(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index(self.backwards_indicator+ channel)], index)
         
 
                     # create mean data and append to all_data
-                    self.all_data.append(realign.Create_Mean_Array(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)]))
+                    self.all_data.append(realign.Create_Mean_Array(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index(self.backwards_indicator+ channel)]))
                 else:
                     # get current res and size and add the additional res and size due to addition of zeros while shifting
                     XRes, YRes = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area]
@@ -2850,13 +2897,13 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     
                     #test realign (per scan) based on minimization of differences 
                     # self.all_data[self.channels.index(channel)] = Realign.Minimize_Drift(self.all_data[self.channels.index(channel)], display=False)
-                    # self.all_data[self.channels.index('R-'+ channel)] = Realign.Minimize_Drift(self.all_data[self.channels.index('R-'+ channel)])
+                    # self.all_data[self.channels.index(self.backwards_indicator+ channel)] = Realign.Minimize_Drift(self.all_data[self.channels.index(self.backwards_indicator+ channel)])
 
                     # shift the data of the forward and backwards channel to match
-                    self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)] = realign.Shift_Array_2D_by_Index(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)], index)
+                    self.all_data[self.channels.index(channel)], self.all_data[self.channels.index(self.backwards_indicator+ channel)] = realign.Shift_Array_2D_by_Index(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index(self.backwards_indicator+ channel)], index)
 
                     # create mean data and append to all_data
-                    self.all_data.append(realign.Create_Mean_Array(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)]))
+                    self.all_data.append(realign.Create_Mean_Array(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index(self.backwards_indicator+ channel)]))
 
                     # XRes, YRes = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area]
                     # XReal, YReal = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.scan_area]
@@ -2876,7 +2923,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         """
         all_channels = []
         for channel in channels:
-            all_channels.extend([channel, 'R-' + channel])
+            all_channels.extend([channel, self.backwards_indicator + channel])
         if height_channel_forward not in channels:
             all_channels.extend([height_channel_forward, height_channel_backward])
         self._Initialize_Data(all_channels)
@@ -2899,8 +2946,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         index = realign.Minimize_Deviation_2D(height_channel_forward_blurr, height_channel_backward_blurr, N, False)
 
         for channel in channels:
-            if 'R-' not in channel:
-                if 'Z' in channel:
+            if self.backwards_indicator not in channel:
+                if self.height_indicator in channel:
                     # create channel_dict for new mean data 
                     self.channel_tag_dict.append(self.channel_tag_dict[self.channels.index(channel)])
 
@@ -2911,7 +2958,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     self.channels.append(channel + '_overlain')
         
                     # create mean data and append to all_data
-                    self.all_data.append(realign.Create_Mean_Array_V2(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)], index))
+                    self.all_data.append(realign.Create_Mean_Array_V2(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index(self.backwards_indicator+ channel)], index))
                 else:
                     # create channel_dict for new mean data 
                     self.channel_tag_dict.append(self.channel_tag_dict[self.channels.index(channel)])
@@ -2923,7 +2970,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     self.channels.append(channel + '_overlain')
                     
                     # create mean data and append to all_data
-                    self.all_data.append(realign.Create_Mean_Array_V2(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index('R-'+ channel)], index))
+                    self.all_data.append(realign.Create_Mean_Array_V2(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index(self.backwards_indicator+ channel)], index))
 
     def Manually_Create_Complex_Channel(self, amp_channel:str, phase_channel:str, complex_type:str=None) -> None:
         """This function will manually create a realpart channel depending on the amp and phase channel you give.
@@ -2972,8 +3019,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 real_data[y][x] = amp_data[y][x]*np.cos(phase_data[y][x])
                 imag_data[y][x] = amp_data[y][x]*np.sin(phase_data[y][x])
         # create realpart and imaginary part channel and dict and add to memory
-        real_channel = f'O{demodulation}R_manipulated' # make shure not to overwrite the realpart created by the Synccorrection
-        imag_channel = f'O{demodulation}I_manipulated' # make shure not to overwrite the imagpart created by the Synccorrection
+        real_channel = f'O{demodulation}' + self.real_indicator + '_manipulated' # make shure not to overwrite the realpart created by the Synccorrection
+        imag_channel = f'O{demodulation}' + self.imag_indicator + '_manipulated' # make shure not to overwrite the imagpart created by the Synccorrection
         real_channel_dict = amp_dict
         imag_channel_dict = amp_dict
 
