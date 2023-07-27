@@ -156,14 +156,18 @@ def Correct_Phase_Drift():
     Measurement.Display_All_Subplots()
     
 def Synccorrection():
-    directory_name = 'testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
-    channels = ['O2P', 'O2A', 'Z C']
-    Measurement = Open_Measurement(directory_name, channels)
-    Measurement.Synccorrection(1.6)
-    Measurement.Display_Channels(['O2P_corrected', 'O2A', 'Z C'])
+    # directory_name = 'testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
+    directory_name = 'example_measurements/2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R'
+    # channels = ['O2P', 'O2A', 'Z C']
+    # channels = ['O2P_corrected', 'O2A', 'Z C']
+    channels = ['O2Re_corrected', 'O2A', 'Z C']
+    Measurement = Open_Measurement(directory_name, channels, autoscale=False)
+    # Measurement.Synccorrection(1.6)
+    Measurement.Display_Channels(['O2Re_corrected', 'O2A', 'Z C'])
 
 def Complete_Example_1():
-    directory_name = 'example_measurements/2022-04-25 1227 PH pentamer_840nm_s50_2'
+    # directory_name = 'example_measurements/2022-04-25 1227 PH pentamer_840nm_s50_2'
+    directory_name = 'example_measurements/2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R'
     channels = ['O2P', 'O2A', 'Z C']
     Measurement = Open_Measurement(directory_name, channels)
     # Measurement.Set_Min_to_Zero(['Z C'])
@@ -239,8 +243,8 @@ def main():
     # Compare_Measurements()
     # Test_Rectangle_Selector()
     # Correct_Phase_Drift()
-    # Synccorrection()
-    Complete_Example_1()
+    Synccorrection()
+    # Complete_Example_1()
     # Test_Aachen_files()
     # Test_Export_to_gsf()
 

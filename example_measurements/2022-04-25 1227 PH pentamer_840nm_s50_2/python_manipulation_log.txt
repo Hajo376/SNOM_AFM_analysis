@@ -26,3 +26,34 @@ filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
 quadratic_pixels = True
 scaling = 4
 gaussian_filter_complex_sigma = 2
+26/07/2023 14:26:58
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+scaling = 4
+gaussian_filter_complex_sigma = 2
+26/07/2023 14:28:06
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+scaling = 4
+gaussian_filter_complex_sigma = 2
+26/07/2023 14:54:40
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+scaling = 4
+gaussian_filter_complex_sigma = 2
+26/07/2023 14:55:00
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+set_min_to_zero = True
+scaling = 4
+gaussian_filter_complex_sigma = 2
+26/07/2023 14:57:51
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+scaling = 4
+gaussian_filter_complex_sigma = 2
+26/07/2023 14:58:21
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+scaling = 4
+gaussian_filter_complex_sigma = 2

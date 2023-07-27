@@ -76,18 +76,22 @@ class Plot_Definitions:
     font_size_fig_title = 12
     #definitions for color bar ranges:
     height_cbar_range = True
-    vmin_height = 0
-    vmax_height = 0
+    vmin_height = None
+    vmax_height = None
     amp_cbar_range = True
-    vmin_amp = 1 # to make shure that the values will be initialized with the first plotting command
-    vmax_amp = -1
+    vmin_amp = None#1 # to make shure that the values will be initialized with the first plotting command
+    vmax_amp = None#-1
     # phase_cbar_range = True
     full_phase_range = True # this will overwrite the cbar
-    # vmin_phase = 0
-    # vmax_phase = 0
+    shared_phase_range = True # only used if full phase range is false
+    vmin_phase = None
+    vmax_phase = None
     real_cbar_range = True
-    vmin_real = 0
-    vmax_real = 0
+    vlimit_real = None
+    # vmin_real = None
+    # vmax_real = None
+    # show plot automatically? turn to false for gui programming
+    show_plot = True
     
 
     
@@ -1074,29 +1078,47 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     if self.real_indicator in title or self.imag_indicator in title: # for real part or imaginary part data
                         if self.file_type == File_Type.comsol_gsf:
                             data = Set_nan_to_zero(data) #comsol data can contain nan values which are problematic for min and max
-                        if abs(min_data) > abs(max_data):
-                            limit = abs(min_data)
-                        else: limit = abs(max_data)
-                        if abs(limit) > abs(Plot_Definitions.vmax_real):
-                            Plot_Definitions.vmin_real = -limit
-                            Plot_Definitions.vmax_real = limit
+                        data_limit = Get_Largest_Abs(min_data, max_data)
+                        if Plot_Definitions.vlimit_real is None: Plot_Definitions.vlimit_real = data_limit
+                        
+                        
+
+                        
                         if Plot_Definitions.real_cbar_range is True:
-                            img = axis.pcolormesh(data, cmap=cmap, vmin=Plot_Definitions.vmin_real, vmax=Plot_Definitions.vmax_real)
+                            if Plot_Definitions.vlimit_real < data_limit: Plot_Definitions.vlimit_real = data_limit
+                            img = axis.pcolormesh(data, cmap=cmap, vmin=-Plot_Definitions.vlimit_real, vmax=Plot_Definitions.vlimit_real)
                         else:
-                            img = axis.pcolormesh(data, cmap=cmap, vmin=-limit, vmax=limit)
+                            img = axis.pcolormesh(data, cmap=cmap, vmin=-data_limit, vmax=data_limit)
                     else:
                         if cmap == SNOM_phase and Plot_Definitions.full_phase_range is True: # for phase data
                             # print('plotting full range phase')
                             vmin = 0
                             vmax = 2*np.pi
                             img = axis.pcolormesh(data, cmap=cmap, vmin=vmin, vmax=vmax)
+                        elif cmap == SNOM_phase and Plot_Definitions.full_phase_range is False:
+                            if Plot_Definitions.vmin_phase is None: Plot_Definitions.vmin_phase = min_data
+                            if Plot_Definitions.vmax_phase is None: Plot_Definitions.vmax_phase = max_data
+                            if Plot_Definitions.shared_phase_range is True:
+                                if Plot_Definitions.vmin_phase > min_data: Plot_Definitions.vmin_phase = min_data
+                                if Plot_Definitions.vmax_phase < max_data: Plot_Definitions.vmax_phase = max_data
+                            else:
+                                Plot_Definitions.vmin_phase = min_data
+                                Plot_Definitions.vmax_phase = max_data
+                                # vmin = min_data
+                                # vmax = max_data
+                            img = axis.pcolormesh(data, cmap=cmap, vmin=Plot_Definitions.vmin_phase, vmax=Plot_Definitions.vmax_phase)
+                            
                         elif cmap == SNOM_amplitude and Plot_Definitions.amp_cbar_range is True:
+                            if Plot_Definitions.vmin_amp is None: Plot_Definitions.vmin_amp = min_data
+                            if Plot_Definitions.vmax_amp is None: Plot_Definitions.vmax_amp = max_data
                             if min_data < Plot_Definitions.vmin_amp: Plot_Definitions.vmin_amp = min_data # update the min and max values in Plot_Definitions if new values are outside of range
                             if max_data > Plot_Definitions.vmax_amp: Plot_Definitions.vmax_amp = max_data
                             vmin = Plot_Definitions.vmin_amp
                             vmax = Plot_Definitions.vmax_amp
                             img = axis.pcolormesh(data, cmap=cmap, vmin=vmin, vmax=vmax)
                         elif cmap == SNOM_height and Plot_Definitions.height_cbar_range is True:
+                            if Plot_Definitions.vmin_height is None: Plot_Definitions.vmin_height = min_data # initialize for the first time
+                            if Plot_Definitions.vmax_height is None: Plot_Definitions.vmax_height = max_data
                             if min_data < Plot_Definitions.vmin_height: Plot_Definitions.vmin_height = min_data # update the min and max values in Plot_Definitions if new values are outside of range
                             if max_data > Plot_Definitions.vmax_height: Plot_Definitions.vmax_height = max_data
                             vmin = Plot_Definitions.vmin_height
@@ -1182,9 +1204,9 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 counter += 1
 
         plt.subplots_adjust(hspace=self.hspace)
-        if self.tight_layout == True:
+        if self.tight_layout is True:
             plt.tight_layout()
-        if self.show_plot:
+        if Plot_Definitions.show_plot is True:
             plt.show()
     
     def Switch_Supplots(self, first_id:int=None, second_id:int=None) -> None:
@@ -1234,14 +1256,14 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         """
         self._Plot_Subplots(self.all_subplots)
 
-    def Display_Channels(self, channels:list=None, show_plot:bool=True) -> None:
+    def Display_Channels(self, channels:list=None) -> None: #, show_plot:bool=True
         """This function displays the channels in memory or the specified ones.
                 
         Args:
             channels (list, optional): List of channels to display. If not specified all channels from memory will be plotted. Defaults to None.
 
         """
-        self.show_plot = show_plot
+        # self.show_plot = show_plot
         if channels == None:
             dataset = self.all_data
             plot_channels_dict = self.channels_label
@@ -3063,7 +3085,9 @@ def Set_nan_to_zero(data) -> np.array:
 def Gauss_Function(x, A, mu, sigma, offset):
     return A*np.exp(-(x-mu)**2/(2.*sigma**2)) + offset
 
-
+def Get_Largest_Abs(val1, val2):
+    if abs(val1) > abs(val2): return abs(val1)
+    else: return abs(val2)
 # not in use, delete?
 '''
     def Center_Realpart(self) -> None:
