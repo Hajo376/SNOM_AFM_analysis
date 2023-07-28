@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd # used for getting data out of html files
 from datetime import datetime
 from enum import Enum, auto
+from pathlib import Path, PurePath
 
 # import own functionality
 from SNOM_AFM_analysis.lib.snom_colormaps import *
@@ -166,8 +167,14 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             autoscale (bool, optional): tries to automatically scale the data to have quadratic pixels and undistorted dimensions.
                 Only for data where the x and y resolutions are an integer multiple of each other, e.g. xres=50nm and yres=50nm or 100nm or 150nm. Defaults to True.
         """
-        self.directory_name = directory_name
-        self.filename = directory_name.split('/')[-1]
+        # self.directory_name = directory_name
+        self.directory_name = Path(directory_name)
+        # print('old directory: ', self.directory_name)
+        # print('new directory: ', Path(self.directory_name))
+        # self.filename = directory_name.split('/')[-1]
+        self.filename = Path(PurePath(self.directory_name).parts[-1])
+        # print('old filename: ', self.filename)
+        # print('new filename: ', PurePath(Path(self.directory_name)).parts[-1])
         self.measurement_title = title # If a measurement_title is specified it will precede the automatically created title based on the channel dictionary
         self.autoscale = autoscale
         self.logfile_path = self._Initialize_Logfile()
@@ -193,17 +200,21 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         """This function aims at finding specific characteristics in the filename to idendify the filetype.
         For example the difference in File_Type.standard and File_Type.standard_new are an additional ' raw' at the end of the filename."""
         try:
-            f_1=open(f"{self.directory_name}/{self.filename} O1A.gsf","br")
+            # f_1=open(f"{self.directory_name}/{self.filename} O1A.gsf","br")
+            f_1=open(self.directory_name / Path(self.filename.name + ' O1A.gsf'),"br")
         except:
             # filetype is at least not standard
             try:
-                f_2=open(f"{self.directory_name}/{self.filename} O1A raw.gsf","br")
+                # f_2=open(f"{self.directory_name}/{self.filename} O1A raw.gsf","br")
+                f_2=open(self.directory_name / Path(self.filename.name + ' O1A raw.gsf'),"br")
             except:
                 try:
-                    f_3=open(f"{self.directory_name}/{self.filename}_parameters.txt","r")
+                    # f_3=open(f"{self.directory_name}/{self.filename}_parameters.txt","r")
+                    f_3=open(self.directory_name / Path(self.filename.name + '_parameters.txt'),"r")
                 except:
                     try:
-                        f_4=open(f"{self.directory_name}/{self.filename}_O1-F-abs.ascii", 'r')
+                        # f_4=open(f"{self.directory_name}/{self.filename}_O1-F-abs.ascii", 'r')
+                        f_4=open(self.directory_name / Path(self.filename.name + '_O1-F-abs.ascii'), 'r')
                     except:
                         print("The correct filetype could not automatically be found. Please try again and specifiy the filetype.")
                     else:
@@ -224,7 +235,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             File_Definitions.parmeters_type = File_Type.html
         #alternative way: get the software version from the last entry in the .txt file
         try:
-            parameters = self.directory_name + '/' + self.filename + '.txt' #standard snom files, not for aachen files
+            # parameters = self.directory_name + '/' + self.filename + '.txt' #standard snom files, not for aachen files
+            parameters = self.directory_name / Path(self.filename.name + '.txt') #standard snom files, not for aachen files
             file = open(parameters, 'r', encoding="utf-8")
         except:
             pass
@@ -307,7 +319,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         print(f'self.parameters_type: {self.parameters_type}')
         print(f'self.file_type:       {self.file_type}')
         if self.parameters_type == File_Type.html:
-            all_tables = pd.read_html("".join([self.directory_name,"/",self.filename,".html"]))
+            # all_tables = pd.read_html("".join([self.directory_name,"/",self.filename,".html"]))
+            all_tables = pd.read_html(self.directory_name / Path(self.filename.name + ".html"))
             tables = all_tables[0]
             self.measurement_tag_dict = {
                 Tag_Type.scan_type: tables[2][0],
@@ -321,7 +334,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 Tag_Type.tapping_amplitude: float(tables[2][15])
             }
         elif self.parameters_type == File_Type.html_new:
-            all_tables = pd.read_html("".join([self.directory_name,"/",self.filename,".html"]))
+            # all_tables = pd.read_html("".join([self.directory_name,"/",self.filename,".html"]))
+            all_tables = pd.read_html(self.directory_name / Path(self.filename.name + ".html"))
             tables = all_tables[0]
             self.measurement_tag_dict = {
                 Tag_Type.scan_type: tables[2][0],
@@ -335,7 +349,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 Tag_Type.tapping_amplitude: float(tables[2][16])
             }
         elif self.parameters_type == File_Type.html_neaspec_version_1_6_3359_1:
-            all_tables = pd.read_html("".join([self.directory_name,"/",self.filename,".html"]))
+            # all_tables = pd.read_html("".join([self.directory_name,"/",self.filename,".html"]))
+            all_tables = pd.read_html(self.directory_name / Path(self.filename.name + ".html"))
             tables = all_tables[0]
             self.measurement_tag_dict = {
                 Tag_Type.center_pos: [float(tables[2][3]), float(tables[3][3])],
@@ -349,7 +364,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             }
         elif self.parameters_type == File_Type.txt:
 
-            parameters = self.directory_name + '/' + self.filename + '.parameters.txt'
+            # parameters = self.directory_name + '/' + self.filename + '.parameters.txt'
+            parameters = self.directory_name / Path(self.filename.name + '.parameters.txt')
             file = open(parameters, 'r')
             parameter_list = file.read()
             file.close()
@@ -374,7 +390,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 Tag_Type.tapping_amplitude: None
             }
         elif self.parameters_type == File_Type.comsol_txt:
-            parameters = self.directory_name + '/' + self.filename + '_parameters.txt'
+            # parameters = self.directory_name + '/' + self.filename + '_parameters.txt'
+            parameters = self.directory_name / Path(self.filename.name + '_parameters.txt')
             file = open(parameters, 'r')
             parameter_list = file.read()
             file.close()
@@ -414,9 +431,11 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             for channel in channels:
                 if (self.file_type == File_Type.standard_new or self.file_type==File_Type.neaspec_version_1_6_3359_1) and '_corrected' not in channel:
                     if ' C' in channel or '_manipulated' in channel: #channel == 'Z C' or channel == 'R-Z C':
-                        filepath = self.directory_name + '/' + self.filename + ' ' + channel + '.gsf'
+                        # filepath = self.directory_name + '/' + self.filename + ' ' + channel + '.gsf'
+                        filepath = self.directory_name / Path(self.filename.name + ' ' + channel + '.gsf')
                     else:
-                        filepath = self.directory_name + '/' + self.filename + ' ' + channel + ' raw.gsf'
+                        # filepath = self.directory_name + '/' + self.filename + ' ' + channel + ' raw.gsf'
+                        filepath = self.directory_name / Path(self.filename.name + ' ' + channel + ' raw.gsf')
                 # elif self.file_type == File_Type.aachen_ascii:
                 #     if '_corrected' in channel or '_manipulated' in channel: 
                 #         filepath = self.directory_name + '/' + self.filename + ' ' + channel + '.gsf'
@@ -424,7 +443,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 #         filepath = self.directory_name + '/' + self.filename + '_' + channel + '.ascii'
                 #         cod = None
                 else:
-                    filepath = self.directory_name + '/' + self.filename + ' ' + channel + '.gsf'
+                    # filepath = self.directory_name + '/' + self.filename + ' ' + channel + '.gsf'
+                    filepath = self.directory_name / Path(self.filename.name + ' ' + channel + '.gsf')
                 file = open(filepath, 'r', encoding=cod)
                 content = file.read()
                 file.close()
@@ -452,7 +472,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             if self.parameters_type == File_Type.txt: #only for aachen files
                 if channels == self.channels:
                     self.channel_tag_dict = []
-                parameters = self.directory_name + '/' + self.filename + '.parameters.txt'
+                # parameters = self.directory_name + '/' + self.filename + '.parameters.txt'
+                parameters = self.directory_name / Path(self.filename.name + '.parameters.txt')
                 file = open(parameters, 'r')
                 parameter_list = file.read()
                 file.close()
@@ -564,11 +585,12 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self.Quadratic_Pixels(channels)
 
     def _Initialize_Logfile(self) -> str:
-        logfile_path = self.directory_name + '/python_manipulation_log.txt'
+        # logfile_path = self.directory_name + '/python_manipulation_log.txt'
+        logfile_path = self.directory_name / Path('python_manipulation_log.txt')
         file = open(logfile_path, 'a') # the new logdata will be appended to the existing file
         now = datetime.now()
         current_datetime = now.strftime("%d/%m/%Y %H:%M:%S")
-        file.write(current_datetime + '\n' + 'filename = ' + self.filename + '\n')
+        file.write(current_datetime + '\n' + 'filename = ' + self.filename.name + '\n')
         file.close()
         return logfile_path
 
@@ -658,13 +680,16 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     if ' C' in channels[i] or '_manipulated' in channels[i]: #channels[i] == 'Z C' or channels[i] == 'R-Z C':
                         # print(f"trying to open {self.directory_name}/{self.filename} {channels[i]}.gsf")
                         # print('channels: ', channels)
-                        f=open(f"{self.directory_name}/{self.filename} {channels[i]}.gsf","br")
+                        # f=open(f"{self.directory_name}/{self.filename} {channels[i]}.gsf","br")
+                        f=open(self.directory_name / Path(self.filename.name + f' {channels[i]}.gsf'),"br")
                     else:
                         # print(f"trying to open {self.directory_name}/{self.filename} {channels[i]} raw.gsf")
                         # print('channels: ', channels)
-                        f=open(f"{self.directory_name}/{self.filename} {channels[i]} raw.gsf","br")
+                        # f=open(f"{self.directory_name}/{self.filename} {channels[i]} raw.gsf","br")
+                        f=open(self.directory_name / Path(self.filename.name + f' {channels[i]} raw.gsf'),"br")
                 else:
-                    f=open(f"{self.directory_name}/{self.filename} {channels[i]}.gsf","br")
+                    # f=open(f"{self.directory_name}/{self.filename} {channels[i]}.gsf","br")
+                    f=open(self.directory_name / Path(self.filename.name + f' {channels[i]}.gsf'),"br")
                 binarydata=f.read()
                 f.close()
                 all_binary_data.append(binarydata)
@@ -716,7 +741,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
 
         elif self.file_type == File_Type.aachen_ascii:
             for i in range(len(channels)):
-                file = open(f"{self.directory_name}/{self.filename}_{channels[i]}.ascii", 'r')
+                # file = open(f"{self.directory_name}/{self.filename}_{channels[i]}.ascii", 'r')
+                file = open(self.directory_name / Path(self.filename.name + f'_{channels[i]}.ascii'), 'r')
                 string_data = file.read()
                 datalist = string_data.split('\n')
                 datalist = [element.split(' ') for element in datalist]
@@ -747,7 +773,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
 
         elif self.file_type == File_Type.aachen_gsf:
             for i in range(len(channels)):
-                f=open(f"{self.directory_name}/{self.filename}_{channels[i]}.gsf","br")
+                # f=open(f"{self.directory_name}/{self.filename}_{channels[i]}.gsf","br")
+                f=open(self.directory_name / Path(self.filename.name + f'_{channels[i]}.gsf'),"br")
                 binarydata=f.read()
                 f.close()
                 all_binary_data.append(binarydata)
@@ -795,7 +822,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         all_data = []
         for i in range(len(channels)):
             # print(channels[i])
-            f=open(f"{self.directory_name}/{self.filename} {channels[i]}.gsf","br")
+            # f=open(f"{self.directory_name}/{self.filename} {channels[i]}.gsf","br")
+            f=open(self.directory_name / Path(self.filename.name + f' {channels[i]}.gsf'),"br")
             binarydata=f.read()
             f.close()
             all_binary_data.append(binarydata)
@@ -832,7 +860,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         #safe the information about which channel is which list in a dictionary
         data_dict = []
         for i in range(len(channels)):
-            f=open(f"{self.directory_name}/{self.filename} {channels[i]}.gsf","br")
+            # f=open(f"{self.directory_name}/{self.filename} {channels[i]}.gsf","br")
+            f=open(self.directory_name / Path(self.filename.name + f' {channels[i]}.gsf'),"br")
             binarydata=f.read()
             f.close()
             all_binary_data.append(binarydata)
@@ -1256,14 +1285,14 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         """
         self._Plot_Subplots(self.all_subplots)
 
-    def Display_Channels(self, channels:list=None, show_plot:bool=True) -> None:
+    def Display_Channels(self, channels:list=None) -> None: #, show_plot:bool=True
         """This function displays the channels in memory or the specified ones.
                 
         Args:
             channels (list, optional): List of channels to display. If not specified all channels from memory will be plotted. Defaults to None.
 
         """
-        self.show_plot = show_plot
+        # self.show_plot = show_plot
         if channels == None:
             dataset = self.all_data
             plot_channels_dict = self.channels_label
@@ -1535,7 +1564,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         if channels == None:
             channels = self.channels
         for channel in channels:
-            filepath = self.directory_name + '/' + self.filename + ' ' + channel + appendix + '.gsf'
+            # filepath = self.directory_name + '/' + self.filename + ' ' + channel + appendix + '.gsf'
+            filepath = self.directory_name / Path(self.filename.name + f' {channel}{appendix}.gsf')
             data = self.all_data[self.channels.index(channel)]
             XRes = len(data[0])
             YRes  = len(data)
@@ -1567,7 +1597,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         if channels == None:
             channels = self.channels
         for channel in channels:
-            filepath = self.directory_name + '/' + self.filename + ' ' + channel + appendix + '.txt'
+            # filepath = self.directory_name + '/' + self.filename + ' ' + channel + appendix + '.txt'
+            filepath = self.directory_name / Path(self.filename.name + f' {channel}{appendix}.txt')
             data = self.all_data[self.channels.index(channel)]
             XRes = len(data[0])
             YRes  = len(data)
@@ -1653,8 +1684,10 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         header, NUL = self._Create_Header(self.preview_phasechannel) # channel for header just important to distinguish z axis unit either m or nothing
         for channel in self.phase_channels:
             i = self.phase_channels.index(channel)
-            phasef = open(self.directory_name + '/' + self.filename + ' ' + channel + '_corrected.gsf', 'bw')
-            realf = open(self.directory_name + '/' + self.filename + ' ' + self.real_channels[i] + '_corrected.gsf', 'bw')
+            # phasef = open(self.directory_name + '/' + self.filename + ' ' + channel + '_corrected.gsf', 'bw')
+            phasef = open(self.directory_name / Path(self.filename.name + f' {channel}_corrected.gsf'), 'bw')
+            # realf = open(self.directory_name + '/' + self.filename + ' ' + self.real_channels[i] + '_corrected.gsf', 'bw')
+            realf = open(self.directory_name / Path(self.filename.name + f' {self.real_channels[i]}_corrected.gsf'), 'bw')
             phasef.write(header.encode('utf-8'))
             realf.write(header.encode('utf-8'))
             phasef.write(NUL) # add NUL terminator
@@ -1813,7 +1846,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             for channel in channels:
                 header, NUL= self._Create_Header(channel)
                 data, trash = self._Load_Data([channel])
-                datafile = open("".join([self.directory_name,"/",self.filename," ",channel,"_masked.gsf"]),"bw")
+                # datafile = open("".join([self.directory_name,"/",self.filename," ",channel,"_masked.gsf"]),"bw")
+                datafile = open(self.directory_name / Path(self.filename.name + f' {channel}_masked.gsf'),"bw")
                 datafile.write(header)
                 datafile.write(NUL)
                 masked_array = np.multiply(data[0], mask_array)
