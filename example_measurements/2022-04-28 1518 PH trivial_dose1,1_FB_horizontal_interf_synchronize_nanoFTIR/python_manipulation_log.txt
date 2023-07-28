@@ -1,0 +1,8 @@
+15/03/2023 15:36:57
+filename = 2022-04-28 1518 PH trivial_dose1,1_FB_horizontal_interf_synchronize_nanoFTIR
+15/03/2023 15:37:46
+filename = 2022-04-28 1518 PH trivial_dose1,1_FB_horizontal_interf_synchronize_nanoFTIR
+15/03/2023 15:39:08
+filename = 2022-04-28 1518 PH trivial_dose1,1_FB_horizontal_interf_synchronize_nanoFTIR
+01/04/2023 16:22:43
+filename = 2022-04-28 1518 PH trivial_dose1,1_FB_horizontal_interf_synchronize_nanoFTIR

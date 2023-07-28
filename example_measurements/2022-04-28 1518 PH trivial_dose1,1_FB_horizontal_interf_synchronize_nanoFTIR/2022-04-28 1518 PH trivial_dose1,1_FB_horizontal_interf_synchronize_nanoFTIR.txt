@@ -1,0 +1,25 @@
+# www.neaspec.com
+# Scan:	 	2D (PsHet)
+# Project:	 	maintainance
+# Description:	 	trivial_dose1,1_FB_horizontal_interf_synchronize_nanoFTIR
+# Date:	 	04/28/2022 15:18:39
+# Scanner Center Position (X, Y):	[µm]	36.65	50.05	 
+# Rotation:	[°]	-1	 	 
+# Scan Area (X, Y, Z):	[µm]	40.000	10.000	0.000
+# Pixel Area (X, Y, Z):	[px]	400	100	1
+# Averaging:	 	1	 	 
+# Integration time:	[ms]	59	 	 
+# Laser Source:	 	Tunable VIS
+# Target Wavelength:	[µm]		 	 
+# Demodulation Mode:	 	PsHet
+# Tip Frequency:	[Hz]	246,664.726	 	 
+# Tip Amplitude:	[mV]	17.900	 	 
+# Tapping Amplitude:	[nm]	61.786	 	 
+# Modulation Frequency:	[Hz]	302.285	 	 
+# Modulation Amplitude:	[mV]	10,000.000	 	 
+# Modulation Offset:	[mV]	4,792.309	 	 
+# Setpoint:	[%]	80.52	 	 
+# Regulator (P, I, D):	 	4.645766	10.215567	1.000000
+# Tip Potential:	[mV]	0.000	 	 
+# M1A Scaling:	[nm/V]	62.000	 	 
+# Version:	 	1.8.5017.0

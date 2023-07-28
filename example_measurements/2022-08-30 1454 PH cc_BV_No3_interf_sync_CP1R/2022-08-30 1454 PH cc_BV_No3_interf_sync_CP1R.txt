@@ -1,0 +1,25 @@
+# www.neaspec.com
+# Scan:	 	2D (PsHet)
+# Project:	 	maintainance
+# Description:	 	cc_BV_No3_interf_sync_CP1R
+# Date:	 	08/30/2022 14:54:57
+# Scanner Center Position (X, Y):	[µm]	51.73	38.57	 
+# Rotation:	[°]	+90	 	 
+# Scan Area (X, Y, Z):	[µm]	3.000	12.000	0.000
+# Pixel Area (X, Y, Z):	[px]	60	120	1
+# Averaging:	 	1	 	 
+# Integration time:	[ms]	92	 	 
+# Laser Source:	 	Tunable NIR source
+# Target Wavelength:	[µm]		 	 
+# Demodulation Mode:	 	PsHet
+# Tip Frequency:	[Hz]	215,111.737	 	 
+# Tip Amplitude:	[mV]	23.800	 	 
+# Tapping Amplitude:	[nm]	74.826	 	 
+# Modulation Frequency:	[Hz]	298.766	 	 
+# Modulation Amplitude:	[mV]	15,700.000	 	 
+# Modulation Offset:	[mV]	3,471.461	 	 
+# Setpoint:	[%]	74.53	 	 
+# Regulator (P, I, D):	 	3.257223	5.614166	1.000000
+# Tip Potential:	[mV]	0.000	 	 
+# M1A Scaling:	[nm/V]	62.000	 	 
+# Version:	 	1.8.5017.0
