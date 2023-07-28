@@ -158,7 +158,7 @@ def Correct_Phase_Drift():
 def Synccorrection():
     # directory_name = 'testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
     directory_name = 'example_measurements/2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R'
-    # channels = ['O2P', 'O2A', 'Z C']
+    channels = ['O2P', 'O2A', 'Z C']
     # channels = ['O2P_corrected', 'O2A', 'Z C']
     channels = ['O2Re_corrected', 'O2A', 'Z C']
     Measurement = Open_Measurement(directory_name, channels, autoscale=False)
