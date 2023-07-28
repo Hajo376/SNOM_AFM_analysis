@@ -898,7 +898,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         """This function adds the specified data to the list of subplots. The list of subplots contains the data, the colormap,
         the colormap label and a title, which are generated from the channel information. The same array is also returned,
         so it can also be iterated by an other function to only plot the data of interest."""
-        if self.amp_indicator in channel:
+        if self.amp_indicator in channel and self.height_indicator not in channel:
             cmap=SNOM_amplitude
             label = 'Amplitude [a.u.]'
             title = f'Amplitude {channel}'
