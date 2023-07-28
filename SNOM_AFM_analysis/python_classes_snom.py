@@ -274,16 +274,20 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self.real_indicator = 'Re'
             self.imag_indicator = 'Im'
         elif self.file_type == File_Type.aachen_ascii or self.file_type == File_Type.aachen_gsf:
-            self.all_channels = ['O1-F-abs','O1-F-arg','O2-F-abs','O2-F-arg','O3-F-abs','O3-F-arg','O4-F-abs','O4-F-arg']
-            self.phase_channels = ['O1-F-arg','O2-F-arg','O3-F-arg','O4-F-arg']
-            self.amp_channels = ['O1-F-abs','O2-F-abs','O3-F-abs','O4-F-abs']
-            self.real_channels = ['O1-F-real','O2-F-real','O3-F-real','O4-F-real',]
+            self.all_channels = ['O1-F-abs','O1-F-arg','O2-F-abs','O2-F-arg','O3-F-abs','O3-F-arg','O4-F-abs','O4-F-arg', 'O1-B-abs','O1-B-arg','O2-B-abs','O2-B-arg','O3-B-abs','O3-B-arg','O4-B-abs','O4-B-arg']
+            self.phase_channels = ['O1-F-arg','O2-F-arg','O3-F-arg','O4-F-arg', 'O1-B-arg','O2-B-arg','O3-B-arg','O4-B-arg']
+            self.amp_channels = ['O1-F-abs','O2-F-abs','O3-F-abs','O4-F-abs', 'O1-B-abs','O2-B-abs','O3-B-abs','O4-B-abs']
+            self.real_channels = ['O1-F-Re','O2-F-Re','O3-F-Re','O4-F-Re','O1-B-Re','O2-B-Re','O3-B-Re','O4-B-Re']
+            self.imag_channels = ['O1-F-Im','O2-F-Im','O3-F-Im','O4-F-Im','O1-B-Im','O2-B-Im','O3-B-Im','O4-B-Im']
             self.height_channel = 'MT-F-abs'
             self.preview_ampchannel = 'O2-F-abs'
             self.preview_phasechannel = 'O2-F-arg'
             self.height_indicator = 'MT'
             self.amp_indicator = 'abs'
             self.phase_indicator = 'arg'
+            self.real_indicator = 'Re'#not used
+            self.imag_indicator = 'Im'#not used
+            self.backwards_indicator = '-B-'
         elif self.file_type == File_Type.comsol_gsf:
             self.all_channels = ['abs', 'arg', 'real']
             self.phase_channels = ['arg']
