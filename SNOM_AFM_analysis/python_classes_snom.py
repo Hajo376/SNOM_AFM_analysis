@@ -1609,7 +1609,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             # file.write(NUL) # the NUL marks the end of the header and konsists of 0 characters in the first dataline
             for y in range(YRes):
                 for x in range(XRes):
-                    file.write(f'{round(data[y][x], 2)} ')
+                    file.write(f'{round(data[y][x], 5)} ')
             file.close()
             print(f'successfully saved channel {channel} to .txt')
             print(filepath)

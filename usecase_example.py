@@ -234,8 +234,7 @@ def Test_Export_to_gsf():
     Measurement.Save_to_gsf()
 
 def main():
-    root = tk.Tk()
-    root.withdraw()
+     
     # Realign()
     # Cut_Masked()
     # Test_Scalebar()

@@ -313,9 +313,6 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         self.corrected_phase_channels = [channel+'_corrected' for channel in self.phase_channels]
         self.corrected_overlain_phase_channels = [channel+'_overlain_manipulated' for channel in self.corrected_phase_channels]
 
-
-
-
     def _Create_Measurement_Tag_Dict(self):
         # create tag_dict for each channel individually? if manipulated channels are loaded they might have different diffrent resolution
         # only center_pos, scan_area, pixel_area and rotation must be stored for each channel individually but rotation is not stored in the original .gsf files
@@ -1612,7 +1609,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             # file.write(NUL) # the NUL marks the end of the header and konsists of 0 characters in the first dataline
             for y in range(YRes):
                 for x in range(XRes):
-                    file.write(f'{round(data[y][x], 2)} ')
+                    file.write(f'{round(data[y][x], 5)} ')
             file.close()
             print(f'successfully saved channel {channel} to .txt')
             print(filepath)
