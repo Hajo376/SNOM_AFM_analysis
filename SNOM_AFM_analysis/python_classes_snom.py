@@ -265,6 +265,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self.real_channels = ['O1Re', 'O2Re', 'O3Re', 'O4Re', 'R-O5Re', 'R-O1Re', 'R-O2Re', 'R-O3Re', 'R-O4Re', 'R-O5Re']
             self.imag_channels = ['O1Im', 'O2Im', 'O3Im', 'O4Im', 'R-O5Im', 'R-O1Im', 'R-O2Im', 'R-O3Im', 'R-O4Im', 'R-O5Im']
             self.height_channel = 'Z C'
+            self.height_channels = ['Z C', 'R-Z C']
             self.preview_ampchannel = 'O2A'
             self.preview_phasechannel = 'O2P'
             self.height_indicator = 'Z'
@@ -280,6 +281,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self.real_channels = ['O1-F-Re','O2-F-Re','O3-F-Re','O4-F-Re','O1-B-Re','O2-B-Re','O3-B-Re','O4-B-Re']
             self.imag_channels = ['O1-F-Im','O2-F-Im','O3-F-Im','O4-F-Im','O1-B-Im','O2-B-Im','O3-B-Im','O4-B-Im']
             self.height_channel = 'MT-F-abs'
+            self.height_channels = ['MT-F-abs', 'MT-B-abs']
             self.preview_ampchannel = 'O2-F-abs'
             self.preview_phasechannel = 'O2-F-arg'
             self.height_indicator = 'MT'
@@ -1458,7 +1460,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 height_blurred = self._Gauss_Blurr_Data(height, sigma)
                 self.all_data[channels_to_filter[2*i]] = height_blurred
                 self.channels_label[channels_to_filter[2*i]] = self.channels_label[channels_to_filter[2*i]] + '_' + self.filter_gauss_indicator
-                self.channels[channels_to_filter[2*i]] += '_' + self.filter_gauss_indicator
+                # self.channels[channels_to_filter[2*i]] += '_' + self.filter_gauss_indicator
             
             else:
                 print(f'You wanted to blurr {self.channels[channels_to_filter[2*i]]}, but that is not implemented! 2')
@@ -1900,7 +1902,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         ax.legend()
         ax.axis('scaled')
         plt.title('3 Point leveling: please click on three points\nto specify the underground plane.')
-        plt.show()
+        if Plot_Definitions.show_plot:
+            plt.show()
         klicker_coords = klicker.get_positions()['event'] #klicker returns a dictionary for the events
         klick_coordinates = [[round(element[0]), round(element[1])] for element in klicker_coords]
         self._Write_to_Logfile('height_leveling_coordinates', klick_coordinates)
@@ -1931,6 +1934,55 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 leveled_height_data[y][x] = height_data[y][x] - plane_data[y][x]
         
         return leveled_height_data
+    
+    def _level_height_data(self, height_data, klick_coordinates, zone):
+        mean_values = [self._Get_Mean_Value(height_data, klick_coordinates[i][0], klick_coordinates[i][1], zone) for i in range(len(klick_coordinates))]
+        matrix = [[klick_coordinates[i][0], klick_coordinates[i][1], mean_values[i]] for i in range(3)]
+        A = matrix
+        b = [100,100,100] # not sure why, 100 is a bit random, but 0 didn't work
+        solution = np.linalg.solve(A, b)
+        yres = len(height_data)
+        xres = len(height_data[0])
+        # create a plane with same dimensions as the height_data
+        plane_data = np.zeros((yres, xres))
+        for y in range(yres):
+            for x in range(xres):
+                plane_data[y][x] = -(solution[0]*x + solution[1]*y)/solution[2]
+        leveled_height_data = np.zeros((yres, xres))
+        # substract the plane_data from the height_data
+        for y in range(yres):
+            for x in range(xres):
+                leveled_height_data[y][x] = height_data[y][x] - plane_data[y][x]
+        
+        return leveled_height_data
+
+    def _get_klicker_coordinates(data, cmap):
+        fig, ax = plt.subplots()
+        ax.pcolormesh(data, cmap=cmap)
+        klicker = clicker(ax, ["event"], markers=["x"])
+        ax.legend()
+        ax.axis('scaled')
+        plt.title('3 Point leveling: please click on three points\nto specify the underground plane.')
+        # if Plot_Definitions.show_plot:
+        plt.show()
+        klicker_coords = klicker.get_positions()['event'] #klicker returns a dictionary for the events
+        klick_coordinates = [[round(element[0]), round(element[1])] for element in klicker_coords]
+        return klick_coordinates
+
+    def _Height_Levelling_3Point_forGui(self, height_data, zone=1) -> np.array:
+        klick_coordinates = self._get_klicker_coordinates(height_data, SNOM_height)
+        if len(klick_coordinates) != 3:
+            print('You need to specify 3 point coordinates! Data was not leveled!')
+            return height_data
+        #     klick_coordinates = get_coordinates()
+        #     user_input = self._User_Input_Bool()
+        #     if user_input == True:
+        #         self._Height_Levelling_3Point(zone)
+        #     else:
+        #         exit()
+        # for the 3 point coordinates the height data is calculated over a small area around the clicked pixels to reduce deviations due to noise
+        self._Write_to_Logfile('height_leveling_coordinates', klick_coordinates)
+        return self._level_height_data(klick_coordinates, zone)
 
     def _Shift_Phase_Data(self, data, shift) -> np.array:
         """This function adds a phaseshift to the specified phase data. The phase data is automatically kept in the 0 to 2 pi range.
@@ -2072,6 +2124,22 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         for channel in channels:
             if self.height_indicator in channel:
                 self.all_data[self.channels.index(channel)] = self._Height_Levelling_3Point(self.all_data[self.channels.index(channel)])
+                self.channels_label[self.channels.index(channel)] += '_leveled' 
+
+    def Level_Height_Channels_forGui(self, channels:list=None):# todo not used?
+        """This function levels all height channels which are either user specified or in the instance memory.
+        The leveling will prompt the user with a preview to select 3 points for getting the coordinates of the leveling plane.
+        This function is specifically for use with GUI.
+        
+        Args:
+            channels (list, optional): List of channels to level. If not specified all channels in memory will be used. Defaults to None.
+        """
+        # self._Initialize_Data(channels)
+        if channels is None:
+            channels = self.channels
+        for channel in channels:
+            if self.height_indicator in channel:
+                self.all_data[self.channels.index(channel)] = self._Height_Levelling_3Point_forGui(self.all_data[self.channels.index(channel)])
                 self.channels_label[self.channels.index(channel)] += '_leveled' 
 
     def Shift_Phase(self, shift:float=None, channels:list=None) -> None:
@@ -2977,7 +3045,11 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             height_channel_forward (str): Usual corrected height channel
             height_channel_backward (str): Backwards height channel
             channels (list, optional): List of all channels to be overlayed. Only specify the forward direction. Defaults to None.
+            If not specified only the amp channels and the height channel will be overlaid.
         """
+        if channels is None:
+            channels = [channel for channel in self.amp_channels if self.backwards_indicator not in channel]
+            channels.append(self.height_channel)
         all_channels = []
         for channel in channels:
             all_channels.extend([channel, self.backwards_indicator + channel])
