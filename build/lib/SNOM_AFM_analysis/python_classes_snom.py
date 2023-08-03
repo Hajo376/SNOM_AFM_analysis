@@ -259,13 +259,14 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         self.file_type = File_Definitions.file_type
         self.parameters_type = File_Definitions.parmeters_type
         if self.file_type == File_Type.standard or self.file_type == File_Type.standard_new or self.file_type == File_Type.neaspec_version_1_6_3359_1:
-            self.all_channels = ['O1A','O1P','O2A','O2P','O3A','O3P','O4A','O4P','O5A','O5P','R-O1A','R-O1P','R-O2A','R-O2P','R-O3A','R-O3P','R-O4A','R-O4P','R-O5A','R-O5P']
             self.phase_channels = ['O1P','O2P','O3P','O4P','O5P', 'R-O1P','R-O2P','R-O3P','R-O4P','R-O5P']
             self.amp_channels = ['O1A','O2A','O3A','O4A','O5A', 'R-O1A','R-O2A','R-O3A','R-O4A','R-O5A']
             self.real_channels = ['O1Re', 'O2Re', 'O3Re', 'O4Re', 'R-O5Re', 'R-O1Re', 'R-O2Re', 'R-O3Re', 'R-O4Re', 'R-O5Re']
             self.imag_channels = ['O1Im', 'O2Im', 'O3Im', 'O4Im', 'R-O5Im', 'R-O1Im', 'R-O2Im', 'R-O3Im', 'R-O4Im', 'R-O5Im']
             self.height_channel = 'Z C'
             self.height_channels = ['Z C', 'R-Z C']
+            # self.all_channels = ['O1A','O1P','O2A','O2P','O3A','O3P','O4A','O4P','O5A','O5P','R-O1A','R-O1P','R-O2A','R-O2P','R-O3A','R-O3P','R-O4A','R-O4P','R-O5A','R-O5P']
+            self.all_channels = self.phase_channels + self.amp_channels + self.height_channels
             self.preview_ampchannel = 'O2A'
             self.preview_phasechannel = 'O2P'
             self.height_indicator = 'Z'
@@ -275,13 +276,14 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self.real_indicator = 'Re'
             self.imag_indicator = 'Im'
         elif self.file_type == File_Type.aachen_ascii or self.file_type == File_Type.aachen_gsf:
-            self.all_channels = ['O1-F-abs','O1-F-arg','O2-F-abs','O2-F-arg','O3-F-abs','O3-F-arg','O4-F-abs','O4-F-arg', 'O1-B-abs','O1-B-arg','O2-B-abs','O2-B-arg','O3-B-abs','O3-B-arg','O4-B-abs','O4-B-arg']
             self.phase_channels = ['O1-F-arg','O2-F-arg','O3-F-arg','O4-F-arg', 'O1-B-arg','O2-B-arg','O3-B-arg','O4-B-arg']
             self.amp_channels = ['O1-F-abs','O2-F-abs','O3-F-abs','O4-F-abs', 'O1-B-abs','O2-B-abs','O3-B-abs','O4-B-abs']
             self.real_channels = ['O1-F-Re','O2-F-Re','O3-F-Re','O4-F-Re','O1-B-Re','O2-B-Re','O3-B-Re','O4-B-Re']
             self.imag_channels = ['O1-F-Im','O2-F-Im','O3-F-Im','O4-F-Im','O1-B-Im','O2-B-Im','O3-B-Im','O4-B-Im']
             self.height_channel = 'MT-F-abs'
             self.height_channels = ['MT-F-abs', 'MT-B-abs']
+            # self.all_channels = ['O1-F-abs','O1-F-arg','O2-F-abs','O2-F-arg','O3-F-abs','O3-F-arg','O4-F-abs','O4-F-arg', 'O1-B-abs','O1-B-arg','O2-B-abs','O2-B-arg','O3-B-abs','O3-B-arg','O4-B-abs','O4-B-arg']
+            self.all_channels = self.phase_channels + self.amp_channels + self.height_channels
             self.preview_ampchannel = 'O2-F-abs'
             self.preview_phasechannel = 'O2-F-arg'
             self.height_indicator = 'MT'
@@ -433,12 +435,15 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 self.channel_tag_dict = []
             for channel in channels:
                 if (self.file_type == File_Type.standard_new or self.file_type==File_Type.neaspec_version_1_6_3359_1) and '_corrected' not in channel:
-                    if ' C' in channel or '_manipulated' in channel: #channel == 'Z C' or channel == 'R-Z C':
-                        # filepath = self.directory_name + '/' + self.filename + ' ' + channel + '.gsf'
-                        filepath = self.directory_name / Path(self.filename.name + ' ' + channel + '.gsf')
-                    else:
-                        # filepath = self.directory_name + '/' + self.filename + ' ' + channel + ' raw.gsf'
+                    # if ' C' in channel or '_manipulated' in channel: #channel == 'Z C' or channel == 'R-Z C':
+                    #     filepath = self.directory_name / Path(self.filename.name + ' ' + channel + '.gsf')
+                    # else:
+                    #     filepath = self.directory_name / Path(self.filename.name + ' ' + channel + ' raw.gsf')
+                    if channel in self.all_channels:
                         filepath = self.directory_name / Path(self.filename.name + ' ' + channel + ' raw.gsf')
+                    else:
+                        filepath = self.directory_name / Path(self.filename.name + ' ' + channel + '.gsf')
+
                 # elif self.file_type == File_Type.aachen_ascii:
                 #     if '_corrected' in channel or '_manipulated' in channel: 
                 #         filepath = self.directory_name + '/' + self.filename + ' ' + channel + '.gsf'
@@ -679,19 +684,16 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             for i in range(len(channels)):
                 # print(channels[i])
                 if (self.file_type==File_Type.standard_new or self.file_type==File_Type.neaspec_version_1_6_3359_1) and '_corrected' not in channels[i]:
-                    # print(f'load data for file_type: {self.file_type}, channel: {channels[i]}')
-                    if ' C' in channels[i] or '_manipulated' in channels[i]: #channels[i] == 'Z C' or channels[i] == 'R-Z C':
-                        # print(f"trying to open {self.directory_name}/{self.filename} {channels[i]}.gsf")
-                        # print('channels: ', channels)
-                        # f=open(f"{self.directory_name}/{self.filename} {channels[i]}.gsf","br")
-                        f=open(self.directory_name / Path(self.filename.name + f' {channels[i]}.gsf'),"br")
-                    else:
-                        # print(f"trying to open {self.directory_name}/{self.filename} {channels[i]} raw.gsf")
-                        # print('channels: ', channels)
-                        # f=open(f"{self.directory_name}/{self.filename} {channels[i]} raw.gsf","br")
+                    # if ' C' in channels[i] or '_manipulated' in channels[i]: #channels[i] == 'Z C' or channels[i] == 'R-Z C':
+                    #     f=open(self.directory_name / Path(self.filename.name + f' {channels[i]}.gsf'),"br")
+                    # else:
+                    #     f=open(self.directory_name / Path(self.filename.name + f' {channels[i]} raw.gsf'),"br")
+                    if channels[i] in self.all_channels:
                         f=open(self.directory_name / Path(self.filename.name + f' {channels[i]} raw.gsf'),"br")
+                    else:
+                        f=open(self.directory_name / Path(self.filename.name + f' {channels[i]}.gsf'),"br")
+
                 else:
-                    # f=open(f"{self.directory_name}/{self.filename} {channels[i]}.gsf","br")
                     f=open(self.directory_name / Path(self.filename.name + f' {channels[i]}.gsf'),"br")
                 binarydata=f.read()
                 f.close()
@@ -700,21 +702,14 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             count = 0
             for channel in channels:
                 # if _manipulated in channel name use channel dict, because resolution etc could be different to original data
-                if '_manipulated' in channel:
-                    # print('2 load data for self.channels: ', self.channels)
-                    # print(f'channel tag dict: {self.channel_tag_dict}')
+                XRes, YRes = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area]
+                '''if '_manipulated' in channel:
                     XRes, YRes = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area]
-                    # print(f'2in load data, XRes, YRes: {XRes, YRes}')
-                # print(self.channel_tag_dict[self.channels.index(channel)])
-                # print(self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area])
                 # dont remember why i added the following but it leads to problems
                 # if channel in self.channels:
                 #     XRes, YRes = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area]
                 else:
-                    XRes, YRes = self.measurement_tag_dict[Tag_Type.pixel_area]
-                    # print(f'3in load data, XRes, YRes: {XRes, YRes}')
-                # print(f'in load data, XRes, YRes: {XRes, YRes}')
-                # print(f'channel: {channel}')
+                    XRes, YRes = self.measurement_tag_dict[Tag_Type.pixel_area]'''
                 
                 datasize=int(XRes*YRes*4)
                 channel_data = np.zeros((YRes, XRes))
@@ -1336,10 +1331,11 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 # check pixel scaling from channel tag dict for each channel
                 pixel_scaling = self.channel_tag_dict[channel_index][Tag_Type.pixel_scaling]
                 if pixel_scaling == 1:
-                    print(f'The data in channel {channel} is not yet scaled! Do you want to scale the data?')
-                    user_input = self._User_Input_Bool()
-                    if user_input == True:
-                        self.Scale_Channels([channel])
+                    if Plot_Definitions.show_plot:
+                        print(f'The data in channel {channel} is not yet scaled! Do you want to scale the data?')
+                        user_input = self._User_Input_Bool()
+                        if user_input == True:
+                            self.Scale_Channels([channel])
                 self.all_data[channel_index] = self._Gauss_Blurr_Data(self.all_data[channel_index], sigma)
                 self.channels_label[channel_index] += '_' + self.filter_gauss_indicator
                 # self.channels[channel_index] = channel + '_' + self.filter_gauss_indicator
@@ -1425,10 +1421,11 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 pixel_scaling_amp = self.channel_tag_dict[channels_to_filter[2*i]][Tag_Type.pixel_scaling]
                 pixel_scaling_phase = self.channel_tag_dict[channels_to_filter[2*i+1]][Tag_Type.pixel_scaling]
                 if pixel_scaling_amp == 1 and pixel_scaling_phase == 1:
-                    print('The data is not yet scaled! Do you want to scale the data?')
-                    user_input = self._User_Input_Bool()
-                    if user_input == True:
-                        self.Scale_Channels([self.channels[channels_to_filter[2*i]], self.channels[channels_to_filter[2*i+1]]])
+                    if Plot_Definitions.show_plot:# is only false if no plots should be shown or if user inputs are unwanted, eg. for gui
+                        print('The data is not yet scaled! Do you want to scale the data?')
+                        user_input = self._User_Input_Bool()
+                        if user_input == True:
+                            self.Scale_Channels([self.channels[channels_to_filter[2*i]], self.channels[channels_to_filter[2*i+1]]])
                 amp = self.all_data[channels_to_filter[2*i]]
                 phase = self.all_data[channels_to_filter[2*i+1]]
                 # compl = np.add(amp*np.cos(phase), 1J*amp*np.sin(phase))
@@ -1452,10 +1449,11 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             elif self.height_indicator in self.channels[channels_to_filter[2*i]]:
                 pixel_scaling = self.channel_tag_dict[channels_to_filter[2*i]][Tag_Type.pixel_scaling]
                 if pixel_scaling == 1:
-                    print('The data is not yet scaled! Do you want to scale the data?')
-                    user_input = self._User_Input_Bool()
-                    if user_input == True:
-                        self.Scale_Channels([self.channels[channels_to_filter[2*i]]])
+                    if Plot_Definitions.show_plot:
+                        print('The data is not yet scaled! Do you want to scale the data?')
+                        user_input = self._User_Input_Bool()
+                        if user_input == True:
+                            self.Scale_Channels([self.channels[channels_to_filter[2*i]]])
                 height = self.all_data[channels_to_filter[2*i]]
                 height_blurred = self._Gauss_Blurr_Data(height, sigma)
                 self.all_data[channels_to_filter[2*i]] = height_blurred
@@ -2455,7 +2453,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             XRes = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area][0]
             XReal = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.scan_area][0]
             pixel_scaling = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_scaling]
-            dx = XReal/(XRes*pixel_scaling)
+            # dx = XReal/(XRes*pixel_scaling)
+            dx = XReal/(XRes)
             scalebar_var = [dx, units, dimension, label, length_fraction, height_fraction, width_fraction,
                             location, loc, pad, border_pad, sep, frameon, color, box_color, box_alpha, scale_loc,
                             label_loc, font_properties, label_formatter, scale_formatter, fixed_value, fixed_units, animated, rotation]
