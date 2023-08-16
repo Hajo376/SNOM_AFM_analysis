@@ -662,10 +662,6 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             else:
                 print(f'Channel {channel} is not in memory! Please initiate the channels you want to use first!')
 
-    def _Gauss_Blurr_Data(self, array, sigma) -> np.array:
-        """Applies a gaussian blurr to the specified array, with a specified sigma. The blurred data is returned as a list."""
-        return gaussian_filter(array, sigma)
-
     def _Load_Data(self, channels:list) -> list:
         """Loads all binary data of the specified channels and returns them in a list plus the dictionary with the channel information.
         Height data is automatically converted to nm. """
@@ -1177,7 +1173,9 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                         map_object = LinearSegmentedColormap.from_list(name='rainbow_alpha',colors=color_array)
 
                         # register this new colormap with matplotlib
-                        plt.register_cmap(cmap=map_object)
+                        try:
+                            plt.register_cmap(cmap=map_object)
+                        except: pass
                         axis.pcolormesh(white_pixels, cmap='rainbow_alpha')
                     
                     
@@ -1312,6 +1310,10 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         self._Display_Dataset(dataset, plot_channels_dict)
         # self._Display_Dataset(dataset, plot_channels)
 
+    def _Gauss_Blurr_Data(self, array, sigma) -> np.array:
+        """Applies a gaussian blurr to the specified array, with a specified sigma. The blurred data is returned as a list."""
+        return gaussian_filter(array, sigma)
+
     def Gauss_Filter_Channels(self, channels:list=None, sigma=2):
         """This function will gauss filter the specified channels. If no channels are specified, the ones in memory will be used.
 
@@ -1408,6 +1410,9 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             if self.height_indicator in channel:
                 channels_to_filter.append(self.channels.index(channel))
                 channels_to_filter.append(self.channels.index(channel))# just add twice for now, change later! ToDo
+            elif self.real_indicator in channel or self.imag_indicator in channel:
+                channels_to_filter.append(self.channels.index(channel))
+                channels_to_filter.append(self.channels.index(channel))# just add twice for now, change later! ToDo
             elif self.channels.index(channel) not in channels_to_filter:
                 print(f'You wanted to blurr {channel}, but that is not implemented! 1')
         # print('channels_to_filter:', channels_to_filter)
@@ -1457,6 +1462,19 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 height = self.all_data[channels_to_filter[2*i]]
                 height_blurred = self._Gauss_Blurr_Data(height, sigma)
                 self.all_data[channels_to_filter[2*i]] = height_blurred
+                self.channels_label[channels_to_filter[2*i]] = self.channels_label[channels_to_filter[2*i]] + '_' + self.filter_gauss_indicator
+                # self.channels[channels_to_filter[2*i]] += '_' + self.filter_gauss_indicator
+            elif self.real_indicator in self.channels[channels_to_filter[2*i]] or self.imag_indicator in self.channels[channels_to_filter[2*i]]:
+                pixel_scaling = self.channel_tag_dict[channels_to_filter[2*i]][Tag_Type.pixel_scaling]
+                if pixel_scaling == 1:
+                    if Plot_Definitions.show_plot:
+                        print('The data is not yet scaled! Do you want to scale the data?')
+                        user_input = self._User_Input_Bool()
+                        if user_input == True:
+                            self.Scale_Channels([self.channels[channels_to_filter[2*i]]])
+                data = self.all_data[channels_to_filter[2*i]]
+                data_blurred = self._Gauss_Blurr_Data(data, sigma)
+                self.all_data[channels_to_filter[2*i]] = data_blurred
                 self.channels_label[channels_to_filter[2*i]] = self.channels_label[channels_to_filter[2*i]] + '_' + self.filter_gauss_indicator
                 # self.channels[channels_to_filter[2*i]] += '_' + self.filter_gauss_indicator
             
@@ -1982,16 +2000,6 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         self._Write_to_Logfile('height_leveling_coordinates', klick_coordinates)
         return self._level_height_data(klick_coordinates, zone)
 
-    def _Shift_Phase_Data(self, data, shift) -> np.array:
-        """This function adds a phaseshift to the specified phase data. The phase data is automatically kept in the 0 to 2 pi range.
-        Could in future be extended to show a live view of the phase data while it can be modified by a slider...
-        e.g. by shifting the colorscale in the preview rather than the actual data..."""
-        yres = len(data)
-        xres = len(data[0])
-        for y in range(yres):
-            for x in range(xres):
-                data[y][x] = (data[y][x] + shift) % (2*np.pi)
-        return data
 
     def _Level_Phase_Slope(self, data, slope) -> np.array:
         """This function substracts a linear phase gradient in y direction from the specified phase data.
@@ -2109,6 +2117,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     else:
                         exit()
 
+
     def Level_Height_Channels(self, channels:list=None) -> None:
         """This function levels all height channels which are either user specified or in the instance memory.
         The leveling will prompt the user with a preview to select 3 points for getting the coordinates of the leveling plane.
@@ -2139,6 +2148,17 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             if self.height_indicator in channel:
                 self.all_data[self.channels.index(channel)] = self._Height_Levelling_3Point_forGui(self.all_data[self.channels.index(channel)])
                 self.channels_label[self.channels.index(channel)] += '_leveled' 
+
+    def _Shift_Phase_Data(self, data, shift) -> np.array:
+        """This function adds a phaseshift to the specified phase data. The phase data is automatically kept in the 0 to 2 pi range.
+        Could in future be extended to show a live view of the phase data while it can be modified by a slider...
+        e.g. by shifting the colorscale in the preview rather than the actual data..."""
+        yres = len(data)
+        xres = len(data[0])
+        for y in range(yres):
+            for x in range(xres):
+                data[y][x] = (data[y][x] + shift) % (2*np.pi)
+        return data
 
     def Shift_Phase(self, shift:float=None, channels:list=None) -> None:
         """This function will prompt the user with a preview of the first phase channel in memory.
@@ -2394,6 +2414,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self.channel_tag_dict[index][Tag_Type.scan_area] = [xreal_new, yreal_new]
             # add new appendix to channel
             self.channels_label[index] += '_reduced'
+        self._Write_to_Logfile('cut', 'autocut')
 
     def _Auto_Cut_Data(self, data) -> np.array:
         """This function cuts the data and removes zero values from the outside."""
@@ -2470,7 +2491,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         Args:
             orientation (str, optional): rotate clockwise ('right') or counter clockwise ('left'). Defaults to 'right'.
         """
-        self._Write_to_Logfile('rotate_90_deg', orientation)
+        # self._Write_to_Logfile('rotate_90_deg', orientation)
         if orientation == 'right':
             axes=(1,0)
             self._Write_to_Logfile('rotation', +90)
@@ -3147,8 +3168,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 real_data[y][x] = amp_data[y][x]*np.cos(phase_data[y][x])
                 imag_data[y][x] = amp_data[y][x]*np.sin(phase_data[y][x])
         # create realpart and imaginary part channel and dict and add to memory
-        real_channel = f'O{demodulation}' + self.real_indicator + '_manipulated' # make shure not to overwrite the realpart created by the Synccorrection
-        imag_channel = f'O{demodulation}' + self.imag_indicator + '_manipulated' # make shure not to overwrite the imagpart created by the Synccorrection
+        real_channel = f'O{demodulation}' + self.real_indicator# + '_manipulated' # make shure not to overwrite the realpart created by the Synccorrection
+        imag_channel = f'O{demodulation}' + self.imag_indicator# + '_manipulated' # make shure not to overwrite the imagpart created by the Synccorrection
         real_channel_dict = amp_dict
         imag_channel_dict = amp_dict
 
