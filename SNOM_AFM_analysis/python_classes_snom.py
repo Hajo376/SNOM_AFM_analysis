@@ -297,13 +297,14 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self.phase_channels = ['arg']
             self.amp_channels = ['abs']
             self.real_channels = ['real']
-            self.height_channel = None
+            self.height_channel = 'none'
             self.preview_ampchannel = 'abs'
             self.preview_phasechannel = 'arg'
-            self.height_indicator = None
+            self.height_indicator = 'none'
             self.amp_indicator = 'abs'
             self.phase_indicator = 'arg'
             self.real_indicator = 'real'
+            self.imag_indicator = 'imag'
         
         # additional definitions independent of filetype:
         self.filter_gauss_indicator = 'gauss'
@@ -450,9 +451,13 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 #     else:
                 #         filepath = self.directory_name + '/' + self.filename + '_' + channel + '.ascii'
                 #         cod = None
+                elif self.file_type == File_Type.comsol_gsf:
+                    filepath = self.directory_name / Path(self.filename.name + '_' + channel + '.gsf')
+
                 else:
                     # filepath = self.directory_name + '/' + self.filename + ' ' + channel + '.gsf'
                     filepath = self.directory_name / Path(self.filename.name + ' ' + channel + '.gsf')
+                print(self.file_type, filepath, self.channels)
                 file = open(filepath, 'r', encoding=cod)
                 content = file.read()
                 file.close()
@@ -817,7 +822,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         for i in range(len(channels)):
             # print(channels[i])
             # f=open(f"{self.directory_name}/{self.filename} {channels[i]}.gsf","br")
-            f=open(self.directory_name / Path(self.filename.name + f' {channels[i]}.gsf'),"br")
+            f=open(self.directory_name / Path(self.filename.name + f'_{channels[i]}.gsf'),"br")
             binarydata=f.read()
             f.close()
             all_binary_data.append(binarydata)
@@ -1150,6 +1155,11 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                         else:
                             # print('not plotting full range phase')
                             img = axis.pcolormesh(data, cmap=cmap)
+                    
+                    # legacy method to draw white pixels around masked areas, currently out of service because 
+                    # the mask is not stored in the plot variable but for the whole measurement.
+                    # repeated calls of the measurement instance would lead to problems
+                    '''
                     if (cmap == SNOM_height) and ('_masked' in title) and ('_reduced' not in title):
                         # create a white border around the masked area, but show the full unmasked height data
                         border_width = 1
@@ -1177,7 +1187,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                             plt.register_cmap(cmap=map_object)
                         except: pass
                         axis.pcolormesh(white_pixels, cmap='rainbow_alpha')
-                    
+                    '''
                     
                     # elif '_shifted' in title:
                     #     XRes = len(data[0])
@@ -1859,7 +1869,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             mask_data == True #unnecessary from now on...
         self._Write_to_Logfile('height_masking_threshold', threshold)
         mask_array = self._Create_Mask_Array(leveled_height_data, threshold)
-        self.mask_array = mask_array
+        self.mask_array = mask_array # todo, mask array must be saved as part of the image, otherwise multiple measurement creations will use the same mask
         if export == True:
             # open files for the masked data:
             for channel in channels:
