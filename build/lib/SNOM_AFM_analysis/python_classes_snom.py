@@ -180,7 +180,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         self.logfile_path = self._Initialize_Logfile()
         self._Initialize_File_Type()
         if channels == None: # the standard channels which will be used if no channels are specified
-            channels = [self.preview_ampchannel, self.preview_phasechannel, self.height_channel]
+            # channels = [self.preview_ampchannel, self.preview_phasechannel, self.height_channel]# not compatible with comsol data, since they have not height channel
+            channels = [self.preview_ampchannel, self.preview_phasechannel]
         self.channels = channels
         self._Create_Measurement_Tag_Dict()
         # just initialize data here?
