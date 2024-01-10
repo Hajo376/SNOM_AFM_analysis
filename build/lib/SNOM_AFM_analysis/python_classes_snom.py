@@ -443,7 +443,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     #     filepath = self.directory_name / Path(self.filename.name + ' ' + channel + '.gsf')
                     # else:
                     #     filepath = self.directory_name / Path(self.filename.name + ' ' + channel + ' raw.gsf')
-                    if channel in self.all_channels:
+                    if channel in self.all_channels and 'C' not in channel:
                         filepath = self.directory_name / Path(self.filename.name + ' ' + channel + ' raw.gsf')
                     else:
                         filepath = self.directory_name / Path(self.filename.name + ' ' + channel + '.gsf')
@@ -692,7 +692,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     #     f=open(self.directory_name / Path(self.filename.name + f' {channels[i]}.gsf'),"br")
                     # else:
                     #     f=open(self.directory_name / Path(self.filename.name + f' {channels[i]} raw.gsf'),"br")
-                    if channels[i] in self.all_channels:
+                    if channels[i] in self.all_channels and 'C' not in channels[i]:
                         f=open(self.directory_name / Path(self.filename.name + f' {channels[i]} raw.gsf'),"br")
                     else:
                         f=open(self.directory_name / Path(self.filename.name + f' {channels[i]}.gsf'),"br")
@@ -2773,22 +2773,22 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         self.profile_orientation = orientation
 
         # get the profile data for amp and phase
-        phase_profiles = self._Get_Profile(profiledata_phase, coordinates, orientation, width_phase)
+        self.phase_profiles = self._Get_Profile(profiledata_phase, coordinates, orientation, width_phase)
         # test:
-        self._Display_Profile([phase_profiles[6], phase_profiles[16]])
+        self._Display_Profile([self.phase_profiles[6], self.phase_profiles[16]])
 
-        amp_profiles = self._Get_Profile(profiledata_amp, coordinates, orientation, width_amp)
-        mean_amp = [np.mean(amp) for amp in amp_profiles]
-        reference_index = int((len(phase_profiles)-1)/2)
-        # phase_difference_profiles = [Phase_Analysis.Get_Profile_Difference(phase_profiles[reference_index], phase_profiles[i]) for i in range(len(phase_profiles))]
-        flattened_profiles = [phase_analysis.Flatten_Phase_Profile(profile, +1) for profile in phase_profiles]
+        self.amp_profiles = self._Get_Profile(profiledata_amp, coordinates, orientation, width_amp)
+        mean_amp = [np.mean(amp) for amp in self.amp_profiles]
+        reference_index = int((len(self.phase_profiles)-1)/2)
+        # phase_difference_profiles = [Phase_Analysis.Get_Profile_Difference(self.phase_profiles[reference_index], self.phase_profiles[i]) for i in range(len(self.phase_profiles))]
+        flattened_profiles = [phase_analysis.Flatten_Phase_Profile(profile, +1) for profile in self.phase_profiles]
         self._Display_Profile(flattened_profiles, linestyle='-', title='Flattened phase profiles') # display the flattened profiles
-        # phase_difference_profiles = [Phase_Analysis.Get_Profile_Difference_2(phase_profiles[reference_index], phase_profiles[i]) for i in range(len(phase_profiles))]
+        # phase_difference_profiles = [Phase_Analysis.Get_Profile_Difference_2(self.phase_profiles[reference_index], self.phase_profiles[i]) for i in range(len(self.phase_profiles))]
         phase_difference_profiles = [phase_analysis.Get_Profile_Difference_2(flattened_profiles[reference_index], flattened_profiles[i]) for i in range(len(flattened_profiles))]
         self._Display_Profile(phase_difference_profiles, linestyle='-', title='Phase difference to center wg') # display the phase difference profiles, no jumps close to 2 pi should occure or the average will lead to false values!
         # mean_phase_differences = [np.mean(diff) for diff in phase_difference_profiles]# todo this does not work!
         mean_phase_differences = [np.mean(diff) if np.mean(diff)>0 else np.mean(diff) + np.pi*2 for diff in phase_difference_profiles]# todo this does not work!
-        real_per_wg_index = [mean_amp[i]*np.cos(mean_phase_differences[i]) for i in range(len(phase_profiles))]
+        real_per_wg_index = [mean_amp[i]*np.cos(mean_phase_differences[i]) for i in range(len(self.phase_profiles))]
         intensity_per_wg_index = [val**2 for val in real_per_wg_index]
         wg_indices = np.arange(-reference_index, reference_index+1)
         # print(wg_indices)
