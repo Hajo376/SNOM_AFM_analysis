@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: SNOM-AFM-analysis
-Version: 0.0.42
+Version: 0.0.46
 Summary: Package for displaying and manipulating SNOM and AFM data.
 Home-page: #
 Author: Hajo Schill

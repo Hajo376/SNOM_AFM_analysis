@@ -13,6 +13,9 @@ import pandas as pd # used for getting data out of html files
 from datetime import datetime
 from enum import Enum, auto
 from pathlib import Path, PurePath
+import os
+import pickle as pkl
+import gc
 
 # import own functionality
 from SNOM_AFM_analysis.lib.snom_colormaps import *
@@ -59,6 +62,7 @@ class File_Definitions:
     #standard file definitions
     file_type = File_Type.standard
     parmeters_type = File_Type.html
+    autodelete_all_subplots = True # if true old subplots will be deleted on creation of new measurement
 
 class Plot_Definitions:
     hide_ticks = True
@@ -148,6 +152,10 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
     # reorganize and put the following variables in the init function
     # ToDo
     all_subplots = []
+    # new version: try to export all_subplots to .json file and only load when needed to reduce ram usage
+    # all_subplots_path = Path(os.environ['APPDATA']) / Path('SNOM_Plotter') / Path('all_subplots.json')
+    # all_subplots_path = Path(os.environ['APPDATA']) / Path('SNOM_Plotter') / Path('all_subplots.npy')
+    all_subplots_path = Path(os.environ['APPDATA']) / Path('SNOM_Plotter') / Path('all_subplots.p')
     # mask_array = []
     # scalebar = [] # specifiy the channels to add the scalebar to, should contain the channel plus the scalbar object in a nested list
     # piezo motion distortion correction:
@@ -189,6 +197,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         # just initialize data here?
         # self._Create_Channels_Tag_Dict()
         self._Initialize_Data(self.channels)
+        if File_Definitions.autodelete_all_subplots: self._Delete_All_Subplots() # automatically delete old subplots
         
         # Create a variable containing the data of the specified channels which can be varied later on with e.g. the gaussian_filter and subsequent methods
         # Aditionally a dictionary is created which contains the channel information
@@ -625,6 +634,30 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         # print('self.channels: ', self.channels)
         # print('self.all_subplots[-1]: ', [element[3] for element in self.all_subplots])
 
+    def _Load_All_Subplots(self) -> None:
+        """Load all subplots from memory (located under APPDATA/SNOM_Plotter/all_subplots.p).
+        """
+        try:
+            with open(self.all_subplots_path, 'rb') as file:
+                self.all_subplots = pkl.load(file)
+        except: self.all_subplots = []
+        
+    
+    def _Export_All_Subplots(self) -> None:
+        """Export all subplots to memory.
+        """
+        with open(self.all_subplots_path, 'wb') as file:
+            pkl.dump(self.all_subplots, file)
+        self.all_subplots = []
+
+    def _Delete_All_Subplots(self):
+        """Delete the subplot memory. Should be done always if new measurement row is investigated.
+        """
+        try:
+            os.remove(self.all_subplots_path)
+        except: pass
+        self.all_subplots = []
+        
     def _Scale_Array(self, array, scaling) -> np.array:
         """This function scales a given 2D Array, it thus creates 'scaling'**2 subpixels per pixel.
         The scaled array is returned."""
@@ -937,12 +970,19 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         # subplots.append([data, cmap, label, title])
         if self.measurement_title != None:
             title = self.measurement_title + title
+        '''
         if scalebar != None:
             self.all_subplots.append([np.copy(data), cmap, label, title, scalebar])
             return [data, cmap, label, title, scalebar]
         else:
             self.all_subplots.append([np.copy(data), cmap, label, title])
             return [data, cmap, label, title]
+        '''
+        supplot = {'data': np.copy(data), 'cmap': cmap, 'label': label, 'title': title, 'scalebar': scalebar}
+        self._Load_All_Subplots()
+        self.all_subplots.append(supplot)
+        self._Export_All_Subplots()
+        return supplot
         
         #old:
         '''
@@ -1017,8 +1057,10 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         """
         #sort the index array in descending order and delete the corresponding plots from the memory
         index_array.sort(reverse=True)
+        self._Load_All_Subplots()
         for index in index_array:
             del self.all_subplots[index]
+        self._Export_All_Subplots()
 
     def Remove_Last_Subplots(self, times:int=1) -> None:
         """This function removes the last added subplots from the memory.
@@ -1028,8 +1070,10 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         Args:
             times [int]: how many subplots should be removed from the end of the list?
         """
+        self._Load_All_Subplots()
         for i in range(times):
             self.all_subplots.pop()
+        self._Export_All_Subplots()
 
     def _Plot_Subplots(self, subplots) -> None:
         """This function plots the subplots. The plots are created in a grid, by default the grid is optimized for 3 by 3. The layout changes dependent on the number of subplots
@@ -1060,7 +1104,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             ncols = 2
             nrows = 2
             changed_orientation = True
-        data = subplots[0][0]
+        # data = subplots[0][0]
+        data = subplots[0]['data']
         # calculate the ratio (x/y) of the data, if the ratio is larger than 1 the images are wider than high,
         # and they will prefferably be positiond vertically instead of horizontally
         ratio = len(data[0])/len(data)
@@ -1069,6 +1114,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             ncols = 1
             changed_orientation = True
         #create the figure with subplots
+        # plt.clf()
+        # plt.cla()
         fig, ax = plt.subplots(nrows, ncols)    
         fig.set_figheight(self.figsizey)
         fig.set_figwidth(self.figsizex) 
@@ -1087,6 +1134,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                         axis = ax[row]
                     else:
                         axis = ax[row, col]
+                    '''
                     data = subplots[counter][0]
                     cmap = subplots[counter][1]
                     label = subplots[counter][2]
@@ -1098,6 +1146,19 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                             label_loc, font_properties, label_formatter, scale_formatter, fixed_value, fixed_units, animated, rotation) 
                         axis.add_artist(scalebar)
                         # print('added a scalebar')
+                    '''
+                    data = subplots[counter]['data']
+                    cmap = subplots[counter]['cmap']
+                    label = subplots[counter]['label']
+                    title = subplots[counter]['title']
+                    scalebar = subplots[counter]['scalebar']
+                    if scalebar is not None:
+                        dx, units, dimension, scalebar_label, length_fraction, height_fraction, width_fraction, location, loc, pad, border_pad, sep, frameon, color, box_color, box_alpha, scale_loc, label_loc, font_properties, label_formatter, scale_formatter, fixed_value, fixed_units, animated, rotation = scalebar
+                        scalebar = ScaleBar(dx, units, dimension, scalebar_label, length_fraction, height_fraction, width_fraction,
+                            location, loc, pad, border_pad, sep, frameon, color, box_color, box_alpha, scale_loc,
+                            label_loc, font_properties, label_formatter, scale_formatter, fixed_value, fixed_units, animated, rotation) 
+                        axis.add_artist(scalebar)
+
                     #center the colorscale for real data around 0
                     # get minima and maxima from data:
                     flattened_data = data.flatten()
@@ -1246,6 +1307,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             plt.tight_layout()
         if Plot_Definitions.show_plot is True:
             plt.show()
+        gc.collect()
     
     def Switch_Supplots(self, first_id:int=None, second_id:int=None) -> None:
         """
@@ -1260,9 +1322,11 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         if (first_id == None) or (second_id == None):
             first_id = int(input('Please enter the id of the first image: '))
             second_id = int(input('Please enter the id of the second image: '))
+        self._Load_All_Subplots()
         first_subplot = self.all_subplots[first_id]
         self.all_subplots[first_id] = self.all_subplots[second_id]
         self.all_subplots[second_id] = first_subplot
+        self._Export_All_Subplots()
         self.Display_All_Subplots()
         print('Are you happy with the new positioning?')
         user_input = self._User_Input_Bool()
@@ -1292,7 +1356,10 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         """
         This function displays all the subplots which have been created until this point.
         """
+        self._Load_All_Subplots()
         self._Plot_Subplots(self.all_subplots)
+        self.all_subplots = []
+        gc.collect()
 
     def Display_Channels(self, channels:list=None) -> None: #, show_plot:bool=True
         """This function displays the channels in memory or the specified ones.
@@ -1321,6 +1388,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
 
             # dataset, dict = self._Load_Data(channels)
         self._Display_Dataset(dataset, plot_channels_dict)
+        gc.collect()
         # self._Display_Dataset(dataset, plot_channels)
 
     def _Gauss_Blurr_Data(self, array, sigma) -> np.array:
@@ -1741,6 +1809,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     realf.write(pack("f",realpixval))
             phasef.close()
             realf.close()
+        gc.collect()
 
     def _Gen_From_Input_Phasedir(self) -> int:
         """
@@ -2129,7 +2198,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                         self.Correct_Phase_Drift()
                     else:
                         exit()
-
+        gc.collect()
 
     def Level_Height_Channels(self, channels:list=None) -> None:
         """This function levels all height channels which are either user specified or in the instance memory.
@@ -2145,6 +2214,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             if self.height_indicator in channel:
                 self.all_data[self.channels.index(channel)] = self._Height_Levelling_3Point(self.all_data[self.channels.index(channel)])
                 self.channels_label[self.channels.index(channel)] += '_leveled' 
+        gc.collect()
 
     def Level_Height_Channels_forGui(self, channels:list=None):# todo not used?
         """This function levels all height channels which are either user specified or in the instance memory.
@@ -2161,6 +2231,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             if self.height_indicator in channel:
                 self.all_data[self.channels.index(channel)] = self._Height_Levelling_3Point_forGui(self.all_data[self.channels.index(channel)])
                 self.channels_label[self.channels.index(channel)] += '_leveled' 
+        gc.collect()
 
     def _Shift_Phase_Data(self, data, shift) -> np.array:
         """This function adds a phaseshift to the specified phase data. The phase data is automatically kept in the 0 to 2 pi range.
@@ -2214,7 +2285,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         for channel in channels:
             if self.phase_indicator in channel:
                 self.all_data[self.channels.index(channel)] = self._Shift_Phase_Data(self.all_data[self.channels.index(channel)], shift)
-                
+        gc.collect()
+
     def _Fit_Horizontal_WG(self, data):
         YRes = len(data)
         XRes = len(data[0])
@@ -2328,6 +2400,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             
             self.all_data.append(shifted_data)
             self.channels_label[i] += '_shifted'
+        gc.collect()
 
     def Cut_Channels(self, channels:list=None, preview_channel:str=None, autocut:bool=False, coords:list=None, reset_mask:bool=False) -> None:
         """This function cuts the specified channels to the specified region. If no coordinates are specified you will be prompted with a window to select an area.
@@ -2391,7 +2464,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     self.all_data[index] = np.multiply(self.all_data[index], self.mask_array)
                     # self.channels[index] += '_reduced'
                 self._Auto_Cut_Channels(channels)
-        
+        gc.collect()
+
     def _Auto_Cut_Channels(self, channels:list=None) -> None:
         """This function automatically cuts away all rows and lines which are only filled with zeros.
         This function applies to all channels in memory.
@@ -2654,6 +2728,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         plt.title('Phase difference')
         plt.tight_layout()
         plt.show()
+        gc.collect()
 
     def _Plot_Data_and_Profile_pos(self, channel, data, coordinates, orientation):
         if self.phase_indicator in channel:
@@ -2863,6 +2938,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             labels (list, optional): the description of the profiles. Will be displayed in the legend. Defaults to None.
         """
         self._Display_Profile(self.profiles)
+        gc.collect()
 
     def Display_Flattened_Profile(self, phase_orientation:int):
         """This function will flatten all profiles in memory and display them. Only useful for phase profiles!
@@ -2872,6 +2948,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         """
         flattened_profiles = [phase_analysis.Flatten_Phase_Profile(profile, phase_orientation) for profile in self.profiles]
         self._Display_Profile(flattened_profiles)
+        gc.collect()
 
     def Display_Phase_Difference(self, reference_index:int):
         """This function will calculate the phase difference of all profiles relative to the profile specified by the reference index.
@@ -2882,6 +2959,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         difference_profiles = [phase_analysis.Get_Profile_Difference(self.profiles[reference_index], self.profiles[i]) for i in range(len(self.profiles)) if i != reference_index]
         labels = ['Wg index ' + str(i) for i in range(len(difference_profiles))]
         self._Display_Profile(difference_profiles, 'Phase difference', labels)
+        gc.collect()
 
     def _Get_Mean_Phase_Difference(self, profiles, reference_index:int):
         difference_profiles = [phase_analysis.Get_Profile_Difference(profiles[reference_index], profiles[i]) for i in range(len(profiles)) if i != reference_index]
@@ -3065,7 +3143,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
 
                     # XRes, YRes = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area]
                     # XReal, YReal = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.scan_area]
-            
+        gc.collect()
+
     def Overlay_Forward_and_Backward_Channels_V2(self, height_channel_forward:str, height_channel_backward:str, channels:list=None):
         """
         Caution! This variant is ment to keep the scan size identical!
@@ -3133,6 +3212,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     
                     # create mean data and append to all_data
                     self.all_data.append(realign.Create_Mean_Array_V2(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index(self.backwards_indicator+ channel)], index))
+        gc.collect()
 
     def Manually_Create_Complex_Channel(self, amp_channel:str, phase_channel:str, complex_type:str=None) -> None:
         """This function will manually create a realpart channel depending on the amp and phase channel you give.
@@ -3207,7 +3287,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self.all_data.append(imag_data)
             self.channel_tag_dict.append(imag_channel_dict)
             self.channels_label.append(imag_channel)
-
+        gc.collect()
 
 
 # could be exported to external file

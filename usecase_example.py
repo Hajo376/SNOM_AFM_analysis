@@ -123,6 +123,7 @@ def Test_Phaseshift():
 def Compare_Measurements():
     channels = ['O2A', 'O2P', 'Z C']
     measurement_titles = ['measurment1: ', 'measurement2: '] # the measurment title just precedes the generic subplot titles
+    File_Definitions.autodelete_all_subplots = False # keep subplots from previous measurement in memory!
     N = 2
     for i in range(N):
         # directory_name = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2022_07_27')
@@ -181,6 +182,7 @@ def Complete_Example_1():
     # Measurement.Cut_Channels(autocut=True) # autocut will remove all empty lines and columns
     # Measurement.Display_Channels()
     # Measurement.Display_All_Subplots()
+    Measurement._Export_All_Subplots()
 
 def Test_Aachen_files():
     # File_Definitions.file_type = File_Type.aachen_gsf
@@ -233,6 +235,24 @@ def Test_Export_to_gsf():
     Measurement.Display_All_Subplots()
     Measurement.Save_to_gsf()
 
+def Test_Export_and_Load_all_subplots():
+    directory_name = 'example_measurements/2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R'
+    channels = ['O2P', 'O2A', 'Z C']
+    Measurement = Open_Measurement(directory_name, channels)
+    Measurement.Scale_Channels()
+    Measurement.Gauss_Filter_Channels_complex()
+    Measurement.Scalebar(['Z C'])
+    Measurement.Display_Channels()
+    Measurement.Display_Channels()
+    Measurement.Display_Channels()
+    Measurement.Display_Channels()
+    Measurement.Display_Channels()
+    # Measurement._Export_All_Subplots()
+    # Measurement._Load_All_Subplots()
+    # Measurement.Display_All_Subplots()
+    # Measurement._Delete_All_Subplots()
+
+
 def main():
      
     # Realign()
@@ -242,10 +262,12 @@ def main():
     # Compare_Measurements()
     # Test_Rectangle_Selector()
     # Correct_Phase_Drift()
-    Synccorrection()
+    # Synccorrection()
     # Complete_Example_1()
     # Test_Aachen_files()
     # Test_Export_to_gsf()
+
+    Test_Export_and_Load_all_subplots()
 
 
 if __name__ == '__main__':
