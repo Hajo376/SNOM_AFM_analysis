@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="SNOM_AFM_analysis",
-    version="0.0.52",
+    version="0.0.54",
     description="Package for displaying and manipulating SNOM and AFM data.",
     # package_dir={},
     packages=["SNOM_AFM_analysis", "SNOM_AFM_analysis/lib"],

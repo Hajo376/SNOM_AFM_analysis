@@ -214,11 +214,42 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
     def _Generate_Savefolder(self):
         """Generate savefolder if not already existing. Careful, has to be the same one as for the snom plotter gui app.
         """
-        self.save_folder = Path(os.environ['APPDATA']) / Path('SNOM_Plotter')
+        # self.logging_folder = Path(os.path.expanduser('~')) / Path('SNOM_Plotter')
+        self.save_folder = Path(os.path.expanduser('~')) / Path('SNOM_Plotter')
         self.all_subplots_path = self.save_folder / Path('all_subplots.p')
-        self.parameters_path = self.save_folder / Path('plotting_parameters.json')
+        self.plotting_parameters_path = self.save_folder / Path('plotting_parameters.json')
+        # self.save_folder = Path(os.environ['APPDATA']) / Path('SNOM_Plotter')
+        # self.all_subplots_path = self.save_folder / Path('all_subplots.p')
+        # self.plotting_parameters_path = self.save_folder / Path('plotting_parameters.json')
+
         if not Path.exists(self.save_folder):
             os.makedirs(self.save_folder)
+
+    def _Generate_Default_Plotting_Parameters(self):
+        dictionary = {
+            "amplitude_cmap": "<SNOM_amplitude>",
+            "amplitude_cbar_label": "Amplitude [a.u.]",
+            "amplitude_title": "<channel>",
+            "phase_cmap": "<SNOM_phase>",
+            "phase_cbar_label": "Phase [a.u.]",
+            "phase_title": "<channel>",
+            "phase_positive_title": "Positively corrected phase <channel>",
+            "phase_negative_title": "Negatively corrected phase <channel>",
+            "height_cmap": "<SNOM_height>",
+            "height_cbar_label": "Height [nm]",
+            "height_title": "<channel>",
+            "real_cmap": "<SNOM_realpart>",
+            "real_cbar_label": "E [a.u.]",
+            "real_title_real": "<channel>",
+            "real_title_imag": "<channel>",
+            "fourier_cmap": "viridis",
+            "fourier_cbar_label": "Intensity [a.u.]",
+            "fourier_title": "Fourier transform",
+            "gauss_blurred_title": "Blurred <channel>"
+        }
+        with open(self.plotting_parameters_path, 'w') as file:
+            json.dump(dictionary, file, indent=4)
+
 
     def _Find_Filetype(self) -> None:
         """This function aims at finding specific characteristics in the filename to idendify the filetype.
@@ -965,9 +996,13 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         so it can also be iterated by an other function to only plot the data of interest."""
         # import plotting_parameters.json, here the user can tweek some options for the plotting, like automatic titles and colormap choices
         
-
-        with open(self.parameters_path, 'r') as file:
-            plotting_parameters = json.load(file)
+        try:
+            with open(self.plotting_parameters_path, 'r') as file:
+                plotting_parameters = json.load(file)
+        except:
+            self._Generate_Default_Plotting_Parameters()
+            with open(self.plotting_parameters_path, 'r') as file:
+                plotting_parameters = json.load(file)
 
         # update the placeholders in the dictionary
         placeholders = {'<channel>': channel}
