@@ -61,6 +61,7 @@ SNOM_realpart = LinearSegmentedColormap('SNOM_realpart', cmap_snom_realpart)
 plt.register_cmap(cmap=SNOM_realpart)
 
 
+
 # all implemented colormaps
 all_colormaps = {
     "<SNOM_amplitude>": SNOM_amplitude,

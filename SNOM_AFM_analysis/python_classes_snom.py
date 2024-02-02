@@ -16,9 +16,10 @@ from pathlib import Path, PurePath
 import os
 import pickle as pkl
 import gc
+import json
 
 # import own functionality
-from SNOM_AFM_analysis.lib.snom_colormaps import *
+from SNOM_AFM_analysis.lib.snom_colormaps import SNOM_height, SNOM_amplitude, SNOM_phase, SNOM_realpart, all_colormaps
 from SNOM_AFM_analysis.lib.phase_slider import Get_Phase_Offset
 from SNOM_AFM_analysis.lib.rectangle_selector import Select_Rectangle
 from SNOM_AFM_analysis.lib.get_directionality import ChiralCoupler
@@ -155,7 +156,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
     # new version: try to export all_subplots to .json file and only load when needed to reduce ram usage
     # all_subplots_path = Path(os.environ['APPDATA']) / Path('SNOM_Plotter') / Path('all_subplots.json')
     # all_subplots_path = Path(os.environ['APPDATA']) / Path('SNOM_Plotter') / Path('all_subplots.npy')
-    all_subplots_path = Path(os.environ['APPDATA']) / Path('SNOM_Plotter') / Path('all_subplots.p')
+    # all_subplots_path = Path(os.environ['APPDATA']) / Path('SNOM_Plotter') / Path('all_subplots.p')
     # mask_array = []
     # scalebar = [] # specifiy the channels to add the scalebar to, should contain the channel plus the scalbar object in a nested list
     # piezo motion distortion correction:
@@ -183,6 +184,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         self.filename = Path(PurePath(self.directory_name).parts[-1])
         # print('old filename: ', self.filename)
         # print('new filename: ', PurePath(Path(self.directory_name)).parts[-1])
+        # initialize savefolder under %Appdata%/Roaming and all necessary file path definitions of files stored there, important for subplot memory and plotting_parameters
+        self._Generate_Savefolder()
         self.measurement_title = title # If a measurement_title is specified it will precede the automatically created title based on the channel dictionary
         self.autoscale = autoscale
         self.logfile_path = self._Initialize_Logfile()
@@ -207,6 +210,15 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         # print(self.all_data)
         # if autoscale == True:
         #     self.Quadratic_Pixels()
+
+    def _Generate_Savefolder(self):
+        """Generate savefolder if not already existing. Careful, has to be the same one as for the snom plotter gui app.
+        """
+        self.save_folder = Path(os.environ['APPDATA']) / Path('SNOM_Plotter')
+        self.all_subplots_path = self.save_folder / Path('all_subplots.p')
+        self.parameters_path = self.save_folder / Path('plotting_parameters.json')
+        if not Path.exists(self.save_folder):
+            os.makedirs(self.save_folder)
 
     def _Find_Filetype(self) -> None:
         """This function aims at finding specific characteristics in the filename to idendify the filetype.
@@ -641,8 +653,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             with open(self.all_subplots_path, 'rb') as file:
                 self.all_subplots = pkl.load(file)
         except: self.all_subplots = []
-        
-    
+         
     def _Export_All_Subplots(self) -> None:
         """Export all subplots to memory.
         """
@@ -925,23 +936,55 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             else:
                 print('At least one of the specified channels is not in memory! You probably should initialize the channels first.')
 
+    def _Replace_Plotting_Parameter_Placeholders(self, dictionary, placeholders):
+        # colormaps = {"<SNOM_amplitude>": SNOM_amplitude,
+        #             "<SNOM_height>": SNOM_height,
+        #             "<SNOM_phase>": SNOM_phase,
+        #             "<SNOM_realpart>": SNOM_realpart}
+        
+        # first iterate through all placeholders and replace them in the dictionary
+        for placeholder in placeholders:
+            value = placeholders[placeholder]
+            for key in dictionary:
+                if placeholder in dictionary[key]:
+                    dictionary[key] = dictionary[key].replace(placeholder, value)
+                    # print('replaced channel!')
+        # replace colormaps
+        for key in dictionary:
+            for colormap in all_colormaps:
+                # print(colormap, type(colormap))
+                # print(dictionary[key])
+                if colormap in dictionary[key]:
+                    dictionary[key] = all_colormaps[colormap]
+                    break
+        return dictionary
+
     def _Add_Subplot(self, data, channel, scalebar=None) -> list:
         """This function adds the specified data to the list of subplots. The list of subplots contains the data, the colormap,
         the colormap label and a title, which are generated from the channel information. The same array is also returned,
         so it can also be iterated by an other function to only plot the data of interest."""
+        # import plotting_parameters.json, here the user can tweek some options for the plotting, like automatic titles and colormap choices
+        
+
+        with open(self.parameters_path, 'r') as file:
+            plotting_parameters = json.load(file)
+
+        # update the placeholders in the dictionary
+        placeholders = {'<channel>': channel}
+        plotting_parameters = self._Replace_Plotting_Parameter_Placeholders(plotting_parameters, placeholders)
+        
+        '''
         if self.amp_indicator in channel and self.height_indicator not in channel:
             cmap=SNOM_amplitude
             label = 'Amplitude [a.u.]'
             title = f'Amplitude {channel}'
         elif self.phase_indicator in channel:
+            cmap = SNOM_phase
             if 'positive' in channel:
-                cmap = SNOM_phase
                 title = f'Positively corrected phase O{channel[1]}P'
             elif 'negative' in channel:
-                cmap = SNOM_phase
                 title = f'Negatively corrected phase O{channel[1]}P'
             else:
-                cmap=SNOM_phase
                 title = f'Phase {channel}'
             label = 'Phase'
         elif self.height_indicator in channel:
@@ -964,6 +1007,42 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             title =  f'Fourier Transform {channel}'
         elif self.filter_gauss_indicator in channel:
             title = f'Gauss blurred {channel}'
+        '''
+
+        if self.amp_indicator in channel and self.height_indicator not in channel:
+            cmap = plotting_parameters["amplitude_cmap"]
+            label = plotting_parameters["amplitude_cbar_label"]
+            title = plotting_parameters["amplitude_title"]
+        elif self.phase_indicator in channel:
+            cmap = plotting_parameters["phase_cmap"]
+            if 'positive' in channel:
+                title = plotting_parameters["phase_positive_title"]
+            elif 'negative' in channel:
+                title = plotting_parameters["phase_negative_title"]
+            else:
+                title = plotting_parameters["phase_title"]
+            label = plotting_parameters["phase_cbar_label"]
+        elif self.height_indicator in channel:
+            cmap = plotting_parameters["height_cmap"]
+            label = plotting_parameters["height_cbar_label"]
+            title = plotting_parameters["height_title"]
+        elif self.real_indicator in channel or self.imag_indicator in channel:
+            cmap = plotting_parameters["real_cmap"]
+            label = plotting_parameters["real_cbar_label"]
+            if self.real_indicator in channel:
+                title = plotting_parameters["real_title_real"]
+            else:
+                title = plotting_parameters["real_title_imag"]
+        
+        
+        
+        elif self.filter_fourier_indicator in channel:
+            cmap = plotting_parameters["fourier_cmap"]
+            label = plotting_parameters["fourier_cbar_label"]
+            title =  plotting_parameters["fourier_title"]
+        elif self.filter_gauss_indicator in channel:
+            title = plotting_parameters["gauss_blurred_title"]
+        
         else:
             print('In _Add_Subplot(), encountered unknown channel')
             exit()
@@ -2081,7 +2160,6 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         # for the 3 point coordinates the height data is calculated over a small area around the clicked pixels to reduce deviations due to noise
         self._Write_to_Logfile('height_leveling_coordinates', klick_coordinates)
         return self._level_height_data(klick_coordinates, zone)
-
 
     def _Level_Phase_Slope(self, data, slope) -> np.array:
         """This function substracts a linear phase gradient in y direction from the specified phase data.
