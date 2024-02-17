@@ -11,6 +11,7 @@ SNOM_AFM_analysis.egg-info/not-zip-safe
 SNOM_AFM_analysis.egg-info/requires.txt
 SNOM_AFM_analysis.egg-info/top_level.txt
 SNOM_AFM_analysis/lib/__init__.py
+SNOM_AFM_analysis/lib/file_handling.py
 SNOM_AFM_analysis/lib/get_directionality.py
 SNOM_AFM_analysis/lib/phase_analysis.py
 SNOM_AFM_analysis/lib/phase_slider.py
@@ -19,6 +20,7 @@ SNOM_AFM_analysis/lib/realign.py
 SNOM_AFM_analysis/lib/rectangle_selector.py
 SNOM_AFM_analysis/lib/snom_colormaps.py
 SNOM_AFM_analysis/lib/__init__.py
+SNOM_AFM_analysis/lib/file_handling.py
 SNOM_AFM_analysis/lib/get_directionality.py
 SNOM_AFM_analysis/lib/phase_analysis.py
 SNOM_AFM_analysis/lib/phase_slider.py
