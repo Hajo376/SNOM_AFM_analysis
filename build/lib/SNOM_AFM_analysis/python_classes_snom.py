@@ -6689,6 +6689,76 @@ class SnomMeasurement(FileHandler):
         gc.collect()
 
 
+    def Create_Gif(self, amp_channel:str, phase_channel:str) -> None:
+        from PIL import Image
+        realcolorpalette=[]
+        for i in range(0,255):
+            realcolorpalette.append(i)
+            if (i<127): realcolorpalette.append(i)
+            else: realcolorpalette.append(255-i)
+            realcolorpalette.append(255-i)
+
+        framenumbers=20
+        Duration=100
+
+        '''if self.amp_indicator not in amp_channel or self.phase_indicator not in phase_channel:
+            print('The specified channels are not specified as needed!')
+            exit()
+        demodulation = amp_channel[1:2]
+        if demodulation not in phase_channel:
+            print('The channels you specified are not from the same demodulation order!\nProceeding anyways...')
+        # check if channels are in memory, if not load the data
+        if amp_channel not in self.channels:
+            amp_data, amp_dict = self._Load_Data(amp_channel)
+        else:
+            amp_data = self.all_data[self.channels.index(amp_channel)]
+            amp_dict = self.channel_tag_dict[self.channels.index(amp_channel)]
+        if phase_channel not in self.channels:
+            phase_data, phase_dict = self._Load_Data(phase_channel)
+        else:
+            phase_data = self.all_data[self.channels.index(phase_channel)]
+            phase_dict = self.channel_tag_dict[self.channels.index(phase_channel)]'''
+        # check if size is identical:
+        # print('printing all channels')
+        print('self.channels: ', self.channels)
+        print('amp_channel: ', amp_channel)
+        print('amp_index: ', self.channels.index(amp_channel))
+        amp_index = 0
+        phase_index = 1
+        amp_data = self.all_data[self.channels.index(amp_channel)]
+        amp_dict = self.channel_tag_dict[self.channels.index(amp_channel)]
+        phase_data = self.all_data[self.channels.index(phase_channel)]
+        phase_dict = self.channel_tag_dict[self.channels.index(phase_channel)]
+        xres_amp, yres_amp = amp_dict[Tag_Type.pixel_area]
+        xres_phase, yres_phase = phase_dict[Tag_Type.pixel_area]
+        if xres_amp != xres_phase or yres_amp != yres_phase:
+            print('The data of the specified channels has different resolution!')
+            exit()
+        XRes, YRes = xres_amp, yres_amp
+        flattened_amp = amp_data.flatten()
+        maxval = max(flattened_amp)
+
+        frames=[]
+        for i in range(0,framenumbers):
+            phase=i*2*np.pi/framenumbers
+            repixels=[]
+            colorpixels=[]
+            for j in range(0,YRes*XRes):
+                repixval=amp_data[j]*np.cos(phase_data[j]-phase)/maxval
+                repixels.append(repixval+1)
+            # img = Image.new('L', (XRes,YRes))
+            img = Image.fromarray(repixels)
+            img.putdata(repixels,256/2,0)
+            img.putpalette(realcolorpalette)
+            #img=img.rotate(angle)
+            #img=img.crop([int(YRes*np.sin(absangle)),int(XRes*np.sin(absangle)),int(XRes-YRes*np.sin(absangle)),int(YRes-XRes*np.sin(absangle))])
+            #img.putdata(colorpixels,256,0)
+            frames.append(img)
+        channel = amp_channel[1:2]
+        frames[0].save("".join([self.filename,"/",'time_dependent_realpart',channel,".gif"]), format='GIF', append_images=frames[1:], save_all=True,duration=Duration, loop=0)
+
+
+
 
 class ApproachCurve(FileHandler):
     """This class opens an approach curve measurement and handels all the approach curve related functions."""

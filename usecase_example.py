@@ -252,6 +252,13 @@ def Test_Export_and_Load_all_subplots():
     # Measurement.Display_All_Subplots()
     # Measurement._Delete_All_Subplots()
 
+def Gif():
+    directory_name = 'C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-03-14-ssh-snom/2024-03-14 112623 PH single_wg_lowest_long_interf_sync'
+    channels = ['O2A', 'O2P', 'Z C']
+    Measurement = SnomMeasurement(directory_name, channels)
+    # Measurement.Display_Channels()
+    Measurement.Create_Gif('O2A', 'O2P')
+
 
 def main():
      
@@ -267,7 +274,8 @@ def main():
     # Test_Aachen_files()
     # Test_Export_to_gsf()
 
-    Test_Export_and_Load_all_subplots()
+    # Test_Export_and_Load_all_subplots()
+    Gif()
 
 
 if __name__ == '__main__':

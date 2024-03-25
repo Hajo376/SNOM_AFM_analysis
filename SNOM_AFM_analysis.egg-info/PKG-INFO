@@ -1,8 +1,11 @@
-Metadata-Version: 2.1
+Metadata-Version: 1.2
 Name: SNOM-AFM-analysis
-Version: 0.0.111
+Version: 0.0.120
 Summary: Package for displaying and manipulating SNOM and AFM data.
 Home-page: #
 Author: Hajo Schill
 Author-email: hajo.schill@acetovit.de
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
 Requires-Python: >=3.7
