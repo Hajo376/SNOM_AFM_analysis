@@ -17,6 +17,11 @@ import os
 import pickle as pkl
 import gc
 import json
+# for gif creation
+import imageio
+from matplotlib.animation import FuncAnimation
+# for old version
+from PIL import Image
 
 # import own functionality
 from SNOM_AFM_analysis.lib.snom_colormaps import SNOM_height, SNOM_amplitude, SNOM_phase, SNOM_realpart, all_colormaps
@@ -6688,43 +6693,30 @@ class SnomMeasurement(FileHandler):
             self.channels_label.append(imag_channel)
         gc.collect()
 
+    def Create_Gif_Old(self, amp_channel:str, phase_channel:str, frames:int=20, fps:int=10) -> None:
+        framenumbers=frames
+        Duration=1000/fps # in ms
 
-    def Create_Gif(self, amp_channel:str, phase_channel:str) -> None:
-        from PIL import Image
         realcolorpalette=[]
+        # old color palette
         for i in range(0,255):
             realcolorpalette.append(i)
             if (i<127): realcolorpalette.append(i)
             else: realcolorpalette.append(255-i)
             realcolorpalette.append(255-i)
 
-        framenumbers=20
-        Duration=100
-
-        '''if self.amp_indicator not in amp_channel or self.phase_indicator not in phase_channel:
+        if self.amp_indicator not in amp_channel or self.phase_indicator not in phase_channel:
             print('The specified channels are not specified as needed!')
             exit()
         demodulation = amp_channel[1:2]
+        print('demodulation: ', demodulation)
         if demodulation not in phase_channel:
             print('The channels you specified are not from the same demodulation order!\nProceeding anyways...')
         # check if channels are in memory, if not load the data
-        if amp_channel not in self.channels:
-            amp_data, amp_dict = self._Load_Data(amp_channel)
-        else:
-            amp_data = self.all_data[self.channels.index(amp_channel)]
-            amp_dict = self.channel_tag_dict[self.channels.index(amp_channel)]
-        if phase_channel not in self.channels:
-            phase_data, phase_dict = self._Load_Data(phase_channel)
-        else:
-            phase_data = self.all_data[self.channels.index(phase_channel)]
-            phase_dict = self.channel_tag_dict[self.channels.index(phase_channel)]'''
-        # check if size is identical:
-        # print('printing all channels')
-        print('self.channels: ', self.channels)
-        print('amp_channel: ', amp_channel)
-        print('amp_index: ', self.channels.index(amp_channel))
-        amp_index = 0
-        phase_index = 1
+        if amp_channel not in self.channels or phase_channel not in self.channels:
+            print('The channels for amplitude or phase were not found in the memory, they will be loaded automatically.\nBe aware that all prior modifications will get deleted.')
+            # reload all channels
+            self._Initialize_Data([amp_channel, phase_channel])
         amp_data = self.all_data[self.channels.index(amp_channel)]
         amp_dict = self.channel_tag_dict[self.channels.index(amp_channel)]
         phase_data = self.all_data[self.channels.index(phase_channel)]
@@ -6743,22 +6735,218 @@ class SnomMeasurement(FileHandler):
             phase=i*2*np.pi/framenumbers
             repixels=[]
             colorpixels=[]
-            for j in range(0,YRes*XRes):
-                repixval=amp_data[j]*np.cos(phase_data[j]-phase)/maxval
-                repixels.append(repixval+1)
-            # img = Image.new('L', (XRes,YRes))
-            img = Image.fromarray(repixels)
+            for j in range(0,YRes):
+                for k in range(XRes):
+                    repixval=amp_data[j][k]*np.cos(phase_data[j][k]-phase)/maxval
+                    repixels.append(repixval+1)
+            img = Image.new('L', (XRes,YRes))
+            # img = Image.fromarray(repixels)
             img.putdata(repixels,256/2,0)
             img.putpalette(realcolorpalette)
             #img=img.rotate(angle)
             #img=img.crop([int(YRes*np.sin(absangle)),int(XRes*np.sin(absangle)),int(XRes-YRes*np.sin(absangle)),int(YRes-XRes*np.sin(absangle))])
             #img.putdata(colorpixels,256,0)
             frames.append(img)
-        channel = amp_channel[1:2]
-        frames[0].save("".join([self.filename,"/",'time_dependent_realpart',channel,".gif"]), format='GIF', append_images=frames[1:], save_all=True,duration=Duration, loop=0)
+        channel = 'O' + demodulation + 'R'
+        # self.filename is actually a windows path element not a str filename, to get the string use: self.filename.name
+        # print('savefile path: ', self.directory_name / Path(self.filename.name + f'{channel}_gif.gif'))
+        frames[0].save(self.directory_name / Path(self.filename.name + f'{channel}_gif_old.gif'), format='GIF', append_images=frames[1:], save_all=True,duration=Duration, loop=0)
+        self._Display_Gif(self.directory_name / Path(self.filename.name + f'{channel}_gif_old.gif'), fps=fps)
+
+    def Create_Gif(self, amp_channel:str, phase_channel:str, frames:int=20, fps:int=10, dpi=100) -> Path:
+        framenumbers=frames
+        Duration=1000/fps # in ms
+
+        realcolorpalette=[]
+        # old color palette
+        for i in range(0,255):
+            realcolorpalette.append(i)
+            if (i<127): realcolorpalette.append(i)
+            else: realcolorpalette.append(255-i)
+            realcolorpalette.append(255-i)
+        # convert cmap to colorpalette
+        # realcolorpalette = SNOM_realpart
+        # import matplotlib as mpl
+        # norm = mpl.colors.Normalize()
+        # from matplotlib import cm
+
+        if self.amp_indicator not in amp_channel or self.phase_indicator not in phase_channel:
+            print('The specified channels are not specified as needed!')
+            exit()
+        demodulation = amp_channel[1:2]
+        print('demodulation: ', demodulation)
+        if demodulation not in phase_channel:
+            print('The channels you specified are not from the same demodulation order!\nProceeding anyways...')
+        # check if channels are in memory, if not load the data
+        if amp_channel not in self.channels or phase_channel not in self.channels:
+            print('The channels for amplitude or phase were not found in the memory, they will be loaded automatically.\nBe aware that all prior modifications will get deleted.')
+            # reload all channels
+            self._Initialize_Data([amp_channel, phase_channel])
+        amp_data = self.all_data[self.channels.index(amp_channel)]
+        amp_dict = self.channel_tag_dict[self.channels.index(amp_channel)]
+        phase_data = self.all_data[self.channels.index(phase_channel)]
+        phase_dict = self.channel_tag_dict[self.channels.index(phase_channel)]
+        xres_amp, yres_amp = amp_dict[Tag_Type.pixel_area]
+        xres_phase, yres_phase = phase_dict[Tag_Type.pixel_area]
+        if xres_amp != xres_phase or yres_amp != yres_phase:
+            print('The data of the specified channels has different resolution!')
+            exit()
+        XRes, YRes = xres_amp, yres_amp
+        flattened_amp = amp_data.flatten()
+        maxval = max(flattened_amp)
+
+        frames=[]
+        for i in range(0,framenumbers):
+            phase=i*2*np.pi/framenumbers
+            repixels=[]
+            for j in range(0,YRes):
+                for k in range(XRes):
+                    repixval=amp_data[j][k]*np.cos(phase_data[j][k]-phase)/maxval
+                    repixels.append(repixval+0.5)
+            data = np.array(repixels).reshape(YRes, XRes)
+            img = Image.fromarray(SNOM_realpart(data, bytes=True))
+            frames.append(img)
+        channel = 'O' + demodulation + 'R'
+        # self.filename is actually a windows path element not a str filename, to get the string use: self.filename.name
+        # print('savefile path: ', self.directory_name / Path(self.filename.name + f'{channel}_gif.gif'))
+        gif_path = self.directory_name / Path(self.filename.name + f'{channel}_gif.gif')
+        frames[0].save(gif_path, format='GIF', append_images=frames[1:], save_all=True,duration=Duration, loop=0, dpi=dpi)
+        # plt.show()
+        # plt.close(fig)
+        if Plot_Definitions.show_plot:
+            self._Display_Gif(gif_path, fps=fps)
+        return gif_path
+
+    def _Display_Gif(self, gif_path, fps=10):
+        # Load the gif
+        frames = imageio.mimread(gif_path)
+
+        # Create a figure and axis
+        fig, ax = plt.subplots()
+
+        # Create a function to update the frame
+        def update_image(frame):
+            ax.clear()
+            ax.imshow(frames[frame])
+            # dont show frame around the image
+            ax.axis('off')
+
+        # Hide the axes
+        ax.axis('off')
+
+        # Create the animation
+        ani = FuncAnimation(fig, update_image, frames=len(frames), interval=1000/fps, repeat=True)
+
+        # Display the animation
+        plt.show()
+
+    def Create_Gif_V2(self, amp_channel:str, phase_channel:str, frames:int=20, fps:int=10) -> None:
+        frame_numer = frames
+
+        if self.amp_indicator not in amp_channel or self.phase_indicator not in phase_channel:
+            print('The specified channels are not specified as needed!')
+            exit()
+        demodulation = amp_channel[1:2]
+        # print('demodulation: ', demodulation)
+        if demodulation not in phase_channel:
+            print('The channels you specified are not from the same demodulation order!\nProceeding anyways...')
+        # check if channels are in memory, if not load the data
+        if amp_channel not in self.channels or phase_channel not in self.channels:
+            print('The channels for amplitude or phase were not found in the memory, they will be loaded automatically.\nBe aware that all prior modifications will get deleted.')
+            # reload all channels
+            self._Initialize_Data([amp_channel, phase_channel])
+        amp_data = self.all_data[self.channels.index(amp_channel)]
+        amp_dict = self.channel_tag_dict[self.channels.index(amp_channel)]
+        phase_data = self.all_data[self.channels.index(phase_channel)]
+        phase_dict = self.channel_tag_dict[self.channels.index(phase_channel)]
+        xres_amp, yres_amp = amp_dict[Tag_Type.pixel_area]
+        xres_phase, yres_phase = phase_dict[Tag_Type.pixel_area]
+        if xres_amp != xres_phase or yres_amp != yres_phase:
+            print('The data of the specified channels has different resolution!')
+            exit()
+        XRes, YRes = xres_amp, yres_amp
+        flattened_amp = amp_data.flatten()
+        maxval = max(flattened_amp)
+        cmap = SNOM_realpart
+
+        # create real data for all frames
+        self.all_real_data = []
+        for i in range(0, frame_numer):
+            phase = i*2*np.pi/frame_numer
+            real_data = np.zeros((YRes, XRes))
+            for j in range(0, YRes):
+                for k in range(XRes):
+                    real_data[j][k] = amp_data[j][k]*np.cos(phase_data[j][k]-phase)/maxval
+            self.all_real_data.append(real_data)
+
+        # Create figure and axis
+        # figsize = 10
+        # figsizex = 10
+        # figsizey = 10*YRes/XRes
+        fig, ax = plt.subplots(tight_layout=True) #, figsize=(figsizex, figsizey)
+        
+        # Create empty list to store the frames
+        frames = []
+        # Create the frames
+        for i in range(frame_numer):
+            ax.clear()
+            data = self.all_real_data[i]
+            self.cax = ax.pcolormesh(data, cmap=cmap, vmin=-maxval*1.1, vmax=maxval*1.1)
+            # self.cax = ax.imshow(data, cmap=cmap, aspect='equal', vmin=-maxval*1.1, vmax=maxval*1.1)
+            ax.set_aspect('equal')
+            ax.invert_yaxis()
+            ax.set_title('Frame {}'.format(i))
+            if i == 0: # create colorbar only once
+                divider = make_axes_locatable(ax)
+                cax = divider.append_axes("right", size=f"{2}%", pad=0.05)
+            cbar = plt.colorbar(self.cax, cax=cax)
+            cbar.ax.get_yaxis().labelpad = 15
+            cbar.ax.set_ylabel('Ez [arb.u.]', rotation=270)
+            # remove ticks on x and y axis, they only show pixelnumber anyways, better to add a scalebar
+            ax.set_xticks([])
+            ax.set_yticks([])
+            # disable the black frame around the image
+            ax.spines['top'].set_visible(False)
+            ax.spines['bottom'].set_visible(False)
+            ax.spines['left'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            # remove the whitespace around the image
+            # ax.margins(0)
+            # ax.margins(x=0, y=0)
+            # ax.spines[['right', 'top']].set_visible(False)
+            # disable the black frame around the colorbar
+            cbar.outline.set_visible(False)
+            fig.canvas.draw()
+            image = np.frombuffer(fig.canvas.tostring_rgb(), dtype='uint8')
+            image = image.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+            frames.append(image)
 
 
+        channel = 'O' + demodulation + 'R'
+        # Save the frames as a gif
+        imageio.mimsave(self.directory_name / Path(self.filename.name + f'{channel}_gif_v2.gif'), frames, fps=fps)
+        # alternative:
+        # import imageio.v3 as iio
+        # iio.imwrite(self.directory_name / Path(self.filename.name + f'{channel}_gif_withimwrite.gif'), frames, fps=fps)
+        # try with writer:
+        # writer = imageio.get_writer(self.directory_name / Path(self.filename.name + f'{channel}_gif_with_writer.gif'), fps = fps)
 
+        # for im in frames:
+        #     writer.append_data(im)
+        # writer.close()
+
+        # delete the figure
+        plt.close(fig)
+        # display the gif
+        self._Display_Gif(self.directory_name / Path(self.filename.name + f'{channel}_gif_v2.gif'), fps=fps)
+
+    def _Get_Demodulation_Order(self, channel:str) -> str:
+        # The demodulation order is typically the second character of the channel name and it should be the only number in the channel name
+        numbers = [int(i) for i in channel.split() if i.isdigit()]
+        if len(numbers) == 0:
+            return None
+        else:
+            return numbers[0]
 
 class ApproachCurve(FileHandler):
     """This class opens an approach curve measurement and handels all the approach curve related functions."""

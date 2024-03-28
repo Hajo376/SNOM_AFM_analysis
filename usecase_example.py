@@ -254,10 +254,16 @@ def Test_Export_and_Load_all_subplots():
 
 def Gif():
     directory_name = 'C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-03-14-ssh-snom/2024-03-14 112623 PH single_wg_lowest_long_interf_sync'
-    channels = ['O2A', 'O2P', 'Z C']
+    # directory_name =  'C:/Users/Hajo/sciebo/Phd/python/SNOM/testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
+    # directory_name = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2022-04-25 1212 PH pentamer_840nm_s50_1'
+    channels = ['O2A', 'O2P_corrected', 'Z C']
     Measurement = SnomMeasurement(directory_name, channels)
     # Measurement.Display_Channels()
-    Measurement.Create_Gif('O2A', 'O2P')
+    Measurement.Rotate_90_deg(orientation='left')
+    # Measurement.Gauss_Filter_Channels_complex()
+    Measurement.Create_Gif('O2A', 'O2P_corrected', frames=20, fps=10, dpi=100)
+    # Measurement.Create_Gif_V2('O2A', 'O2P_corrected', 20, 10)
+    # Measurement.Create_Gif_Old('O2A', 'O2P_corrected', 20, 10)
 
 
 def main():
