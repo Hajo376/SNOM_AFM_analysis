@@ -3487,6 +3487,7 @@ class FileHandler(File_Definitions, Plot_Definitions):
             # print('trying to get paremeters dict')
             try:
                 self.parameters_dict = Convert_Header_To_Dict(parameters_path)
+                # filetype_found = True
                 print('using new parameters dict!')
             except: pass # seems like an unknown parameters filetype was encountered proceed as usual
             else:
@@ -3504,7 +3505,7 @@ class FileHandler(File_Definitions, Plot_Definitions):
                     File_Definitions.parameters_type = File_Type.new_parameters_txt # todo, still experimental
                     # print('using new parameters txt definition')
                     filetype_found = True
-                if self.parameters_dict['Scan'][0] == 'Approach Curve':
+                if self.parameters_dict['Scan'][0] == 'Approach Curve' or self.parameters_dict['Scan'][0] == 'Approach Curve (PsHet)':
                     File_Definitions.file_type = File_Type.approach_curve
                     File_Definitions.parameters_type = File_Type.new_parameters_txt # todo, still experimental
                     filetype_found = True
