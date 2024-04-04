@@ -116,7 +116,7 @@ class Plot_Definitions:
     
 
     
-
+# old, can be deleted later on
 class Open_Measurement(File_Definitions, Plot_Definitions):
     """This is the main class. You need to specify the measurement folder containing the individual channels.
     You can also specify the channels you want to investigate in the initialisation or at a later point using the 'Initialize_Channels' method.
@@ -3444,6 +3444,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         gc.collect()
 
 
+
+# new version is based on filehandler to do basic stuff and then a class for each different measurement type like snom/afm, approach curves, spectra etc.
 class FileHandler(File_Definitions, Plot_Definitions):
     """This class handles the filetype and parameter type and all toplevel functionality."""
     def __init__(self, directory_name:str, title:str=None) -> None:
@@ -3682,8 +3684,6 @@ class FileHandler(File_Definitions, Plot_Definitions):
         # only used by synccorrection, every other function should use the channels tag dict version, as pixel resolution could vary
         self.XRes, self.YRes = self.measurement_tag_dict[Tag_Type.pixel_area][0], self.measurement_tag_dict[Tag_Type.pixel_area][1]
         self.XReal, self.YReal = self.measurement_tag_dict[Tag_Type.scan_area][0], self.measurement_tag_dict[Tag_Type.scan_area][1] # in µm
-
-
 
 class SnomMeasurement(FileHandler):
     """This class opens a snom measurement and handels all the snom related functions."""
