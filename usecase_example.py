@@ -265,6 +265,15 @@ def Gif():
     # Measurement.Create_Gif_V2('O2A', 'O2P_corrected', 20, 10)
     # Measurement.Create_Gif_Old('O2A', 'O2P_corrected', 20, 10)
 
+def Test_3D_Scan():
+    # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 144100 PH 3D single_wg_20mu_3d'
+    directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
+    channels = ['O2A', 'O3A', 'Z']
+    # channels = ['Z']
+    measurement = Scan_3D(directory, channels)
+    measurement.Set_Min_to_Zero()
+    # measurement.Display_Approach_Curve(20, 0, 'Z', ['Z', 'O2A', 'O3A']) 
+    measurement.Display_Cutplane(axis='x', line=0, channel='O2A')
 
 def main():
      
@@ -281,7 +290,8 @@ def main():
     # Test_Export_to_gsf()
 
     # Test_Export_and_Load_all_subplots()
-    Gif()
+    # Gif()
+    Test_3D_Scan()
 
 
 if __name__ == '__main__':

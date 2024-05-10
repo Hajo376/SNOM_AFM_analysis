@@ -31,7 +31,7 @@ from SNOM_AFM_analysis.lib.get_directionality import ChiralCoupler
 from SNOM_AFM_analysis.lib import realign
 from SNOM_AFM_analysis.lib import profile
 from SNOM_AFM_analysis.lib import phase_analysis
-from SNOM_AFM_analysis.lib.file_handling import Get_Parameter_Values, Convert_Header_To_Dict
+from SNOM_AFM_analysis.lib.file_handling import Get_Parameter_Values, Convert_Header_To_Dict, Find_Index
 
 class Definitions(Enum):
     vertical = auto()
@@ -58,6 +58,8 @@ class File_Type(Enum):
     snom_measurement = auto()
     afm_measurement = auto()
     spectrum_measurement = auto()
+    snom_measurement_3d = auto()
+    ''' Data from a snom 3D measurement has the same shape as a standard snom measurement, but each pixel contains an approach curve.'''
 
 class Tag_Type(Enum):
     # Tag types:
@@ -3511,6 +3513,10 @@ class FileHandler(File_Definitions, Plot_Definitions):
                     File_Definitions.file_type = File_Type.approach_curve
                     File_Definitions.parameters_type = File_Type.new_parameters_txt # todo, still experimental
                     filetype_found = True
+                elif self.parameters_dict['Scan'][0] == '3D' or self.parameters_dict['Scan'][0] == '3D (PsHet)':
+                    File_Definitions.file_type = File_Type.snom_measurement_3d
+                    File_Definitions.parameters_type = File_Type.new_parameters_txt
+                    filetype_found = True
         if filetype_found is False: # if parameter txt does not exist try to find the filetype by looking into one of the binary files
             try:
                 # f_1=open(f"{self.directory_name}/{self.filename} O1A.gsf","br")
@@ -3675,7 +3681,7 @@ class FileHandler(File_Definitions, Plot_Definitions):
                 Tag_Type.rotation: float(self.parameters_dict['Rotation'][0]),
                 Tag_Type.scan_area: [float(self.parameters_dict['Scan Area (X, Y, Z)'][0]), float(self.parameters_dict['Scan Area (X, Y, Z)'][1]), float(self.parameters_dict['Scan Area (X, Y, Z)'][2])],
                 Tag_Type.scan_unit: self.parameters_dict['Scan Area (X, Y, Z)'][3],
-                Tag_Type.pixel_area: [int(self.parameters_dict['Pixel Area (X, Y, Z)'][0]), int(self.parameters_dict['Pixel Area (X, Y, Z)'][1])],
+                Tag_Type.pixel_area: [int(self.parameters_dict['Pixel Area (X, Y, Z)'][0]), int(self.parameters_dict['Pixel Area (X, Y, Z)'][1]), int(self.parameters_dict['Pixel Area (X, Y, Z)'][2])],
                 Tag_Type.integration_time: float(self.parameters_dict['Integration time'][0]),
                 Tag_Type.tip_frequency: [float(self.parameters_dict['Tip Frequency'][0].replace(',', '')), 'Hz'],
                 Tag_Type.tip_amplitude: float(self.parameters_dict['Tip Amplitude'][0]),
@@ -7017,7 +7023,6 @@ class ApproachCurve(FileHandler):
         self.all_data[self.x_channel] = self.all_data[self.x_channel] - min_x
         # print('all data after set to zero: ', self.all_data[self.x_channel])
 
-
     def Display_Channels(self, y_channels=None):
         if y_channels == None:
             y_channels = self.channels
@@ -7044,7 +7049,14 @@ class ApproachCurve(FileHandler):
             plt.show()
     
     def Display_Channels_V2(self, y_channels=None):
+        x_channel = 'Z'
         if y_channels == None:
+            y_channels = self.channels
+        y_data = []
+        for channel in y_channels:
+            y_data.append(self.all_data[channel])
+        self._Display_Approach_Curve(x_data=self.all_data[self.x_channel], y_data=y_data, x_channel=x_channel, y_channels=y_channels)
+        '''if y_channels == None:
             y_channels = self.channels
         # x_channel = 'Depth'
         x_channel = 'Z'
@@ -7086,7 +7098,53 @@ class ApproachCurve(FileHandler):
             plt.tight_layout()
         
         if Plot_Definitions.show_plot:
+            plt.show()'''
+
+    def _Display_Approach_Curve(self, x_data, y_data:list, x_channel, y_channels):
+        
+        # x_channel = 'Depth'
+        
+        # import matplotlib.colors as mcolors
+        # colors = mcolors.TABLEAU_COLORS
+        colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:olive']
+        fig, ax1 = plt.subplots()
+        line1, = ax1.plot(x_data, y_data[0], label=y_channels[0], color=colors[0])
+        if len(y_channels) == 1:
+            ax1.legend()
+        elif len(y_channels) == 2:
+            ax2 = ax1.twinx()
+            line2, = ax2.plot(x_data, y_data[1], label=y_channels[1], color=colors[1])
+            ax2.set_ylabel(y_channels[1])
+            ax1.legend(handles=[line1, line2])
+        else: # deactivate ticks for all except the first or it will get messy
+            handles = [line1]
+            for channel in y_channels[1:]: # ignore the first as it was plotted already
+                # i = self.channels.index(channel)
+                i = y_channels.index(channel)
+                # plt.plot(x_data, self.all_data[channel], label=channel)
+                ax = ax1.twinx()
+                ax.tick_params(right=False, labelright=False)
+                line, = ax.plot(x_data, y_data[i], label=channel, color=colors[i])
+                handles.append(line)
+            ax1.legend(handles=handles)
+            
+        # print(x_data)
+        # print(self.all_data[y_channels[0]])
+        # print(self.channels)
+
+        # labels for axes:
+        ax1.set_xlabel(f'Z [nm]')
+        ax1.set_ylabel(y_channels[0])
+        # plt.xlabel(f'Depth [px]')
+        # if len(self.channels) == 1:
+        #     plt.ylabel(self.channels[0])
+        # plt.legend()
+        if Plot_Definitions.tight_layout:
+            plt.tight_layout()
+        
+        if Plot_Definitions.show_plot:
             plt.show()
+
 
     def find_index(self, filepath, channel):
         with open(filepath, 'r') as file:
@@ -7097,6 +7155,172 @@ class ApproachCurve(FileHandler):
         split_line.remove('\n')
         # print(split_line)
         return split_line.index(channel)
+
+
+class Scan_3D(FileHandler):
+    """A 3D scan is a measurement where one approach curve is saved per pixel. This class is ment to handle such measurements.
+
+    Args:
+        FileHandler (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    def __init__(self, directory_name: str, channels:list=None, title: str = None) -> None:
+        # set channelname if none is given
+        if channels == None:
+            channels = ['Z', 'O2A'] # if you want to plot approach curves 'Z' must be included!
+        self.channels = channels
+        self.x_channel = 'Z'
+        # call the init constructor of the filehandler class
+        super().__init__(directory_name, title)
+        # define header, probably same as for approach curve
+        self.header = 27
+        # load the channels from the datafile
+        self._Load_Data()
+
+    def _Initialize_Measurement_Channel_Indicators(self):
+        if self.file_type == File_Type.snom_measurement_3d:
+            self.height_channel = 'Z'
+            self.height_channels = ['Z']
+            self.mechanical_channels = ['M1A', 'M1P'] # todo
+            self.phase_channels = ['O1P','O2P','O3P','O4P','O5P']
+            self.amp_channels = ['O1A','O2A','O3A','O4A','O5A']
+            self.all_channels = self.height_channels + self.mechanical_channels + self.phase_channels + self.amp_channels
+            self.height_indicator = 'Z'
+
+    def _Load_Data(self):
+        datafile = self.directory_name / Path(self.filename.name + '.txt')
+        # initialize all data dict
+        self.all_data = {} # (key, value) = (channelname, 3d matrix, shape:(xres, yres, zres)) 
+        # load the data per channel and add to all_data
+        # with open(datafile, 'r') as file:
+        for channel in self.channels:
+            index = Find_Index(self.header, datafile, channel) # find the index of the channels
+            file = open(datafile, 'r')
+            self.all_data[channel] = np.genfromtxt(file ,skip_header=self.header+1, usecols=(index), delimiter='\t', invalid_raise = False)
+            # self.all_data[channel] = np.genfromtxt(file ,skip_header=self.header+1, usecols=(10), delimiter='\t', invalid_raise = False)
+            file.close()
+            # print('Shape of data: ', self.all_data[channel].shape)
+            x,y,z = self.measurement_tag_dict[Tag_Type.pixel_area]
+            self.all_data[channel] = np.reshape(self.all_data[channel], (y,x,z))
+            # print('Shape of data: ', self.all_data[channel].shape)
+        # scale the x data to nm
+        x_scaling = 1
+        # print('xunit: ', self.measurement_tag_dict[Tag_Type.scan_unit])
+        try: x_unit = self.measurement_tag_dict[Tag_Type.scan_unit]
+        except: x_unit = None
+        else:
+            # we want to convert the xaxis to nm
+            if x_unit == '[µm]':
+                x_scaling = pow(10,3)
+            elif x_unit == '[nm]':
+                x_scaling = 1
+            elif x_unit == '[m]':
+                x_scaling = pow(10,9)
+        # ok forget about that, the software from neaspec saves the scan area parameters as µm but the actual data is stored in m...
+        x_scaling = pow(10,9)
+        # scale xdata:
+        # self.all_data[self.x_channel] = [i*x_scaling for i in self.all_data[self.x_channel]]
+        self.all_data[self.x_channel] = np.multiply(self.all_data[self.x_channel], x_scaling)
+
+    def Set_Min_to_Zero(self) -> None:
+        # set the min of the xdata array to zero
+        min_x = np.nanmin(self.all_data[self.x_channel]) # for some reason at least the first value seems to be nan 
+        self.all_data[self.x_channel] = self.all_data[self.x_channel] - min_x
+
+    def Display_Cutplane(self, axis:str='x', line:int=0, channel:str=None):
+        # todo: shift each y column by offset value depending on average z position, to correct for varying starting position, due to non flat substrates
+        if channel == None:
+            channel = self.channels[0]
+        x,y,z = self.measurement_tag_dict[Tag_Type.pixel_area]
+        data = self.all_data[channel].copy()
+        # data = np.reshape(data, (y,x,z))
+        if axis == 'x':
+            cutplane_data = np.zeros((z,x)) 
+            for i in range(x):
+                for j in range(z):
+                    cutplane_data[j][i] = data[line][i][j]
+
+        plt.pcolormesh(cutplane_data)
+        plt.show()
+    
+    # def _Get_Z_Shift_(self, z_data):
+    #     # get the average z position for each approach curve
+    #     z_shift = np.zeros(len(z_data[0]))
+    #     for i in range(len(z_data[0])):
+    #         z_shift[i] = np.mean(z_data[:,i])
+    #     return z_shift
+
+    def Display_Approach_Curve(self, x_pixel, y_pixel, x_channel:str=None, y_channels:list=None):
+        if x_channel == None:
+            x_channel = 'Z'
+        if x_channel not in self.channels:
+            print('The specified x channel is not in the channels of the measurement! Can not display approach curve.')
+            return None
+        if y_channels == None:
+            y_channels = self.channels
+        x_data = self.all_data[x_channel][y_pixel][x_pixel]
+        y_data = []
+        for channel in y_channels:
+            y_data.append(self.all_data[channel][y_pixel][x_pixel])
+        self._Display_Approach_Curve(x_data, y_data, x_channel, y_channels)
+
+    def _Display_Approach_Curve(self, x_data, y_data:list, x_channel, y_channels):
+        
+        # x_channel = 'Depth'
+        
+        # import matplotlib.colors as mcolors
+        # colors = mcolors.TABLEAU_COLORS
+        colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:olive']
+        fig, ax1 = plt.subplots()
+        line1, = ax1.plot(x_data, y_data[0], label=y_channels[0], color=colors[0])
+        if len(y_channels) == 1:
+            ax1.legend()
+        elif len(y_channels) == 2:
+            ax2 = ax1.twinx()
+            line2, = ax2.plot(x_data, y_data[1], label=y_channels[1], color=colors[1])
+            ax2.set_ylabel(y_channels[1])
+            ax1.legend(handles=[line1, line2])
+        else: # deactivate ticks for all except the first or it will get messy
+            handles = [line1]
+            for channel in y_channels[1:]: # ignore the first as it was plotted already
+                # i = self.channels.index(channel)
+                i = y_channels.index(channel)
+                # plt.plot(x_data, self.all_data[channel], label=channel)
+                ax = ax1.twinx()
+                ax.tick_params(right=False, labelright=False)
+                line, = ax.plot(x_data, y_data[i], label=channel, color=colors[i])
+                handles.append(line)
+            ax1.legend(handles=handles)
+            
+        # print(x_data)
+        # print(self.all_data[y_channels[0]])
+        # print(self.channels)
+
+        # labels for axes:
+        ax1.set_xlabel(f'Z [nm]')
+        ax1.set_ylabel(y_channels[0])
+        # plt.xlabel(f'Depth [px]')
+        # if len(self.channels) == 1:
+        #     plt.ylabel(self.channels[0])
+        # plt.legend()
+        if Plot_Definitions.tight_layout:
+            plt.tight_layout()
+        
+        if Plot_Definitions.show_plot:
+            plt.show()
+
+
+    def Cut_Data(self):
+        pass
+
+    def Average_Data(self):
+        pass
+
+
+
+
 
 # could be exported to external file
 

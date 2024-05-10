@@ -12,6 +12,16 @@ def _Find_Header_Size(filepath) -> int:
             else: inside_header = False
     return header
 
+def Find_Index(header, filepath, channel):
+    with open(filepath, 'r') as file:
+        for i in range(header+1):
+            line = file.readline()
+    # print(line)
+    split_line = line.split('\t')
+    split_line.remove('\n')
+    # print(split_line)
+    return split_line.index(channel)
+
 def _Remove_Empty_Spaces(line) -> str:
     # print('starting to replace empty spaces')
     try:
@@ -28,7 +38,7 @@ def _Remove_Empty_Spaces(line) -> str:
     return line
 
 
-def _Simplify_Line(line) -> (str, list):
+def _Simplify_Line(line):
     # replace # in the beginning, might be different for different sofrware versions
     # print(line)
     line = line.replace('# ', '')
