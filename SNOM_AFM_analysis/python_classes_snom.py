@@ -7242,15 +7242,81 @@ class Scan_3D(FileHandler):
                 for j in range(z):
                     cutplane_data[j][i] = data[line][i][j]
 
-        plt.pcolormesh(cutplane_data)
+        img = plt.pcolormesh(cutplane_data)
+        plt.colorbar(img)
+        plt.show()
+
+    def Display_Cutplane_V2(self, axis:str='x', line:int=0, channel:str=None, align='auto'):
+        if channel == None:
+            channel = self.channels[0]
+        x,y,z = self.measurement_tag_dict[Tag_Type.pixel_area]
+        data = self.all_data[channel].copy()
+        # data = np.reshape(data, (y,x,z))
+        if axis == 'x':
+            cutplane_data = np.zeros((z,x)) 
+            for i in range(x):
+                for j in range(z):
+                    cutplane_data[j][i] = data[line][i][j]
+        # todo: shift each y column by offset value depending on average z position, to correct for varying starting position, due to non flat substrates
+        z_shifts = np.zeros(x)
+        # idea: get all the lowest points of the approach curves and shift them to the same z position, herefore we shift them only upwards relative to the lowest point
+        z_data_raw = self.all_data[self.x_channel]
+        # reshape the data to the correct shape
+        if axis == 'x':
+            z_data = np.zeros((z,x)) 
+            for i in range(x):
+                for j in range(z):
+                    z_data[j][i] = z_data_raw[line][i][j]
+        for i in range(x):
+            z_shifts[i] = self._Get_Z_Shift_(z_data[:,i])
+        # print('z_data: ', z_data[:,40])
+        # print('z_data: ', z_data[0])
+        # img = plt.pcolormesh(z_data)
+        # plt.colorbar(img)
+        # plt.show()
+        # z_data is in nm
+        z_shifts = z_shifts
+        if align == 'auto':
+            z_min = np.min(z_shifts)
+            z_shifts = z_shifts - z_min
+        # now we need to shift each approach curve by the corresponding z_shift
+        # therefore we need to create a new data array which can encorporate the shifted data
+        XRes, YRes, ZRes = self.measurement_tag_dict[Tag_Type.pixel_area]
+        print('ZR: ', ZRes)
+        XRange, YRange, ZRange = self.measurement_tag_dict[Tag_Type.scan_area]
+        XYZUnit = self.parameters_dict['Scan Area (X, Y, Z)'][-1]
+        # print('parameters: ', self.parameters_dict['Scan Area (X, Y, Z)'])
+        # convert Range to nm
+        if XYZUnit == '[µm]':
+            XRange = XRange*1e3
+            YRange = YRange*1e3
+            ZRange = ZRange*1e3
+        else:
+            print('Error! The unit of the scan area is not supported yet!')
+        z_pixelsize = ZRange/ZRes
+        print('z_shifts: ', z_shifts)
+        # calculate the new z range
+        ZRange_new = ZRange + z_shifts.max()
+        ZRes_new = int(ZRange_new/z_pixelsize)
+        print('ZRes_new: ', ZRes_new)
+        # create the new data array
+        cutplane_data = np.zeros((ZRes_new, XRes))
+        for i in range(XRes):
+            for j in range(ZRes):
+                cutplane_data[j+int(z_shifts[i]/z_pixelsize)][i] = data[line][i][j]
+        '''This shifting is not optimal, since a slow drift or a tilt of the sample would lead to a wrong alignment of the approach curves, although they start at the bottom.
+        Maybe try to use a 2d scan of the same region to align the approach curves.'''
+        img = plt.pcolormesh(cutplane_data)
+        plt.colorbar(img)
         plt.show()
     
-    # def _Get_Z_Shift_(self, z_data):
-    #     # get the average z position for each approach curve
-    #     z_shift = np.zeros(len(z_data[0]))
-    #     for i in range(len(z_data[0])):
-    #         z_shift[i] = np.mean(z_data[:,i])
-    #     return z_shift
+    def _Get_Z_Shift_(self, z_data):
+        # get the average z position for each approach curve
+        # might change in the future to a more sophisticated method
+        # return np.mean(z_data)
+
+        # return the shift of the starting point of the approach curve
+        return z_data[0]
 
     def Display_Approach_Curve(self, x_pixel, y_pixel, x_channel:str=None, y_channels:list=None):
         if x_channel == None:
