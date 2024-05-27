@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_point_clicker import clicker# used for getting coordinates from images
 from matplotlib_scalebar.scalebar import ScaleBar # used for creating scale bars
+from matplotlib import patches # used for creating rectangles 
 import numpy as np
 import pandas as pd # used for getting data out of html files
 from datetime import datetime
@@ -5610,6 +5611,277 @@ class SnomMeasurement(FileHandler):
                     else:
                         exit()
         gc.collect()
+
+    def Correct_Phase_Drift_Nonlinear(self, channels:list=None, reference_area:list = [None, None]) -> None:
+        """This function corrects the phase drift in the y-direction by using a reference area across the full length of the scan.	
+        The reference area is used to calculate the average phase value per row.
+        This value is then substracted from the phase data to level the phase.
+        The reference area is specified by two coordinates, the left and right border. If no area is specified the whole image will be used.
+        Make shure not to rotate the image prior to this function, since the reference area is defined in y-direction.
+
+        Args:
+            channels (list, optional): List of channels to level. If not specified all channels in memory will be used. Defaults to None.
+            reference_area (list, optional): The reference area to calculate the phase offset, specify as reference_area=[left-border, right-border].
+                If not specified the whole image will be used. Defaults to [None, None].
+        """
+
+        # zone = int(zone*self.scaling_factor/4) #automatically enlargen the zone if the data has been scaled by more than a factor of 4
+        self._Initialize_Data(channels)
+        phase_data = None
+        if self.preview_phasechannel in self.channels:
+            phase_data = np.copy(self.all_data[self.channels.index(self.preview_phasechannel)])
+            phase_channel = self.preview_phasechannel
+        else:
+            phase_data = self._Load_Data([self.preview_phasechannel])[0][0]
+            phase_channel = self.preview_phasechannel
+        
+        # cut out the reference area
+        # if no area is specified just use the whole data
+        if reference_area[0] == None:
+            reference_area[0] = 0 # left border
+        if reference_area[1] == None:
+            reference_area[1] = len(phase_data[0]) # right border
+
+        # get the average phase value of the reference area per line
+        # reference_values = [np.mean(phase_data[i][reference_area[0]:reference_area[1]]) for i in range(len(phase_data))]
+
+        # # display phase before flattening
+        # reference_values = [phase_data[i][0] for i in range(len(phase_data))]
+        # fig, ax = plt.subplots()
+        # ax.plot(reference_values)
+        # plt.title('Reference values')
+        # plt.show()
+        # print(reference_values)
+
+        # get the phase values per column of the reference area, then flatten each column 
+        flattened_phase_profiles = []
+        for j in range(reference_area[0], reference_area[1]):
+            reference_values = [phase_data[i][j] for i in range(len(phase_data))]
+            reference_values_flattened = phase_analysis.Flatten_Phase_Profile(reference_values, 1)
+            # reference_values_flattened = np.unwrap(reference_values)
+            flattened_phase_profiles.append(reference_values_flattened)
+
+        # # display all the flattened phase profiles
+        # fig, ax = plt.subplots()
+        # for i in range(len(flattened_phase_profiles)):
+        #     ax.plot(flattened_phase_profiles[i])
+        # plt.title('Flattened phase profiles')
+        # plt.show()
+
+        # average all flattened profiles
+        reference_values_flattened = np.mean(flattened_phase_profiles, axis=0)
+
+        # # display the reference values
+        # fig, ax = plt.subplots()
+        # ax.plot(reference_values_flattened)
+        # plt.title('Reference values')
+        # plt.show()
+
+        # remove the averaged reference data per line from the phase data
+        leveled_phase_data = np.copy(phase_data)
+        for i in range(len(phase_data)):
+            leveled_phase_data[i] = (leveled_phase_data[i] - reference_values_flattened[i] + np.pi) %(2*np.pi)
+
+        # display the leveled phase data
+        fig, ax = plt.subplots()
+        img = ax.pcolormesh(leveled_phase_data, cmap=SNOM_phase)
+        ax.invert_yaxis()
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="10%", pad=0.05)
+        cbar = plt.colorbar(img, cax=cax)
+        cbar.ax.get_yaxis().labelpad = 15
+        cbar.ax.set_ylabel('phase', rotation=270)
+        # ax.legend()
+        ax.axis('scaled')
+        plt.title('Leveled Pase: ' + phase_channel)
+        plt.show()
+
+        print('Are you satisfied with the phase leveling?')
+        user_input = self._User_Input_Bool()
+        if user_input == True:
+            # write to logfile
+            self._Write_to_Logfile('phase_driftcomp_nonlinear')
+            # do the leveling for all channels but use always the same reference data, channels should only differ in phase offset
+            for i in range(len(channels)):
+                if 'P' in channels[i]:
+                    self.all_data[self.channels.index(channels[i])] = [(self.all_data[self.channels.index(channels[i])][j] - reference_values_flattened[j] + np.pi) %(2*np.pi) for j in range(len(reference_values_flattened))]
+        gc.collect()
+
+    def Match_Phase_Offset(self, channels:list=None, reference_channel=None, reference_area=None, manual_width=5) -> None:
+        """This function matches the phase offset of all phase channels in memory to the reference channel.
+        The reference channel is the first phase channel in memory if not specified.
+
+        Args:
+            channels (list, optional): List of channels to level. If not specified all channels in memory will be used. Defaults to None.
+            reference_channel ([type], optional): The reference channel to which all other phase channels will be matched.
+                If not specified the first phase channel in memory will be used. Defaults to None.
+            reference_area ([type], optional): The area in the reference channel which will be used to calculate the phase offset. If not specified the whole image will be used.
+                You can also specify 'manual' then you will be asked to click on a point in the image. The area around that pixel will then be used as reference. Defaults to None.
+            manual_width (int, optional): The width of the manual reference area. Only applies if reference_area='manual'. Defaults to 5.
+        """
+        if channels is None:
+            channels = self.channels
+        # self._Initialize_Data(channels)
+        if reference_channel == None:
+            for channel in channels:
+                if self.phase_indicator in channel:
+                    reference_channel = channel
+                    break
+        if reference_area is None:
+            # reference_area = [[xmin, xmax][ymin, ymax]]
+            reference_area = [[0, len(self.all_data[self.channels.index(reference_channel)][0])],[0, len(self.all_data[self.channels.index(reference_channel)])]]
+        elif reference_area == 'manual':
+            # use pointcklicker to get the reference area
+            fig, ax = plt.subplots()
+            ax.pcolormesh(self.all_data[self.channels.index(reference_channel)], cmap=SNOM_phase)
+            klicker = clicker(ax, ["event"], markers=["x"])
+            ax.legend()
+            ax.axis('scaled')
+            ax.invert_yaxis()
+            plt.title('Please click in the area to use as reference.')
+            plt.show()
+            klicker_coords = klicker.get_positions()['event']
+            klick_coordinates = [[round(element[0]), round(element[1])] for element in klicker_coords]
+            # make sure only one point is selected
+            if len(klick_coordinates) != 1 and type(klick_coordinates[0]) != list:
+                print('You must specify one point which should define the reference area!')
+                print('Do you want to try again?')
+                user_input = self._User_Input_Bool()
+                if user_input == True:
+                    self.Match_Phase_Offset(channels, reference_channel, 'manual')
+                else:
+                    exit()
+            reference_area = [[klick_coordinates[0][0] - manual_width,klick_coordinates[0][0] + manual_width],[klick_coordinates[0][1] - manual_width, klick_coordinates[0][1] + manual_width]]
+        
+        reference_data = self.all_data[self.channels.index(reference_channel)]
+        reference_phase = np.mean([reference_data[i][reference_area[0][0]:reference_area[0][1]] for i in range(reference_area[1][0], reference_area[1][1])])
+        
+        # display the reference area
+        fig, ax = plt.subplots()
+        img = ax.pcolormesh(reference_data, cmap=SNOM_phase)
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+        cbar = plt.colorbar(img, cax=cax)
+        cbar.ax.get_yaxis().labelpad = 15
+        cbar.ax.set_ylabel('phase', rotation=270)
+        ax.legend()
+        ax.axis('scaled')  
+        rect = patches.Rectangle((reference_area[0][0], reference_area[1][0]), reference_area[0][1]-reference_area[0][0], reference_area[1][1]-reference_area[1][0], linewidth=1, edgecolor='g', facecolor='none')
+        ax.add_patch(rect)
+        ax.invert_yaxis()
+        plt.title('Reference Area: ' + reference_channel)
+        plt.show()
+
+        for channel in channels:
+            if self.phase_indicator in channel:
+                phase_data = self.all_data[self.channels.index(channel)]
+                # phase_offset = np.mean(phase_data) - reference_phase
+                phase_offset = np.mean([phase_data[i][reference_area[0][0]:reference_area[0][1]] for i in range(reference_area[1][0], reference_area[1][1])]) - reference_phase
+                self.all_data[self.channels.index(channel)] = self._Shift_Phase_Data(phase_data, -phase_offset)
+        gc.collect()
+
+    def Correct_Amplitude_Drift_Nonlinear(self, channels:list=None, reference_area:list = [None, None]) -> None:
+        """This function corrects the amplitude drift in the y-direction by using a reference area across the full length of the scan.	
+        The reference area is used to calculate the average amplitude value per row.
+        This value is then divided from the amplitude data to level the amplitude.
+        The reference area is specified by two coordinates, the left and right border. If no area is specified the whole image will be used.
+        Make shure not to rotate the image prior to this function, since the reference area is defined in y-direction.
+
+        Args:
+            channels (list, optional): List of channels to level. If not specified all channels in memory will be used. Defaults to None.
+            reference_area (list, optional): The reference area to calculate the amplitude offset, specify as reference_area=[left-border, right-border].
+                If not specified the whole image will be used. Defaults to [None, None].
+        """
+
+        # zone = int(zone*self.scaling_factor/4) #automatically enlargen the zone if the data has been scaled by more than a factor of 4
+        self._Initialize_Data(channels)
+        amplitude_data = None
+        if self.preview_ampchannel in self.channels:
+            amplitude_data = np.copy(self.all_data[self.channels.index(self.preview_ampchannel)])
+            amplitude_channel = self.preview_ampchannel
+        else:
+            amplitude_data = self._Load_Data([self.preview_ampchannel])[0][0]
+            amplitude_channel = self.preview_ampchannel
+        
+        # cut out the reference area
+        # if no area is specified just use the whole data
+        if reference_area[0] == None:
+            reference_area[0] = 0
+        if reference_area[1] == None:
+            reference_area[1] = len(amplitude_data[0])
+        
+        # iterate through the reference area and get the average amplitude value per row
+        reference_values = [np.mean(amplitude_data[i][reference_area[0]:reference_area[1]]) for i in range(len(amplitude_data))]
+
+        # we assume the average amplitude should stay constant, so we divide the amplitude data by the reference values and multiply by the mean reference value
+        leveled_amplitude_data = np.copy(amplitude_data)
+        for i in range(len(amplitude_data)):
+            leveled_amplitude_data[i] = amplitude_data[i] / reference_values[i] * np.mean(reference_values)
+        
+        # display the original data besides the leveled amplitude data
+        fig, ax = plt.subplots(1, 2)
+        img1 = ax[0].pcolormesh(amplitude_data, cmap=SNOM_amplitude)
+        img2 = ax[1].pcolormesh(leveled_amplitude_data, cmap=SNOM_amplitude)
+        ax[0].invert_yaxis()
+        ax[1].invert_yaxis()
+        divider = make_axes_locatable(ax[0])
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+        cbar = plt.colorbar(img1, cax=cax)
+        cbar.ax.get_yaxis().labelpad = 15
+        cbar.ax.set_ylabel('amplitude', rotation=270)
+        divider = make_axes_locatable(ax[1])
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+        cbar = plt.colorbar(img2, cax=cax)
+        cbar.ax.get_yaxis().labelpad = 15
+        cbar.ax.set_ylabel('amplitude', rotation=270)
+        # ax[0].legend()
+        # ax[1].legend()
+        ax[0].axis('scaled')
+        ax[1].axis('scaled')
+        ax[0].set_title('Original Amplitude: ' + amplitude_channel)
+        ax[1].set_title('Leveled Amplitude: ' + amplitude_channel)
+        plt.show()
+
+        # ask the user if he is satisfied with the leveling
+        print('Are you satisfied with the amplitude leveling?')
+        user_input = self._User_Input_Bool()
+        if user_input == True:
+            # do the leveling for all channels, each channel should be referenced to itself since the amplitudes of the channels will be different
+            for i in range(len(channels)):
+                if self.amp_indicator in channels[i]:
+                    # self.all_data[self.channels.index(channels[i])] = np.copy(self.all_data[self.channels.index(channels[i])])
+                    reference_values = [np.mean(self.all_data[self.channels.index(channels[i])][j][reference_area[0]:reference_area[1]]) for j in range(len(self.all_data[self.channels.index(channels[i])]))]
+                    self.all_data[self.channels.index(channels[i])] = [(self.all_data[self.channels.index(channels[i])][j] / reference_values[j] * np.mean(reference_values)) for j in range(len(reference_values))]
+        else:
+            print('Do you want to repeat the leveling?')
+            user_input = self._User_Input_Bool()
+            if user_input == True:
+                # write to logfile
+                self._Write_to_Logfile('amplitude_driftcomp_nonlinear')
+                #start the leveling process again
+                self.Correct_Amplitude_Drift_Nonlinear(channels, reference_area)
+            else:
+                exit()
+        gc.collect()
+
+
+
+
+
+        # fig, ax = plt.subplots()
+        # img = ax.pcolormesh(leveled_amplitude_data, cmap=SNOM_amplitude)
+        # # also plot the original data
+        # # ax.pcolormesh(amplitude_data, cmap=SNOM_amplitude)
+        # ax.invert_yaxis()
+        # divider = make_axes_locatable(ax)
+        # cax = divider.append_axes("right", size="10%", pad=0.05)
+        # cbar = plt.colorbar(img, cax=cax)
+        # cbar.ax.get_yaxis().labelpad = 15
+        # cbar.ax.set_ylabel('amplitude', rotation=270)
+        # # ax.legend()
+        # ax.axis('scaled')
+        # plt.title('Leveled Amplitude: ' + amplitude_channel)
+        # plt.show()
 
     def Level_Height_Channels(self, channels:list=None) -> None:
         """This function levels all height channels which are either user specified or in the instance memory.

@@ -1,7 +1,7 @@
 import numpy as np
 
 def Flatten_Phase_Profile(profile:list, phase_orientation:int=1) -> list:
-    flattened_profile = []
+    """flattened_profile = []
     previous_element = profile[0]
     offset = 0
     for element in profile:
@@ -14,7 +14,10 @@ def Flatten_Phase_Profile(profile:list, phase_orientation:int=1) -> list:
         flattened_profile.append(element + offset)
         previous_element = element
 
-    return flattened_profile
+    return flattened_profile"""
+    # new alternative, use built-in numpy function unwrap
+    return np.unwrap(profile)
+
 
 def Get_Smallest_Difference(value1, value2):
     # make shure value1 is smaller than value2

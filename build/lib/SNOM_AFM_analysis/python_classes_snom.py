@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_point_clicker import clicker# used for getting coordinates from images
 from matplotlib_scalebar.scalebar import ScaleBar # used for creating scale bars
+from matplotlib import patches # used for creating rectangles 
 import numpy as np
 import pandas as pd # used for getting data out of html files
 from datetime import datetime
@@ -31,7 +32,7 @@ from SNOM_AFM_analysis.lib.get_directionality import ChiralCoupler
 from SNOM_AFM_analysis.lib import realign
 from SNOM_AFM_analysis.lib import profile
 from SNOM_AFM_analysis.lib import phase_analysis
-from SNOM_AFM_analysis.lib.file_handling import Get_Parameter_Values, Convert_Header_To_Dict
+from SNOM_AFM_analysis.lib.file_handling import Get_Parameter_Values, Convert_Header_To_Dict, Find_Index
 
 class Definitions(Enum):
     vertical = auto()
@@ -58,6 +59,8 @@ class File_Type(Enum):
     snom_measurement = auto()
     afm_measurement = auto()
     spectrum_measurement = auto()
+    snom_measurement_3d = auto()
+    ''' Data from a snom 3D measurement has the same shape as a standard snom measurement, but each pixel contains an approach curve.'''
 
 class Tag_Type(Enum):
     # Tag types:
@@ -116,7 +119,7 @@ class Plot_Definitions:
     
 
     
-
+# old, can be deleted later on
 class Open_Measurement(File_Definitions, Plot_Definitions):
     """This is the main class. You need to specify the measurement folder containing the individual channels.
     You can also specify the channels you want to investigate in the initialisation or at a later point using the 'Initialize_Channels' method.
@@ -3444,6 +3447,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         gc.collect()
 
 
+
+# new version is based on filehandler to do basic stuff and then a class for each different measurement type like snom/afm, approach curves, spectra etc.
 class FileHandler(File_Definitions, Plot_Definitions):
     """This class handles the filetype and parameter type and all toplevel functionality."""
     def __init__(self, directory_name:str, title:str=None) -> None:
@@ -3508,6 +3513,10 @@ class FileHandler(File_Definitions, Plot_Definitions):
                 if self.parameters_dict['Scan'][0] == 'Approach Curve' or self.parameters_dict['Scan'][0] == 'Approach Curve (PsHet)':
                     File_Definitions.file_type = File_Type.approach_curve
                     File_Definitions.parameters_type = File_Type.new_parameters_txt # todo, still experimental
+                    filetype_found = True
+                elif self.parameters_dict['Scan'][0] == '3D' or self.parameters_dict['Scan'][0] == '3D (PsHet)':
+                    File_Definitions.file_type = File_Type.snom_measurement_3d
+                    File_Definitions.parameters_type = File_Type.new_parameters_txt
                     filetype_found = True
         if filetype_found is False: # if parameter txt does not exist try to find the filetype by looking into one of the binary files
             try:
@@ -3673,7 +3682,7 @@ class FileHandler(File_Definitions, Plot_Definitions):
                 Tag_Type.rotation: float(self.parameters_dict['Rotation'][0]),
                 Tag_Type.scan_area: [float(self.parameters_dict['Scan Area (X, Y, Z)'][0]), float(self.parameters_dict['Scan Area (X, Y, Z)'][1]), float(self.parameters_dict['Scan Area (X, Y, Z)'][2])],
                 Tag_Type.scan_unit: self.parameters_dict['Scan Area (X, Y, Z)'][3],
-                Tag_Type.pixel_area: [int(self.parameters_dict['Pixel Area (X, Y, Z)'][0]), int(self.parameters_dict['Pixel Area (X, Y, Z)'][1])],
+                Tag_Type.pixel_area: [int(self.parameters_dict['Pixel Area (X, Y, Z)'][0]), int(self.parameters_dict['Pixel Area (X, Y, Z)'][1]), int(self.parameters_dict['Pixel Area (X, Y, Z)'][2])],
                 Tag_Type.integration_time: float(self.parameters_dict['Integration time'][0]),
                 Tag_Type.tip_frequency: [float(self.parameters_dict['Tip Frequency'][0].replace(',', '')), 'Hz'],
                 Tag_Type.tip_amplitude: float(self.parameters_dict['Tip Amplitude'][0]),
@@ -3682,8 +3691,6 @@ class FileHandler(File_Definitions, Plot_Definitions):
         # only used by synccorrection, every other function should use the channels tag dict version, as pixel resolution could vary
         self.XRes, self.YRes = self.measurement_tag_dict[Tag_Type.pixel_area][0], self.measurement_tag_dict[Tag_Type.pixel_area][1]
         self.XReal, self.YReal = self.measurement_tag_dict[Tag_Type.scan_area][0], self.measurement_tag_dict[Tag_Type.scan_area][1] # in µm
-
-
 
 class SnomMeasurement(FileHandler):
     """This class opens a snom measurement and handels all the snom related functions."""
@@ -5605,6 +5612,277 @@ class SnomMeasurement(FileHandler):
                         exit()
         gc.collect()
 
+    def Correct_Phase_Drift_Nonlinear(self, channels:list=None, reference_area:list = [None, None]) -> None:
+        """This function corrects the phase drift in the y-direction by using a reference area across the full length of the scan.	
+        The reference area is used to calculate the average phase value per row.
+        This value is then substracted from the phase data to level the phase.
+        The reference area is specified by two coordinates, the left and right border. If no area is specified the whole image will be used.
+        Make shure not to rotate the image prior to this function, since the reference area is defined in y-direction.
+
+        Args:
+            channels (list, optional): List of channels to level. If not specified all channels in memory will be used. Defaults to None.
+            reference_area (list, optional): The reference area to calculate the phase offset, specify as reference_area=[left-border, right-border].
+                If not specified the whole image will be used. Defaults to [None, None].
+        """
+
+        # zone = int(zone*self.scaling_factor/4) #automatically enlargen the zone if the data has been scaled by more than a factor of 4
+        self._Initialize_Data(channels)
+        phase_data = None
+        if self.preview_phasechannel in self.channels:
+            phase_data = np.copy(self.all_data[self.channels.index(self.preview_phasechannel)])
+            phase_channel = self.preview_phasechannel
+        else:
+            phase_data = self._Load_Data([self.preview_phasechannel])[0][0]
+            phase_channel = self.preview_phasechannel
+        
+        # cut out the reference area
+        # if no area is specified just use the whole data
+        if reference_area[0] == None:
+            reference_area[0] = 0 # left border
+        if reference_area[1] == None:
+            reference_area[1] = len(phase_data[0]) # right border
+
+        # get the average phase value of the reference area per line
+        # reference_values = [np.mean(phase_data[i][reference_area[0]:reference_area[1]]) for i in range(len(phase_data))]
+
+        # # display phase before flattening
+        # reference_values = [phase_data[i][0] for i in range(len(phase_data))]
+        # fig, ax = plt.subplots()
+        # ax.plot(reference_values)
+        # plt.title('Reference values')
+        # plt.show()
+        # print(reference_values)
+
+        # get the phase values per column of the reference area, then flatten each column 
+        flattened_phase_profiles = []
+        for j in range(reference_area[0], reference_area[1]):
+            reference_values = [phase_data[i][j] for i in range(len(phase_data))]
+            reference_values_flattened = phase_analysis.Flatten_Phase_Profile(reference_values, 1)
+            # reference_values_flattened = np.unwrap(reference_values)
+            flattened_phase_profiles.append(reference_values_flattened)
+
+        # # display all the flattened phase profiles
+        # fig, ax = plt.subplots()
+        # for i in range(len(flattened_phase_profiles)):
+        #     ax.plot(flattened_phase_profiles[i])
+        # plt.title('Flattened phase profiles')
+        # plt.show()
+
+        # average all flattened profiles
+        reference_values_flattened = np.mean(flattened_phase_profiles, axis=0)
+
+        # # display the reference values
+        # fig, ax = plt.subplots()
+        # ax.plot(reference_values_flattened)
+        # plt.title('Reference values')
+        # plt.show()
+
+        # remove the averaged reference data per line from the phase data
+        leveled_phase_data = np.copy(phase_data)
+        for i in range(len(phase_data)):
+            leveled_phase_data[i] = (leveled_phase_data[i] - reference_values_flattened[i] + np.pi) %(2*np.pi)
+
+        # display the leveled phase data
+        fig, ax = plt.subplots()
+        img = ax.pcolormesh(leveled_phase_data, cmap=SNOM_phase)
+        ax.invert_yaxis()
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="10%", pad=0.05)
+        cbar = plt.colorbar(img, cax=cax)
+        cbar.ax.get_yaxis().labelpad = 15
+        cbar.ax.set_ylabel('phase', rotation=270)
+        # ax.legend()
+        ax.axis('scaled')
+        plt.title('Leveled Pase: ' + phase_channel)
+        plt.show()
+
+        print('Are you satisfied with the phase leveling?')
+        user_input = self._User_Input_Bool()
+        if user_input == True:
+            # write to logfile
+            self._Write_to_Logfile('phase_driftcomp_nonlinear')
+            # do the leveling for all channels but use always the same reference data, channels should only differ in phase offset
+            for i in range(len(channels)):
+                if 'P' in channels[i]:
+                    self.all_data[self.channels.index(channels[i])] = [(self.all_data[self.channels.index(channels[i])][j] - reference_values_flattened[j] + np.pi) %(2*np.pi) for j in range(len(reference_values_flattened))]
+        gc.collect()
+
+    def Match_Phase_Offset(self, channels:list=None, reference_channel=None, reference_area=None, manual_width=5) -> None:
+        """This function matches the phase offset of all phase channels in memory to the reference channel.
+        The reference channel is the first phase channel in memory if not specified.
+
+        Args:
+            channels (list, optional): List of channels to level. If not specified all channels in memory will be used. Defaults to None.
+            reference_channel ([type], optional): The reference channel to which all other phase channels will be matched.
+                If not specified the first phase channel in memory will be used. Defaults to None.
+            reference_area ([type], optional): The area in the reference channel which will be used to calculate the phase offset. If not specified the whole image will be used.
+                You can also specify 'manual' then you will be asked to click on a point in the image. The area around that pixel will then be used as reference. Defaults to None.
+            manual_width (int, optional): The width of the manual reference area. Only applies if reference_area='manual'. Defaults to 5.
+        """
+        if channels is None:
+            channels = self.channels
+        # self._Initialize_Data(channels)
+        if reference_channel == None:
+            for channel in channels:
+                if self.phase_indicator in channel:
+                    reference_channel = channel
+                    break
+        if reference_area is None:
+            # reference_area = [[xmin, xmax][ymin, ymax]]
+            reference_area = [[0, len(self.all_data[self.channels.index(reference_channel)][0])],[0, len(self.all_data[self.channels.index(reference_channel)])]]
+        elif reference_area == 'manual':
+            # use pointcklicker to get the reference area
+            fig, ax = plt.subplots()
+            ax.pcolormesh(self.all_data[self.channels.index(reference_channel)], cmap=SNOM_phase)
+            klicker = clicker(ax, ["event"], markers=["x"])
+            ax.legend()
+            ax.axis('scaled')
+            ax.invert_yaxis()
+            plt.title('Please click in the area to use as reference.')
+            plt.show()
+            klicker_coords = klicker.get_positions()['event']
+            klick_coordinates = [[round(element[0]), round(element[1])] for element in klicker_coords]
+            # make sure only one point is selected
+            if len(klick_coordinates) != 1 and type(klick_coordinates[0]) != list:
+                print('You must specify one point which should define the reference area!')
+                print('Do you want to try again?')
+                user_input = self._User_Input_Bool()
+                if user_input == True:
+                    self.Match_Phase_Offset(channels, reference_channel, 'manual')
+                else:
+                    exit()
+            reference_area = [[klick_coordinates[0][0] - manual_width,klick_coordinates[0][0] + manual_width],[klick_coordinates[0][1] - manual_width, klick_coordinates[0][1] + manual_width]]
+        
+        reference_data = self.all_data[self.channels.index(reference_channel)]
+        reference_phase = np.mean([reference_data[i][reference_area[0][0]:reference_area[0][1]] for i in range(reference_area[1][0], reference_area[1][1])])
+        
+        # display the reference area
+        fig, ax = plt.subplots()
+        img = ax.pcolormesh(reference_data, cmap=SNOM_phase)
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+        cbar = plt.colorbar(img, cax=cax)
+        cbar.ax.get_yaxis().labelpad = 15
+        cbar.ax.set_ylabel('phase', rotation=270)
+        ax.legend()
+        ax.axis('scaled')  
+        rect = patches.Rectangle((reference_area[0][0], reference_area[1][0]), reference_area[0][1]-reference_area[0][0], reference_area[1][1]-reference_area[1][0], linewidth=1, edgecolor='g', facecolor='none')
+        ax.add_patch(rect)
+        ax.invert_yaxis()
+        plt.title('Reference Area: ' + reference_channel)
+        plt.show()
+
+        for channel in channels:
+            if self.phase_indicator in channel:
+                phase_data = self.all_data[self.channels.index(channel)]
+                # phase_offset = np.mean(phase_data) - reference_phase
+                phase_offset = np.mean([phase_data[i][reference_area[0][0]:reference_area[0][1]] for i in range(reference_area[1][0], reference_area[1][1])]) - reference_phase
+                self.all_data[self.channels.index(channel)] = self._Shift_Phase_Data(phase_data, -phase_offset)
+        gc.collect()
+
+    def Correct_Amplitude_Drift_Nonlinear(self, channels:list=None, reference_area:list = [None, None]) -> None:
+        """This function corrects the amplitude drift in the y-direction by using a reference area across the full length of the scan.	
+        The reference area is used to calculate the average amplitude value per row.
+        This value is then divided from the amplitude data to level the amplitude.
+        The reference area is specified by two coordinates, the left and right border. If no area is specified the whole image will be used.
+        Make shure not to rotate the image prior to this function, since the reference area is defined in y-direction.
+
+        Args:
+            channels (list, optional): List of channels to level. If not specified all channels in memory will be used. Defaults to None.
+            reference_area (list, optional): The reference area to calculate the amplitude offset, specify as reference_area=[left-border, right-border].
+                If not specified the whole image will be used. Defaults to [None, None].
+        """
+
+        # zone = int(zone*self.scaling_factor/4) #automatically enlargen the zone if the data has been scaled by more than a factor of 4
+        self._Initialize_Data(channels)
+        amplitude_data = None
+        if self.preview_ampchannel in self.channels:
+            amplitude_data = np.copy(self.all_data[self.channels.index(self.preview_ampchannel)])
+            amplitude_channel = self.preview_ampchannel
+        else:
+            amplitude_data = self._Load_Data([self.preview_ampchannel])[0][0]
+            amplitude_channel = self.preview_ampchannel
+        
+        # cut out the reference area
+        # if no area is specified just use the whole data
+        if reference_area[0] == None:
+            reference_area[0] = 0
+        if reference_area[1] == None:
+            reference_area[1] = len(amplitude_data[0])
+        
+        # iterate through the reference area and get the average amplitude value per row
+        reference_values = [np.mean(amplitude_data[i][reference_area[0]:reference_area[1]]) for i in range(len(amplitude_data))]
+
+        # we assume the average amplitude should stay constant, so we divide the amplitude data by the reference values and multiply by the mean reference value
+        leveled_amplitude_data = np.copy(amplitude_data)
+        for i in range(len(amplitude_data)):
+            leveled_amplitude_data[i] = amplitude_data[i] / reference_values[i] * np.mean(reference_values)
+        
+        # display the original data besides the leveled amplitude data
+        fig, ax = plt.subplots(1, 2)
+        img1 = ax[0].pcolormesh(amplitude_data, cmap=SNOM_amplitude)
+        img2 = ax[1].pcolormesh(leveled_amplitude_data, cmap=SNOM_amplitude)
+        ax[0].invert_yaxis()
+        ax[1].invert_yaxis()
+        divider = make_axes_locatable(ax[0])
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+        cbar = plt.colorbar(img1, cax=cax)
+        cbar.ax.get_yaxis().labelpad = 15
+        cbar.ax.set_ylabel('amplitude', rotation=270)
+        divider = make_axes_locatable(ax[1])
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+        cbar = plt.colorbar(img2, cax=cax)
+        cbar.ax.get_yaxis().labelpad = 15
+        cbar.ax.set_ylabel('amplitude', rotation=270)
+        # ax[0].legend()
+        # ax[1].legend()
+        ax[0].axis('scaled')
+        ax[1].axis('scaled')
+        ax[0].set_title('Original Amplitude: ' + amplitude_channel)
+        ax[1].set_title('Leveled Amplitude: ' + amplitude_channel)
+        plt.show()
+
+        # ask the user if he is satisfied with the leveling
+        print('Are you satisfied with the amplitude leveling?')
+        user_input = self._User_Input_Bool()
+        if user_input == True:
+            # do the leveling for all channels, each channel should be referenced to itself since the amplitudes of the channels will be different
+            for i in range(len(channels)):
+                if self.amp_indicator in channels[i]:
+                    # self.all_data[self.channels.index(channels[i])] = np.copy(self.all_data[self.channels.index(channels[i])])
+                    reference_values = [np.mean(self.all_data[self.channels.index(channels[i])][j][reference_area[0]:reference_area[1]]) for j in range(len(self.all_data[self.channels.index(channels[i])]))]
+                    self.all_data[self.channels.index(channels[i])] = [(self.all_data[self.channels.index(channels[i])][j] / reference_values[j] * np.mean(reference_values)) for j in range(len(reference_values))]
+        else:
+            print('Do you want to repeat the leveling?')
+            user_input = self._User_Input_Bool()
+            if user_input == True:
+                # write to logfile
+                self._Write_to_Logfile('amplitude_driftcomp_nonlinear')
+                #start the leveling process again
+                self.Correct_Amplitude_Drift_Nonlinear(channels, reference_area)
+            else:
+                exit()
+        gc.collect()
+
+
+
+
+
+        # fig, ax = plt.subplots()
+        # img = ax.pcolormesh(leveled_amplitude_data, cmap=SNOM_amplitude)
+        # # also plot the original data
+        # # ax.pcolormesh(amplitude_data, cmap=SNOM_amplitude)
+        # ax.invert_yaxis()
+        # divider = make_axes_locatable(ax)
+        # cax = divider.append_axes("right", size="10%", pad=0.05)
+        # cbar = plt.colorbar(img, cax=cax)
+        # cbar.ax.get_yaxis().labelpad = 15
+        # cbar.ax.set_ylabel('amplitude', rotation=270)
+        # # ax.legend()
+        # ax.axis('scaled')
+        # plt.title('Leveled Amplitude: ' + amplitude_channel)
+        # plt.show()
+
     def Level_Height_Channels(self, channels:list=None) -> None:
         """This function levels all height channels which are either user specified or in the instance memory.
         The leveling will prompt the user with a preview to select 3 points for getting the coordinates of the leveling plane.
@@ -7017,7 +7295,6 @@ class ApproachCurve(FileHandler):
         self.all_data[self.x_channel] = self.all_data[self.x_channel] - min_x
         # print('all data after set to zero: ', self.all_data[self.x_channel])
 
-
     def Display_Channels(self, y_channels=None):
         if y_channels == None:
             y_channels = self.channels
@@ -7044,7 +7321,14 @@ class ApproachCurve(FileHandler):
             plt.show()
     
     def Display_Channels_V2(self, y_channels=None):
+        x_channel = 'Z'
         if y_channels == None:
+            y_channels = self.channels
+        y_data = []
+        for channel in y_channels:
+            y_data.append(self.all_data[channel])
+        self._Display_Approach_Curve(x_data=self.all_data[self.x_channel], y_data=y_data, x_channel=x_channel, y_channels=y_channels)
+        '''if y_channels == None:
             y_channels = self.channels
         # x_channel = 'Depth'
         x_channel = 'Z'
@@ -7086,7 +7370,53 @@ class ApproachCurve(FileHandler):
             plt.tight_layout()
         
         if Plot_Definitions.show_plot:
+            plt.show()'''
+
+    def _Display_Approach_Curve(self, x_data, y_data:list, x_channel, y_channels):
+        
+        # x_channel = 'Depth'
+        
+        # import matplotlib.colors as mcolors
+        # colors = mcolors.TABLEAU_COLORS
+        colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:olive']
+        fig, ax1 = plt.subplots()
+        line1, = ax1.plot(x_data, y_data[0], label=y_channels[0], color=colors[0])
+        if len(y_channels) == 1:
+            ax1.legend()
+        elif len(y_channels) == 2:
+            ax2 = ax1.twinx()
+            line2, = ax2.plot(x_data, y_data[1], label=y_channels[1], color=colors[1])
+            ax2.set_ylabel(y_channels[1])
+            ax1.legend(handles=[line1, line2])
+        else: # deactivate ticks for all except the first or it will get messy
+            handles = [line1]
+            for channel in y_channels[1:]: # ignore the first as it was plotted already
+                # i = self.channels.index(channel)
+                i = y_channels.index(channel)
+                # plt.plot(x_data, self.all_data[channel], label=channel)
+                ax = ax1.twinx()
+                ax.tick_params(right=False, labelright=False)
+                line, = ax.plot(x_data, y_data[i], label=channel, color=colors[i])
+                handles.append(line)
+            ax1.legend(handles=handles)
+            
+        # print(x_data)
+        # print(self.all_data[y_channels[0]])
+        # print(self.channels)
+
+        # labels for axes:
+        ax1.set_xlabel(f'Z [nm]')
+        ax1.set_ylabel(y_channels[0])
+        # plt.xlabel(f'Depth [px]')
+        # if len(self.channels) == 1:
+        #     plt.ylabel(self.channels[0])
+        # plt.legend()
+        if Plot_Definitions.tight_layout:
+            plt.tight_layout()
+        
+        if Plot_Definitions.show_plot:
             plt.show()
+
 
     def find_index(self, filepath, channel):
         with open(filepath, 'r') as file:
@@ -7097,6 +7427,238 @@ class ApproachCurve(FileHandler):
         split_line.remove('\n')
         # print(split_line)
         return split_line.index(channel)
+
+
+class Scan_3D(FileHandler):
+    """A 3D scan is a measurement where one approach curve is saved per pixel. This class is ment to handle such measurements.
+
+    Args:
+        FileHandler (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    def __init__(self, directory_name: str, channels:list=None, title: str = None) -> None:
+        # set channelname if none is given
+        if channels == None:
+            channels = ['Z', 'O2A'] # if you want to plot approach curves 'Z' must be included!
+        self.channels = channels
+        self.x_channel = 'Z'
+        # call the init constructor of the filehandler class
+        super().__init__(directory_name, title)
+        # define header, probably same as for approach curve
+        self.header = 27
+        # load the channels from the datafile
+        self._Load_Data()
+
+    def _Initialize_Measurement_Channel_Indicators(self):
+        if self.file_type == File_Type.snom_measurement_3d:
+            self.height_channel = 'Z'
+            self.height_channels = ['Z']
+            self.mechanical_channels = ['M1A', 'M1P'] # todo
+            self.phase_channels = ['O1P','O2P','O3P','O4P','O5P']
+            self.amp_channels = ['O1A','O2A','O3A','O4A','O5A']
+            self.all_channels = self.height_channels + self.mechanical_channels + self.phase_channels + self.amp_channels
+            self.height_indicator = 'Z'
+
+    def _Load_Data(self):
+        datafile = self.directory_name / Path(self.filename.name + '.txt')
+        # initialize all data dict
+        self.all_data = {} # (key, value) = (channelname, 3d matrix, shape:(xres, yres, zres)) 
+        # load the data per channel and add to all_data
+        # with open(datafile, 'r') as file:
+        for channel in self.channels:
+            index = Find_Index(self.header, datafile, channel) # find the index of the channels
+            file = open(datafile, 'r')
+            self.all_data[channel] = np.genfromtxt(file ,skip_header=self.header+1, usecols=(index), delimiter='\t', invalid_raise = False)
+            # self.all_data[channel] = np.genfromtxt(file ,skip_header=self.header+1, usecols=(10), delimiter='\t', invalid_raise = False)
+            file.close()
+            # print('Shape of data: ', self.all_data[channel].shape)
+            x,y,z = self.measurement_tag_dict[Tag_Type.pixel_area]
+            self.all_data[channel] = np.reshape(self.all_data[channel], (y,x,z))
+            # print('Shape of data: ', self.all_data[channel].shape)
+        # scale the x data to nm
+        x_scaling = 1
+        # print('xunit: ', self.measurement_tag_dict[Tag_Type.scan_unit])
+        try: x_unit = self.measurement_tag_dict[Tag_Type.scan_unit]
+        except: x_unit = None
+        else:
+            # we want to convert the xaxis to nm
+            if x_unit == '[µm]':
+                x_scaling = pow(10,3)
+            elif x_unit == '[nm]':
+                x_scaling = 1
+            elif x_unit == '[m]':
+                x_scaling = pow(10,9)
+        # ok forget about that, the software from neaspec saves the scan area parameters as µm but the actual data is stored in m...
+        x_scaling = pow(10,9)
+        # scale xdata:
+        # self.all_data[self.x_channel] = [i*x_scaling for i in self.all_data[self.x_channel]]
+        self.all_data[self.x_channel] = np.multiply(self.all_data[self.x_channel], x_scaling)
+
+    def Set_Min_to_Zero(self) -> None:
+        # set the min of the xdata array to zero
+        min_x = np.nanmin(self.all_data[self.x_channel]) # for some reason at least the first value seems to be nan 
+        self.all_data[self.x_channel] = self.all_data[self.x_channel] - min_x
+
+    def Display_Cutplane(self, axis:str='x', line:int=0, channel:str=None):
+        # todo: shift each y column by offset value depending on average z position, to correct for varying starting position, due to non flat substrates
+        if channel == None:
+            channel = self.channels[0]
+        x,y,z = self.measurement_tag_dict[Tag_Type.pixel_area]
+        data = self.all_data[channel].copy()
+        # data = np.reshape(data, (y,x,z))
+        if axis == 'x':
+            cutplane_data = np.zeros((z,x)) 
+            for i in range(x):
+                for j in range(z):
+                    cutplane_data[j][i] = data[line][i][j]
+
+        img = plt.pcolormesh(cutplane_data)
+        plt.colorbar(img)
+        plt.show()
+
+    def Display_Cutplane_V2(self, axis:str='x', line:int=0, channel:str=None, align='auto'):
+        if channel == None:
+            channel = self.channels[0]
+        x,y,z = self.measurement_tag_dict[Tag_Type.pixel_area]
+        data = self.all_data[channel].copy()
+        # data = np.reshape(data, (y,x,z))
+        if axis == 'x':
+            cutplane_data = np.zeros((z,x)) 
+            for i in range(x):
+                for j in range(z):
+                    cutplane_data[j][i] = data[line][i][j]
+        # todo: shift each y column by offset value depending on average z position, to correct for varying starting position, due to non flat substrates
+        z_shifts = np.zeros(x)
+        # idea: get all the lowest points of the approach curves and shift them to the same z position, herefore we shift them only upwards relative to the lowest point
+        z_data_raw = self.all_data[self.x_channel]
+        # reshape the data to the correct shape
+        if axis == 'x':
+            z_data = np.zeros((z,x)) 
+            for i in range(x):
+                for j in range(z):
+                    z_data[j][i] = z_data_raw[line][i][j]
+        for i in range(x):
+            z_shifts[i] = self._Get_Z_Shift_(z_data[:,i])
+        # print('z_data: ', z_data[:,40])
+        # print('z_data: ', z_data[0])
+        # img = plt.pcolormesh(z_data)
+        # plt.colorbar(img)
+        # plt.show()
+        # z_data is in nm
+        z_shifts = z_shifts
+        if align == 'auto':
+            z_min = np.min(z_shifts)
+            z_shifts = z_shifts - z_min
+        # now we need to shift each approach curve by the corresponding z_shift
+        # therefore we need to create a new data array which can encorporate the shifted data
+        XRes, YRes, ZRes = self.measurement_tag_dict[Tag_Type.pixel_area]
+        print('ZR: ', ZRes)
+        XRange, YRange, ZRange = self.measurement_tag_dict[Tag_Type.scan_area]
+        XYZUnit = self.parameters_dict['Scan Area (X, Y, Z)'][-1]
+        # print('parameters: ', self.parameters_dict['Scan Area (X, Y, Z)'])
+        # convert Range to nm
+        if XYZUnit == '[µm]':
+            XRange = XRange*1e3
+            YRange = YRange*1e3
+            ZRange = ZRange*1e3
+        else:
+            print('Error! The unit of the scan area is not supported yet!')
+        z_pixelsize = ZRange/ZRes
+        print('z_shifts: ', z_shifts)
+        # calculate the new z range
+        ZRange_new = ZRange + z_shifts.max()
+        ZRes_new = int(ZRange_new/z_pixelsize)
+        print('ZRes_new: ', ZRes_new)
+        # create the new data array
+        cutplane_data = np.zeros((ZRes_new, XRes))
+        for i in range(XRes):
+            for j in range(ZRes):
+                cutplane_data[j+int(z_shifts[i]/z_pixelsize)][i] = data[line][i][j]
+        '''This shifting is not optimal, since a slow drift or a tilt of the sample would lead to a wrong alignment of the approach curves, although they start at the bottom.
+        Maybe try to use a 2d scan of the same region to align the approach curves.'''
+        img = plt.pcolormesh(cutplane_data)
+        plt.colorbar(img)
+        plt.show()
+    
+    def _Get_Z_Shift_(self, z_data):
+        # get the average z position for each approach curve
+        # might change in the future to a more sophisticated method
+        # return np.mean(z_data)
+
+        # return the shift of the starting point of the approach curve
+        return z_data[0]
+
+    def Display_Approach_Curve(self, x_pixel, y_pixel, x_channel:str=None, y_channels:list=None):
+        if x_channel == None:
+            x_channel = 'Z'
+        if x_channel not in self.channels:
+            print('The specified x channel is not in the channels of the measurement! Can not display approach curve.')
+            return None
+        if y_channels == None:
+            y_channels = self.channels
+        x_data = self.all_data[x_channel][y_pixel][x_pixel]
+        y_data = []
+        for channel in y_channels:
+            y_data.append(self.all_data[channel][y_pixel][x_pixel])
+        self._Display_Approach_Curve(x_data, y_data, x_channel, y_channels)
+
+    def _Display_Approach_Curve(self, x_data, y_data:list, x_channel, y_channels):
+        
+        # x_channel = 'Depth'
+        
+        # import matplotlib.colors as mcolors
+        # colors = mcolors.TABLEAU_COLORS
+        colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:olive']
+        fig, ax1 = plt.subplots()
+        line1, = ax1.plot(x_data, y_data[0], label=y_channels[0], color=colors[0])
+        if len(y_channels) == 1:
+            ax1.legend()
+        elif len(y_channels) == 2:
+            ax2 = ax1.twinx()
+            line2, = ax2.plot(x_data, y_data[1], label=y_channels[1], color=colors[1])
+            ax2.set_ylabel(y_channels[1])
+            ax1.legend(handles=[line1, line2])
+        else: # deactivate ticks for all except the first or it will get messy
+            handles = [line1]
+            for channel in y_channels[1:]: # ignore the first as it was plotted already
+                # i = self.channels.index(channel)
+                i = y_channels.index(channel)
+                # plt.plot(x_data, self.all_data[channel], label=channel)
+                ax = ax1.twinx()
+                ax.tick_params(right=False, labelright=False)
+                line, = ax.plot(x_data, y_data[i], label=channel, color=colors[i])
+                handles.append(line)
+            ax1.legend(handles=handles)
+            
+        # print(x_data)
+        # print(self.all_data[y_channels[0]])
+        # print(self.channels)
+
+        # labels for axes:
+        ax1.set_xlabel(f'Z [nm]')
+        ax1.set_ylabel(y_channels[0])
+        # plt.xlabel(f'Depth [px]')
+        # if len(self.channels) == 1:
+        #     plt.ylabel(self.channels[0])
+        # plt.legend()
+        if Plot_Definitions.tight_layout:
+            plt.tight_layout()
+        
+        if Plot_Definitions.show_plot:
+            plt.show()
+
+
+    def Cut_Data(self):
+        pass
+
+    def Average_Data(self):
+        pass
+
+
+
+
 
 # could be exported to external file
 

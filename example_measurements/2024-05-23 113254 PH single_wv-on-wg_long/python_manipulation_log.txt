@@ -1,0 +1,132 @@
+23/05/2024 14:12:02
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 14:12:44
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 14:13:52
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 14:17:11
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 14:17:51
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 14:18:40
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 14:22:07
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 14:22:57
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 14:23:50
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 14:24:45
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 14:26:07
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 14:27:15
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 14:28:23
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 14:36:02
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 14:39:08
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 15:27:31
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 15:33:51
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 15:36:36
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 15:37:41
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 15:37:51
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 15:38:49
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 15:39:59
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 15:41:09
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 15:41:58
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 15:42:48
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 15:43:37
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 15:45:33
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 15:46:12
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 15:47:04
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 15:47:54
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 15:49:24
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 16:37:37
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True
+23/05/2024 16:38:27
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+quadratic_pixels = True

@@ -277,6 +277,29 @@ def Test_3D_Scan():
     measurement.Display_Cutplane(axis='x', line=0, channel='O2A')
     measurement.Display_Cutplane_V2(axis='x', line=0, channel='O2A')
 
+def Test_Phase_Drift_Correction():
+    # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-23 113254 PH single_wv-on-wg_long'
+    directory = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-05-23-ssh-reflection')
+    channels = ['O2P', 'O3P', 'O4P']
+    measurement = SnomMeasurement(directory, channels)
+    measurement.Display_Channels()
+    measurement.Correct_Phase_Drift_Nonlinear(channels=['O2P', 'O3P', 'O4P'], reference_area=[0, 50])
+    measurement.Display_Channels()
+    # measurement.Match_Phase_Offset(channels=['O2P', 'O3P', 'O4P'], reference_channel='O2P', reference_area=[[0,50],[0,50]])
+    measurement.Match_Phase_Offset(channels=['O2P', 'O3P', 'O4P'], reference_channel='O2P', reference_area='manual', manual_width=20)
+    measurement.Display_Channels()
+
+def Test_Amplitude_Drift_Correction():
+    # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-23 113254 PH single_wv-on-wg_long'
+    directory = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-05-23-ssh-reflection')
+    channels = ['O2A', 'O3A', 'O4A']
+    measurement = SnomMeasurement(directory, channels)
+    Plot_Definitions.amp_cbar_range = False
+    measurement.Display_Channels()
+    # measurement.Correct_Amplitude_Drift_Nonlinear(channels=['O2A'], reference_area=[0, 50])
+    measurement.Correct_Amplitude_Drift_Nonlinear(channels=['O2A', 'O3A', 'O4A'], reference_area=[140, 160])
+    measurement.Display_Channels()
+
 def main():
      
     # Realign()
@@ -293,7 +316,9 @@ def main():
 
     # Test_Export_and_Load_all_subplots()
     # Gif()
-    Test_3D_Scan()
+    # Test_3D_Scan()
+    # Test_Phase_Drift_Correction()
+    Test_Amplitude_Drift_Correction()
 
 
 if __name__ == '__main__':

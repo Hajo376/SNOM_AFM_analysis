@@ -1,0 +1,27 @@
+# www.neaspec.com
+# Scan:	 	2D (PsHet)
+# Project:	 	Test
+# Description:	 	single_wv-on-wg_long
+# Date:	 	05/23/2024 11:32:54
+# Scanner Center Position (X, Y):	[µm]	51.02	52.71	 
+# Rotation:	[°]	-89	 	 
+# Scan Area (X, Y, Z):	[µm]	6.000	60.000	0.000
+# Pixel Area (X, Y, Z):	[px]	120	600	1
+# Averaging:	 	1	 	 
+# Integration time:	[ms]	29	 	 
+# Laser Source:	 	Tunable VIS
+# Detector:	 	NIR
+# Target Wavelength:	[µm]		 	 
+# Demodulation Mode:	 	PsHet
+# Tip Frequency:	[Hz]	262,974.631	 	 
+# Tip Amplitude:	[mV]	14.500	 	 
+# Tapping Amplitude:	[nm]	68.330	 	 
+# Modulation Frequency:	[Hz]	304.415	 	 
+# Modulation Amplitude:	[mV]	9,700.000	 	 
+# Modulation Offset:	[mV]	4,560.492	 	 
+# Setpoint:	[%]	75.79	 	 
+# Regulator (P, I, D):	 	1.812754	2.258861	1.000000
+# Tip Potential:	[mV]	0.000	 	 
+# M1A Scaling:	[nm/V]	14.000	 	 
+# Q-Factor:	 	562.9	 	 
+# Version:	 	1.10.9592.0
