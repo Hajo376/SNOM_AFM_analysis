@@ -300,6 +300,17 @@ def Test_Amplitude_Drift_Correction():
     measurement.Correct_Amplitude_Drift_Nonlinear(channels=['O2A', 'O3A', 'O4A'], reference_area=[140, 160])
     measurement.Display_Channels()
 
+def Test_Height_Drift_Correction():
+    directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-23 113254 PH single_wv-on-wg_long'
+    # directory = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-05-23-ssh-reflection')
+    channels = ['Z C']
+    measurement = SnomMeasurement(directory, channels)
+    Plot_Definitions.amp_cbar_range = False
+    measurement.Display_Channels()
+    # measurement.Correct_Amplitude_Drift_Nonlinear(channels=['O2A'], reference_area=[0, 50])
+    measurement.Correct_Height_Drift_Nonlinear(channels=['Z C'], reference_area=[20, 40])
+    measurement.Display_Channels()
+
 def main():
      
     # Realign()
@@ -318,7 +329,8 @@ def main():
     # Gif()
     # Test_3D_Scan()
     # Test_Phase_Drift_Correction()
-    Test_Amplitude_Drift_Correction()
+    # Test_Amplitude_Drift_Correction()
+    Test_Height_Drift_Correction()
 
 
 if __name__ == '__main__':

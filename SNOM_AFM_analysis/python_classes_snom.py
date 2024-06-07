@@ -5620,13 +5620,16 @@ class SnomMeasurement(FileHandler):
         Make shure not to rotate the image prior to this function, since the reference area is defined in y-direction.
 
         Args:
-            channels (list, optional): List of channels to level. If not specified all channels in memory will be used. Defaults to None.
+            channels (list, optional): list of channels, will override the already existing channels
             reference_area (list, optional): The reference area to calculate the phase offset, specify as reference_area=[left-border, right-border].
                 If not specified the whole image will be used. Defaults to [None, None].
         """
 
         # zone = int(zone*self.scaling_factor/4) #automatically enlargen the zone if the data has been scaled by more than a factor of 4
+        # if a list of channels is specified those will be loaded and the old ones will be overwritten
         self._Initialize_Data(channels)
+        # define local list of channels to use for leveling
+        channels = self.channels
         phase_data = None
         if self.preview_phasechannel in self.channels:
             phase_data = np.copy(self.all_data[self.channels.index(self.preview_phasechannel)])
@@ -5700,7 +5703,7 @@ class SnomMeasurement(FileHandler):
         user_input = self._User_Input_Bool()
         if user_input == True:
             # write to logfile
-            self._Write_to_Logfile('phase_driftcomp_nonlinear')
+            self._Write_to_Logfile('phase_driftcomp_nonlinear_reference_area', reference_area)
             # do the leveling for all channels but use always the same reference data, channels should only differ in phase offset
             for i in range(len(channels)):
                 if 'P' in channels[i]:
@@ -5712,16 +5715,17 @@ class SnomMeasurement(FileHandler):
         The reference channel is the first phase channel in memory if not specified.
 
         Args:
-            channels (list, optional): List of channels to level. If not specified all channels in memory will be used. Defaults to None.
+            channels (list, optional): list of channels, will override the already existing channels
             reference_channel ([type], optional): The reference channel to which all other phase channels will be matched.
                 If not specified the first phase channel in memory will be used. Defaults to None.
             reference_area ([type], optional): The area in the reference channel which will be used to calculate the phase offset. If not specified the whole image will be used.
                 You can also specify 'manual' then you will be asked to click on a point in the image. The area around that pixel will then be used as reference. Defaults to None.
             manual_width (int, optional): The width of the manual reference area. Only applies if reference_area='manual'. Defaults to 5.
         """
-        if channels is None:
-            channels = self.channels
-        # self._Initialize_Data(channels)
+        # if a list of channels is specified those will be loaded and the old ones will be overwritten
+        self._Initialize_Data(channels)
+        # define local list of channels to use for leveling
+        channels = self.channels
         if reference_channel == None:
             for channel in channels:
                 if self.phase_indicator in channel:
@@ -5778,6 +5782,7 @@ class SnomMeasurement(FileHandler):
                 # phase_offset = np.mean(phase_data) - reference_phase
                 phase_offset = np.mean([phase_data[i][reference_area[0][0]:reference_area[0][1]] for i in range(reference_area[1][0], reference_area[1][1])]) - reference_phase
                 self.all_data[self.channels.index(channel)] = self._Shift_Phase_Data(phase_data, -phase_offset)
+        self._Write_to_Logfile('match_phase_offset_reference_area', reference_area)
         gc.collect()
 
     def Correct_Amplitude_Drift_Nonlinear(self, channels:list=None, reference_area:list = [None, None]) -> None:
@@ -5788,13 +5793,16 @@ class SnomMeasurement(FileHandler):
         Make shure not to rotate the image prior to this function, since the reference area is defined in y-direction.
 
         Args:
-            channels (list, optional): List of channels to level. If not specified all channels in memory will be used. Defaults to None.
+            channels (list, optional): list of channels, will override the already existing channels
             reference_area (list, optional): The reference area to calculate the amplitude offset, specify as reference_area=[left-border, right-border].
                 If not specified the whole image will be used. Defaults to [None, None].
         """
 
         # zone = int(zone*self.scaling_factor/4) #automatically enlargen the zone if the data has been scaled by more than a factor of 4
+        # if a list of channels is specified those will be loaded and the old ones will be overwritten
         self._Initialize_Data(channels)
+        # define local list of channels to use for leveling
+        channels = self.channels
         amplitude_data = None
         if self.preview_ampchannel in self.channels:
             amplitude_data = np.copy(self.all_data[self.channels.index(self.preview_ampchannel)])
@@ -5857,9 +5865,96 @@ class SnomMeasurement(FileHandler):
             user_input = self._User_Input_Bool()
             if user_input == True:
                 # write to logfile
-                self._Write_to_Logfile('amplitude_driftcomp_nonlinear')
+                self._Write_to_Logfile('amplitude_driftcomp_nonlinear_reference_area', reference_area)
                 #start the leveling process again
                 self.Correct_Amplitude_Drift_Nonlinear(channels, reference_area)
+            else:
+                exit()
+        gc.collect()
+
+    def Correct_Height_Drift_Nonlinear(self, channels:list=None, reference_area:list = [None, None]) -> None:
+        """This function corrects the height drift in the y-direction by using a reference area across the full length of the scan.	
+        The reference area is used to calculate the average height value per row.
+        This value is then divided from the height data to level the height.
+        The reference area is specified by two coordinates, the left and right border. If no area is specified the whole image will be used.
+        Make shure not to rotate the image prior to this function, since the reference area is defined in y-direction.
+
+        Args:
+            channels (list, optional): list of channels, will override the already existing channels
+            reference_area (list, optional): The reference area to calculate the height offset, specify as reference_area=[left-border, right-border].
+                If not specified the whole image will be used. Defaults to [None, None].
+        """
+
+        # zone = int(zone*self.scaling_factor/4) #automatically enlargen the zone if the data has been scaled by more than a factor of 4
+        # if a list of channels is specified those will be loaded and the old ones will be overwritten
+        self._Initialize_Data(channels)
+        # define local list of channels to use for leveling
+        channels = self.channels
+        height_data = None
+        if self.height_channel in self.channels:
+            height_data = np.copy(self.all_data[self.channels.index(self.height_channel)])
+            height_channel = self.height_channel
+        else:
+            height_data = self._Load_Data([self.height_channel])[0][0]
+            height_channel = self.height_channel
+        
+        # cut out the reference area
+        # if no area is specified just use the whole data
+        if reference_area[0] == None:
+            reference_area[0] = 0
+        if reference_area[1] == None:
+            reference_area[1] = len(height_data[0])
+        
+        # iterate through the reference area and get the average height value per row
+        reference_values = [np.mean(height_data[i][reference_area[0]:reference_area[1]]) for i in range(len(height_data))]
+
+        # we assume the average height should stay constant, so we divide the height data by the reference values and multiply by the mean reference value
+        leveled_height_data = np.copy(height_data)
+        for i in range(len(height_data)):
+            leveled_height_data[i] = height_data[i] / reference_values[i] * np.mean(reference_values)
+        
+        # display the original data besides the leveled height data
+        fig, ax = plt.subplots(1, 2)
+        img1 = ax[0].pcolormesh(height_data, cmap=SNOM_height)
+        img2 = ax[1].pcolormesh(leveled_height_data, cmap=SNOM_height)
+        ax[0].invert_yaxis()
+        ax[1].invert_yaxis()
+        divider = make_axes_locatable(ax[0])
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+        cbar = plt.colorbar(img1, cax=cax)
+        cbar.ax.get_yaxis().labelpad = 15
+        cbar.ax.set_ylabel('height', rotation=270)
+        divider = make_axes_locatable(ax[1])
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+        cbar = plt.colorbar(img2, cax=cax)
+        cbar.ax.get_yaxis().labelpad = 15
+        cbar.ax.set_ylabel('height', rotation=270)
+        # ax[0].legend()
+        # ax[1].legend()
+        ax[0].axis('scaled')
+        ax[1].axis('scaled')
+        ax[0].set_title('Original height: ' + height_channel)
+        ax[1].set_title('Leveled height: ' + height_channel)
+        plt.show()
+
+        # ask the user if he is satisfied with the leveling
+        print('Are you satisfied with the height leveling?')
+        user_input = self._User_Input_Bool()
+        if user_input == True:
+            # do the leveling for all channels, each channel should be referenced to itself since the heights of the channels will be different
+            for i in range(len(channels)):
+                if self.height_indicator in channels[i]:
+                    # self.all_data[self.channels.index(channels[i])] = np.copy(self.all_data[self.channels.index(channels[i])])
+                    reference_values = [np.mean(self.all_data[self.channels.index(channels[i])][j][reference_area[0]:reference_area[1]]) for j in range(len(self.all_data[self.channels.index(channels[i])]))]
+                    self.all_data[self.channels.index(channels[i])] = [(self.all_data[self.channels.index(channels[i])][j] / reference_values[j] * np.mean(reference_values)) for j in range(len(reference_values))]
+        else:
+            print('Do you want to repeat the leveling?')
+            user_input = self._User_Input_Bool()
+            if user_input == True:
+                # write to logfile
+                self._Write_to_Logfile('height_driftcomp_nonlinear_reference_area', reference_area)
+                #start the leveling process again
+                self.Correct_Height_Drift_Nonlinear(channels, reference_area)
             else:
                 exit()
         gc.collect()

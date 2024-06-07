@@ -1,5 +1,6 @@
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 # to use perceptual colormaps:
 import colorcet as cc
 
