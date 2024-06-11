@@ -1,9 +1,9 @@
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.pyplot as plt
-import matplotlib as mpl
+# import matplotlib as mpl
 # to use perceptual colormaps:
 import colorcet as cc
-
+"""
 SNOM_height = 'gray'
 
 cmap_snom_amplitude = {'red':   ((0.0, 0.0, 0.0),
@@ -62,7 +62,7 @@ cmap_snom_realpart = {
 }
 SNOM_realpart = LinearSegmentedColormap('SNOM_realpart', cmap_snom_realpart)
 plt.register_cmap(cmap=SNOM_realpart)
-
+"""
 
 # replace old maps with perceptual colormaps
 SNOM_amplitude = cc.cm.CET_L3

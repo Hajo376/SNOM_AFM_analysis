@@ -355,3 +355,249 @@ filename = 2024-05-23 113254 PH single_wv-on-wg_long
 quadratic_pixels = True
 scaling = 4
 gaussian_filter_complex_sigma = 2
+11/06/2024 09:44:01
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+scaling = 4
+gaussian_filter_complex_sigma = 2
+11/06/2024 09:45:13
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+scaling = 4
+gaussian_filter_complex_sigma = 2
+save_to_gsf_appendix = _manipulated
+11/06/2024 09:45:57
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 09:46:41
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:09:50
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:10:43
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:11:18
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:12:20
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:12:43
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:16:14
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:16:48
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:18:46
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:19:51
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:20:42
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:21:14
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:22:17
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:23:14
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:23:31
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:24:17
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:24:45
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:25:03
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:25:31
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:26:05
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:26:23
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:26:41
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:27:16
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:27:52
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:28:04
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:28:24
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:28:58
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:29:11
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:29:22
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:29:37
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:29:59
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:30:20
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:36:08
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:36:42
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:37:00
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:37:53
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:39:14
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:39:39
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:41:07
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:41:39
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:46:07
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:46:35
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:47:00
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:47:28
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:48:00
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:48:37
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:49:19
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:50:29
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:50:46
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:51:09
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:53:25
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:53:47
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:54:14
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:55:53
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 10:58:00
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 11:14:35
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 11:15:52
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 11:16:34
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 11:16:54
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 11:17:50
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 11:18:01
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 11:18:10
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 11:18:22
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 11:18:45
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 11:18:55
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 11:19:12
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 11:19:22
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 11:19:36
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 11:20:14
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 11:24:54
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 11:25:27
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 12:49:21
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+11/06/2024 12:50:50
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+11/06/2024 12:51:09
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 12:52:02
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 12:54:50
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+11/06/2024 12:57:02
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+11/06/2024 12:57:45
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+11/06/2024 15:29:23
+filename = 2024-05-23 113254 PH single_wv-on-wg_long

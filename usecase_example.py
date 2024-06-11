@@ -267,15 +267,15 @@ def Gif():
 
 def Test_3D_Scan():
     # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 144100 PH 3D single_wg_20mu_3d'
-    directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
-    # directory = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-05-14-ssh-snom')
-    channels = ['O2A', 'O2P', 'Z']
+    # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
+    directory = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-05-14-ssh-snom')
+    channels = ['O3A', 'O3P', 'Z']
     # channels = ['Z']
     measurement = Scan_3D(directory, channels)
     measurement.Set_Min_to_Zero()
     # measurement.Display_Approach_Curve(20, 0, 'Z', ['Z', 'O2A', 'O3A']) 
-    measurement.Display_Cutplane(axis='x', line=0, channel='O2A')
-    measurement.Display_Cutplane_V2(axis='x', line=0, channel='O2A')
+    measurement.Display_Cutplane(axis='x', line=0, channel='O3P')
+    measurement.Display_Cutplane_V2(axis='x', line=0, channel='O3P')
 
 def Test_Phase_Drift_Correction():
     # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-23 113254 PH single_wv-on-wg_long'
@@ -327,10 +327,10 @@ def main():
 
     # Test_Export_and_Load_all_subplots()
     # Gif()
-    # Test_3D_Scan()
+    Test_3D_Scan()
     # Test_Phase_Drift_Correction()
     # Test_Amplitude_Drift_Correction()
-    Test_Height_Drift_Correction()
+    # Test_Height_Drift_Correction()
 
 
 if __name__ == '__main__':
