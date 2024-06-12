@@ -135,11 +135,11 @@ def Compare_Measurements():
     Measurement.Display_All_Subplots()
 
 def Test_Rectangle_Selector():
-    directory_name = 'testdata/2022-04-25 1227 PH pentamer_840nm_s50_2'
+    directory_name = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2022-04-25 1227 PH pentamer_840nm_s50_2'
     channels = ['O2P', 'O2A', 'Z C']
     Measurement = Open_Measurement(directory_name, channels)
     Measurement.Display_Channels()
-    Measurement.Cut_Channels()
+    Measurement.Cut_Channels(reset_mask=True)
     Measurement.Display_Channels()
     Measurement.Display_All_Subplots()
 
@@ -318,7 +318,7 @@ def main():
     # Test_Scalebar()
     # Test_Phaseshift()
     # Compare_Measurements()
-    # Test_Rectangle_Selector()
+    Test_Rectangle_Selector()
     # Correct_Phase_Drift()
     # Synccorrection()
     # Complete_Example_1()
@@ -327,7 +327,7 @@ def main():
 
     # Test_Export_and_Load_all_subplots()
     # Gif()
-    Test_3D_Scan()
+    # Test_3D_Scan()
     # Test_Phase_Drift_Correction()
     # Test_Amplitude_Drift_Correction()
     # Test_Height_Drift_Correction()

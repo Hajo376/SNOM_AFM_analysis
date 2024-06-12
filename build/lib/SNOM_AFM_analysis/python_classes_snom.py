@@ -3741,8 +3741,9 @@ class SnomMeasurement(FileHandler):
             self.imag_channels = ['O1Im', 'O2Im', 'O3Im', 'O4Im', 'R-O5Im', 'R-O1Im', 'R-O2Im', 'R-O3Im', 'R-O4Im', 'R-O5Im']
             self.height_channel = 'Z C'
             self.height_channels = ['Z C', 'R-Z C']
+            self.mechanical_channels = ['M0A', 'M0P', 'M1A', 'M1P', 'M2A', 'M2P', 'M3A', 'M3P', 'M4A', 'M4P', 'M5A', 'M5P', 'R-M0A', 'R-M0P', 'R-M1A', 'R-M1P', 'R-M2A', 'R-M2P', 'R-M3A', 'R-M3P', 'R-M4A', 'R-M4P', 'R-M5A', 'R-M5P']
             # self.all_channels = ['O1A','O1P','O2A','O2P','O3A','O3P','O4A','O4P','O5A','O5P','R-O1A','R-O1P','R-O2A','R-O2P','R-O3A','R-O3P','R-O4A','R-O4P','R-O5A','R-O5P']
-            self.all_channels = self.phase_channels + self.amp_channels + self.height_channels
+            self.all_channels = self.phase_channels + self.amp_channels + self.height_channels + self.mechanical_channels
             self.preview_ampchannel = 'O2A'
             self.preview_phasechannel = 'O2P'
             self.height_indicator = 'Z'
