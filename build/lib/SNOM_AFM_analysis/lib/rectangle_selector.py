@@ -62,7 +62,7 @@ class Rectangle_Selector():
                 toggle_selector.RS.set_active(True)
         # drawtype is 'box' or 'line' or 'none'
         toggle_selector.RS = RectangleSelector(axis, line_select_callback,
-                                            drawtype='box', useblit=True,
+                                            useblit=True,
                                             button=[1, 3],  # don't use middle button
                                             minspanx=5, minspany=5,
                                             spancoords='pixels',

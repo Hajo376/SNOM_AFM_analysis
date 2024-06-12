@@ -765,3 +765,217 @@ filename = 2024-05-23 113254 PH single_wv-on-wg_long
 filename = 2024-05-23 113254 PH single_wv-on-wg_long
 12/06/2024 13:07:26
 filename = 2024-05-23 113254 PH single_wv-on-wg_long
+12/06/2024 13:17:15
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+cut_coords = [[23, 2], [93, 535]]
+cut = autocut
+12/06/2024 13:19:34
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+cut_coords = [[18, 1], [96, 535]]
+cut = autocut
+rotation = 90
+12/06/2024 13:22:44
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+cut_coords = [[18, 1], [98, 531]]
+cut = autocut
+rotation = 90
+12/06/2024 13:25:20
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+cut_coords = [[25, 2], [95, 528]]
+cut = autocut
+rotation = 90
+gaussian_filter_sigma = 2
+scaling = 4
+12/06/2024 13:28:53
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+cut_coords = [[23, 1], [95, 528]]
+cut = autocut
+rotation = 90
+gaussian_filter_sigma = 2
+scaling = 4
+12/06/2024 13:32:20
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+12/06/2024 13:32:38
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+12/06/2024 13:33:04
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+12/06/2024 13:33:41
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+cut_coords = [[89, 0], [389, 4271]]
+cut = autocut
+rotation = 90
+12/06/2024 13:34:45
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+cut_coords = [[76, 0], [415, 4348]]
+cut = autocut
+rotation = 90
+12/06/2024 13:35:49
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+cut_coords = [[89, 6], [409, 4226]]
+cut = autocut
+rotation = 90
+12/06/2024 13:42:39
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 13:49:11
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+cut_coords = [[95, 0], [383, 4284]]
+cut = autocut
+rotation = 90
+12/06/2024 13:50:27
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+cut_coords = [[76, 0], [428, 4245]]
+cut = autocut
+rotation = 90
+12/06/2024 13:51:33
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 13:52:09
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 13:57:26
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 13:58:26
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 14:07:39
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 14:08:41
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 14:09:43
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 14:35:55
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+12/06/2024 14:36:10
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 14:37:52
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 14:53:41
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 15:58:11
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 15:59:07
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:00:05
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:01:14
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:02:03
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:05:31
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:07:01
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:09:36
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:10:30
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:12:08
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:20:51
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:25:16
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:26:42
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:28:21
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:29:31
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:30:24
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:31:11
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:33:03
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:33:27
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:37:30
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:37:53
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:38:53
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:39:20
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:39:43
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:40:32
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:41:48
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:44:07
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:44:44
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:46:14
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:47:16
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:48:08
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:48:31
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:48:42
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:49:56
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:51:44
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 16:54:03
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 17:00:46
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 17:38:06
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 17:39:19
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+12/06/2024 17:40:09
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
