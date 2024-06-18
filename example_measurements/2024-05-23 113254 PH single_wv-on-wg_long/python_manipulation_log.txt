@@ -979,3 +979,29 @@ rotation = 90
 12/06/2024 17:40:09
 filename = 2024-05-23 113254 PH single_wv-on-wg_long
 rotation = 90
+13/06/2024 09:55:21
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+13/06/2024 10:19:26
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+13/06/2024 10:20:50
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+13/06/2024 10:27:48
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+13/06/2024 10:40:11
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+13/06/2024 10:47:46
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+13/06/2024 10:56:51
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+rotation = 90
+13/06/2024 10:57:17
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+cut_coords = [[89, 0], [396, 4495]]
+cut = autocut
+rotation = 90

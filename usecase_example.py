@@ -108,17 +108,23 @@ def Test_Scalebar():
     Measurement.Display_All_Subplots()
     
 def Test_Phaseshift():
-    directory_name = 'testdata/2022-04-25 1227 PH pentamer_840nm_s50_2'
-    channels = ['O2P', 'O3P', 'O2A', 'Z C']
-    Measurement = Open_Measurement(directory_name, channels)
-    Measurement.Scale_Channels()
-    Measurement.Gauss_Filter_Channels_complex()
+    # directory_name = 'testdata/2022-04-25 1227 PH pentamer_840nm_s50_2'
+    directory_name = 'C:/Users/Hajo/sciebo/Phd/Paper/Dielectric_Waveguides/raw_data/reflection_mode/2024-05-23 161457 PH single_wv-on-wg_-45deg_thicc'
+    
+    # channels = ['O2P', 'O3P', 'O2A', 'Z C']
+    # Plot_Definitions.full_phase_range = False
+    Plot_Definitions.shared_phase_range = False
+    channels = ['O2P_manipulated', 'O3P_manipulated', 'O2A', 'Z C']
+    # Measurement = Open_Measurement(directory_name, channels)
+    Measurement = SnomMeasurement(directory_name, channels)
+    # Measurement.Scale_Channels()
+    # Measurement.Gauss_Filter_Channels_complex()
     Measurement.Display_Channels()
     Measurement.Shift_Phase()
     # Measurement.Shift_Phase(1.96)
     Measurement.Display_Channels()
-    Measurement.Remove_Subplots([2,3,6,7])
-    Measurement.Display_All_Subplots()
+    # Measurement.Remove_Subplots([2,3,6,7])
+    # Measurement.Display_All_Subplots()
 
 def Compare_Measurements():
     channels = ['O2A', 'O2P', 'Z C']
@@ -316,9 +322,9 @@ def main():
     # Realign()
     # Cut_Masked()
     # Test_Scalebar()
-    # Test_Phaseshift()
+    Test_Phaseshift()
     # Compare_Measurements()
-    Test_Rectangle_Selector()
+    # Test_Rectangle_Selector()
     # Correct_Phase_Drift()
     # Synccorrection()
     # Complete_Example_1()

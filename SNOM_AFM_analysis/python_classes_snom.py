@@ -4576,10 +4576,10 @@ class SnomMeasurement(FileHandler):
                     #center the colorscale for real data around 0
                     # get minima and maxima from data:
                     flattened_data = data.flatten()
-                    min_data = min(flattened_data)
-                    max_data = max(flattened_data)
-                    # print('min: ', min_data)
-                    # print('max: ', max_data)
+                    min_data = np.min(flattened_data)
+                    max_data = np.max(flattened_data)
+                    print('min: ', min_data)
+                    print('max: ', max_data)
 
                     if self.real_indicator in title or self.imag_indicator in title: # for real part or imaginary part data
                         if self.file_type == File_Type.comsol_gsf:
@@ -6041,7 +6041,7 @@ class SnomMeasurement(FileHandler):
             shift_known = False
         else:
             shift_known = True
-        if shift_known == False:
+        if shift_known is False:
             if self.preview_phasechannel in channels:
                     phase_data = np.copy(self.all_data[self.channels.index(self.preview_phasechannel)])
             else:
@@ -6061,9 +6061,17 @@ class SnomMeasurement(FileHandler):
         self._Write_to_Logfile('phase_shift', shift)
         # shift all phase channels in memory
         # could also be implemented to shift each channel individually...
+        
         for channel in channels:
+            print(channel)
             if self.phase_indicator in channel:
+                print('Before phase shift: ', channel)
+                print('Min phase value:', np.min(self.all_data[self.channels.index(channel)]))
+                print('Max phase value:', np.max(self.all_data[self.channels.index(channel)]))
                 self.all_data[self.channels.index(channel)] = self._Shift_Phase_Data(self.all_data[self.channels.index(channel)], shift)
+                print('After phase shift: ', channel)
+                print('Min phase value:', np.min(self.all_data[self.channels.index(channel)]))
+                print('Max phase value:', np.max(self.all_data[self.channels.index(channel)]))
         gc.collect()
 
     def _Fit_Horizontal_WG(self, data):
