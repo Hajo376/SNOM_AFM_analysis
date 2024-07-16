@@ -275,13 +275,74 @@ def Test_3D_Scan():
     # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 144100 PH 3D single_wg_20mu_3d'
     # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
     directory = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-05-14-ssh-snom')
-    channels = ['O3A', 'O3P', 'Z']
+    channels = ['O2A', 'O2P', 'O3A', 'O3P', 'Z']
     # channels = ['Z']
     measurement = Scan_3D(directory, channels)
     measurement.Set_Min_to_Zero()
     # measurement.Display_Approach_Curve(20, 0, 'Z', ['Z', 'O2A', 'O3A']) 
-    measurement.Display_Cutplane(axis='x', line=0, channel='O3P')
-    measurement.Display_Cutplane_V2(axis='x', line=0, channel='O3P')
+    # measurement.Display_Cutplane(axis='x', line=0, channel='O3A')
+    Plot_Definitions.colorbar_width = 3
+    # measurement.Display_Cutplane_V2(axis='x', line=0, channel='O2A')
+    # measurement.Display_Cutplane_V2(axis='x', line=0, channel='O2P')
+    # measurement.Display_Cutplane_V2_Realpart(axis='x', line=0, demodulation=2)
+    # measurement.Display_Cutplane_V2(axis='x', line=0, channel='O3A')
+    # measurement.Display_Cutplane_V2(axis='x', line=0, channel='O3P')
+    # measurement.Display_Cutplane_V2_Realpart(axis='x', line=0, demodulation=3)
+    measurement.Generate_All_Cutplane_Data()
+    measurement.Match_Phase_Offset(channels=['O2P', 'O3P'], reference_channel='O2P', reference_area='manual', manual_width=3)
+    measurement.Display_Cutplane_V3(axis='x', line=0, channel='O2P')
+    measurement.Display_Cutplane_V3(axis='x', line=0, channel='O3P')
+    measurement.Shift_Phase()
+    measurement.Display_Cutplane_V3(axis='x', line=0, channel='O2P')
+    measurement.Display_Cutplane_V3(axis='x', line=0, channel='O3P')
+    measurement.Display_Cutplane_V3_Realpart(axis='x', line=0, demodulation=2)
+    measurement.Display_Cutplane_V3_Realpart(axis='x', line=0, demodulation=3)
+
+def Phase_Correction_3D_Scan():
+    directory = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-05-14-ssh-snom')
+    channels = ['O2A', 'O2P', 'O3A', 'O3P', 'Z']
+    # channels = ['Z']
+    measurement = Scan_3D(directory, channels)
+    measurement.Set_Min_to_Zero()
+    Plot_Definitions.colorbar_width = 3
+    measurement.Generate_All_Cutplane_Data()
+    measurement.Match_Phase_Offset(channels=['O2P', 'O3P'], reference_channel='O2P', reference_area='manual', manual_width=3)
+    measurement.Display_Cutplane_V3(axis='x', line=0, channel='O2P')
+    measurement.Display_Cutplane_V3(axis='x', line=0, channel='O3P')
+    measurement.Shift_Phase()
+    measurement.Display_Cutplane_V3(axis='x', line=0, channel='O2P')
+    measurement.Display_Cutplane_V3(axis='x', line=0, channel='O3P')
+    measurement.Display_Cutplane_V3_Realpart(axis='x', line=0, demodulation=2)
+    measurement.Display_Cutplane_V3_Realpart(axis='x', line=0, demodulation=3)
+
+def Average_3D_Scan():
+    directory = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-05-14-ssh-snom')
+    channels = ['O2A', 'O2P', 'O3A', 'O3P', 'Z']
+    # channels = ['Z']
+    measurement = Scan_3D(directory, channels)
+    measurement.Set_Min_to_Zero()
+    Plot_Definitions.colorbar_width = 3
+    # measurement.Generate_All_Cutplane_Data()
+    # measurement.Display_Cutplane_V3(axis='x', line=0, channel='O2A')
+    # measurement.Display_Cutplane_V3(axis='x', line=0, channel='O2P')
+    # measurement.Display_Cutplane_V3(axis='x', line=0, channel='O3A')
+    # measurement.Display_Cutplane_V3(axis='x', line=0, channel='O3P')
+    measurement.Average_Data()
+    # measurement.Display_Cutplane_V3(axis='x', line=0, channel='O2A')
+    # measurement.Display_Cutplane_V3(axis='x', line=0, channel='O2P')
+    # measurement.Display_Cutplane_V3(axis='x', line=0, channel='O3A')
+    # measurement.Display_Cutplane_V3(axis='x', line=0, channel='O3P')
+
+    measurement.Match_Phase_Offset(channels=['O2P', 'O3P'], reference_channel='O2P', reference_area='manual', manual_width=3)
+    measurement.Display_Cutplane_V3(axis='x', line=0, channel='O2P')
+    measurement.Display_Cutplane_V3(axis='x', line=0, channel='O3P')
+    measurement.Shift_Phase()
+    measurement.Display_Cutplane_V3(axis='x', line=0, channel='O2P')
+    measurement.Display_Cutplane_V3(axis='x', line=0, channel='O3P')
+    measurement.Display_Cutplane_V3_Realpart(axis='x', line=0, demodulation=2)
+    measurement.Display_Cutplane_V3_Realpart(axis='x', line=0, demodulation=3)
+
+    
 
 def Test_Phase_Drift_Correction():
     # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-23 113254 PH single_wv-on-wg_long'
@@ -317,12 +378,24 @@ def Test_Height_Drift_Correction():
     measurement.Correct_Height_Drift_Nonlinear(channels=['Z C'], reference_area=[20, 40])
     measurement.Display_Channels()
 
+def Test_Channel_Substraction():
+    initialdir = 'C:/Users/Hajo/sciebo/Phd/Paper/Dielectric_Waveguides/raw_data/reflection_mode/24-07-10/970nm'
+    directory = filedialog.askdirectory(initialdir=initialdir)
+    channels = ['O3P', 'O4P']
+    Plot_Definitions.amp_cbar_range = False
+    Plot_Definitions.colorbar_width = 3
+    measurement = SnomMeasurement(directory, channels)
+    measurement.Display_Channels()
+    measurement.Substract_Channels('O3P', 'O4P')
+    measurement.Shift_Phase(channels=['O3P-O4P'])
+    measurement.Display_Channels()
+
 def main():
      
     # Realign()
     # Cut_Masked()
     # Test_Scalebar()
-    Test_Phaseshift()
+    # Test_Phaseshift()
     # Compare_Measurements()
     # Test_Rectangle_Selector()
     # Correct_Phase_Drift()
@@ -334,9 +407,12 @@ def main():
     # Test_Export_and_Load_all_subplots()
     # Gif()
     # Test_3D_Scan()
+    # Phase_Correction_3D_Scan()
+    # Average_3D_Scan()
     # Test_Phase_Drift_Correction()
     # Test_Amplitude_Drift_Correction()
     # Test_Height_Drift_Correction()
+    Test_Channel_Substraction()
 
 
 if __name__ == '__main__':

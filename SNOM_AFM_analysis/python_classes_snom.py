@@ -3691,7 +3691,81 @@ class FileHandler(File_Definitions, Plot_Definitions):
         # only used by synccorrection, every other function should use the channels tag dict version, as pixel resolution could vary
         self.XRes, self.YRes = self.measurement_tag_dict[Tag_Type.pixel_area][0], self.measurement_tag_dict[Tag_Type.pixel_area][1]
         self.XReal, self.YReal = self.measurement_tag_dict[Tag_Type.scan_area][0], self.measurement_tag_dict[Tag_Type.scan_area][1] # in µm
+    
+    def _Replace_Plotting_Parameter_Placeholders(self, dictionary:dict, placeholders:dict) -> dict:
+        """This function replaces the placeholders in the plotting parameters dictionary with the actual values. 
+        Afterwards it replaces the colormap placeholders with the actual colormaps.
 
+        Args:
+            dictionary (dict): plotting parameters dictionary
+            placeholders (dict): dictionary containing the string definition of the placeholder and its value
+
+        Returns:
+            dict: the updated plotting parameters dictionary
+        """
+        # colormaps = {"<SNOM_amplitude>": SNOM_amplitude,
+        #             "<SNOM_height>": SNOM_height,
+        #             "<SNOM_phase>": SNOM_phase,
+        #             "<SNOM_realpart>": SNOM_realpart}
+        
+        # first iterate through all placeholders and replace them in the dictionary
+        for placeholder in placeholders:
+            value = placeholders[placeholder]
+            for key in dictionary:
+                if placeholder in dictionary[key]:
+                    dictionary[key] = dictionary[key].replace(placeholder, value)
+                    # print('replaced channel!')
+        # replace colormaps
+        for key in dictionary:
+            for colormap in all_colormaps:
+                if colormap in dictionary[key]:
+                    dictionary[key] = all_colormaps[colormap]
+                    break
+        return dictionary
+
+    def _Get_Plotting_Parameters(self) -> dict:
+        """This will load the plotting parameters dictionary from the plotting_parameters.json file. If the file does not exist, it will be created with default values.
+        The dictionary contains definitions for the colormaps, the colormap labels and the titles of the subplots. It also contains placeholders, which can be replaced by the actual values.
+        The user can change the values in the plotting_parameters.json file to customize the plotting.
+
+        Returns:
+            dict: plotting parameters dictionary
+        """
+        try:
+            with open(self.plotting_parameters_path, 'r') as file:
+                plotting_parameters = json.load(file)
+        except:
+            self._Generate_Default_Plotting_Parameters()
+            with open(self.plotting_parameters_path, 'r') as file:
+                plotting_parameters = json.load(file)
+        return plotting_parameters
+    
+    def _Generate_Default_Plotting_Parameters(self):
+        dictionary = {
+            "amplitude_cmap": "<SNOM_amplitude>",
+            "amplitude_cbar_label": "Amplitude / a.u.",
+            "amplitude_title": "<channel>",
+            "phase_cmap": "<SNOM_phase>",
+            "phase_cbar_label": "Phase / rad",
+            "phase_title": "<channel>",
+            "phase_positive_title": "Positively corrected phase <channel>",
+            "phase_negative_title": "Negatively corrected phase <channel>",
+            "height_cmap": "<SNOM_height>",
+            "height_cbar_label": "Height / nm",
+            "height_title": "<channel>",
+            "real_cmap": "<SNOM_realpart>",
+            "real_cbar_label": "E / a.u.",
+            "real_title_real": "<channel>",
+            "real_title_imag": "<channel>",
+            "fourier_cmap": "viridis",
+            "fourier_cbar_label": "Intensity / a.u.",
+            "fourier_title": "Fourier transform",
+            "gauss_blurred_title": "Blurred <channel>"
+        }
+        with open(self.plotting_parameters_path, 'w') as file:
+            json.dump(dictionary, file, indent=4)
+
+    
 class SnomMeasurement(FileHandler):
     """This class opens a snom measurement and handels all the snom related functions."""
     all_subplots = []
@@ -3708,30 +3782,6 @@ class SnomMeasurement(FileHandler):
         self._Initialize_Data(self.channels)
         if File_Definitions.autodelete_all_subplots: self._Delete_All_Subplots() # automatically delete old subplots
     
-    def _Generate_Default_Plotting_Parameters(self):
-        dictionary = {
-            "amplitude_cmap": "<SNOM_amplitude>",
-            "amplitude_cbar_label": "Amplitude [a.u.]",
-            "amplitude_title": "<channel>",
-            "phase_cmap": "<SNOM_phase>",
-            "phase_cbar_label": "Phase [a.u.]",
-            "phase_title": "<channel>",
-            "phase_positive_title": "Positively corrected phase <channel>",
-            "phase_negative_title": "Negatively corrected phase <channel>",
-            "height_cmap": "<SNOM_height>",
-            "height_cbar_label": "Height [nm]",
-            "height_title": "<channel>",
-            "real_cmap": "<SNOM_realpart>",
-            "real_cbar_label": "E [a.u.]",
-            "real_title_real": "<channel>",
-            "real_title_imag": "<channel>",
-            "fourier_cmap": "viridis",
-            "fourier_cbar_label": "Intensity [a.u.]",
-            "fourier_title": "Fourier transform",
-            "gauss_blurred_title": "Blurred <channel>"
-        }
-        with open(self.plotting_parameters_path, 'w') as file:
-            json.dump(dictionary, file, indent=4)
 
     def _Initialize_Measurement_Channel_Indicators(self):
         if self.file_type == File_Type.standard or self.file_type == File_Type.standard_new or self.file_type == File_Type.neaspec_version_1_6_3359_1:
@@ -4059,6 +4109,7 @@ class SnomMeasurement(FileHandler):
         # data_dict = {}
         # all_data = np.zeros((len(channels), self.YRes, self.XRes))
         all_data = []
+        # why not safe channel and data as a dictionary? Maybe change it later
         if self.file_type==File_Type.standard or self.file_type==File_Type.standard_new or self.file_type ==File_Type.neaspec_version_1_6_3359_1:
             for i in range(len(channels)):
                 # print(channels[i])
@@ -4186,6 +4237,9 @@ class SnomMeasurement(FileHandler):
                         pixval=unpack("f",reduced_binarydata[4*(y*XRes+x):4*(y*XRes+x+1)])[0]
                         all_data[count][y][x] = round(pixval*scaling + phaseoffset, rounding_decimal)
                 count+=1
+        # data_dict currently is just a list of the channels, this list is not equivalent to self.channels as the data_dict
+        # or later self.channels_label contains the names of the channels which are used as the plot title, they will change depending on the functions applied, eg. 'channel_blurred' or channel_manipulated'...
+        # but self.channels will always contain the original channel name as this is used for internal referencing
         return all_data, data_dict
 
     def _Load_Data_comsol(self, channels):
@@ -4267,44 +4321,18 @@ class SnomMeasurement(FileHandler):
             else:
                 print('At least one of the specified channels is not in memory! You probably should initialize the channels first.')
 
-    def _Replace_Plotting_Parameter_Placeholders(self, dictionary, placeholders):
-        # colormaps = {"<SNOM_amplitude>": SNOM_amplitude,
-        #             "<SNOM_height>": SNOM_height,
-        #             "<SNOM_phase>": SNOM_phase,
-        #             "<SNOM_realpart>": SNOM_realpart}
-        
-        # first iterate through all placeholders and replace them in the dictionary
-        for placeholder in placeholders:
-            value = placeholders[placeholder]
-            for key in dictionary:
-                if placeholder in dictionary[key]:
-                    dictionary[key] = dictionary[key].replace(placeholder, value)
-                    # print('replaced channel!')
-        # replace colormaps
-        for key in dictionary:
-            for colormap in all_colormaps:
-                # print(colormap, type(colormap))
-                # print(dictionary[key])
-                if colormap in dictionary[key]:
-                    dictionary[key] = all_colormaps[colormap]
-                    break
-        return dictionary
-
     def _Add_Subplot(self, data, channel, scalebar=None) -> list:
         """This function adds the specified data to the list of subplots. The list of subplots contains the data, the colormap,
         the colormap label and a title, which are generated from the channel information. The same array is also returned,
         so it can also be iterated by an other function to only plot the data of interest."""
         # import plotting_parameters.json, here the user can tweek some options for the plotting, like automatic titles and colormap choices
-        
-        try:
-            with open(self.plotting_parameters_path, 'r') as file:
-                plotting_parameters = json.load(file)
-        except:
-            self._Generate_Default_Plotting_Parameters()
-            with open(self.plotting_parameters_path, 'r') as file:
-                plotting_parameters = json.load(file)
+        plotting_parameters = self._Get_Plotting_Parameters()
 
         # update the placeholders in the dictionary
+        # the dictionary contains certain placeholders, which are now being replaced with the actual values
+        # until now only the channel placeholder is used but more could be added
+        # placeholders are indicated by the '<' and '>' characters
+        # this step insures, that for example the title contains the correct channel name
         placeholders = {'<channel>': channel}
         plotting_parameters = self._Replace_Plotting_Parameter_Placeholders(plotting_parameters, placeholders)
         
@@ -7331,6 +7359,22 @@ class SnomMeasurement(FileHandler):
         else:
             return numbers[0]
 
+    def Substract_Channels(self, channel1:str, channel2:str) -> None:
+        if channel1 not in self.channels or channel2 not in self.channels:
+            print('The specified channels are not in memory, they will be loaded automatically.')
+            self._Initialize_Data([channel1, channel2])
+        data1 = self.all_data[self.channels.index(channel1)]
+        data2 = self.all_data[self.channels.index(channel2)]
+        if data1.shape != data2.shape:
+            print('The data of the specified channels has different resolution!')
+            exit()
+        result = data1 - data2
+        self.channels.append(channel1 + '-' + channel2)
+        self.all_data.append(result)
+        self.channel_tag_dict.append(self.channel_tag_dict[self.channels.index(channel1)])
+        self.channels_label.append(channel1 + '-' + channel2)
+
+
 class ApproachCurve(FileHandler):
     """This class opens an approach curve measurement and handels all the approach curve related functions."""
     def __init__(self, directory_name:str, channels:list=None, title:str=None) -> None:
@@ -7552,6 +7596,8 @@ class Scan_3D(FileHandler):
         super().__init__(directory_name, title)
         # define header, probably same as for approach curve
         self.header = 27
+        # initialize the channel indicators
+        self._Initialize_Measurement_Channel_Indicators()
         # load the channels from the datafile
         self._Load_Data()
 
@@ -7563,7 +7609,13 @@ class Scan_3D(FileHandler):
             self.phase_channels = ['O1P','O2P','O3P','O4P','O5P']
             self.amp_channels = ['O1A','O2A','O3A','O4A','O5A']
             self.all_channels = self.height_channels + self.mechanical_channels + self.phase_channels + self.amp_channels
+            self.preview_ampchannel = 'O2A'
+            self.preview_phasechannel = 'O2P'
             self.height_indicator = 'Z'
+            self.amp_indicator = 'A'
+            self.phase_indicator = 'P'
+            self.real_indicator = 'Re'
+            self.imag_indicator = 'Im'
 
     def _Load_Data(self):
         datafile = self.directory_name / Path(self.filename.name + '.txt')
@@ -7605,8 +7657,7 @@ class Scan_3D(FileHandler):
         min_x = np.nanmin(self.all_data[self.x_channel]) # for some reason at least the first value seems to be nan 
         self.all_data[self.x_channel] = self.all_data[self.x_channel] - min_x
 
-    def Display_Cutplane(self, axis:str='x', line:int=0, channel:str=None):
-        # todo: shift each y column by offset value depending on average z position, to correct for varying starting position, due to non flat substrates
+    def Get_Cutplane_Data(self, axis:str='x', line:int=0, channel:str=None):
         if channel == None:
             channel = self.channels[0]
         x,y,z = self.measurement_tag_dict[Tag_Type.pixel_area]
@@ -7617,6 +7668,19 @@ class Scan_3D(FileHandler):
             for i in range(x):
                 for j in range(z):
                     cutplane_data[j][i] = data[line][i][j]
+        return cutplane_data
+
+    def Generate_All_Cutplane_Data(self, axis:str='x', line:int=0):
+        self.all_cutplane_data = {}
+        for channel in self.channels:
+            self.all_cutplane_data[channel] = self.Get_Cutplane_Data(axis=axis, line=line, channel=channel)
+
+
+    def Display_Cutplane(self, axis:str='x', line:int=0, channel:str=None):
+        # todo: shift each y column by offset value depending on average z position, to correct for varying starting position, due to non flat substrates
+        if channel == None:
+            channel = self.channels[0]
+        cutplane_data = self.Get_Cutplane_Data(axis=axis, line=line, channel=channel)
 
         img = plt.pcolormesh(cutplane_data)
         plt.colorbar(img)
@@ -7625,14 +7689,8 @@ class Scan_3D(FileHandler):
     def Display_Cutplane_V2(self, axis:str='x', line:int=0, channel:str=None, align='auto'):
         if channel == None:
             channel = self.channels[0]
+        cutplane_data = self.Get_Cutplane_Data(axis=axis, line=line, channel=channel)
         x,y,z = self.measurement_tag_dict[Tag_Type.pixel_area]
-        data = self.all_data[channel].copy()
-        # data = np.reshape(data, (y,x,z))
-        if axis == 'x':
-            cutplane_data = np.zeros((z,x)) 
-            for i in range(x):
-                for j in range(z):
-                    cutplane_data[j][i] = data[line][i][j]
         # todo: shift each y column by offset value depending on average z position, to correct for varying starting position, due to non flat substrates
         z_shifts = np.zeros(x)
         # idea: get all the lowest points of the approach curves and shift them to the same z position, herefore we shift them only upwards relative to the lowest point
@@ -7677,15 +7735,328 @@ class Scan_3D(FileHandler):
         print('ZRes_new: ', ZRes_new)
         # create the new data array
         cutplane_data = np.zeros((ZRes_new, XRes))
+        data = self.all_data[channel].copy()
         for i in range(XRes):
             for j in range(ZRes):
                 cutplane_data[j+int(z_shifts[i]/z_pixelsize)][i] = data[line][i][j]
         '''This shifting is not optimal, since a slow drift or a tilt of the sample would lead to a wrong alignment of the approach curves, although they start at the bottom.
         Maybe try to use a 2d scan of the same region to align the approach curves.'''
-        img = plt.pcolormesh(cutplane_data)
-        plt.colorbar(img)
+        
+        # import plotting_parameters.json, here the user can tweek some options for the plotting, like automatic titles and colormap choices
+        plotting_parameters = self._Get_Plotting_Parameters()
+
+        # update the placeholders in the dictionary
+        # the dictionary contains certain placeholders, which are now being replaced with the actual values
+        # until now only the channel placeholder is used but more could be added
+        # placeholders are indicated by the '<' and '>' characters
+        # this step insures, that for example the title contains the correct channel name
+        placeholders = {'<channel>': channel}
+        plotting_parameters = self._Replace_Plotting_Parameter_Placeholders(plotting_parameters, placeholders)
+
+        # set colormap depending on channel
+        if self.amp_indicator in channel:
+            cmap = plotting_parameters["amplitude_cmap"]
+            label = plotting_parameters["amplitude_cbar_label"]
+            title = plotting_parameters["amplitude_title"]
+        elif self.phase_indicator in channel:
+            cmap = plotting_parameters["phase_cmap"]
+            label = plotting_parameters["phase_cbar_label"]
+            title = plotting_parameters["phase_title"]
+        else:
+            cmap = 'viridis'
+        fig, ax = plt.subplots()
+        img = plt.pcolormesh(cutplane_data, cmap=cmap)
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size=f"{self.colorbar_width}%", pad=0.05) # size is the size of colorbar relative to original axis, 100% means same size, 10% means 10% of original
+        cbar = plt.colorbar(img, aspect=1, cax=cax)
+        cbar.ax.get_yaxis().labelpad = 15
+        cbar.ax.set_ylabel(label, rotation=270)
+        if self.hide_ticks == True:
+            # remove ticks on x and y axis, they only show pixelnumber anyways, better to add a scalebar
+            ax.set_xticks([])
+            ax.set_yticks([])
+        # plt.colorbar(img)
+        plt.show()
+
+    def Display_Cutplane_V3(self, axis:str='x', line:int=0, channel:str=None, align='auto'):
+        if channel == None:
+            channel = self.channels[0]
+        cutplane_data = self.all_cutplane_data[channel]
+        XRes, YRes, ZRes = self.measurement_tag_dict[Tag_Type.pixel_area]
+        # YRes, XRes = cutplane_data.shape # cutplane data might have been
+        XRange, YRange, ZRange = self.measurement_tag_dict[Tag_Type.scan_area]
+        XYZUnit = self.parameters_dict['Scan Area (X, Y, Z)'][-1]
+        # convert Range to nm
+        if XYZUnit == '[µm]':
+            XRange = XRange*1e3
+            YRange = YRange*1e3
+            ZRange = ZRange*1e3
+        else:
+            print('Error! The unit of the scan area is not supported yet!')
+        z_pixelsize = ZRange/ZRes
+
+        # now we can try to shift each approach curve by the corresponding z_shift
+        # easiest way is to use the z start position of each approach curve
+        if align == 'auto':
+            z_shifts = np.zeros(XRes)
+            # idea: get all the lowest points of the approach curves and shift them to the same z position, herefore we shift them only upwards relative to the lowest point
+            z_data = self.all_cutplane_data[self.x_channel]
+            # reshape the data to the correct shape
+            for i in range(XRes):
+                z_shifts[i] = self._Get_Z_Shift_(z_data[:,i])
+            # z_data is in nm
+            z_shifts = z_shifts
+            z_min = np.min(z_shifts)
+            z_shifts = z_shifts - z_min
+            # therefore we need to create a new data array which can encorporate the shifted data
+            # calculate the new z range
+            ZRange_new = ZRange + z_shifts.max()
+            ZRes_new = int(ZRange_new/z_pixelsize)
+            # print('ZRes_new: ', ZRes_new)
+            # create the new data array
+            cutplane_data = np.zeros((ZRes_new, XRes))
+            data = self.all_cutplane_data[channel].copy()
+            for i in range(XRes):
+                for j in range(ZRes):
+                    cutplane_data[j+int(z_shifts[i]/z_pixelsize)][i] = data[j][i]
+            # This shifting is not optimal, since a slow drift or a tilt of the sample would lead to a wrong alignment of the approach curves, although they start at the bottom.
+            # Maybe try to use a 2d scan of the same region to align the approach curves.
+        
+        # import plotting_parameters.json, here the user can tweek some options for the plotting, like automatic titles and colormap choices
+        plotting_parameters = self._Get_Plotting_Parameters()
+
+        # update the placeholders in the dictionary
+        # the dictionary contains certain placeholders, which are now being replaced with the actual values
+        # until now only the channel placeholder is used but more could be added
+        # placeholders are indicated by the '<' and '>' characters
+        # this step insures, that for example the title contains the correct channel name
+        placeholders = {'<channel>': channel}
+        plotting_parameters = self._Replace_Plotting_Parameter_Placeholders(plotting_parameters, placeholders)
+
+        # set colormap depending on channel
+        if self.amp_indicator in channel:
+            cmap = plotting_parameters["amplitude_cmap"]
+            label = plotting_parameters["amplitude_cbar_label"]
+            title = plotting_parameters["amplitude_title"]
+        elif self.phase_indicator in channel:
+            cmap = plotting_parameters["phase_cmap"]
+            label = plotting_parameters["phase_cbar_label"]
+            title = plotting_parameters["phase_title"]
+        else:
+            cmap = 'viridis'
+        fig, ax = plt.subplots()
+        img = plt.pcolormesh(cutplane_data, cmap=cmap)
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size=f"{self.colorbar_width}%", pad=0.05) # size is the size of colorbar relative to original axis, 100% means same size, 10% means 10% of original
+        cbar = plt.colorbar(img, aspect=1, cax=cax)
+        cbar.ax.get_yaxis().labelpad = 15
+        cbar.ax.set_ylabel(label, rotation=270)
+        if self.hide_ticks == True:
+            # remove ticks on x and y axis, they only show pixelnumber anyways, better to add a scalebar
+            ax.set_xticks([])
+            ax.set_yticks([])
+        # plt.colorbar(img)
         plt.show()
     
+    def Display_Cutplane_V2_Realpart(self, axis:str='x', line:int=0, demodulation:int=2, align='auto'):
+        
+        amp_channel = f'O{demodulation}A'
+        phase_channel = f'O{demodulation}P'
+        x,y,z = self.measurement_tag_dict[Tag_Type.pixel_area]
+        amp_data = self.all_data[amp_channel].copy()
+        phase_data = self.all_data[phase_channel].copy()
+        # data = np.reshape(data, (y,x,z))
+        if axis == 'x':
+            cutplane_amp_data = np.zeros((z,x)) 
+            cutplane_phase_data = np.zeros((z,x))
+            for i in range(x):
+                for j in range(z):
+                    cutplane_amp_data[j][i] = amp_data[line][i][j]
+                    cutplane_phase_data[j][i] = phase_data[line][i][j]
+        # todo: shift each y column by offset value depending on average z position, to correct for varying starting position, due to non flat substrates
+        z_shifts = np.zeros(x)
+        # idea: get all the lowest points of the approach curves and shift them to the same z position, herefore we shift them only upwards relative to the lowest point
+        z_data_raw = self.all_data[self.x_channel]
+        # reshape the data to the correct shape
+        if axis == 'x':
+            z_data = np.zeros((z,x)) 
+            for i in range(x):
+                for j in range(z):
+                    z_data[j][i] = z_data_raw[line][i][j]
+        for i in range(x):
+            z_shifts[i] = self._Get_Z_Shift_(z_data[:,i])
+        z_shifts = z_shifts
+        if align == 'auto':
+            z_min = np.min(z_shifts)
+            z_shifts = z_shifts - z_min
+        # now we need to shift each approach curve by the corresponding z_shift
+        # therefore we need to create a new data array which can encorporate the shifted data
+        XRes, YRes, ZRes = self.measurement_tag_dict[Tag_Type.pixel_area]
+        print('ZR: ', ZRes)
+        XRange, YRange, ZRange = self.measurement_tag_dict[Tag_Type.scan_area]
+        XYZUnit = self.parameters_dict['Scan Area (X, Y, Z)'][-1]
+        # print('parameters: ', self.parameters_dict['Scan Area (X, Y, Z)'])
+        # convert Range to nm
+        if XYZUnit == '[µm]':
+            XRange = XRange*1e3
+            YRange = YRange*1e3
+            ZRange = ZRange*1e3
+        else:
+            print('Error! The unit of the scan area is not supported yet!')
+        z_pixelsize = ZRange/ZRes
+        print('z_shifts: ', z_shifts)
+        # calculate the new z range
+        ZRange_new = ZRange + z_shifts.max()
+        ZRes_new = int(ZRange_new/z_pixelsize)
+        print('ZRes_new: ', ZRes_new)
+        # create the new data array
+        cutplane_real_data = np.zeros((ZRes_new, XRes))
+        for i in range(XRes):
+            for j in range(ZRes):
+                cutplane_real_data[j+int(z_shifts[i]/z_pixelsize)][i] = amp_data[line][i][j]*np.cos(phase_data[line][i][j])
+        # set the channel 
+        channel = f'O{demodulation}Re'
+        '''This shifting is not optimal, since a slow drift or a tilt of the sample would lead to a wrong alignment of the approach curves, although they start at the bottom.
+        Maybe try to use a 2d scan of the same region to align the approach curves.'''
+        
+        # import plotting_parameters.json, here the user can tweek some options for the plotting, like automatic titles and colormap choices
+        plotting_parameters = self._Get_Plotting_Parameters()
+
+        # update the placeholders in the dictionary
+        # the dictionary contains certain placeholders, which are now being replaced with the actual values
+        # until now only the channel placeholder is used but more could be added
+        # placeholders are indicated by the '<' and '>' characters
+        # this step insures, that for example the title contains the correct channel name
+        placeholders = {'<channel>': channel}
+        plotting_parameters = self._Replace_Plotting_Parameter_Placeholders(plotting_parameters, placeholders)
+
+        # set colormap depending on channel
+        if self.amp_indicator in channel:
+            cmap = plotting_parameters["amplitude_cmap"]
+            label = plotting_parameters["amplitude_cbar_label"]
+            title = plotting_parameters["amplitude_title"]
+        elif self.phase_indicator in channel:
+            cmap = plotting_parameters["phase_cmap"]
+            label = plotting_parameters["phase_cbar_label"]
+            title = plotting_parameters["phase_title"]
+        elif self.real_indicator in channel:
+            cmap = plotting_parameters["real_cmap"]
+            label = plotting_parameters["real_cbar_label"]
+            title = plotting_parameters["real_title_real"]
+        else:
+            cmap = 'viridis'
+        fig, ax = plt.subplots()
+        max_val = np.max(cutplane_real_data)
+        img = plt.pcolormesh(cutplane_real_data, cmap=cmap, vmin=-max_val, vmax=max_val)
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size=f"{self.colorbar_width}%", pad=0.05) # size is the size of colorbar relative to original axis, 100% means same size, 10% means 10% of original
+        cbar = plt.colorbar(img, aspect=1, cax=cax)
+        cbar.ax.get_yaxis().labelpad = 15
+        cbar.ax.set_ylabel(label, rotation=270)
+        if self.hide_ticks == True:
+            # remove ticks on x and y axis, they only show pixelnumber anyways, better to add a scalebar
+            ax.set_xticks([])
+            ax.set_yticks([])
+        plt.tight_layout()
+        # plt.colorbar(img)
+        plt.show()
+    
+    def Display_Cutplane_V3_Realpart(self, axis:str='x', line:int=0, demodulation:int=2, align='auto'):
+        
+        amp_channel = f'O{demodulation}A'
+        phase_channel = f'O{demodulation}P'
+        real_channel = f'O{demodulation}Re'
+        # set the channel 
+        channel = f'O{demodulation}Re'
+        if channel == None:
+            channel = self.channels[0]
+        # create real part cutplane data
+        self.all_cutplane_data[real_channel] = np.multiply(self.all_cutplane_data[f'O{demodulation}A'], np.cos(self.all_cutplane_data[f'O{demodulation}P']))
+        cutplane_data = self.all_cutplane_data[real_channel]
+        XRes, YRes, ZRes = self.measurement_tag_dict[Tag_Type.pixel_area]
+        XRange, YRange, ZRange = self.measurement_tag_dict[Tag_Type.scan_area]
+        XYZUnit = self.parameters_dict['Scan Area (X, Y, Z)'][-1]
+        # convert Range to nm
+        if XYZUnit == '[µm]':
+            XRange = XRange*1e3
+            YRange = YRange*1e3
+            ZRange = ZRange*1e3
+        else:
+            print('Error! The unit of the scan area is not supported yet!')
+        z_pixelsize = ZRange/ZRes
+
+        # now we can try to shift each approach curve by the corresponding z_shift
+        # easiest way is to use the z start position of each approach curve
+        if align == 'auto':
+            z_shifts = np.zeros(XRes)
+            # idea: get all the lowest points of the approach curves and shift them to the same z position, herefore we shift them only upwards relative to the lowest point
+            z_data = self.all_cutplane_data[self.x_channel]
+            # reshape the data to the correct shape
+            for i in range(XRes):
+                z_shifts[i] = self._Get_Z_Shift_(z_data[:,i])
+            # z_data is in nm
+            z_shifts = z_shifts
+            z_min = np.min(z_shifts)
+            z_shifts = z_shifts - z_min
+            # therefore we need to create a new data array which can encorporate the shifted data
+            # calculate the new z range
+            ZRange_new = ZRange + z_shifts.max()
+            ZRes_new = int(ZRange_new/z_pixelsize)
+            # print('ZRes_new: ', ZRes_new)
+            # create the new data array
+            cutplane_data = np.zeros((ZRes_new, XRes))
+            data = self.all_cutplane_data[real_channel].copy()
+            for i in range(XRes):
+                for j in range(ZRes):
+                    cutplane_data[j+int(z_shifts[i]/z_pixelsize)][i] = data[j][i]
+            # This shifting is not optimal, since a slow drift or a tilt of the sample would lead to a wrong alignment of the approach curves, although they start at the bottom.
+            # Maybe try to use a 2d scan of the same region to align the approach curves.
+        
+        '''This shifting is not optimal, since a slow drift or a tilt of the sample would lead to a wrong alignment of the approach curves, although they start at the bottom.
+        Maybe try to use a 2d scan of the same region to align the approach curves.'''
+        
+        # import plotting_parameters.json, here the user can tweek some options for the plotting, like automatic titles and colormap choices
+        plotting_parameters = self._Get_Plotting_Parameters()
+
+        # update the placeholders in the dictionary
+        # the dictionary contains certain placeholders, which are now being replaced with the actual values
+        # until now only the channel placeholder is used but more could be added
+        # placeholders are indicated by the '<' and '>' characters
+        # this step insures, that for example the title contains the correct channel name
+        placeholders = {'<channel>': channel}
+        plotting_parameters = self._Replace_Plotting_Parameter_Placeholders(plotting_parameters, placeholders)
+
+        # set colormap depending on channel
+        if self.amp_indicator in channel:
+            cmap = plotting_parameters["amplitude_cmap"]
+            label = plotting_parameters["amplitude_cbar_label"]
+            title = plotting_parameters["amplitude_title"]
+        elif self.phase_indicator in channel:
+            cmap = plotting_parameters["phase_cmap"]
+            label = plotting_parameters["phase_cbar_label"]
+            title = plotting_parameters["phase_title"]
+        elif self.real_indicator in channel:
+            cmap = plotting_parameters["real_cmap"]
+            label = plotting_parameters["real_cbar_label"]
+            title = plotting_parameters["real_title_real"]
+        else:
+            cmap = 'viridis'
+        fig, ax = plt.subplots()
+        max_val = np.max(cutplane_data)
+        img = plt.pcolormesh(cutplane_data, cmap=cmap, vmin=-max_val, vmax=max_val)
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size=f"{self.colorbar_width}%", pad=0.05) # size is the size of colorbar relative to original axis, 100% means same size, 10% means 10% of original
+        cbar = plt.colorbar(img, aspect=1, cax=cax)
+        cbar.ax.get_yaxis().labelpad = 15
+        cbar.ax.set_ylabel(label, rotation=270)
+        if self.hide_ticks == True:
+            # remove ticks on x and y axis, they only show pixelnumber anyways, better to add a scalebar
+            ax.set_xticks([])
+            ax.set_yticks([])
+        plt.tight_layout()
+        # plt.colorbar(img)
+        plt.show()
+
     def _Get_Z_Shift_(self, z_data):
         # get the average z position for each approach curve
         # might change in the future to a more sophisticated method
@@ -7753,12 +8124,221 @@ class Scan_3D(FileHandler):
         if Plot_Definitions.show_plot:
             plt.show()
 
+    def Match_Phase_Offset(self, channels:list=None, reference_channel=None, reference_area=None, manual_width=5, axis='x', line=0) -> None:
+        """This function matches the phase offset of all phase channels in memory to the reference channel.
+        The reference channel is the first phase channel in memory if not specified.
+
+        Args:
+            channels (list, optional): list of channels, will override the already existing channels
+            reference_channel ([type], optional): The reference channel to which all other phase channels will be matched.
+                If not specified the first phase channel in memory will be used. Defaults to None.
+            reference_area ([type], optional): The area in the reference channel which will be used to calculate the phase offset. If not specified the whole image will be used.
+                You can also specify 'manual' then you will be asked to click on a point in the image. The area around that pixel will then be used as reference. Defaults to None.
+            manual_width (int, optional): The width of the manual reference area. Only applies if reference_area='manual'. Defaults to 5.
+        """
+        # if a list of channels is specified those will be loaded and the old ones will be overwritten
+        # self._Initialize_Data(channels)
+        # define local list of channels to use for leveling
+        channels = self.channels
+        if reference_channel == None:
+            for channel in channels:
+                if self.phase_indicator in channel:
+                    reference_channel = channel
+                    break
+        cutplane_data = self.Get_Cutplane_Data(axis=axis, line=line, channel=reference_channel)
+        if reference_area is None:
+            # reference_area = [[xmin, xmax][ymin, ymax]]
+            reference_area = [[0, len(cutplane_data[0])],[0, len(cutplane_data)]]
+        elif reference_area == 'manual':
+            # use pointcklicker to get the reference area
+            fig, ax = plt.subplots()
+            ax.pcolormesh(cutplane_data, cmap=SNOM_phase)
+            klicker = clicker(ax, ["event"], markers=["x"])
+            ax.legend()
+            ax.axis('scaled')
+            # ax.invert_yaxis()
+            plt.title('Please click in the area to use as reference.')
+            plt.show()
+            klicker_coords = klicker.get_positions()['event']
+            klick_coordinates = [[round(element[0]), round(element[1])] for element in klicker_coords]
+            # make sure only one point is selected
+            if len(klick_coordinates) != 1 and type(klick_coordinates[0]) != list:
+                print('You must specify one point which should define the reference area!')
+                print('Do you want to try again?')
+                user_input = self._User_Input_Bool()
+                if user_input == True:
+                    self.Match_Phase_Offset(channels, reference_channel, 'manual', manual_width, axis, line)
+                else:
+                    exit()
+            reference_area = [[klick_coordinates[0][0] - manual_width,klick_coordinates[0][0] + manual_width],[klick_coordinates[0][1] - manual_width, klick_coordinates[0][1] + manual_width]]
+        
+        reference_data = cutplane_data
+        reference_phase = np.mean([cutplane_data[reference_area[0][0]:reference_area[0][1]] for i in range(reference_area[1][0], reference_area[1][1])])
+        
+        # display the reference area
+        fig, ax = plt.subplots()
+        img = ax.pcolormesh(reference_data, cmap=SNOM_phase)
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+        cbar = plt.colorbar(img, cax=cax)
+        cbar.ax.get_yaxis().labelpad = 15
+        cbar.ax.set_ylabel('phase', rotation=270)
+        ax.legend()
+        ax.axis('scaled')  
+        rect = patches.Rectangle((reference_area[0][0], reference_area[1][0]), reference_area[0][1]-reference_area[0][0], reference_area[1][1]-reference_area[1][0], linewidth=1, edgecolor='g', facecolor='none')
+        ax.add_patch(rect)
+        ax.invert_yaxis()
+        plt.title('Reference Area: ' + reference_channel)
+        plt.show()
+
+        for channel in channels:
+            if self.phase_indicator in channel:
+                # phase_data = self.Get_Cutplane_Data(axis=axis, line=line, channel=channel)
+                phase_data = self.all_cutplane_data[channel]
+                # phase_offset = np.mean(phase_data) - reference_phase
+                phase_offset = np.mean([phase_data[i][reference_area[0][0]:reference_area[0][1]] for i in range(reference_area[1][0], reference_area[1][1])]) - reference_phase
+                self.all_cutplane_data[channel] = self._Shift_Phase_Data(phase_data, -phase_offset)
+        self._Write_to_Logfile('match_phase_offset_reference_area', reference_area)
+        gc.collect()
+
+    def _Shift_Phase_Data(self, data, shift) -> np.array:
+        """This function adds a phaseshift to the specified phase data. The phase data is automatically kept in the 0 to 2 pi range.
+        Could in future be extended to show a live view of the phase data while it can be modified by a slider...
+        e.g. by shifting the colorscale in the preview rather than the actual data..."""
+        yres = len(data)
+        xres = len(data[0])
+        for y in range(yres):
+            for x in range(xres):
+                data[y][x] = (data[y][x] + shift) % (2*np.pi)
+        return data
+
+    def Shift_Phase(self, shift:float=None, channels:list=None) -> None:
+        """This function will prompt the user with a preview of the first phase channel in memory.
+        Under the preview is a slider, by changing the slider value the phase preview will shift accordingly.
+        If you are satisfied with the shift, hit the 'accept' button. The preview will close and the shift will
+        be applied to all phase channels in memory.
+
+        Args:
+            shift (float, optional): If you know the shift value already, you can enter values between 0 and 2*Pi
+            channels (list, optional): List of channels to apply the shift to, only phase channels will be shifted though.
+                If not specified all channels in memory will be used. Defaults to None.
+        """
+        if channels is None:
+            channels = self.channels
+        # self._Initialize_Data(channels)
+        if shift == None:
+            shift_known = False
+        else:
+            shift_known = True
+        if shift_known is False:
+            if self.preview_phasechannel in channels:
+                    # phase_data = np.copy(self.all_data[self.channels.index(self.preview_phasechannel)])
+                    phase_data = np.copy(self.all_cutplane_data[self.preview_phasechannel])
+            else:
+                # check if corrected phase channel is present
+                # just take the first phase channel in memory
+                for channel in channels:
+                    if self.phase_indicator in channel:
+                        # phase_data = np.copy(self.all_data[self.channels.index(channel)])
+                        phase_data = np.copy(self.all_cutplane_data[channel])
+                        # print(len(phase_data))
+                        # print(len(phase_data[0]))
+                        break
+            shift = Get_Phase_Offset(phase_data)
+            print('The phase shift you chose is:', shift)
+            shift_known = True
+
+        # export shift value to logfile
+        self._Write_to_Logfile('phase_shift', shift)
+        # shift all phase channels in memory
+        # could also be implemented to shift each channel individually...
+        
+        for channel in channels:
+            print(channel)
+            if self.phase_indicator in channel:
+                # print('Before phase shift: ', channel)
+                # print('Min phase value:', np.min(self.all_cutplane_data[channel]))
+                # print('Max phase value:', np.max(self.all_cutplane_data[channel]))
+                # self.all_data[self.channels.index(channel)] = self._Shift_Phase_Data(self.all_data[self.channels.index(channel)], shift)
+                self.all_cutplane_data[channel] = self._Shift_Phase_Data(self.all_cutplane_data[channel], shift)
+                # print('After phase shift: ', channel)
+                # print('Min phase value:', np.min(self.all_cutplane_data[channel]))
+                # print('Max phase value:', np.max(self.all_cutplane_data[channel]))
+        gc.collect()
+
 
     def Cut_Data(self):
         pass
 
-    def Average_Data(self):
-        pass
+    def Average_Data(self, channels:list=None):
+        if channels == None:
+            channels = self.channels
+        # create a cutplane of the data by averaging over the y axis
+        # create a new data array with the averaged data
+        self.all_cutplane_data = {}
+        for channel in channels:
+            if self.amp_indicator in channel:
+                amp_data = self.all_data[channel]
+                averaged_amp_data = np.mean(amp_data, axis=0)
+                self.all_cutplane_data[channel] = np.transpose(averaged_amp_data, axes=(1,0))
+            elif self.phase_indicator in channel:
+                phase_data = self.all_data[channel]
+                averaged_phase_data = np.mean(phase_data, axis=0)
+                self.all_cutplane_data[channel] = np.transpose(averaged_phase_data, axes=(1,0))
+            elif self.real_indicator in channel:
+                real_data = self.all_data[channel]
+                averaged_real_data = np.mean(real_data, axis=0)
+                self.all_cutplane_data[channel] = np.transpose(averaged_real_data, axes=(1,0))
+            elif self.height_indicator in channel:
+                height_data = self.all_data[channel]
+                averaged_height_data = np.mean(height_data, axis=0)
+                self.all_cutplane_data[channel] = np.transpose(averaged_height_data, axes=(1,0))
+
+
+        
+        # averaged_height_data = np.mean(new_data, axis=2)
+        # # plot the averaged height data
+        # fig, ax = plt.subplots()
+        # ax.pcolormesh(averaged_height_data)
+        # ax.invert_yaxis()
+        # plt.show()
+        
+
+    def Align_Lines(self):
+        # idea: take the height channel and average each approach curve, then compare the averaged lines to each other and aplly a shift to align them
+        height_data = self.all_data[self.height_channel]
+        averaged_height_data = np.mean(height_data, axis=2)
+        # plot the averaged height data
+        fig, ax = plt.subplots()
+        ax.pcolormesh(averaged_height_data)
+        ax.invert_yaxis()
+        plt.show()
+
+        # get the index which minimized the deviation of the height channels
+        indices = []
+        for line in averaged_height_data:
+            # calculate the index which minimizes the deviation of the height data
+            index = realign.Minimize_Deviation_1D(averaged_height_data[0], line, 5, False)
+            indices.append(index)
+        # make a new data array with the shifted data
+        # apply the shift to all channels
+        # self.all_data = realign.Realign_Data(self.all_data, index)
+        # print(height_data.shape)
+        # shape = (yres, xres, zres)
+        XRes, YRes, ZRes = self.measurement_tag_dict[Tag_Type.pixel_area]
+        # ac_zeros = np.zeros(ZRes)
+        # idea: create a new data array where each approach curve is shifted by the corresponding index
+        # get the biggest differnce in indices
+        max_shift = np.max(indices) - np.min(indices)
+        # apply the shift to each channel
+        for channel in self.channels:
+            new_data = np.zeros((YRes, XRes+max_shift, ZRes))
+            for y in range(YRes):
+                shift = indices[y] - np.min(indices)
+                for x in range(XRes):
+                    new_data[y][x+shift] = self.all_data[channel][y][x]
+            self.all_data[channel] = new_data
+        self.measurement_tag_dict[Tag_Type.pixel_area] = (XRes+max_shift, YRes, ZRes)
 
 
 
