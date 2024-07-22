@@ -4155,8 +4155,9 @@ class SnomMeasurement(FileHandler):
                 if self.phase_indicator in channel:
                     # normal phase data ranges from -pi to pi and gets shifted by +pi
                     phaseoffset = np.pi
-                    if '_corrected' in channel:
-                        # if the data is from a corrected channel it is already shifted
+                    # if '_corrected' in channel:
+                    if channel not in self.phase_channels:
+                        # if the data is not from a raw channel we assume it is already shifted
                         phaseoffset = 0
                 if self.real_indicator in channel or self.imag_indicator in channel:
                     rounding_decimal = 4
@@ -5737,6 +5738,10 @@ class SnomMeasurement(FileHandler):
             for i in range(len(channels)):
                 if 'P' in channels[i]:
                     self.all_data[self.channels.index(channels[i])] = [(self.all_data[self.channels.index(channels[i])][j] - reference_values_flattened[j] + np.pi) %(2*np.pi) for j in range(len(reference_values_flattened))]
+                    # also apply a phase shift to ensure that the phase is between 0 and 2pi
+                    # for now take the average phase an shift it to pi/2 should be white on the colormap
+                    phase_shift = np.pi/2 - np.mean(self.all_data[self.channels.index(channels[i])])
+                    self.all_data[self.channels.index(channels[i])] = self._Shift_Phase_Data(self.all_data[self.channels.index(channels[i])], phase_shift)
         gc.collect()
 
     def Match_Phase_Offset(self, channels:list=None, reference_channel=None, reference_area=None, manual_width=5) -> None:

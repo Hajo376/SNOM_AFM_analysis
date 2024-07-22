@@ -353,7 +353,8 @@ def Test_Phase_Drift_Correction():
     measurement.Correct_Phase_Drift_Nonlinear(channels=['O2P', 'O3P', 'O4P'], reference_area=[0, 50])
     measurement.Display_Channels()
     # measurement.Match_Phase_Offset(channels=['O2P', 'O3P', 'O4P'], reference_channel='O2P', reference_area=[[0,50],[0,50]])
-    measurement.Match_Phase_Offset(channels=['O2P', 'O3P', 'O4P'], reference_channel='O2P', reference_area='manual', manual_width=20)
+    # print('channels: ', measurement.channels)
+    measurement.Match_Phase_Offset(reference_channel='O2P', reference_area='manual', manual_width=20)
     measurement.Display_Channels()
 
 def Test_Amplitude_Drift_Correction():
@@ -409,10 +410,10 @@ def main():
     # Test_3D_Scan()
     # Phase_Correction_3D_Scan()
     # Average_3D_Scan()
-    # Test_Phase_Drift_Correction()
+    Test_Phase_Drift_Correction()
     # Test_Amplitude_Drift_Correction()
     # Test_Height_Drift_Correction()
-    Test_Channel_Substraction()
+    # Test_Channel_Substraction()
 
 
 if __name__ == '__main__':
