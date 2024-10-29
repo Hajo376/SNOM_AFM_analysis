@@ -4155,8 +4155,9 @@ class SnomMeasurement(FileHandler):
                 if self.phase_indicator in channel:
                     # normal phase data ranges from -pi to pi and gets shifted by +pi
                     phaseoffset = np.pi
-                    if '_corrected' in channel:
-                        # if the data is from a corrected channel it is already shifted
+                    # if '_corrected' in channel:
+                    if channel not in self.phase_channels:
+                        # if the data is not from a raw channel we assume it is already shifted
                         phaseoffset = 0
                 if self.real_indicator in channel or self.imag_indicator in channel:
                     rounding_decimal = 4

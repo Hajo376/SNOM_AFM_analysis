@@ -5053,6 +5053,28 @@ class SnomMeasurement(FileHandler):
             self.all_data[channels_to_filter[i+1]] = FS_compl_angle
             self.channels_label[channels_to_filter[i+1]] = self.channels_label[channels_to_filter[i+1]] + '_fft'
 
+    def Fourier_Filter_Channels_V2(self, channels:list=None) -> None:
+        """This function applies the Fourier filter to all data in memory or specified channels
+                
+        Args:
+            channels [list]: list of channels, will override the already existing channels
+        """
+        # self._Initialize_Data(channels)
+        self._Write_to_Logfile('fourier_filter', True)
+        if channels is None:
+            channels = self.channels
+        # for i in range(len(self.amp_channels)):
+        #     if (self.amp_channels[i] in self.channels) and (self.phase_channels[i] in self.channels):
+        #         channels_to_filter.append(self.channels.index(self.amp_channels[i]))
+        #         channels_to_filter.append(self.channels.index(self.phase_channels[i]))
+        #     else:
+        #         print('In order to apply the fourier_filter amplitude and phase of the same channel number must be in the channels list!')
+        
+        for i in range(len(channels)):
+            FS = self._Fourier_Filter_Array(self.all_data[self.channels.index(channels[i])])
+            self.all_data[channels[i]] = np.log(np.abs(np.fft.fftshift(FS))**2)
+            self.channels_label[channels[i]] = self.channels_label[channels[i]] + '_fft'
+
     def _Create_Header(self, channel, data=None, filetype='gsf'):
         # data = self.all_data[self.channels.index(channel)]
         # load data instead, because sometimes the channel is not in memory
@@ -5933,6 +5955,7 @@ class SnomMeasurement(FileHandler):
             height_channel = self.height_channel
         
         # cut out the reference area
+        # new version: let the user specify the reference area by moving two borders in the preview
         # if no area is specified just use the whole data
         if reference_area[0] == None:
             reference_area[0] = 0

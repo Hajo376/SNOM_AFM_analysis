@@ -342,8 +342,6 @@ def Average_3D_Scan():
     measurement.Display_Cutplane_V3_Realpart(axis='x', line=0, demodulation=2)
     measurement.Display_Cutplane_V3_Realpart(axis='x', line=0, demodulation=3)
 
-    
-
 def Test_Phase_Drift_Correction():
     # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-23 113254 PH single_wv-on-wg_long'
     directory = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-05-23-ssh-reflection')
@@ -391,6 +389,16 @@ def Test_Channel_Substraction():
     measurement.Shift_Phase(channels=['O3P-O4P'])
     measurement.Display_Channels()
 
+def Simple_AFM_Example():
+    directory = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-05-23-ssh-reflection')
+    channels = ['Z C']
+    measurement = SnomMeasurement(directory, channels, autoscale=False)
+    height_data = measurement.all_data[0]
+    plt.pcolormesh(height_data)
+    plt.show()
+
+    # measurement.Display_Channels()
+
 def main():
      
     # Realign()
@@ -410,10 +418,11 @@ def main():
     # Test_3D_Scan()
     # Phase_Correction_3D_Scan()
     # Average_3D_Scan()
-    Test_Phase_Drift_Correction()
+    # Test_Phase_Drift_Correction()
     # Test_Amplitude_Drift_Correction()
     # Test_Height_Drift_Correction()
     # Test_Channel_Substraction()
+    Simple_AFM_Example()
 
 
 if __name__ == '__main__':

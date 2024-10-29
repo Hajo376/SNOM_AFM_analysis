@@ -21,6 +21,7 @@ SNOM_AFM_analysis/lib/realign.py
 SNOM_AFM_analysis/lib/rectangle_selector.py
 SNOM_AFM_analysis/lib/snom_colormaps.py
 SNOM_AFM_analysis/lib/__init__.py
+SNOM_AFM_analysis/lib/edge_detection.py
 SNOM_AFM_analysis/lib/file_handling.py
 SNOM_AFM_analysis/lib/get_directionality.py
 SNOM_AFM_analysis/lib/phase_analysis.py
