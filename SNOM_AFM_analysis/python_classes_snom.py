@@ -28,6 +28,7 @@ from PIL import Image
 from SNOM_AFM_analysis.lib.snom_colormaps import SNOM_height, SNOM_amplitude, SNOM_phase, SNOM_realpart, all_colormaps
 from SNOM_AFM_analysis.lib.phase_slider import Get_Phase_Offset
 from SNOM_AFM_analysis.lib.rectangle_selector import Select_Rectangle
+from SNOM_AFM_analysis.lib.data_range_selector import Select_Data_Range
 from SNOM_AFM_analysis.lib.get_directionality import ChiralCoupler
 from SNOM_AFM_analysis.lib import realign
 from SNOM_AFM_analysis.lib import profile
@@ -7401,6 +7402,48 @@ class SnomMeasurement(FileHandler):
         self.all_data.append(result)
         self.channel_tag_dict.append(self.channel_tag_dict[self.channels.index(channel1)])
         self.channels_label.append(channel1 + '-' + channel2)
+
+    def Test_Data_Range_Selector(self):
+        # test the data range selector
+        # use the data of the first channel in memory to test the data range selector
+        data = self.all_data[0]
+        channel = self.channels[0]
+        start, end, is_horizontal, inverted = Select_Data_Range(data, channel)
+        print('start: ', start, 'end: ', end, 'is_horizontal: ', is_horizontal, 'inverted: ', inverted)
+        # create an array fromt the data using the coordinates
+        # if inverted is true two arrays should be created, one for the left and right side if horizontal, one for the top and bottom side if vertical
+        reduced_data = []
+        if is_horizontal:
+            if inverted:
+                left_data = data[:,:start]
+                right_data = data[:,end:]
+                reduced_data.append(left_data)
+                reduced_data.append(right_data)
+                # print('left data: ', left_data)
+                # print('right data: ', right_data)
+            else:
+                selected_data = data[:,start:end]
+                reduced_data.append(selected_data)
+                # print('selected data: ', selected_data)
+        else:
+            if inverted:
+                top_data = data[:start,:]
+                bottom_data = data[end:,:]
+                reduced_data.append(top_data)
+                reduced_data.append(bottom_data)
+                # print('top data: ', top_data)
+                # print('bottom data: ', bottom_data)
+            else:
+                selected_data = data[start:end,:]
+                reduced_data.append(selected_data)
+                # print('selected data: ', selected_data)
+        # display the reduced data
+        for i in range(len(reduced_data)):
+            fig, ax = plt.subplots()
+            ax.pcolormesh(reduced_data[i], cmap='viridis')
+            ax.invert_yaxis()
+            ax.legend()
+            plt.show()
 
 
 class ApproachCurve(FileHandler):

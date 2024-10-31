@@ -370,6 +370,7 @@ def Test_Height_Drift_Correction():
     directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-23 113254 PH single_wv-on-wg_long'
     # directory = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-05-23-ssh-reflection')
     channels = ['Z C']
+    # channels = ['O2A']
     measurement = SnomMeasurement(directory, channels)
     Plot_Definitions.amp_cbar_range = False
     measurement.Display_Channels()
@@ -399,6 +400,24 @@ def Simple_AFM_Example():
 
     # measurement.Display_Channels()
 
+def Test_Data_Range_Selector():
+    '''array = [[1, 2, 3, 4, 5], 
+             [6, 7, 8, 9, 10], 
+             [11, 12, 13, 14, 15], 
+             [16, 17, 18, 19, 20], 
+             [21, 22, 23, 24, 25]]
+    array = np.array(array)
+    # slice array:
+    # only display center three columns
+    array_1 = array[:,1:4]
+    print(array_1)'''
+    directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2022-04-25 1227 PH pentamer_840nm_s50_2'
+    channels = ['Z C']
+    # channels = ['O2A']
+    measurement = SnomMeasurement(directory, channels)
+    measurement.Test_Data_Range_Selector()
+
+
 def main():
      
     # Realign()
@@ -422,7 +441,8 @@ def main():
     # Test_Amplitude_Drift_Correction()
     # Test_Height_Drift_Correction()
     # Test_Channel_Substraction()
-    Simple_AFM_Example()
+    # Simple_AFM_Example()
+    Test_Data_Range_Selector()
 
 
 if __name__ == '__main__':

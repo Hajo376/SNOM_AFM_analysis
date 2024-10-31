@@ -1005,3 +1005,9 @@ filename = 2024-05-23 113254 PH single_wv-on-wg_long
 cut_coords = [[89, 0], [396, 4495]]
 cut = autocut
 rotation = 90
+31/10/2024 11:11:04
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
+31/10/2024 11:11:29
+filename = 2024-05-23 113254 PH single_wv-on-wg_long
+quadratic_pixels = True
