@@ -1,0 +1,27 @@
+# www.neaspec.com
+# Scan:	 	2D (PsHet)
+# Project:	 	Test
+# Description:	 	pmma_wedge_on_gold_thin_970nm
+# Date:	 	07/25/2024 11:40:01
+# Scanner Center Position (X, Y):	[µm]	49.55	49.02	 
+# Rotation:	[°]	+45	 	 
+# Scan Area (X, Y, Z):	[µm]	10.000	50.000	0.000
+# Pixel Area (X, Y, Z):	[px]	200	250	1
+# Averaging:	 	1	 	 
+# Integration time:	[ms]	49	 	 
+# Laser Source:	 	Tunable VIS
+# Detector:	 	NIR
+# Target Wavelength:	[µm]		 	 
+# Demodulation Mode:	 	PsHet
+# Tip Frequency:	[Hz]	265,857.907	 	 
+# Tip Amplitude:	[mV]	7.500	 	 
+# Tapping Amplitude:	[nm]	43.986	 	 
+# Modulation Frequency:	[Hz]	304.970	 	 
+# Modulation Amplitude:	[mV]	9,800.000	 	 
+# Modulation Offset:	[mV]	5,143.412	 	 
+# Setpoint:	[%]	77.19	 	 
+# Regulator (P, I, D):	 	1.948454	2.658207	1.000000
+# Tip Potential:	[mV]	0.000	 	 
+# M1A Scaling:	[nm/V]	14.000	 	 
+# Q-Factor:	 	381.7	 	 
+# Version:	 	1.10.9592.0

@@ -313,3 +313,12 @@ quadratic_pixels = True
 31/10/2024 16:12:48
 filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
 quadratic_pixels = True
+04/11/2024 10:46:18
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+04/11/2024 10:50:08
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+04/11/2024 11:12:37
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True

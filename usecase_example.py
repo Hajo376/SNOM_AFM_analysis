@@ -417,6 +417,20 @@ def Test_Data_Range_Selector():
     measurement = SnomMeasurement(directory, channels)
     measurement.Test_Data_Range_Selector()
 
+def Test_Level_Columnwise():
+    # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-10-24 104052 PH wg_wv_No3_15slits_pol45deg_anal90deg_fine' # for height
+    directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm' # for height, amplitude and phase
+    # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-08-21 132732 PH pmma_wedge_on_gold_thick_1600nm' # for height, amplitude and phase
+    channels = ['Z C']
+    # channels = ['O2A']
+    # channels = ['O2P']
+    # Plot_Definitions.height_cbar_range = False
+    measurement = SnomMeasurement(directory, channels)
+    measurement.Level_Data_Columnwise(channel_list=channels)
+    measurement.Level_Data_Columnwise(channel_list=channels)
+    measurement.Display_Channels() 
+    # print(measurement.all_data[1])
+
 
 def main():
      
@@ -442,7 +456,8 @@ def main():
     # Test_Height_Drift_Correction()
     # Test_Channel_Substraction()
     # Simple_AFM_Example()
-    Test_Data_Range_Selector()
+    # Test_Data_Range_Selector()
+    Test_Level_Columnwise()
 
 
 if __name__ == '__main__':

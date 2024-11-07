@@ -28,6 +28,7 @@ from PIL import Image
 from SNOM_AFM_analysis.lib.snom_colormaps import SNOM_height, SNOM_amplitude, SNOM_phase, SNOM_realpart, all_colormaps
 from SNOM_AFM_analysis.lib.phase_slider import Get_Phase_Offset
 from SNOM_AFM_analysis.lib.rectangle_selector import Select_Rectangle
+from SNOM_AFM_analysis.lib.data_range_selector import Select_Data_Range
 from SNOM_AFM_analysis.lib.get_directionality import ChiralCoupler
 from SNOM_AFM_analysis.lib import realign
 from SNOM_AFM_analysis.lib import profile
@@ -99,15 +100,20 @@ class Plot_Definitions:
     font_size_legend = 8
     font_size_fig_title = 12
     #definitions for color bar ranges:
-    height_cbar_range = True
+    # using the same range for all channels is useful for comparison
+    # make all height channels have the same range?
+    height_cbar_range = False
     vmin_height = None
     vmax_height = None
-    amp_cbar_range = True
+    # make all amplitude channels have the same range?
+    amp_cbar_range = False
     vmin_amp = None#1 # to make shure that the values will be initialized with the first plotting command
     vmax_amp = None#-1
     # phase_cbar_range = True
+    # plot the full 2pi range for the phase channels no matter what the actual data range is?
     full_phase_range = True # this will overwrite the cbar
-    shared_phase_range = True # only used if full phase range is false
+    # make all phase channels have the same range?
+    shared_phase_range = False # only used if full phase range is false
     vmin_phase = None
     vmax_phase = None
     real_cbar_range = True
@@ -3777,7 +3783,7 @@ class SnomMeasurement(FileHandler):
                 channels = [self.preview_ampchannel, self.preview_phasechannel]
             else:
                 channels = [self.preview_ampchannel, self.preview_phasechannel, self.height_channel]
-        self.channels = channels        
+        self.channels = channels.copy() # make sure to copy the list to avoid changing the original list     
         self.autoscale = autoscale
         self._Initialize_Data(self.channels)
         if File_Definitions.autodelete_all_subplots: self._Delete_All_Subplots() # automatically delete old subplots
@@ -5053,6 +5059,28 @@ class SnomMeasurement(FileHandler):
             self.all_data[channels_to_filter[i+1]] = FS_compl_angle
             self.channels_label[channels_to_filter[i+1]] = self.channels_label[channels_to_filter[i+1]] + '_fft'
 
+    def Fourier_Filter_Channels_V2(self, channels:list=None) -> None:
+        """This function applies the Fourier filter to all data in memory or specified channels
+                
+        Args:
+            channels [list]: list of channels, will override the already existing channels
+        """
+        # self._Initialize_Data(channels)
+        self._Write_to_Logfile('fourier_filter', True)
+        if channels is None:
+            channels = self.channels
+        # for i in range(len(self.amp_channels)):
+        #     if (self.amp_channels[i] in self.channels) and (self.phase_channels[i] in self.channels):
+        #         channels_to_filter.append(self.channels.index(self.amp_channels[i]))
+        #         channels_to_filter.append(self.channels.index(self.phase_channels[i]))
+        #     else:
+        #         print('In order to apply the fourier_filter amplitude and phase of the same channel number must be in the channels list!')
+        
+        for i in range(len(channels)):
+            FS = self._Fourier_Filter_Array(self.all_data[self.channels.index(channels[i])])
+            self.all_data[channels[i]] = np.log(np.abs(np.fft.fftshift(FS))**2)
+            self.channels_label[channels[i]] = self.channels_label[channels[i]] + '_fft'
+
     def _Create_Header(self, channel, data=None, filetype='gsf'):
         # data = self.all_data[self.channels.index(channel)]
         # load data instead, because sometimes the channel is not in memory
@@ -5933,6 +5961,7 @@ class SnomMeasurement(FileHandler):
             height_channel = self.height_channel
         
         # cut out the reference area
+        # new version: let the user specify the reference area by moving two borders in the preview
         # if no area is specified just use the whole data
         if reference_area[0] == None:
             reference_area[0] = 0
@@ -7379,13 +7408,161 @@ class SnomMeasurement(FileHandler):
         self.channel_tag_dict.append(self.channel_tag_dict[self.channels.index(channel1)])
         self.channels_label.append(channel1 + '-' + channel2)
 
+    def _Select_Data_Range(self, channel:str, data:np.ndarray=None, use_memory=True) -> tuple:
+        """This function will use the data range selector to select a range of data. If use_memory is True the function will use the data from memory for the specified channel.
+        In that case it will ignore the data argument. If use_memory is False the function will use the data argument and ignore the channel argument. The channel argument is only
+        used to get the correct colormap. The function will return the selected data.
+        Either one or two arrays will be returned depending on the selection.
+
+        Args:
+            data (np.ndarray): Data array to select the range from. Defaults to None.
+            channel (str): Channel name to get the data from memory or/and colormap from. Defaults to None.
+            use_memory (bool, optional): If True the function will use the data from memory for the specified channel. Defaults to True.
+
+        Returns:
+            list: List of one or two arrays containing the selected data depending on the selection.
+        """
+        # identify the data to use for the range selection
+        if use_memory:
+            data = self.all_data[self.channels.index(channel)]
+        elif data is None:
+            print('No data was specified!')
+            return None
+        # get the range selection
+        start, end, is_horizontal, inverted = Select_Data_Range(data, channel)
+        return start, end, is_horizontal, inverted
+
+    def _Get_Data_From_selected_Range(self, data:np.ndarray, start:int, end:int, is_horizontal:bool, inverted:bool) -> list:
+        """This function will return one or two arrays from the data using the coordinates of the range selection.
+
+        Args:
+            data (np.ndarray): Data array to create the array/s from.
+            start (int): Start coordinate of the range selection.
+            end (int): End coordinate of the range selection.
+            is_horizontal (bool): Boolean to indicate if the range selection is horizontal.
+            inverted (bool): Bollean to indicate if the range selection is inverted.
+
+        Returns:
+            list: The list contains one or two arrays depending on the selection. Each array contains the selected data.
+        """
+        # start, end, is_horizontal, inverted = self._Select_Data_Range(channel, data, use_memory)
+        # create one or two arrays from the data using the coordinates
+        reduced_data = []
+        if is_horizontal:
+            if inverted:
+                left_data = data[:,:start]
+                right_data = data[:,end:]
+                reduced_data.append(left_data)
+                reduced_data.append(right_data)
+            else:
+                selected_data = data[:,start:end]
+                reduced_data.append(selected_data)
+        else:
+            if inverted:
+                top_data = data[:start,:]
+                bottom_data = data[end:,:]
+                reduced_data.append(top_data)
+                reduced_data.append(bottom_data)
+            else:
+                selected_data = data[start:end,:]
+                reduced_data.append(selected_data)
+        return reduced_data
+    
+    def Level_Data_Columnwise(self, channel_list:list=None, display_channel:str=None) -> None:
+        """This function will level the data of the specified channels columnwise. The function will use the data from the display channel to select the range for leveling.
+
+        Args:
+            channels (list, optional): Channels from memory which should be leveled. Defaults to None.
+            display_channel (str, optional): Channel to use to select the range for leveling. Defaults to None.
+        """
+        # todo sofar only for the horizontal selection (slow drifts), maybe problematic if the data was rotated...
+        # todo does not work yet for phase and amplitude channels
+        if channel_list is None:
+            print('No channels specified, using all channels in memory.')
+            channel_list = self.channels
+        if display_channel is None:
+            display_channel = self.channels[0]
+        # get the selection from the display channel
+        selection = self._Select_Data_Range(display_channel)
+        # now use the selection to level all channels
+        import time
+        # print('test: ', channel_list==self.channels)
+        for channel in channel_list:
+            # get the data from memory
+            data = self.all_data[self.channels.index(channel)]
+            # get the reduced data
+            reduced_data = self._Get_Data_From_selected_Range(data, *selection)
+            # level the data
+            if len(reduced_data) == 1:
+                print('leveling with one reference area')
+                # get the reference data from the mean of the reduced data for each row
+                reference_data = np.mean(reduced_data[0], axis=1)
+                # create the leveled data
+                leveled_data = np.zeros(data.shape)
+                for i in range(data.shape[0]):
+                    # leveled_data[i] = data[i] - reference_data[i]
+                    if i > 0:
+                        mean_drift = np.mean(reference_data[i]) - np.mean(reference_data[0])
+                        leveled_data[i] = data[i] - mean_drift
+                    else:
+                        leveled_data[i] = data[i]
+            elif len(reduced_data) == 2:
+                print('leveling with two reference areas')
+                # get the reference data from the mean of the reduced data for each column and for both sides
+                reference_data_left = np.mean(reduced_data[0], axis=1)
+                reference_data_right = np.mean(reduced_data[1], axis=1)
+                # create the leveled data by interpolating between the two reference data arrays and subtracting them from the data
+                leveled_data = np.zeros(data.shape)
+                for i in range(data.shape[0]):
+                    # if phase is leveled make sure no phase jumps occur otherwise the leveling will not work
+                    # first correct the overall drift of the mean per line
+                    if i > 0:
+                        # mean_drift = np.mean([reference_data_left[i], reference_data_right[i]]) - np.mean([reference_data_left[i-1], reference_data_right[i-1]])
+                        mean_drift = np.mean([reference_data_left[i], reference_data_right[i]]) - np.mean([reference_data_left[0], reference_data_right[0]])
+                        leveled_data[i] = data[i] - mean_drift
+                        # print(f'line {i}, mean data: {np.mean([reference_data_left[i], reference_data_right[i]])}, mean drift: {mean_drift}')
+                    else:
+                        # print('first line')
+                        # print('mean data: ', np.mean([reference_data_left[0], reference_data_right[0]]))
+                        leveled_data[i] = data[i]
+                    # then correct the drift within each individual line by interpolating between the two reference data arrays
+                    line_drift = np.interp(np.linspace(0, 1, data.shape[1]), [0, 1], [reference_data_left[i], reference_data_right[i]])
+                    # shift line_drift such that the mean is zero
+                    line_drift = line_drift - np.mean(line_drift)
+                    leveled_data[i] = leveled_data[i] - line_drift
+                    # if i == 0: plot the linedata and the linedrift
+                    # if i == 0:
+                    # plt.plot(data[i], label='data')
+                    # plt.plot(line_drift + np.mean(data[i]), label='line drift')
+                    # plt.plot(leveled_data[i], label='leveled data')
+                    # plt.legend()
+                    # plt.show()
+            # if phase channel, shift the data to match the leveled data to the original data
+            if self.phase_indicator in channel:
+                # todo, for now just shift by 0 to make sure the data is within the 0 to 2pi range
+                # shift the data such that the mean is pi
+                mean_phase = np.mean(leveled_data)
+                shift = np.pi - mean_phase
+                self._Shift_Phase_Data(leveled_data, shift=shift)
+            # save the leveled data
+            self.channels.append(channel + '_leveled')
+            self.all_data.append(leveled_data)
+            self.channel_tag_dict.append(self.channel_tag_dict[self.channels.index(channel)])
+            self.channels_label.append(channel + '_leveled')
+
+            # # modify hei
+            # if self.height_indicator in channel:
+            #     # set the min to zero
+            #     self.Set_Min_to_Zero([channel + '_leveled'])
+
+
 
 class ApproachCurve(FileHandler):
     """This class opens an approach curve measurement and handels all the approach curve related functions."""
     def __init__(self, directory_name:str, channels:list=None, title:str=None) -> None:
         if channels == None:
             channels = ['M1A']
-        self.channels = channels
+        self.channels = channels.copy()
         # x_channel = 'Depth'
         self.x_channel = 'Z'
         super().__init__(directory_name, title)
@@ -7595,7 +7772,7 @@ class Scan_3D(FileHandler):
         # set channelname if none is given
         if channels == None:
             channels = ['Z', 'O2A'] # if you want to plot approach curves 'Z' must be included!
-        self.channels = channels
+        self.channels = channels.copy()
         self.x_channel = 'Z'
         # call the init constructor of the filehandler class
         super().__init__(directory_name, title)
