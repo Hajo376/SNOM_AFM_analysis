@@ -431,6 +431,33 @@ def Test_Level_Columnwise():
     measurement.Display_Channels() 
     # print(measurement.all_data[1])
 
+def Test_Get_Pixel_Value():
+    directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm' # for height, amplitude and phase
+    channels = ['Z C']
+    measurement = SnomMeasurement(directory, channels)
+    coords = measurement.Get_Pixel_Coordinates(channels[0])
+    val = measurement.Get_Pixel_Value('Z C', coords)
+    # val = measurement.Get_Pixel_Value('Z C')
+    print(val)
+
+def Test_Profile_Selector():
+    # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm' # for height, amplitude and phase
+    directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-10-24 104052 PH wg_wv_No3_15slits_pol45deg_anal90deg_fine'
+    channels = ['Z C']
+    measurement = SnomMeasurement(directory, channels)
+    measurement.Test_Profile_Selection()
+    # measurement.Display_Profiles()
+
+def test_gauss_filter_v2():
+    # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm' # for height, amplitude and phase
+    directory = 'C:/Users/Hajo/sciebo/Phd/Paper/Dielectric_Waveguides/raw_data/transmission_mode/reflection_grating/2024-10-24 100547 PH wg_wv_No3_15slits_pol45deg_anal0deg_fine'
+    # channels = ['Z C', 'O2P', 'O2A']
+    channels = ['Z C', 'O2P_corrected_aligned', 'O2A']
+
+    measurement = SnomMeasurement(directory, channels)
+    measurement.Gauss_Filter_Channels_complex()
+    measurement.Display_Channels()
+
 
 def main():
      
@@ -457,7 +484,10 @@ def main():
     # Test_Channel_Substraction()
     # Simple_AFM_Example()
     # Test_Data_Range_Selector()
-    Test_Level_Columnwise()
+    # Test_Level_Columnwise()
+    # Test_Get_Pixel_Value()
+    # Test_Profile_Selector()
+    test_gauss_filter_v2()
 
 
 if __name__ == '__main__':

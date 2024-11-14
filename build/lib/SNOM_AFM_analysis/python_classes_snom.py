@@ -34,6 +34,7 @@ from SNOM_AFM_analysis.lib import realign
 from SNOM_AFM_analysis.lib import profile
 from SNOM_AFM_analysis.lib import phase_analysis
 from SNOM_AFM_analysis.lib.file_handling import Get_Parameter_Values, Convert_Header_To_Dict, Find_Index
+from SNOM_AFM_analysis.lib.profile_selector import select_profile
 
 class Definitions(Enum):
     vertical = auto()
@@ -81,7 +82,7 @@ class File_Definitions:
     #standard file definitions
     file_type = File_Type.standard
     parameters_type = File_Type.html
-    autodelete_all_subplots = True # if true old subplots will be deleted on creation of new measurement
+    
     
 
 class Plot_Definitions:
@@ -122,6 +123,7 @@ class Plot_Definitions:
     # vmax_real = None
     # show plot automatically? turn to false for gui programming
     show_plot = True
+    autodelete_all_subplots = True # if true old subplots will be deleted on creation of new measurement
     
 
     
@@ -210,7 +212,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         # just initialize data here?
         # self._Create_Channels_Tag_Dict()
         self._Initialize_Data(self.channels)
-        if File_Definitions.autodelete_all_subplots: self._Delete_All_Subplots() # automatically delete old subplots
+        if Plot_Definitions.autodelete_all_subplots: self._Delete_All_Subplots() # automatically delete old subplots
         
         # Create a variable containing the data of the specified channels which can be varied later on with e.g. the gaussian_filter and subsequent methods
         # Aditionally a dictionary is created which contains the channel information
@@ -2959,9 +2961,11 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
 
         """
         if preview_channel is None:
-            preview_channel = self.height_channel
-        if preview_channel not in self.channels and profile_channel not in self.channels:
-            print('The channels for preview and the profiles were not found in the memory, they will be loaded automatically.\nBe aware that all prior modifications will get deleted.')  
+            # preview_channel = self.height_channe
+            # use the first channel in memory if no preview channel is specified
+            preview_channel = self.channels[0]
+        if profile_channel not in self.channels:
+            print('The channel for the profiles were not found in the memory, they will be loaded automatically.\nBe aware that all prior modifications will get deleted.')  
             self._Initialize_Data([profile_channel, preview_channel])#this will negate any modifications done prior like blurr...
         profiledata = self.all_data[self.channels.index(profile_channel)]
         previewdata = self.all_data[self.channels.index(preview_channel)]
@@ -3786,7 +3790,7 @@ class SnomMeasurement(FileHandler):
         self.channels = channels.copy() # make sure to copy the list to avoid changing the original list     
         self.autoscale = autoscale
         self._Initialize_Data(self.channels)
-        if File_Definitions.autodelete_all_subplots: self._Delete_All_Subplots() # automatically delete old subplots
+        if Plot_Definitions.autodelete_all_subplots: self._Delete_All_Subplots() # automatically delete old subplots
     
 
     def _Initialize_Measurement_Channel_Indicators(self):
@@ -3826,7 +3830,7 @@ class SnomMeasurement(FileHandler):
             self.imag_indicator = 'Im'#not used
             self.backwards_indicator = '-B-'
         elif self.file_type == File_Type.comsol_gsf:
-            self.all_channels = ['abs', 'arg', 'real']
+            self.all_channels = ['abs', 'arg', 'real', 'imag']
             self.phase_channels = ['arg']
             self.amp_channels = ['abs']
             self.real_channels = ['real']
@@ -3969,7 +3973,75 @@ class SnomMeasurement(FileHandler):
             if tag_array[i][0] == tag:
                 tagval = float(tag_array[i][1])
         return tagval
-    
+
+    def _get_optomechanical_indicator(self, channel) -> tuple:
+        """This function returns the optomechanical indicator of the channel and its index in the channel name.
+        Meaning it tries to find out wether the cannel is an optical or mechanical channel."""
+        optomechanical_indicator = None
+        indicator_index = None
+        if self.file_type == File_Type.standard or self.file_type == File_Type.standard_new or self.file_type == File_Type.neaspec_version_1_6_3359_1:
+            channel_list = list(channel)
+            for i in range(3): # for this filetype the optomechanical indicator is always within the first 3 characters
+                if channel_list[i] == 'O':
+                    optomechanical_indicator = 'O'
+                    indicator_index = i
+                    break
+                elif channel_list[i] == 'M':
+                    optomechanical_indicator = 'M'
+                    indicator_index = i
+                    break
+                # elif channel_list[i] == 'Z': # height channels do not have an optomechanical indicator, they are mechanical but should be treated differently
+                #     optomechanical_indicator = 'Z'
+                #     indicator_index = i
+                #     break
+            return optomechanical_indicator, indicator_index
+        elif self.file_type == File_Type.aachen_ascii or self.file_type == File_Type.aachen_gsf:
+            # in this case the optomechanical indicator is always the first character in the channel name
+            optomechanical_indicator = channel[0:1]
+            # check if channel is a height channel, then it should not have an index
+            if channel[0:2] != 'MT':
+                indicator_index = 0
+            return optomechanical_indicator, indicator_index
+        else:
+            print('optomechanical indicator for this filetype is not yet implemented')
+            return None, None
+
+    def _is_amp_channel(self, channel) -> bool:
+        """This function returns True if the channel is an amplitude channel, False otherwise."""
+        optomechanical_indicator, indicator_index = self._get_optomechanical_indicator(channel)
+        if optomechanical_indicator == 'O' and self.amp_indicator in channel:
+            return True
+        else:
+            return False
+            
+    def _is_phase_channel(self, channel) -> bool:
+        """This function returns True if the channel is a phase channel, False otherwise."""
+        optomechanical_indicator, indicator_index = self._get_optomechanical_indicator(channel)
+        if optomechanical_indicator == 'O' and self.phase_indicator in channel:
+            return True
+        else:
+            return False
+        
+    def _is_height_channel(self, channel) -> bool:
+        """This function returns True if the channel is a height channel, False otherwise."""
+        optomechanical_indicator, indicator_index = self._get_optomechanical_indicator(channel)
+        if optomechanical_indicator == None and self.height_indicator in channel:
+            return True
+        else:
+            return False
+                 
+    def _get_demodulation_num(self, channel) -> int:
+        """This function returns the demodulation number of the channel.
+        So far for all known filetypes the demodulation number is the number behind the optomechanical indicator (O or M) in the channel name."""
+        optomechanical_indicator, indicator_index = self._get_optomechanical_indicator(channel)
+        demodulation_num = None
+        if indicator_index != None: # if the index is None the channel is a height channel and has no demodulation number
+            demodulation_num = int(channel[indicator_index +1 : indicator_index +2])
+
+        if demodulation_num == None:
+            print('demodulation number could not be found')
+        return demodulation_num
+
     def _Initialize_Data(self, channels=None) -> None:
         """This function initializes the data in memory. If no channels are specified the already existing data is used,
         which is created automatically in the instance init method. If channels are specified, the instance data is overwritten.
@@ -4613,8 +4685,8 @@ class SnomMeasurement(FileHandler):
                     flattened_data = data.flatten()
                     min_data = np.min(flattened_data)
                     max_data = np.max(flattened_data)
-                    print('min: ', min_data)
-                    print('max: ', max_data)
+                    # print('min: ', min_data)
+                    # print('max: ', max_data)
 
                     if self.real_indicator in title or self.imag_indicator in title: # for real part or imaginary part data
                         if self.file_type == File_Type.comsol_gsf:
@@ -4874,7 +4946,120 @@ class SnomMeasurement(FileHandler):
             else: 
                 print(f'Channel {channel} is not in memory! Please initiate the channels you want to use first!')
 
-    def Gauss_Filter_Channels_complex(self, channels:list=None, sigma=2) -> None:
+    def _find_gauss_compatible_channels(self) -> list:
+        """This function goes through all channels in memory and tries to find compatible pairs of amplitude and phase channels.
+        The function returns a list of lists, where each sublist contains the indices of the amplitude and phase channel.
+        """
+        channel_pairs = [] # list of lists, where each sublist contains the indices of the amplitude and phase channel relative to the self.channels list
+        phase_channels = [] # sort the phase channels in a separate list
+        amp_channels = [] # sort the amplitude channels in a separate list e.g. [[demod, channel_index, channel_name]]
+        for i in range(len(self.channels)):
+            demod = self._get_demodulation_num(self.channels[i])
+            if self._is_amp_channel(self.channels[i]):
+                amp_channels.append([demod, i])
+            elif self._is_phase_channel(self.channels[i]):
+                phase_channels.append([demod, i])
+
+        # now try to find a partner for each phase channel, if there are amp channels without a partner they will be blurred ignoring the phase
+        for i in range(len(phase_channels)):
+            possible_amp_partners = []
+            for j in range(len(amp_channels)):
+                if phase_channels[i][0] == amp_channels[j][0]: # check if the demodulation number is the same
+                    if self.all_data[phase_channels[i][1]].shape == self.all_data[amp_channels[j][1]].shape: # check if the data shape is the same
+                        possible_amp_partners.append(amp_channels[j][1])
+            if len(possible_amp_partners) == 1:
+                channel_pairs.append([possible_amp_partners[0], phase_channels[i][1]])
+            elif len(possible_amp_partners) > 1:
+                print(f'Found more than one possible amplitude channel for phase channel {self.channels[phase_channels[i][1]]}!')
+                print('Please specify the correct one! This channel will be ignored for now.')
+        
+        return channel_pairs
+
+    def Gauss_Filter_Channels_complex(self, channels:list=None, scaling=4, sigma=2) -> None:
+        """This fucton gauss filters the specified channels. If no channels are specified, all channels in memory will be used.
+        The function is designed to work with complex data, where amplitude and phase are stored in separate channels.
+        It will also blur heiht, real part and imaginary part channels and amplitude channels without phase partner and phase channels without amplitude partner if you want to.
+        If the data is not scaled already the function will do it automatically, the default scaling factor is 4, works good with sigma=2.
+                
+        Args:
+            channels [list]: list of channels to blurr, must contain amplitude and phase of same channels.
+            scaling [int]: the scaling factor used for scaling the data, default is 4
+            sigma [int]: the sigma used for blurring the data, bigger sigma means bigger blurr radius
+
+        """
+        self._Write_to_Logfile('gaussian_filter_complex_sigma', sigma)
+        if channels is None:
+            channels = self.channels
+        for channel in channels:
+            if channel not in self.channels:
+                print(f'Channel {channel} is not in memory! Please initiate the channels you want to use first!')
+
+        # get pairs of amplitude and phase channels
+        channel_pairs = self._find_gauss_compatible_channels()
+        # print('All channels:', self.channels)
+        # print('Found the following channel pairs for blurring:', channel_pairs)
+        # make a list of the remaining channels
+        remaining_channels = []
+        for i in range(len(self.channels)):
+            if i not in [pair[0] for pair in channel_pairs] and i not in [pair[1] for pair in channel_pairs]:
+                if self._is_phase_channel(self.channels[i]) == False: # ignore phase channels
+                    remaining_channels.append(i)
+                else:
+                    print(f'Channel {self.channels[i]} is a phase channel and does not have a compatible amplitude channel!')
+                    print('For phase data without amplitude please use the Gauss_Filter_Channels() function!')
+                    # get user input if the phase channel should be blurred without amplitude, might be useful in some cases when the phase is flat
+                    print('Do you want to blur this channel without amplitude anyways?')
+                    user_input = self._User_Input_Bool()
+                    if user_input == True:
+                        remaining_channels.append(i)
+        # print('Remaining channels:', remaining_channels)
+        
+        # check if the data is scaled, if not scale it
+        for i in range(len(channel_pairs)):
+            if self.channel_tag_dict[channel_pairs[i][0]][Tag_Type.pixel_scaling] == 1:
+                # scale the data
+                self.Scale_Channels([self.channels[channel_pairs[i][0]]], scaling)
+            if self.channel_tag_dict[channel_pairs[i][1]][Tag_Type.pixel_scaling] == 1:
+                # scale the data
+                self.Scale_Channels([self.channels[channel_pairs[i][1]]], scaling)
+        
+        for i in range(len(remaining_channels)):
+            if self.channel_tag_dict[remaining_channels[i]][Tag_Type.pixel_scaling] == 1:
+                # scale the data
+                self.Scale_Channels([self.channels[remaining_channels[i]]], scaling)
+
+        # now start the blurring process for the amplitude and phase channel pairs
+        print('Starting the blurring process, this might take a while...')
+        for i in range(len(channel_pairs)):
+            amp = self.all_data[channel_pairs[i][0]]
+            phase = self.all_data[channel_pairs[i][1]]
+            real = amp*np.cos(phase)
+            imag = amp*np.sin(phase)
+
+            # compl_blurred = self._Gauss_Blurr_Data(compl, sigma)
+            real_blurred = self._Gauss_Blurr_Data(real, sigma)
+            imag_blurred = self._Gauss_Blurr_Data(imag, sigma)
+            compl_blurred = np.add(real_blurred, 1J*imag_blurred)
+            amp_blurred = np.abs(compl_blurred)
+            phase_blurred = self._Get_Compl_Angle(compl_blurred)
+
+            # update the data in memory and the labels used for plotting but not the channel names
+            self.all_data[channel_pairs[i][0]] = amp_blurred
+            self.channels_label[channel_pairs[i][0]] = self.channels_label[channel_pairs[i][0]] + '_' + self.filter_gauss_indicator
+            self.all_data[channel_pairs[i][1]] = phase_blurred
+            self.channels_label[channel_pairs[i][1]] = self.channels_label[channel_pairs[i][1]] + '_' + self.filter_gauss_indicator
+
+        # now start the blurring process for the remaining channels
+        # this will blurr height, real part, imaginary part channels and amplitude channels without phase partner and phase channels without amplitude partner if the user wants to
+        for i in range(len(remaining_channels)):
+            data = self.all_data[remaining_channels[i]]
+            data_blurred = self._Gauss_Blurr_Data(data, sigma)
+            self.all_data[remaining_channels[i]] = data_blurred
+            self.channels_label[remaining_channels[i]] = self.channels_label[remaining_channels[i]] + '_' + self.filter_gauss_indicator
+        print('Blurring process finished!')
+         
+    # old mehtod, not used anymore
+    def Gauss_Filter_Channels_complex_old(self, channels:list=None, sigma=2) -> None:
         """This function gauss filters the instance channels. For optical channels, amplitude and phase have to be specified!
         Please make shure you scale your data prior to calling this function rather improve the visibility than loosing to much information
                 
@@ -5463,6 +5648,87 @@ class SnomMeasurement(FileHandler):
                     mean += data[y_pixel][x_pixel]
                     count += 1
         return mean/count
+
+    def Get_Pixel_Coordinates(self, channel) -> list:
+        """This function returns the pixel coordinates of the clicked pixel."""
+        data = self.all_data[self.channels.index(channel)]
+        # identify the colormap
+        if self.height_indicator in channel:
+            cmap = SNOM_height
+        elif self.phase_indicator in channel:
+            cmap = SNOM_phase
+        elif self.amp_indicator in channel:
+            cmap = SNOM_amplitude
+        else:
+            cmap = 'viridis'
+        fig, ax = plt.subplots()
+        ax.pcolormesh(data, cmap='viridis')
+        klicker = clicker(ax, ["event"], markers=["x"])
+        ax.legend()
+        ax.axis('scaled')
+        ax.invert_yaxis()
+        plt.title('Please click on the pixel you want to get the coordinates from.')
+        if Plot_Definitions.show_plot:
+            plt.show()
+        klicker_coords = klicker.get_positions()['event'] #klicker returns a dictionary for the events
+        coordinates = [[round(element[0]), round(element[1])] for element in klicker_coords]
+        # return coordinates
+        # display image with the clicked pixel
+        fig, ax = plt.subplots()
+        ax.pcolormesh(data, cmap='viridis')
+        ax.plot(coordinates[0][0], coordinates[0][1], 'rx')
+        ax.legend()
+        ax.axis('scaled')
+        ax.invert_yaxis()
+        plt.title('You clicked on the following pixel.')
+        if Plot_Definitions.show_plot:
+            plt.show()
+        return coordinates
+
+    def Get_Pixel_Value(self, channel, coordinates:list=None, zone=1) -> float:
+        """This function returns the pixel value of a channel at the specified coordinates.
+        The zone specifies the number of neighbors. 0 means only the pixel itself. 1 means the pixel and the 8 nearest pixels.
+        2 means zone 1 plus the next 16, so a total of 25 with the pixel in the middle.
+        If the channel is scaled the zone will be scaled as well."""
+        # adjust the zone if the data is scaled
+        zone = zone*self._Get_Channel_Scaling(self.channels.index(channel))
+        # display the channel
+        data = self.all_data[self.channels.index(channel)]
+        if coordinates == None:
+            coordinates = self.Get_Pixel_Coordinates(channel)
+            '''fig, ax = plt.subplots()
+            # identify the colormap
+            if self.height_indicator in channel:
+                cmap = SNOM_height
+            elif self.phase_indicator in channel:
+                cmap = SNOM_phase
+            elif self.amp_indicator in channel:
+                cmap = SNOM_amplitude
+            else:
+                cmap = 'viridis'
+            ax.pcolormesh(data, cmap=cmap)
+            klicker = clicker(ax, ["event"], markers=["x"])
+            ax.legend()
+            ax.axis('scaled')
+            # invert the y axis to match the image
+            ax.invert_yaxis()
+            plt.title('Please click on the pixel you want to get the value from.')
+            if Plot_Definitions.show_plot:
+                plt.show()
+            klicker_coords = klicker.get_positions()['event'] #klicker returns a dictionary for the events
+            coordinates = [[round(element[0]), round(element[1])] for element in klicker_coords]'''
+        if len(coordinates) != 1:
+            print('You need to specify one pixel coordinate! \nDo you want to try again?')
+            user_input = self._User_Input_Bool()
+            if user_input == True:
+                self.Get_Pixel_Value(channel, zone)
+            else:
+                exit()
+        x = coordinates[0][0]
+        y = coordinates[0][1]
+        # get the mean value of the pixel and its neighbors
+        pixel_value = self._Get_Mean_Value(data, x, y, zone)
+        return pixel_value
 
     def _Height_Levelling_3Point(self, height_data, zone=1) -> np.array:
         fig, ax = plt.subplots()
@@ -7465,8 +7731,6 @@ class SnomMeasurement(FileHandler):
                 reduced_data.append(bottom_data)
             else:
                 selected_data = data[start:end,:]
-                reduced_data.append(selected_data)
-        return reduced_data
     
     def Level_Data_Columnwise(self, channel_list:list=None, display_channel:str=None) -> None:
         """This function will level the data of the specified channels columnwise. The function will use the data from the display channel to select the range for leveling.
@@ -7479,7 +7743,7 @@ class SnomMeasurement(FileHandler):
         # todo does not work yet for phase and amplitude channels
         if channel_list is None:
             print('No channels specified, using all channels in memory.')
-            channel_list = self.channels
+            channel_list = self.channels.copy() # make sure to use a copy for the iteration, because the list will be modified
         if display_channel is None:
             display_channel = self.channels[0]
         # get the selection from the display channel
@@ -7554,6 +7818,33 @@ class SnomMeasurement(FileHandler):
             # if self.height_indicator in channel:
             #     # set the min to zero
             #     self.Set_Min_to_Zero([channel + '_leveled'])
+
+    # not yet fully implemented, eg. the profile plot function is only ment for full horizontal or vertical profiles only
+    def Test_Profile_Selection(self, channel:str=None) -> None:
+        if channel is None:
+            channel = self.channels[0]
+        
+        array_2d = self.all_data[self.channels.index(channel)]
+        # x, y = np.mgrid[-0:100:1, 0:200:1]
+        # z = np.sqrt(x**2 + y**2) + np.sin(x**2 + y**2)
+        # z = np.sin(x/2)*np.exp(-x/100)
+        # array_2d = z
+        # plt.pcolormesh(array_2d)
+        # plt.show()
+        profile, start, end, width = select_profile(array_2d, channel)
+        plt.plot(profile)
+        plt.show()
+        return profile, start, end, width
+        '''self.profile_channel = channel
+        self.profiles = [profile]
+        # find out the orientation of the profile
+        if start[0] == end[0]:
+            self.profile_orientation = Definitions.horizontal
+        elif start[1] == end[1]:
+            self.profile_orientation = Definitions.vertical
+        else:
+            self.profile_orientation = 'unknown'
+            print('The profile orientation could not be determined!')'''
 
 
 

@@ -105,3 +105,8 @@ filename = 2024-10-24 104052 PH wg_wv_No3_15slits_pol45deg_anal90deg_fine
 quadratic_pixels = True
 set_min_to_zero = True
 set_min_to_zero = True
+11/11/2024 14:55:28
+filename = 2024-10-24 104052 PH wg_wv_No3_15slits_pol45deg_anal90deg_fine
+quadratic_pixels = True
+14/11/2024 15:08:46
+filename = 2024-10-24 104052 PH wg_wv_No3_15slits_pol45deg_anal90deg_fine
