@@ -1,0 +1,25 @@
+# www.neaspec.com
+# Scan:	 	2D (PsHet)
+# Project:	 	maintainance
+# Description:	 	Arrow EFM Tip 9K_815nm_hires
+# Date:	 	03/04/2020 18:10:02
+# Scanner Center Position (X, Y):	[µm]	48.18	51.36	 
+# Rotation:	[°]	+90	 	 
+# Scan Area (X, Y, Z):	[µm]	5.000	5.000	0.000
+# Pixel Area (X, Y, Z):	[px]	250	250	1
+# Averaging:	 	1	 	 
+# Integration time:	[ms]	13	 	 
+# Laser Source:	 	Tunable VIS
+# Target Wavelength:	[µm]		 	 
+# Demodulation Mode:	 	PsHet
+# Tip Frequency:	[Hz]	82,930.078	 	 
+# Tip Amplitude:	[mV]	35.700	 	 
+# Tapping Amplitude:	[nm]	46.000	 	 
+# Modulation Frequency:	[Hz]	304.890	 	 
+# Modulation Amplitude:	[mV]	8,300.000	 	 
+# Modulation Offset:	[mV]	1,063.846	 	 
+# Setpoint:	[%]	77.77	 	 
+# Regulator (P, I, D):	 	1.571744	2.152212	1.000000
+# Tip Potential:	[mV]	0.000	 	 
+# M1A Scaling:	[nm/V]	62.000	 	 
+# Version:	 	1.8.5017.0

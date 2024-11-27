@@ -265,3 +265,36 @@ gaussian_filter_complex_sigma = 2
 scaling = 4
 scaling = 4
 scaling = 4
+25/11/2024 15:57:14
+filename = 2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm
+quadratic_pixels = True
+25/11/2024 15:57:59
+filename = 2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm
+quadratic_pixels = True
+25/11/2024 16:00:56
+filename = 2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm
+quadratic_pixels = True
+25/11/2024 16:01:42
+filename = 2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm
+quadratic_pixels = True
+25/11/2024 16:02:04
+filename = 2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm
+quadratic_pixels = True
+25/11/2024 16:02:58
+filename = 2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm
+quadratic_pixels = True
+25/11/2024 16:03:22
+filename = 2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm
+quadratic_pixels = True
+25/11/2024 16:05:50
+filename = 2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm
+quadratic_pixels = True
+25/11/2024 16:06:50
+filename = 2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm
+quadratic_pixels = True
+25/11/2024 16:07:23
+filename = 2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm
+quadratic_pixels = True
+25/11/2024 16:08:00
+filename = 2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm
+quadratic_pixels = True

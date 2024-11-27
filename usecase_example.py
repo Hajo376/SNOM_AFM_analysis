@@ -64,11 +64,11 @@ Hajo Schill
 
 
 def Realign():
-    directory_name = 'testdata/2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long'
+    directory_name = 'example_measurements/2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long'
     # Example to realign horizontal waveguides
     # channels = ['O3P', 'O3A', 'Z C']
     channels = ['O2P', 'O2A', 'Z C']
-    Measurement = Open_Measurement(directory_name, channels)
+    Measurement = SnomMeasurement(directory_name, channels)
     Measurement.Display_Channels()
     Measurement.Set_Min_to_Zero(['Z C'])
     Measurement.Scale_Channels()
@@ -82,9 +82,9 @@ def Realign():
     Measurement.Display_All_Subplots()
  
 def Cut_Masked():
-    directory_name = 'testdata/2022-04-25 1227 PH pentamer_840nm_s50_2'
+    directory_name = 'example_measurements/2022-04-25 1227 PH pentamer_840nm_s50_2'
     channels = ['O2P', 'O2A', 'Z C']
-    Measurement = Open_Measurement(directory_name, channels)
+    Measurement = SnomMeasurement(directory_name, channels)
     Measurement.Set_Min_to_Zero(['Z C'])
     Measurement.Scale_Channels()
     Measurement.Gauss_Filter_Channels_complex()
@@ -95,27 +95,28 @@ def Cut_Masked():
     Measurement.Display_All_Subplots()
 
 def Test_Scalebar():
-    directory_name = 'testdata/2022-04-25 1227 PH pentamer_840nm_s50_2'
+    directory_name = 'example_measurements/2022-04-25 1227 PH pentamer_840nm_s50_2'
     channels = ['O2P', 'O2A', 'Z C']
-    Measurement = Open_Measurement(directory_name, channels)
+    # Measurement = SnomMeasurement(directory_name, channels)
+    Measurement = SnomMeasurement(directory_name, channels)
     Measurement.Scalebar(['Z C'], length_fraction=0.5)
     Measurement.Display_Channels()
     Measurement.Scale_Channels()
     Measurement.Gauss_Filter_Channels_complex()
     Measurement.Scalebar(['Z C'], length_fraction=0.5)
-    Measurement.Cut_Channels()
+    # Measurement.Cut_Channels()
     Measurement.Display_Channels()    
     Measurement.Display_All_Subplots()
     
 def Test_Phaseshift():
-    # directory_name = 'testdata/2022-04-25 1227 PH pentamer_840nm_s50_2'
+    # directory_name = 'example_measurements/2022-04-25 1227 PH pentamer_840nm_s50_2'
     directory_name = 'C:/Users/Hajo/sciebo/Phd/Paper/Dielectric_Waveguides/raw_data/reflection_mode/2024-05-23 161457 PH single_wv-on-wg_-45deg_thicc'
     
     # channels = ['O2P', 'O3P', 'O2A', 'Z C']
     # Plot_Definitions.full_phase_range = False
     Plot_Definitions.shared_phase_range = False
     channels = ['O2P_manipulated', 'O3P_manipulated', 'O2A', 'Z C']
-    # Measurement = Open_Measurement(directory_name, channels)
+    # Measurement = SnomMeasurement(directory_name, channels)
     Measurement = SnomMeasurement(directory_name, channels)
     # Measurement.Scale_Channels()
     # Measurement.Gauss_Filter_Channels_complex()
@@ -135,7 +136,7 @@ def Compare_Measurements():
         # directory_name = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2022_07_27')
         directory_name = filedialog.askdirectory(initialdir='testdata')
         measurement_title = measurement_titles[i]
-        Measurement = Open_Measurement(directory_name, channels, measurement_title)
+        Measurement = SnomMeasurement(directory_name, channels, measurement_title)
         Measurement.Display_Channels()
 
     Measurement.Display_All_Subplots()
@@ -143,16 +144,16 @@ def Compare_Measurements():
 def Test_Rectangle_Selector():
     directory_name = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2022-04-25 1227 PH pentamer_840nm_s50_2'
     channels = ['O2P', 'O2A', 'Z C']
-    Measurement = Open_Measurement(directory_name, channels)
+    Measurement = SnomMeasurement(directory_name, channels)
     Measurement.Display_Channels()
     Measurement.Cut_Channels(reset_mask=True)
     Measurement.Display_Channels()
     Measurement.Display_All_Subplots()
 
 def Correct_Phase_Drift():
-    directory_name = 'testdata/2020-03-04 1810 PH Arrow EFM Tip 9K_815nm_hires'
+    directory_name = 'example_measurements/2020-03-04 1810 PH Arrow EFM Tip 9K_815nm_hires'
     channels = ['O2P', 'O3P', 'Z C']
-    Measurement = Open_Measurement(directory_name, channels)
+    Measurement = SnomMeasurement(directory_name, channels)
     Measurement.Display_Channels()
     Measurement.Shift_Phase()
     Measurement.Display_Channels()
@@ -163,12 +164,12 @@ def Correct_Phase_Drift():
     Measurement.Display_All_Subplots()
     
 def Synccorrection():
-    # directory_name = 'testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
+    # directory_name = 'example_measurements/2020-01-08 1337 PH denmark_skurve_02_synchronize'
     directory_name = 'example_measurements/2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R'
     channels = ['O2P', 'O2A', 'Z C']
     # channels = ['O2P_corrected', 'O2A', 'Z C']
     channels = ['O2Re_corrected', 'O2A', 'Z C']
-    Measurement = Open_Measurement(directory_name, channels, autoscale=False)
+    Measurement = SnomMeasurement(directory_name, channels, autoscale=False)
     # Measurement.Synccorrection(1.6)
     Measurement.Display_Channels(['O2Re_corrected', 'O2A', 'Z C'])
 
@@ -176,7 +177,7 @@ def Complete_Example_1():
     # directory_name = 'example_measurements/2022-04-25 1227 PH pentamer_840nm_s50_2'
     directory_name = 'example_measurements/2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R'
     channels = ['O2P', 'O2A', 'Z C']
-    Measurement = Open_Measurement(directory_name, channels)
+    Measurement = SnomMeasurement(directory_name, channels)
     # Measurement.Set_Min_to_Zero(['Z C'])
     # Measurement.Display_Channels()
     Measurement.Scale_Channels()
@@ -196,10 +197,10 @@ def Test_Aachen_files():
     # File_Definitions.parmeters_type = File_Type.txt
     channels = ['O2-F-abs', 'O2-F-arg', 'MT-F-abs']
     # directory_name = '2018-09-10_16-44-27_scan'
-    # directory_name = 'testdata/2022-07-07_16-10-33_scan_AaronLukas_2D_4x4_array'
+    # directory_name = 'example_measurements/2022-07-07_16-10-33_scan_AaronLukas_2D_4x4_array'
     directory_name = 'example_measurements/2018-09-10_16-44-27_scan'
 
-    Measurement = Open_Measurement(directory_name, channels)
+    Measurement = SnomMeasurement(directory_name, channels)
     Plot_Definitions.full_phase_range = False
     # Measurement.Display_Channels()
     # Measurement.Set_Min_to_Zero()
@@ -227,10 +228,10 @@ def Test_Export_to_gsf():
     File_Definitions.file_type = File_Type.aachen_ascii
     File_Definitions.parmeters_type = File_Type.txt
     channels = ['O2-F-abs', 'O2-F-arg', 'MT-F-abs']
-    # directory_name = 'testdata/2022-04-25 1227 PH pentamer_840nm_s50_2'
+    # directory_name = 'example_measurements/2022-04-25 1227 PH pentamer_840nm_s50_2'
     # channels = ['O2P', 'O2A', 'Z C']
-    directory_name = 'testdata/2018-09-10_16-44-27_scan'
-    Measurement = Open_Measurement(directory_name, channels)
+    directory_name = 'example_measurements/2018-09-10_16-44-27_scan'
+    Measurement = SnomMeasurement(directory_name, channels)
     # Measurement.Set_Min_to_Zero(['Z C'])
     Measurement.Scale_Channels()
     Measurement.Gauss_Filter_Channels_complex()
@@ -244,7 +245,7 @@ def Test_Export_to_gsf():
 def Test_Export_and_Load_all_subplots():
     directory_name = 'example_measurements/2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R'
     channels = ['O2P', 'O2A', 'Z C']
-    Measurement = Open_Measurement(directory_name, channels)
+    Measurement = SnomMeasurement(directory_name, channels)
     Measurement.Scale_Channels()
     Measurement.Gauss_Filter_Channels_complex()
     Measurement.Scalebar(['Z C'])
@@ -260,7 +261,7 @@ def Test_Export_and_Load_all_subplots():
 
 def Gif():
     directory_name = 'C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-03-14-ssh-snom/2024-03-14 112623 PH single_wg_lowest_long_interf_sync'
-    # directory_name =  'C:/Users/Hajo/sciebo/Phd/python/SNOM/testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
+    # directory_name =  'C:/Users/Hajo/sciebo/Phd/python/SNOM/example_measurements/2020-01-08 1337 PH denmark_skurve_02_synchronize'
     # directory_name = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2022-04-25 1212 PH pentamer_840nm_s50_1'
     channels = ['O2A', 'O2P_corrected', 'Z C']
     Measurement = SnomMeasurement(directory_name, channels)
@@ -458,6 +459,54 @@ def test_gauss_filter_v2():
     measurement.Gauss_Filter_Channels_complex()
     measurement.Display_Channels()
 
+def test_comsol_data():
+    directory = 'example_measurements/DLSPPW_bragg_8slits_Ez_onpmma'
+    # channels = ['Z C', 'O2P_corrected_aligned', 'O2A']
+    measurement = SnomMeasurement(directory)
+    measurement.Display_Channels()
+    # print('All channels: ', measurement.channels)
+
+def test_comsol_height_data():
+    def create_comsol_height_data():
+        height = 0.14 # in um
+        wg_width = 0.3
+        wg_length = 5
+        grating_width = 0.3
+        grating_length = 1.5
+        grating_period = 0.455
+        num_of_gratings = 8
+        simulation_area = [501, 301] # x, y
+        physical_area = [10, 6] # x, y in um
+        pixel_resolution = [physical_area[0]/(simulation_area[0]-1), physical_area[1]/(simulation_area[1]-1)] # x, y in um/pixel
+        waveguide_area = [[0,wg_length], [3-wg_width/2,3+wg_width/2]] # [[x_left,x_right], [y_low, y_top]] in um
+        grating_positions = [wg_length - grating_width/2 + i*grating_period for i in range(num_of_gratings)]
+        grating_areas = [[[pos-grating_width/2, pos+grating_width/2], [3-grating_length/2, 3+grating_length/2]] for pos in grating_positions]
+        # create the height data
+        height_data = np.zeros((simulation_area[1], simulation_area[0]))
+        for i in range(simulation_area[0]):
+            for j in range(simulation_area[1]):
+                if waveguide_area[0][0] <= i*pixel_resolution[0] <= waveguide_area[0][1] and waveguide_area[1][0] <= j*pixel_resolution[1] <= waveguide_area[1][1]:
+                    height_data[j,i] = height*1000 # in nm
+                for grating_area in grating_areas:
+                    if grating_area[0][0] <= i*pixel_resolution[0] <= grating_area[0][1] and grating_area[1][0] <= j*pixel_resolution[1] <= grating_area[1][1]:
+                        height_data[j,i] = height*1000 # in nm
+        # return the height data
+        return height_data
+
+    channels = ['abs', 'arg']
+    directory = 'example_measurements/DLSPPW_bragg_8slits_Ez_onpmma'
+    measurement = SnomMeasurement(directory, channels)
+    measurement.Display_Channels()
+    # create the height data
+    height_data = create_comsol_height_data()
+    height_channel_tag_dict = measurement.channel_tag_dict[0] # just copy the amp channel tag dict
+    measurement.Create_New_Channel(height_data, 'Z', height_channel_tag_dict, 'Height')
+    measurement.Display_Channels()
+    amp = measurement.all_data[0]
+    height_data = measurement.all_data[2]
+    measurement.Display_Overlay('abs', 'Z', alpha=0.2)
+    # measurement.Save_to_gsf(['Z'], appendix='')
+
 
 def main():
      
@@ -487,7 +536,9 @@ def main():
     # Test_Level_Columnwise()
     # Test_Get_Pixel_Value()
     # Test_Profile_Selector()
-    test_gauss_filter_v2()
+    # test_gauss_filter_v2()
+    # test_comsol_data()
+    test_comsol_height_data()
 
 
 if __name__ == '__main__':

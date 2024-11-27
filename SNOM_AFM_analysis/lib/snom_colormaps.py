@@ -66,7 +66,8 @@ plt.register_cmap(cmap=SNOM_realpart)
 
 # replace old maps with perceptual colormaps
 SNOM_amplitude = cc.cm.CET_L3
-SNOM_phase = cc.cm.CET_C3s
+# SNOM_phase = cc.cm.CET_C3s
+SNOM_phase = cc.cm.CET_C3
 # SNOM_realpart = cc.cm.CET_D1A 
 SNOM_realpart = cc.cm.CET_D1
 # SNOM_realpart = cc.cm.CET_D9

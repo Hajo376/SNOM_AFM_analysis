@@ -1,0 +1,186 @@
+17/08/2022 10:20:22
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+17/08/2022 10:22:00
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+17/08/2022 10:23:21
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+17/08/2022 10:27:49
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+17/08/2022 10:45:53
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+17/08/2022 10:49:21
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+17/08/2022 10:50:10
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+17/08/2022 10:57:27
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+17/08/2022 11:00:31
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+17/08/2022 11:09:10
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+17/08/2022 11:09:59
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+17/08/2022 11:17:24
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+17/08/2022 11:18:02
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+17/08/2022 15:11:56
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+17/08/2022 15:13:28
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+18/08/2022 10:18:01
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+18/08/2022 10:20:10
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+18/08/2022 10:20:48
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+18/08/2022 10:21:31
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+18/08/2022 10:23:11
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+18/08/2022 10:24:14
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+18/08/2022 10:26:13
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+18/08/2022 10:27:42
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+18/08/2022 11:27:14
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+18/08/2022 11:28:30
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+18/08/2022 11:30:50
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+18/08/2022 11:31:42
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+18/08/2022 11:32:19
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+18/08/2022 13:42:55
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+18/08/2022 13:43:59
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+18/08/2022 13:44:54
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+18/08/2022 13:46:56
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+18/08/2022 13:49:53
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+18/08/2022 13:53:18
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+18/08/2022 13:58:55
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+18/08/2022 13:59:52
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+18/08/2022 14:05:49
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+18/08/2022 14:24:05
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+18/08/2022 14:24:29
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+08/03/2023 16:12:51
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+08/03/2023 16:13:34
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+quadratic_pixels = True
+height_leveling_coordinates = [[52, 6], [384, 89], [740, 41]]
+height_masking_threshold = 0.5
+08/03/2023 16:14:51
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+08/03/2023 16:23:13
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+08/03/2023 16:31:17
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+08/03/2023 16:33:02
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+08/03/2023 16:42:44
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+08/03/2023 16:44:44
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+08/03/2023 16:46:06
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+08/03/2023 16:49:52
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+08/03/2023 16:50:55
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+08/03/2023 16:51:28
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+quadratic_pixels = True
+height_leveling_coordinates = []
+08/03/2023 16:52:10
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+08/03/2023 16:57:53
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+quadratic_pixels = True
+08/03/2023 16:59:13
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+quadratic_pixels = True
+08/03/2023 17:37:11
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+quadratic_pixels = True
+08/03/2023 17:38:50
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+quadratic_pixels = True
+08/03/2023 17:39:18
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+quadratic_pixels = True
+08/03/2023 17:40:32
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+quadratic_pixels = True
+height_leveling_coordinates = [[16, 36], [91, 89], [183, 40]]
+08/03/2023 17:42:26
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+quadratic_pixels = True
+height_leveling_coordinates = [[65, 7], [345, 91], [713, 10]]
+height_masking_threshold = 0.5
+30/06/2023 18:43:55
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+set_min_to_zero = True
+30/06/2023 18:43:59
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+set_min_to_zero = True
+30/06/2023 19:46:27
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+quadratic_pixels = True
+30/06/2023 19:46:33
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+30/06/2023 20:05:33
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+quadratic_pixels = True
+set_min_to_zero = True
+30/06/2023 20:05:37
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+set_min_to_zero = True
+30/06/2023 20:13:16
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+quadratic_pixels = True
+set_min_to_zero = True
+30/06/2023 20:13:18
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+quadratic_pixels = True
+set_min_to_zero = True
+30/06/2023 20:13:19
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+quadratic_pixels = True
+set_min_to_zero = True
+30/06/2023 20:13:22
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+set_min_to_zero = True
+03/07/2023 09:58:51
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+quadratic_pixels = True
+set_min_to_zero = True
+26/11/2024 14:14:34
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+quadratic_pixels = True
+set_min_to_zero = True
+scaling = 4
+realign_bounds = [142, 244]
+gaussian_filter_complex_sigma = 2
+height_leveling_coordinates = []
+26/11/2024 14:15:28
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+quadratic_pixels = True
+set_min_to_zero = True
+scaling = 4
+realign_bounds = [143, 244]
+gaussian_filter_complex_sigma = 2
+height_leveling_coordinates = [[470, 168], [1792, 377], [2716, 163]]

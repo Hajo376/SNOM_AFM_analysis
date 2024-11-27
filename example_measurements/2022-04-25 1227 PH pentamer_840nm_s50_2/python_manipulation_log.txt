@@ -322,3 +322,22 @@ quadratic_pixels = True
 04/11/2024 11:12:37
 filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
 quadratic_pixels = True
+26/11/2024 13:51:17
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+scaling = 4
+gaussian_filter_complex_sigma = 2
+26/11/2024 13:52:01
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+26/11/2024 13:52:24
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+26/11/2024 13:53:21
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+scaling = 4
+gaussian_filter_complex_sigma = 2
+26/11/2024 14:10:15
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+scaling = 4
+gaussian_filter_complex_sigma = 2

@@ -358,8 +358,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self.imag_channels = ['O1Im', 'O2Im', 'O3Im', 'O4Im', 'R-O5Im', 'R-O1Im', 'R-O2Im', 'R-O3Im', 'R-O4Im', 'R-O5Im']
             self.height_channel = 'Z C'
             self.height_channels = ['Z C', 'R-Z C']
-            # self.all_channels = ['O1A','O1P','O2A','O2P','O3A','O3P','O4A','O4P','O5A','O5P','R-O1A','R-O1P','R-O2A','R-O2P','R-O3A','R-O3P','R-O4A','R-O4P','R-O5A','R-O5P']
-            self.all_channels = self.phase_channels + self.amp_channels + self.height_channels
+            # self.all_channels_default = ['O1A','O1P','O2A','O2P','O3A','O3P','O4A','O4P','O5A','O5P','R-O1A','R-O1P','R-O2A','R-O2P','R-O3A','R-O3P','R-O4A','R-O4P','R-O5A','R-O5P']
+            self.all_channels_default = self.phase_channels + self.amp_channels + self.height_channels
             self.preview_ampchannel = 'O2A'
             self.preview_phasechannel = 'O2P'
             self.height_indicator = 'Z'
@@ -375,8 +375,8 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self.imag_channels = ['O1-F-Im','O2-F-Im','O3-F-Im','O4-F-Im','O1-B-Im','O2-B-Im','O3-B-Im','O4-B-Im']
             self.height_channel = 'MT-F-abs'
             self.height_channels = ['MT-F-abs', 'MT-B-abs']
-            # self.all_channels = ['O1-F-abs','O1-F-arg','O2-F-abs','O2-F-arg','O3-F-abs','O3-F-arg','O4-F-abs','O4-F-arg', 'O1-B-abs','O1-B-arg','O2-B-abs','O2-B-arg','O3-B-abs','O3-B-arg','O4-B-abs','O4-B-arg']
-            self.all_channels = self.phase_channels + self.amp_channels + self.height_channels
+            # self.all_channels_default = ['O1-F-abs','O1-F-arg','O2-F-abs','O2-F-arg','O3-F-abs','O3-F-arg','O4-F-abs','O4-F-arg', 'O1-B-abs','O1-B-arg','O2-B-abs','O2-B-arg','O3-B-abs','O3-B-arg','O4-B-abs','O4-B-arg']
+            self.all_channels_default = self.phase_channels + self.amp_channels + self.height_channels
             self.preview_ampchannel = 'O2-F-abs'
             self.preview_phasechannel = 'O2-F-arg'
             self.height_indicator = 'MT'
@@ -386,7 +386,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             self.imag_indicator = 'Im'#not used
             self.backwards_indicator = '-B-'
         elif self.file_type == File_Type.comsol_gsf:
-            self.all_channels = ['abs', 'arg', 'real']
+            self.all_channels_default = ['abs', 'arg', 'real']
             self.phase_channels = ['arg']
             self.amp_channels = ['abs']
             self.real_channels = ['real']
@@ -406,7 +406,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
 
         #create also lists for the overlain channels
         self.overlain_phase_channels = [channel+'_overlain_manipulated' for channel in self.phase_channels]
-        self.overlayed_amp_channels = [channel+'_overlain_manipulated' for channel in self.amp_channels]
+        self.overlain_amp_channels = [channel+'_overlain_manipulated' for channel in self.amp_channels]
         # self.corrected_phase_channels = ['O1P_corrected','O2P_corrected','O3P_corrected','O4P_corrected','O5P_corrected', 'R-O1P_corrected','R-O2P_corrected','R-O3P_corrected','R-O4P_corrected','R-O5P_corrected']
         self.corrected_phase_channels = [channel+'_corrected' for channel in self.phase_channels]
         self.corrected_overlain_phase_channels = [channel+'_overlain_manipulated' for channel in self.corrected_phase_channels]
@@ -547,7 +547,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     #     filepath = self.directory_name / Path(self.filename.name + ' ' + channel + '.gsf')
                     # else:
                     #     filepath = self.directory_name / Path(self.filename.name + ' ' + channel + ' raw.gsf')
-                    if channel in self.all_channels and 'C' not in channel:
+                    if channel in self.all_channels_default and 'C' not in channel:
                         filepath = self.directory_name / Path(self.filename.name + ' ' + channel + ' raw.gsf')
                     else:
                         filepath = self.directory_name / Path(self.filename.name + ' ' + channel + '.gsf')
@@ -819,7 +819,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     #     f=open(self.directory_name / Path(self.filename.name + f' {channels[i]}.gsf'),"br")
                     # else:
                     #     f=open(self.directory_name / Path(self.filename.name + f' {channels[i]} raw.gsf'),"br")
-                    if channels[i] in self.all_channels and 'C' not in channels[i]:
+                    if channels[i] in self.all_channels_default and 'C' not in channels[i]:
                         f=open(self.directory_name / Path(self.filename.name + f' {channels[i]} raw.gsf'),"br")
                     else:
                         f=open(self.directory_name / Path(self.filename.name + f' {channels[i]}.gsf'),"br")
@@ -941,6 +941,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         return all_data, data_dict
 
     def _Load_Data_comsol(self, channels):
+        print('loading comsol data')
         # datasize=int(self.XRes*self.YRes*4)
         #create a list containing all the lists of the individual channels
         all_binary_data = []
@@ -971,7 +972,9 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 rounding_decimal = 5
             if self.phase_indicator in channel:
                 # normal phase data ranges from -pi to pi and gets shifted by +pi
-                phaseoffset = np.pi
+                # phaseoffset = np.pi
+                # in newest version the phase is already shifted to the interval 0 to 2pi when being saved as gsf by the comsol script
+                phaseoffset = 0
             if self.real_indicator in channel or self.imag_indicator in channel:
                 rounding_decimal = 4
             for y in range(0,YRes):
@@ -1614,7 +1617,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         # if optical channels should be blurred, the according amp and phase data are used to get the complex values and blurr those
         # before backconversion to amp and phase, the realpart could also be returned in future... ToDo
         # print(f'self.channels: {self.channels}')
-        # print(f'self.overlayed_amp_channels: {self.overlayed_amp_channels}')
+        # print(f'self.overlain_amp_channels: {self.overlain_amp_channels}')
         # print(f'self.overlain_phase_channels: {self.overlain_phase_channels}')
         # print(f'self.corrected_overlain_phase_channels: {self.corrected_overlain_phase_channels}')
         for i in range(len(self.phase_channels)):
@@ -1625,12 +1628,12 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                 elif (self.corrected_phase_channels[i] in channels):
                     channels_to_filter.append(self.channels.index(self.amp_channels[i]))
                     channels_to_filter.append(self.channels.index(self.corrected_phase_channels[i]))
-            elif self.overlayed_amp_channels[i] in channels:
+            elif self.overlain_amp_channels[i] in channels:
                 if self.overlain_phase_channels[i] in channels:
-                    channels_to_filter.append(self.channels.index(self.overlayed_amp_channels[i]))
+                    channels_to_filter.append(self.channels.index(self.overlain_amp_channels[i]))
                     channels_to_filter.append(self.channels.index(self.overlain_phase_channels[i]))
                 elif self.corrected_overlain_phase_channels[i] in channels:
-                    channels_to_filter.append(self.channels.index(self.overlayed_amp_channels[i]))
+                    channels_to_filter.append(self.channels.index(self.overlain_amp_channels[i]))
                     channels_to_filter.append(self.channels.index(self.corrected_overlain_phase_channels[i]))
         
         # should not be necessary anymore since backwards channesl are now included in standart channle lists
@@ -1666,7 +1669,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         
         for i in range(int(len(channels_to_filter)/2)):
             # print(f'channel {self.channels[channels_to_filter[2*i]]} is blurred!')
-            if (self.channels[channels_to_filter[2*i]] in self.amp_channels) or (self.channels[channels_to_filter[2*i]] in [self.backwards_indicator + element for element in self.amp_channels]) or (self.channels[channels_to_filter[2*i]] in self.overlayed_amp_channels):
+            if (self.channels[channels_to_filter[2*i]] in self.amp_channels) or (self.channels[channels_to_filter[2*i]] in [self.backwards_indicator + element for element in self.amp_channels]) or (self.channels[channels_to_filter[2*i]] in self.overlain_amp_channels):
                 # print(self.channel_tag_dict) # ToDo remove
                 # print(self.file_type) # ToDo remove
                 # print(self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_scaling] = scaling)
@@ -1945,7 +1948,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             phasedir = self._Create_Synccorr_Preview(self.preview_phasechannel, wavelength)
         self._Write_to_Logfile('synccorrection_wavelength', wavelength)
         self._Write_to_Logfile('synccorrection_phasedir', phasedir)
-        # all_channels = self.all_channels
+        # all_channels = self.all_channels_default
         # dataset, dict = self._Load_Data(all_channels)
         header, NUL = self._Create_Header(self.preview_phasechannel) # channel for header just important to distinguish z axis unit either m or nothing
         for channel in self.phase_channels:
@@ -2081,7 +2084,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
             export [bool]: if you want to apply the mask to all channels and export them change to 'True'
         """
         if export == True:
-            channels = self.all_channels
+            channels = self.all_channels_default
         self._Initialize_Data(channels)
         if (mask_channel == None) or (mask_channel not in self.channels):
             if self.height_channel in self.channels:
@@ -2597,7 +2600,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
                     self.all_data[index] = np.multiply(self.all_data[index], self.mask_array)
                     # self.channels[index] += '_reduced'
             else:
-                print('There does not seem to be an old mask...')
+                print('There does not seem to be an old mask... in cut_channels')
         else:
             if autocut == True:
                 self._Auto_Cut_Channels(channels)
@@ -3186,7 +3189,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         Args:
             height_channel_forward (str): usual corrected height channel
             height_channel_backward (str): backwards height channel
-            channels (list, optional): a list of all channels to be overlayed. Defaults to None.
+            channels (list, optional): a list of all channels to be overlain. Defaults to None.
         """
         all_channels = []
         for channel in channels:
@@ -3323,7 +3326,7 @@ class Open_Measurement(File_Definitions, Plot_Definitions):
         Args:
             height_channel_forward (str): Usual corrected height channel
             height_channel_backward (str): Backwards height channel
-            channels (list, optional): List of all channels to be overlayed. Only specify the forward direction. Defaults to None.
+            channels (list, optional): List of all channels to be overlain. Only specify the forward direction. Defaults to None.
             If not specified only the amp channels and the height channel will be overlaid.
         """
         if channels is None:
@@ -3474,12 +3477,10 @@ class FileHandler(File_Definitions, Plot_Definitions):
         """Generate savefolder if not already existing. Careful, has to be the same one as for the snom plotter gui app.
         """
         # self.logging_folder = Path(os.path.expanduser('~')) / Path('SNOM_Plotter')
-        self.save_folder = Path(os.path.expanduser('~')) / Path('SNOM_Plotter')
+        # self.save_folder = Path(os.path.expanduser('~')) / Path('SNOM_Plotter')
+        self.save_folder = Path(os.path.expanduser('~')) / Path('SNOM_Analysis')
         self.all_subplots_path = self.save_folder / Path('all_subplots.p')
-        self.plotting_parameters_path = self.save_folder / Path('plotting_parameters.json')
-        # self.save_folder = Path(os.environ['APPDATA']) / Path('SNOM_Plotter')
-        # self.all_subplots_path = self.save_folder / Path('all_subplots.p')
-        # self.plotting_parameters_path = self.save_folder / Path('plotting_parameters.json')
+        self.plotting_parameters_path = self.save_folder / Path('plotting_parameters.json') # probably not a good idea to use the same folder as the snom plotter app
 
         if not Path.exists(self.save_folder):
             os.makedirs(self.save_folder)
@@ -3772,6 +3773,28 @@ class FileHandler(File_Definitions, Plot_Definitions):
             "fourier_title": "Fourier transform",
             "gauss_blurred_title": "Blurred <channel>"
         }
+        # Todo: add more parameters to the dictionary
+        # make a similar file for the snom plotter app and overwrite the defaults from the snom anlaysis package
+        # make it possible to add mutliple sets of parameters, each for a different filetype
+        '''
+        channel indicators
+        channel labels
+        channel prefixes
+        channel suffixes
+        file endings (.gsf, .txt, .ascii, ...)
+        synccorrected channel indicator
+        manipulated channel indicator
+        filetype indicator? (standard, aachen, comsol, ...)
+        parameters type indicator? (txt, html, gsf)
+        add all plotting parameters
+        enable/disable logfiles
+        standard channels
+        also add the default values for the loading of the data like:
+            phaseoffset
+            rounding_decimal (amp, phase, height, ...)
+            scaling
+        allow to add a list of custom channels which will be added to all_channels_custom
+        '''
         with open(self.plotting_parameters_path, 'w') as file:
             json.dump(dictionary, file, indent=4)
 
@@ -3794,16 +3817,21 @@ class SnomMeasurement(FileHandler):
     
 
     def _Initialize_Measurement_Channel_Indicators(self):
+        # in the future these indicators should be read from external prameters file to make it easier for the user to add new filetypes with different indicators
+        # the cannel prefix and suffix are characters surrounding the channel name in the filename, they will be used when loading and saving the data
+        # filename = directory_name + channel_prefix + channel + channel_suffix + appendix + '.gsf' (or '.txt') 
+        # appendix is just a standard appendix when saving to not overwrite the original files, can be changed by the user default is '_manipulated'
         if self.file_type == File_Type.standard or self.file_type == File_Type.standard_new or self.file_type == File_Type.neaspec_version_1_6_3359_1:
             self.phase_channels = ['O1P','O2P','O3P','O4P','O5P', 'R-O1P','R-O2P','R-O3P','R-O4P','R-O5P']
             self.amp_channels = ['O1A','O2A','O3A','O4A','O5A', 'R-O1A','R-O2A','R-O3A','R-O4A','R-O5A']
             self.real_channels = ['O1Re', 'O2Re', 'O3Re', 'O4Re', 'R-O5Re', 'R-O1Re', 'R-O2Re', 'R-O3Re', 'R-O4Re', 'R-O5Re']
             self.imag_channels = ['O1Im', 'O2Im', 'O3Im', 'O4Im', 'R-O5Im', 'R-O1Im', 'R-O2Im', 'R-O3Im', 'R-O4Im', 'R-O5Im']
+            self.complex_channels = self.imag_channels + self.real_channels
             self.height_channel = 'Z C'
             self.height_channels = ['Z C', 'R-Z C']
             self.mechanical_channels = ['M0A', 'M0P', 'M1A', 'M1P', 'M2A', 'M2P', 'M3A', 'M3P', 'M4A', 'M4P', 'M5A', 'M5P', 'R-M0A', 'R-M0P', 'R-M1A', 'R-M1P', 'R-M2A', 'R-M2P', 'R-M3A', 'R-M3P', 'R-M4A', 'R-M4P', 'R-M5A', 'R-M5P']
-            # self.all_channels = ['O1A','O1P','O2A','O2P','O3A','O3P','O4A','O4P','O5A','O5P','R-O1A','R-O1P','R-O2A','R-O2P','R-O3A','R-O3P','R-O4A','R-O4P','R-O5A','R-O5P']
-            self.all_channels = self.phase_channels + self.amp_channels + self.height_channels + self.mechanical_channels
+            # self.all_channels_default = ['O1A','O1P','O2A','O2P','O3A','O3P','O4A','O4P','O5A','O5P','R-O1A','R-O1P','R-O2A','R-O2P','R-O3A','R-O3P','R-O4A','R-O4P','R-O5A','R-O5P']
+            self.all_channels_default = self.phase_channels + self.amp_channels + self.mechanical_channels
             self.preview_ampchannel = 'O2A'
             self.preview_phasechannel = 'O2P'
             self.height_indicator = 'Z'
@@ -3812,15 +3840,40 @@ class SnomMeasurement(FileHandler):
             self.backwards_indicator = 'R-'
             self.real_indicator = 'Re'
             self.imag_indicator = 'Im'
+            
+            self.channel_prefix_default = ' '
+            self.channel_prefix_custom = ' '
+            if self.file_type == File_Type.standard_new:
+                self.channel_suffix_default = ' raw'
+            else:
+                self.channel_suffix_default = ''
+            self.channel_suffix_custom = ''
+            self.file_ending = '.gsf'
+
+            # definitions for data loading:
+            self.phase_offset_default = np.pi # shift raw data to the interval [0, 2pi]
+            self.phase_offset_custom = 0 # assume custom data is already in the interval [0, 2pi]
+            self.rounding_decimal_amp_default = 5
+            self.rounding_decimal_amp_custom = 5
+            self.rounding_decimal_phase_default = 5
+            self.rounding_decimal_phase_custom = 5
+            self.rounding_decimal_complex_default = 5
+            self.rounding_decimal_complex_custom = 5
+            self.rounding_decimal_height_default = 2 # when in nm
+            self.rounding_decimal_height_custom = 2 # when in nm
+            self.height_scaling_default = 10**9 # data is in m convert to nm
+            self.height_scaling_custom = 10**9 # data is in m convert to nm
+
         elif self.file_type == File_Type.aachen_ascii or self.file_type == File_Type.aachen_gsf:
             self.phase_channels = ['O1-F-arg','O2-F-arg','O3-F-arg','O4-F-arg', 'O1-B-arg','O2-B-arg','O3-B-arg','O4-B-arg']
             self.amp_channels = ['O1-F-abs','O2-F-abs','O3-F-abs','O4-F-abs', 'O1-B-abs','O2-B-abs','O3-B-abs','O4-B-abs']
             self.real_channels = ['O1-F-Re','O2-F-Re','O3-F-Re','O4-F-Re','O1-B-Re','O2-B-Re','O3-B-Re','O4-B-Re']
             self.imag_channels = ['O1-F-Im','O2-F-Im','O3-F-Im','O4-F-Im','O1-B-Im','O2-B-Im','O3-B-Im','O4-B-Im']
+            self.complex_channels = self.imag_channels + self.real_channels
             self.height_channel = 'MT-F-abs'
             self.height_channels = ['MT-F-abs', 'MT-B-abs']
-            # self.all_channels = ['O1-F-abs','O1-F-arg','O2-F-abs','O2-F-arg','O3-F-abs','O3-F-arg','O4-F-abs','O4-F-arg', 'O1-B-abs','O1-B-arg','O2-B-abs','O2-B-arg','O3-B-abs','O3-B-arg','O4-B-abs','O4-B-arg']
-            self.all_channels = self.phase_channels + self.amp_channels + self.height_channels
+            # self.all_channels_default = ['O1-F-abs','O1-F-arg','O2-F-abs','O2-F-arg','O3-F-abs','O3-F-arg','O4-F-abs','O4-F-arg', 'O1-B-abs','O1-B-arg','O2-B-abs','O2-B-arg','O3-B-abs','O3-B-arg','O4-B-abs','O4-B-arg']
+            self.all_channels_default = self.phase_channels + self.amp_channels
             self.preview_ampchannel = 'O2-F-abs'
             self.preview_phasechannel = 'O2-F-arg'
             self.height_indicator = 'MT'
@@ -3829,19 +3882,65 @@ class SnomMeasurement(FileHandler):
             self.real_indicator = 'Re'#not used
             self.imag_indicator = 'Im'#not used
             self.backwards_indicator = '-B-'
+            self.channel_prefix_default = '_'
+            self.channel_prefix_custom = '_'
+            self.channel_suffix_default = ''
+            self.channel_suffix_custom = ''
+            if self.file_type == File_Type.aachen_ascii:
+                self.file_ending = '.ascii'
+            else:
+                self.file_ending = '.gsf'
+            # definitions for data loading:
+            # todo the detector voltages should be handeled here, the following values are just placeholders
+            # also gsf file reading for the gwyddion dump format is not implemented yet but ascii somewhat works
+            self.phase_offset_default = np.pi # shift raw data to the interval [0, 2pi]
+            self.phase_offset_custom = 0 # assume custom data is already in the interval [0, 2pi]
+            self.rounding_decimal_amp_default = 5
+            self.rounding_decimal_amp_custom = 5
+            self.rounding_decimal_phase_default = 5
+            self.rounding_decimal_phase_custom = 5
+            self.rounding_decimal_complex_default = 5
+            self.rounding_decimal_complex_custom = 5
+            self.rounding_decimal_height_default = 2 # when in nm
+            self.rounding_decimal_height_custom = 2 # when in nm
+            self.height_scaling_default = 10**9 # data is in m convert to nm
+            self.height_scaling_custom = 10**9 # data is in m convert to nm
+
         elif self.file_type == File_Type.comsol_gsf:
-            self.all_channels = ['abs', 'arg', 'real', 'imag']
+            self.all_channels_default = ['abs', 'arg', 'real', 'imag', 'Z'] # Z is not a standard channel, but the user might create it manually to show the simulation design
             self.phase_channels = ['arg']
             self.amp_channels = ['abs']
             self.real_channels = ['real']
-            self.height_channel = 'none'
+            self.imag_channels = ['imag']
+            self.complex_channels = self.imag_channels + self.real_channels
+            self.height_channel = 'Z'
+            self.height_channels = ['Z']
             self.preview_ampchannel = 'abs'
             self.preview_phasechannel = 'arg'
-            self.height_indicator = 'none'
+            self.height_indicator = 'Z'
             self.amp_indicator = 'abs'
             self.phase_indicator = 'arg'
             self.real_indicator = 'real'
             self.imag_indicator = 'imag'
+            self.channel_prefix_default = '_'
+            self.channel_prefix_custom = '_'
+            self.channel_suffix_default = ''
+            self.channel_suffix_custom = ''
+            self.file_ending = '.gsf'
+
+            # definitions for data loading:
+            self.phase_offset_default = 0 # assume default data is already in the interval [0, 2pi]
+            self.phase_offset_custom = 0 # assume custom data is already in the interval [0, 2pi]
+            self.rounding_decimal_amp_default = 5
+            self.rounding_decimal_amp_custom = 5
+            self.rounding_decimal_phase_default = 5
+            self.rounding_decimal_phase_custom = 5
+            self.rounding_decimal_complex_default = 5
+            self.rounding_decimal_complex_custom = 5
+            self.rounding_decimal_height_default = 2 # when in nm
+            self.rounding_decimal_height_custom = 2 # when in nm
+            self.height_scaling_default = 10**9 # data is in m convert to nm
+            self.height_scaling_custom = 10**9 # data is in m convert to nm
         
         # additional definitions independent of filetype:
         self.filter_gauss_indicator = 'gauss'
@@ -3850,10 +3949,12 @@ class SnomMeasurement(FileHandler):
 
         #create also lists for the overlain channels
         self.overlain_phase_channels = [channel+'_overlain_manipulated' for channel in self.phase_channels]
-        self.overlayed_amp_channels = [channel+'_overlain_manipulated' for channel in self.amp_channels]
+        self.overlain_amp_channels = [channel+'_overlain_manipulated' for channel in self.amp_channels]
         # self.corrected_phase_channels = ['O1P_corrected','O2P_corrected','O3P_corrected','O4P_corrected','O5P_corrected', 'R-O1P_corrected','R-O2P_corrected','R-O3P_corrected','R-O4P_corrected','R-O5P_corrected']
         self.corrected_phase_channels = [channel+'_corrected' for channel in self.phase_channels]
         self.corrected_overlain_phase_channels = [channel+'_overlain_manipulated' for channel in self.corrected_phase_channels]
+
+        self.all_channels_custom = self.height_channels + self.complex_channels + self.overlain_phase_channels + self.overlain_amp_channels + self.corrected_phase_channels + self.corrected_overlain_phase_channels
 
     def _Create_Channels_Tag_Dict(self, channels:list=None):
         # ToDo optimize everything so new filetypes dont need so much extra copies
@@ -3870,7 +3971,7 @@ class SnomMeasurement(FileHandler):
                     #     filepath = self.directory_name / Path(self.filename.name + ' ' + channel + '.gsf')
                     # else:
                     #     filepath = self.directory_name / Path(self.filename.name + ' ' + channel + ' raw.gsf')
-                    if channel in self.all_channels and 'C' not in channel:
+                    if channel in self.all_channels_default and 'C' not in channel:
                         filepath = self.directory_name / Path(self.filename.name + ' ' + channel + ' raw.gsf')
                     else:
                         filepath = self.directory_name / Path(self.filename.name + ' ' + channel + '.gsf')
@@ -3887,7 +3988,7 @@ class SnomMeasurement(FileHandler):
                 else:
                     # filepath = self.directory_name + '/' + self.filename + ' ' + channel + '.gsf'
                     filepath = self.directory_name / Path(self.filename.name + ' ' + channel + '.gsf')
-                print(self.file_type, filepath, self.channels)
+                # print(self.file_type, filepath, self.channels)
                 file = open(filepath, 'r', encoding=cod)
                 content = file.read()
                 file.close()
@@ -4002,6 +4103,8 @@ class SnomMeasurement(FileHandler):
             if channel[0:2] != 'MT':
                 indicator_index = 0
             return optomechanical_indicator, indicator_index
+        elif self.file_type == File_Type.comsol_gsf:
+            return None, None
         else:
             print('optomechanical indicator for this filetype is not yet implemented')
             return None, None
@@ -4011,6 +4114,8 @@ class SnomMeasurement(FileHandler):
         optomechanical_indicator, indicator_index = self._get_optomechanical_indicator(channel)
         if optomechanical_indicator == 'O' and self.amp_indicator in channel:
             return True
+        elif self.file_type == File_Type.comsol_gsf and self.amp_indicator in channel:
+            return True
         else:
             return False
             
@@ -4019,9 +4124,21 @@ class SnomMeasurement(FileHandler):
         optomechanical_indicator, indicator_index = self._get_optomechanical_indicator(channel)
         if optomechanical_indicator == 'O' and self.phase_indicator in channel:
             return True
+        elif self.file_type == File_Type.comsol_gsf and self.phase_indicator in channel:
+            return True
         else:
             return False
-        
+
+    def _is_complex_channel(self, channel) -> bool:
+        """This function returns True if the channel is a complex channel, False otherwise."""
+        optomechanical_indicator, indicator_index = self._get_optomechanical_indicator(channel)
+        if optomechanical_indicator == 'O' and self.real_indicator in channel or self.imag_indicator in channel:
+            return True
+        elif self.file_type == File_Type.comsol_gsf and (self.real_indicator in channel or self.imag_indicator in channel):
+            return True
+        else:
+            return False
+
     def _is_height_channel(self, channel) -> bool:
         """This function returns True if the channel is a height channel, False otherwise."""
         optomechanical_indicator, indicator_index = self._get_optomechanical_indicator(channel)
@@ -4029,7 +4146,29 @@ class SnomMeasurement(FileHandler):
             return True
         else:
             return False
-                 
+
+    def _channel_has_demod_num(self, channel) -> bool:
+        """This function returns True if the channel has a demodulation number, False otherwise.
+
+        Args:
+            channel (str): channel name
+
+        Returns:
+            bool: _description_
+        """
+        # only amplitude, phase, complex and mechanical (amp, phase) channels can have a demodulation number not the height channels
+        if self._is_amp_channel(channel) or self._is_phase_channel(channel) or self._is_complex_channel(channel):
+            return True
+        elif self._is_height_channel(channel):
+            return False
+        else:
+            try:
+                if channel in self.mechanical_channels:
+                    return True
+            except:
+                print('unknown channel encountered in _channel_has_demod_num')
+                return False
+
     def _get_demodulation_num(self, channel) -> int:
         """This function returns the demodulation number of the channel.
         So far for all known filetypes the demodulation number is the number behind the optomechanical indicator (O or M) in the channel name."""
@@ -4038,7 +4177,8 @@ class SnomMeasurement(FileHandler):
         if indicator_index != None: # if the index is None the channel is a height channel and has no demodulation number
             demodulation_num = int(channel[indicator_index +1 : indicator_index +2])
 
-        if demodulation_num == None:
+        if demodulation_num == None and self._channel_has_demod_num(channel):
+            # height channel for example has no demodulation number but should not cause an error
             print('demodulation number could not be found')
         return demodulation_num
 
@@ -4173,7 +4313,8 @@ class SnomMeasurement(FileHandler):
             else:
                 print(f'Channel {channel} is not in memory! Please initiate the channels you want to use first!')
 
-    def _Load_Data(self, channels:list) -> list:
+    # old not needed anymore
+    def _Load_Data_old(self, channels:list) -> list:
         """Loads all binary data of the specified channels and returns them in a list plus the dictionary with the channel information.
         Height data is automatically converted to nm. """
         if self.file_type == File_Type.comsol_gsf:
@@ -4196,7 +4337,7 @@ class SnomMeasurement(FileHandler):
                     #     f=open(self.directory_name / Path(self.filename.name + f' {channels[i]}.gsf'),"br")
                     # else:
                     #     f=open(self.directory_name / Path(self.filename.name + f' {channels[i]} raw.gsf'),"br")
-                    if channels[i] in self.all_channels and 'C' not in channels[i]:
+                    if channels[i] in self.all_channels_default and 'C' not in channels[i]:
                         f=open(self.directory_name / Path(self.filename.name + f' {channels[i]} raw.gsf'),"br")
                     else:
                         f=open(self.directory_name / Path(self.filename.name + f' {channels[i]}.gsf'),"br")
@@ -4321,6 +4462,110 @@ class SnomMeasurement(FileHandler):
         # but self.channels will always contain the original channel name as this is used for internal referencing
         return all_data, data_dict
 
+    # same as _Load_Data but using channel prefixes and suffixes to make it more generic and independent of the filetype
+    def _Load_Data(self, channels:list) -> list:
+        """Loads all binary data of the specified channels and returns them in a list plus the dictionary with the channel information.
+        Height data is automatically converted to nm. """
+
+        # try to make loading independent of filetype and make use of channel prefixes and suffixes
+        # if self.file_type == File_Type.comsol_gsf:
+        #     return self._Load_Data_comsol(channels)
+        #create a list containing all the lists of the individual channels
+        # all_binary_data = []
+        #safe the information about which channel is which list in a dictionary
+        data_dict = []
+        all_data = []
+        # why not safe channel and data as a dictionary? Maybe change it later
+        
+        
+        
+
+        for channel in channels:
+            # check if channel is a default channel or something user made
+            # if default use the standard naming convention
+            # if user made dont use the '_raw' suffix
+            if channel in self.all_channels_default:
+                suffix = self.channel_suffix_default
+                prefix = self.channel_prefix_default
+                channel_type = 'default'
+            elif channel in self.all_channels_custom:
+                suffix = self.channel_suffix_custom
+                prefix = self.channel_prefix_custom
+                channel_type = 'custom'
+            else:
+                print('channel not found in default or custom channels')
+                exit()
+            # check the readmode depending on the filetype
+            # this also affects the way the data is read and processed
+            if self.file_ending == '.gsf':
+                read_mode = 'br'
+            elif self.file_ending == '.ascii':
+                read_mode = 'r'
+            else:
+                print('file ending not supported')
+            with open(self.directory_name / Path(self.filename.name + f'{prefix}{channel}{suffix}{self.file_ending}'), read_mode) as f:
+                data=f.read()
+
+            if read_mode == 'br':
+                binarydata = data
+            elif read_mode == 'r':
+                datalist = data.split('\n')
+                datalist = [element.split(' ') for element in datalist]
+                datalist = np.array(datalist[:-1], dtype=float)#, dtype=np.float convert list to np.array and strings to float
+            
+            # get the resolution of the channel 
+            XRes, YRes = self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_area]
+            datasize=int(XRes*YRes*4)
+            channel_data = np.zeros((YRes, XRes))
+            # we knwo the resolution of the data from the header or parameter file
+            # we use that to read the data from the end of the file until the end of the file minus the datasize
+            # in this way we ignore the header and read only the data
+            reduced_binarydata=binarydata[-datasize:]
+
+            # depending on the channel type set the scaling, phase_offset and rounding_decimal
+            scaling = 1 # default scaling, not every channel needs scaling
+            phase_offset = 0 # default phase offset, not every channel needs a phase offset
+            if self._is_amp_channel(channel):
+                if channel_type == 'default':
+                    rounding_decimal = self.rounding_decimal_amp_default
+                elif channel_type == 'custom':
+                    rounding_decimal = self.rounding_decimal_amp_custom
+            if self._is_height_channel(channel):
+                if channel_type == 'default':
+                    scaling = self.height_scaling_default
+                    rounding_decimal = self.rounding_decimal_height_default
+                elif channel_type == 'custom':
+                    scaling = self.height_scaling_custom
+                    rounding_decimal = self.rounding_decimal_height_custom
+            if self._is_phase_channel(channel):
+                if channel_type == 'default':
+                    phase_offset = self.phase_offset_default
+                    rounding_decimal = self.rounding_decimal_phase_default
+                elif channel_type == 'custom':
+                    phase_offset = self.phase_offset_custom
+                    rounding_decimal = self.rounding_decimal_phase_custom
+            if self._is_complex_channel(channel):
+                if channel_type == 'default':
+                    rounding_decimal = self.rounding_decimal_complex_default
+                elif channel_type == 'custom':
+                    rounding_decimal = self.rounding_decimal_complex_custom
+            # now read the data and apply the scaling, phase offset and rounding
+            for y in range(0,YRes):
+                for x in range(0,XRes):
+                    if read_mode == 'br':
+                        pixval=unpack("f",reduced_binarydata[4*(y*XRes+x):4*(y*XRes+x+1)])[0]
+                        channel_data[y][x] = round(pixval*scaling + phase_offset, rounding_decimal)
+                    elif read_mode == 'r':
+                        datalist[y][x] = round(datalist[y][x]*scaling + phase_offset, rounding_decimal)
+            
+            all_data.append(channel_data)
+            data_dict.append(channel)
+        # data_dict currently is just a list of the channels, this list is not equivalent to self.channels as the data_dict
+        # or later self.channels_label contains the names of the channels which are used as the plot title, they will change depending on the functions applied, eg. 'channel_blurred' or channel_manipulated'...
+        # but self.channels will always contain the original channel name as this is used for internal referencing
+        return all_data, data_dict
+
+    # old not needed anymore
     def _Load_Data_comsol(self, channels):
         # datasize=int(self.XRes*self.YRes*4)
         #create a list containing all the lists of the individual channels
@@ -4352,7 +4597,8 @@ class SnomMeasurement(FileHandler):
                 rounding_decimal = 5
             if self.phase_indicator in channel:
                 # normal phase data ranges from -pi to pi and gets shifted by +pi
-                phaseoffset = np.pi
+                # phaseoffset = np.pi # in the newest version of the comsol script the phase is already shifted
+                phaseoffset = 0
             if self.real_indicator in channel or self.imag_indicator in channel:
                 rounding_decimal = 4
             for y in range(0,YRes):
@@ -4400,10 +4646,7 @@ class SnomMeasurement(FileHandler):
             else:
                 print('At least one of the specified channels is not in memory! You probably should initialize the channels first.')
 
-    def _Add_Subplot(self, data, channel, scalebar=None) -> list:
-        """This function adds the specified data to the list of subplots. The list of subplots contains the data, the colormap,
-        the colormap label and a title, which are generated from the channel information. The same array is also returned,
-        so it can also be iterated by an other function to only plot the data of interest."""
+    def _get_plotting_values(self, channel) -> tuple:
         # import plotting_parameters.json, here the user can tweek some options for the plotting, like automatic titles and colormap choices
         plotting_parameters = self._Get_Plotting_Parameters()
 
@@ -4486,8 +4729,22 @@ class SnomMeasurement(FileHandler):
             title = plotting_parameters["gauss_blurred_title"]
         
         else:
+            print('channel: ', channel)
+            print('self.amp_indicator: ', self.amp_indicator)
+            print('self.phase_indicator: ', self.phase_indicator)
+            print('self.height_indicator: ', self.height_indicator)
+            print('self.real_indicator: ', self.real_indicator)
+            print('self.imag_indicator: ', self.imag_indicator)
+
             print('In _Add_Subplot(), encountered unknown channel')
             exit()
+        return cmap, label, title
+
+    def _Add_Subplot(self, data, channel, scalebar=None) -> list:
+        """This function adds the specified data to the list of subplots. The list of subplots contains the data, the colormap,
+        the colormap label and a title, which are generated from the channel information. The same array is also returned,
+        so it can also be iterated by an other function to only plot the data of interest."""
+        cmap, label, title = self._get_plotting_values(channel)
         # subplots.append([data, cmap, label, title])
         if self.measurement_title != None:
             title = self.measurement_title + title
@@ -4892,25 +5149,62 @@ class SnomMeasurement(FileHandler):
         # self.show_plot = show_plot
         if channels == None:
             dataset = self.all_data
-            plot_channels_dict = self.channels_label
-            # plot_channels = self.channels
+            # plot_channels_dict = self.channels_label
+            # plot_channels_dict = self.channels
+            plot_channels = self.channels
         else:
             dataset = []
-            plot_channels_dict = []
-            # plot_channels = []
+            # plot_channels_dict = []
+            plot_channels = []
             for channel in channels:
                 if channel in self.channels:
                     dataset.append(self.all_data[self.channels.index(channel)])
-                    plot_channels_dict.append(self.channels_label[self.channels.index(channel)])
-                    # plot_channels.append(channel)
+                    # plot_channels_dict.append(self.channels_label[self.channels.index(channel)])
+                    # plot_channels_dict.append(channel)
+                    plot_channels.append(channel)
                 else: 
                     print(f'Channel {channel} is not in memory! Please initiate the channels you want to display first!')
                     print(self.channels)
 
             # dataset, dict = self._Load_Data(channels)
-        self._Display_Dataset(dataset, plot_channels_dict)
+        # self._Display_Dataset(dataset, plot_channels_dict)
+        self._Display_Dataset(dataset, plot_channels)
         gc.collect()
-        # self._Display_Dataset(dataset, plot_channels)
+
+    def Display_Overlay(self, channel1:str, channel2:str, alpha=0.5) -> None:
+        """This function displays an overlay of two channels. The first channel is displayed in full color, the second channel is displayed width a specified alpha.
+        """
+        # get the colormaps
+        cmap1, label1, title1 = self._get_plotting_values(channel1)
+        cmap2, label2, title2 = self._get_plotting_values(channel2)
+        # get the data
+        data1 = self.all_data[self.channels.index(channel1)]
+        data2 = self.all_data[self.channels.index(channel2)]
+        # create the figure
+        fig, ax = plt.subplots()
+        fig.set_figheight(self.figsizey)
+        fig.set_figwidth(self.figsizex)
+        # plot the data
+        # img1 = ax.pcolormesh(data1, cmap=cmap1)
+        # img2 = ax.pcolormesh(data2, cmap=cmap2, alpha=alpha)
+        img1 = ax.imshow(data1, cmap=cmap1)
+        img2 = ax.imshow(data2, cmap=cmap2, alpha=alpha)
+        # add the colorbar
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size=f"{self.colorbar_width}%", pad=0.05)
+        cbar = plt.colorbar(img1, aspect=1, cax=cax)
+        cbar.ax.get_yaxis().labelpad = 15
+        cbar.ax.set_ylabel(label1, rotation=270)
+        # invert y axis to fit to the scanning procedure which starts in the top left corner
+        ax.invert_yaxis()
+        # add the title
+        # ax.set_title(title1)
+        # remove ticks on x and y axis, they only show pixelnumber anyways, better to add a scalebar
+        if self.hide_ticks == True:
+            ax.set_xticks([])
+            ax.set_yticks([])
+        plt.show()
+        gc.collect()
 
     def _Gauss_Blurr_Data(self, array, sigma) -> np.array:
         """Applies a gaussian blurr to the specified array, with a specified sigma. The blurred data is returned as a list."""
@@ -5082,7 +5376,7 @@ class SnomMeasurement(FileHandler):
         # if optical channels should be blurred, the according amp and phase data are used to get the complex values and blurr those
         # before backconversion to amp and phase, the realpart could also be returned in future... ToDo
         # print(f'self.channels: {self.channels}')
-        # print(f'self.overlayed_amp_channels: {self.overlayed_amp_channels}')
+        # print(f'self.overlain_amp_channels: {self.overlain_amp_channels}')
         # print(f'self.overlain_phase_channels: {self.overlain_phase_channels}')
         # print(f'self.corrected_overlain_phase_channels: {self.corrected_overlain_phase_channels}')
         for i in range(len(self.phase_channels)):
@@ -5093,12 +5387,12 @@ class SnomMeasurement(FileHandler):
                 elif (self.corrected_phase_channels[i] in channels):
                     channels_to_filter.append(self.channels.index(self.amp_channels[i]))
                     channels_to_filter.append(self.channels.index(self.corrected_phase_channels[i]))
-            elif self.overlayed_amp_channels[i] in channels:
+            elif self.overlain_amp_channels[i] in channels:
                 if self.overlain_phase_channels[i] in channels:
-                    channels_to_filter.append(self.channels.index(self.overlayed_amp_channels[i]))
+                    channels_to_filter.append(self.channels.index(self.overlain_amp_channels[i]))
                     channels_to_filter.append(self.channels.index(self.overlain_phase_channels[i]))
                 elif self.corrected_overlain_phase_channels[i] in channels:
-                    channels_to_filter.append(self.channels.index(self.overlayed_amp_channels[i]))
+                    channels_to_filter.append(self.channels.index(self.overlain_amp_channels[i]))
                     channels_to_filter.append(self.channels.index(self.corrected_overlain_phase_channels[i]))
         
         # should not be necessary anymore since backwards channesl are now included in standart channle lists
@@ -5134,7 +5428,7 @@ class SnomMeasurement(FileHandler):
         
         for i in range(int(len(channels_to_filter)/2)):
             # print(f'channel {self.channels[channels_to_filter[2*i]]} is blurred!')
-            if (self.channels[channels_to_filter[2*i]] in self.amp_channels) or (self.channels[channels_to_filter[2*i]] in [self.backwards_indicator + element for element in self.amp_channels]) or (self.channels[channels_to_filter[2*i]] in self.overlayed_amp_channels):
+            if (self.channels[channels_to_filter[2*i]] in self.amp_channels) or (self.channels[channels_to_filter[2*i]] in [self.backwards_indicator + element for element in self.amp_channels]) or (self.channels[channels_to_filter[2*i]] in self.overlain_amp_channels):
                 # print(self.channel_tag_dict) # ToDo remove
                 # print(self.file_type) # ToDo remove
                 # print(self.channel_tag_dict[self.channels.index(channel)][Tag_Type.pixel_scaling] = scaling)
@@ -5321,7 +5615,20 @@ class SnomMeasurement(FileHandler):
             channels = self.channels
         for channel in channels:
             # filepath = self.directory_name + '/' + self.filename + ' ' + channel + appendix + '.gsf'
-            filepath = self.directory_name / Path(self.filename.name + f' {channel}{appendix}.gsf')
+            # find out if channel is default or not
+            if channel in self.all_channels_default:
+                suffix = self.channel_suffix_default
+                prefix = self.channel_prefix_default
+                channel_type = 'default'
+            elif channel in self.all_channels_custom:
+                suffix = self.channel_suffix_custom
+                prefix = self.channel_prefix_custom
+                channel_type = 'custom'
+            else:
+                print('channel not found in default or custom channels')
+                exit()
+            # filepath = self.directory_name / Path(self.filename.name + f' {channel}{appendix}.gsf')
+            filepath = self.directory_name / Path(self.filename.name + f'{prefix}{channel}{suffix}{appendix}.gsf')
             data = self.all_data[self.channels.index(channel)]
             XRes = len(data[0])
             YRes  = len(data)
@@ -5353,8 +5660,19 @@ class SnomMeasurement(FileHandler):
         if channels == None:
             channels = self.channels
         for channel in channels:
-            # filepath = self.directory_name + '/' + self.filename + ' ' + channel + appendix + '.txt'
-            filepath = self.directory_name / Path(self.filename.name + f' {channel}{appendix}.txt')
+            if channel in self.all_channels_default:
+                suffix = self.channel_suffix_default
+                prefix = self.channel_prefix_default
+                channel_type = 'default'
+            elif channel in self.all_channels_custom:
+                suffix = self.channel_suffix_custom
+                prefix = self.channel_prefix_custom
+                channel_type = 'custom'
+            else:
+                print('channel not found in default or custom channels')
+                exit()
+            # filepath = self.directory_name / Path(self.filename.name + f' {channel}{appendix}.txt')
+            filepath = self.directory_name / Path(self.filename.name + f'{prefix}{channel}{suffix}{appendix}.txt')
             data = self.all_data[self.channels.index(channel)]
             XRes = len(data[0])
             YRes  = len(data)
@@ -5435,7 +5753,7 @@ class SnomMeasurement(FileHandler):
             phasedir = self._Create_Synccorr_Preview(self.preview_phasechannel, wavelength)
         self._Write_to_Logfile('synccorrection_wavelength', wavelength)
         self._Write_to_Logfile('synccorrection_phasedir', phasedir)
-        # all_channels = self.all_channels
+        # all_channels = self.all_channels_default
         # dataset, dict = self._Load_Data(all_channels)
         header, NUL = self._Create_Header(self.preview_phasechannel) # channel for header just important to distinguish z axis unit either m or nothing
         for channel in self.phase_channels:
@@ -5571,7 +5889,7 @@ class SnomMeasurement(FileHandler):
             export [bool]: if you want to apply the mask to all channels and export them change to 'True'
         """
         if export == True:
-            channels = self.all_channels
+            channels = self.all_channels_default
         self._Initialize_Data(channels)
         if (mask_channel == None) or (mask_channel not in self.channels):
             if self.height_channel in self.channels:
@@ -6547,7 +6865,7 @@ class SnomMeasurement(FileHandler):
                     self.all_data[index] = np.multiply(self.all_data[index], self.mask_array)
                     # self.channels[index] += '_reduced'
             else:
-                print('There does not seem to be an old mask...')
+                print('There does not seem to be an old mask... ')
         else:
             if autocut == True:
                 self._Auto_Cut_Channels(channels)
@@ -7134,7 +7452,7 @@ class SnomMeasurement(FileHandler):
         Args:
             height_channel_forward (str): usual corrected height channel
             height_channel_backward (str): backwards height channel
-            channels (list, optional): a list of all channels to be overlayed. Defaults to None.
+            channels (list, optional): a list of all channels to be overlain. Defaults to None.
         """
         all_channels = []
         for channel in channels:
@@ -7271,7 +7589,7 @@ class SnomMeasurement(FileHandler):
         Args:
             height_channel_forward (str): Usual corrected height channel
             height_channel_backward (str): Backwards height channel
-            channels (list, optional): List of all channels to be overlayed. Only specify the forward direction. Defaults to None.
+            channels (list, optional): List of all channels to be overlain. Only specify the forward direction. Defaults to None.
             If not specified only the amp channels and the height channel will be overlaid.
         """
         if channels is None:
@@ -7731,6 +8049,7 @@ class SnomMeasurement(FileHandler):
                 reduced_data.append(bottom_data)
             else:
                 selected_data = data[start:end,:]
+        return reduced_data
     
     def Level_Data_Columnwise(self, channel_list:list=None, display_channel:str=None) -> None:
         """This function will level the data of the specified channels columnwise. The function will use the data from the display channel to select the range for leveling.
@@ -7757,6 +8076,10 @@ class SnomMeasurement(FileHandler):
             # get the reduced data
             reduced_data = self._Get_Data_From_selected_Range(data, *selection)
             # level the data
+            # print('data: ', data)
+            # print('selection: ', selection)
+            # print('reduced_data: ', reduced_data)
+            # print('reduced_data.shape: ', reduced_data.shape())
             if len(reduced_data) == 1:
                 print('leveling with one reference area')
                 # get the reference data from the mean of the reduced data for each row
@@ -7819,6 +8142,14 @@ class SnomMeasurement(FileHandler):
             #     # set the min to zero
             #     self.Set_Min_to_Zero([channel + '_leveled'])
 
+    def Create_New_Channel(self, data, channel_name:str, channel_tag_dict:dict, channel_label:str=None) -> None:
+        if channel_label is None:
+            channel_label = channel_name
+        self.channels.append(channel_name)
+        self.all_data.append(data)
+        self.channel_tag_dict.append(channel_tag_dict)
+        self.channels_label.append(channel_label)
+
     # not yet fully implemented, eg. the profile plot function is only ment for full horizontal or vertical profiles only
     def Test_Profile_Selection(self, channel:str=None) -> None:
         if channel is None:
@@ -7868,7 +8199,7 @@ class ApproachCurve(FileHandler):
             self.mechanical_channels = ['M1A', 'M1P'] # todo
             self.phase_channels = ['O1P','O2P','O3P','O4P','O5P']
             self.amp_channels = ['O1A','O2A','O3A','O4A','O5A']
-            self.all_channels = self.height_channels + self.mechanical_channels + self.phase_channels + self.amp_channels
+            self.all_channels_default = self.height_channels + self.mechanical_channels + self.phase_channels + self.amp_channels
             self.height_indicator = 'Z'
             self.backwards_indicator = 'R-'
 
@@ -8081,7 +8412,7 @@ class Scan_3D(FileHandler):
             self.mechanical_channels = ['M1A', 'M1P'] # todo
             self.phase_channels = ['O1P','O2P','O3P','O4P','O5P']
             self.amp_channels = ['O1A','O2A','O3A','O4A','O5A']
-            self.all_channels = self.height_channels + self.mechanical_channels + self.phase_channels + self.amp_channels
+            self.all_channels_default = self.height_channels + self.mechanical_channels + self.phase_channels + self.amp_channels
             self.preview_ampchannel = 'O2A'
             self.preview_phasechannel = 'O2P'
             self.height_indicator = 'Z'

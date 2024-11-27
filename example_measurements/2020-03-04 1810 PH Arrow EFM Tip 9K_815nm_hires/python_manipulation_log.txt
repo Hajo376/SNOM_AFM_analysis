@@ -1,0 +1,13 @@
+25/11/2024 16:11:01
+filename = 2020-03-04 1810 PH Arrow EFM Tip 9K_815nm_hires
+quadratic_pixels = True
+phase_shift = 4.697285169550124
+phase_driftcomp_slope = 0.0022988977013123665
+phase_shift = 1.8728725434862228
+25/11/2024 16:38:54
+filename = 2020-03-04 1810 PH Arrow EFM Tip 9K_815nm_hires
+quadratic_pixels = True
+phase_shift = 2.975450734409564
+25/11/2024 16:39:35
+filename = 2020-03-04 1810 PH Arrow EFM Tip 9K_815nm_hires
+quadratic_pixels = True
