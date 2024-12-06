@@ -174,9 +174,17 @@ def Synccorrection():
     Measurement.Display_Channels(['O2Re_corrected', 'O2A', 'Z C'])
 
 def Complete_Example_1():
-    # directory_name = 'example_measurements/2022-04-25 1227 PH pentamer_840nm_s50_2'
-    directory_name = 'example_measurements/2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R'
+    # examples from aachen group Taubner
+    # directory_name = 'example_measurements/2022-07-07_16-10-33_scan_AaronLukas_2D_4x4_array' # version unknown, .dump files
+    # directory_name = 'example_measurements/2018-09-10_16-44-27_scan' # version unknown, .dump files and .ascii files
+    # channels = ['O2-F-abs', 'O2-F-arg', 'MT-F-abs']
+    # own examples from Bonn for different software versions
+    # directory_name = 'example_measurements/2018-02-09 1506 PH dt20nmwindow1' # version 1.6.3359.1
+    # directory_name = 'example_measurements/2022-04-25 1227 PH pentamer_840nm_s50_2' # version 1.8.5017.0
+    # directory_name = 'example_measurements/2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R' # version 1.8.5017.0
+    directory_name = 'example_measurements/2024-10-24 104052 PH wg_wv_No3_15slits_pol45deg_anal90deg_fine' # version 1.10.9592.0
     channels = ['O2P', 'O2A', 'Z C']
+
     Measurement = SnomMeasurement(directory_name, channels)
     # Measurement.Set_Min_to_Zero(['Z C'])
     # Measurement.Display_Channels()
@@ -184,12 +192,12 @@ def Complete_Example_1():
     Measurement.Gauss_Filter_Channels_complex()
     # Measurement.Shift_Phase()
     # Measurement.Heigth_Mask_Channels()
-    Measurement.Scalebar(['Z C'])
+    Measurement.Scalebar([channels[-1]])
     Measurement.Display_Channels()
     # Measurement.Cut_Channels(autocut=True) # autocut will remove all empty lines and columns
     # Measurement.Display_Channels()
     # Measurement.Display_All_Subplots()
-    Measurement._Export_All_Subplots()
+    # Measurement._Export_All_Subplots()
 
 def Test_Aachen_files():
     # File_Definitions.file_type = File_Type.aachen_gsf
@@ -507,6 +515,22 @@ def test_comsol_height_data():
     measurement.Display_Overlay('abs', 'Z', alpha=0.2)
     # measurement.Save_to_gsf(['Z'], appendix='')
 
+def test_config():
+    directory_name = 'example_measurements/2018-02-09 1506 PH dt20nmwindow1' # version 1.6.3359.1
+    # directory_name = 'example_measurements/2022-04-25 1227 PH pentamer_840nm_s50_2' # version 1.8.5017.0
+    # directory_name = 'example_measurements/2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R' # version 1.8.5017.0
+    # directory_name = 'example_measurements/2024-10-24 104052 PH wg_wv_No3_15slits_pol45deg_anal90deg_fine' # version 1.10.9592.0
+    channels = ['O2P', 'O2A', 'Z C']
+    # channels = ['abs', 'arg']
+    # directory_name = 'example_measurements/DLSPPW_bragg_8slits_Ez_onpmma' # comsol
+    # directory_name = 'example_measurements/DLSPPW_bragg_8slits_Ex_ongold' # comsol
+
+    Measurement = SnomMeasurement(directory_name, channels)
+    Measurement.Display_Channels()
+    # Measurement._create_default_config()
+    # Measurement._print_measurement_tags()
+    # Measurement._print_config()
+
 
 def main():
      
@@ -538,7 +562,8 @@ def main():
     # Test_Profile_Selector()
     # test_gauss_filter_v2()
     # test_comsol_data()
-    test_comsol_height_data()
+    # test_comsol_height_data()
+    test_config()
 
 
 if __name__ == '__main__':

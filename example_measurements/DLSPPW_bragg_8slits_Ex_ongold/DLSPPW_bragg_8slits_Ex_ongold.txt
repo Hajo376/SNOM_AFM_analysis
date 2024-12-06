@@ -1,0 +1,3 @@
+# Scan Area (X, Y):	m	1e-05	6e-06	
+# Pixel Area (X, Y):	501	301	
+# Version:	Comsol

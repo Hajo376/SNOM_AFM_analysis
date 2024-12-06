@@ -12,7 +12,8 @@ from matplotlib import patches # used for creating rectangles
 import numpy as np
 import pandas as pd # used for getting data out of html files
 from datetime import datetime
-from enum import Enum, auto
+# from enum import Enum, auto
+from aenum import Enum, auto, extend_enum
 from pathlib import Path, PurePath
 import os
 import pickle as pkl
@@ -23,6 +24,8 @@ import imageio
 from matplotlib.animation import FuncAnimation
 # for old version
 from PIL import Image
+# for config file
+from configparser import ConfigParser
 
 # import own functionality
 from SNOM_AFM_analysis.lib.snom_colormaps import SNOM_height, SNOM_amplitude, SNOM_phase, SNOM_realpart, all_colormaps
@@ -57,6 +60,7 @@ class File_Type(Enum):
     # new standard for getting the scan parameters from txt file, does not work for Aachen files
     # only tested for Versions: 1.8.5017.0, 1.10.9592.0
     new_parameters_txt = auto()
+    # measurement types
     approach_curve = auto()
     snom_measurement = auto()
     afm_measurement = auto()
@@ -77,6 +81,10 @@ class Tag_Type(Enum):
     tip_amplitude = auto()
     tapping_amplitude = auto()
     pixel_scaling = auto()
+
+# new version of tags, tags are read in from config file
+class Measurement_Tags(Enum):
+    pass
 
 class File_Definitions:
     #standard file definitions
@@ -3470,7 +3478,15 @@ class FileHandler(File_Definitions, Plot_Definitions):
         self._Generate_Savefolder()
         self.measurement_title = title # If a measurement_title is specified it will precede the automatically created title based on the channel dictionary
         self.logfile_path = self._Initialize_Logfile()
+        # testing the new config file:
+        
+        if self.config_path.exists():
+            self._load_config() # load the config file
+        else:
+            self._create_default_config() # create a default config file if not existing
+        
         self._Initialize_File_Type()
+        # self._init_measurement_tags() # this fills the measurement_tag class with all the tags as enums
         self._Create_Measurement_Tag_Dict()
 
     def _Generate_Savefolder(self):
@@ -3481,6 +3497,7 @@ class FileHandler(File_Definitions, Plot_Definitions):
         self.save_folder = Path(os.path.expanduser('~')) / Path('SNOM_Analysis')
         self.all_subplots_path = self.save_folder / Path('all_subplots.p')
         self.plotting_parameters_path = self.save_folder / Path('plotting_parameters.json') # probably not a good idea to use the same folder as the snom plotter app
+        self.config_path = self.save_folder / Path('config.ini')
 
         if not Path.exists(self.save_folder):
             os.makedirs(self.save_folder)
@@ -3490,7 +3507,326 @@ class FileHandler(File_Definitions, Plot_Definitions):
         self.file_type = File_Definitions.file_type
         self.parameters_type = File_Definitions.parameters_type
 
+    def _create_default_config(self):
+        """This function creates a default config file in case the script is run for the first time or the old config file is missing.
+        This can also be called to reset the config file to default settings. But all manual changes will be lost.
+        """
+        config = ConfigParser() 
+        # careful with default, the content of default will be added to all other sections
+        # config['DEFAULT'] = {'FILETYPE': 'FILETYPE2',
+        #                     'PARAMETERTYPE': 'PARAMETERTYPE6',
+        # }
+        # the default parameters will be taken from the default Filtype definition
+        # todo remove this, this is just for internal testing
+        # config['FILETYPES'] = {
+        #     'FILETYPE1': 'standard',
+        #     'FILETYPE2': 'standard_new',
+        #     'FILETYPE3': 'aachen_gsf',
+        #     'FILETYPE4': 'aachen_ascii',
+        #     'FILETYPE5': 'neaspec_version_1_6_3359_1',
+        #     'FILETYPE6': 'comsol_gsf',
+        # }
+        config['FILETYPES'] = {
+            'filetype1': 'FILETYPE1',
+            'filetype2': 'FILETYPE2',
+            'filetype3': 'FILETYPE3',
+            'filetype4': 'FILETYPE4',
+            'filetype5': 'FILETYPE5',
+            'filetype6': 'FILETYPE6',
+        }
+        config['PARAMETERTYPES'] = {
+            'PARAMETERTYPE1': 'html',
+            'PARAMETERTYPE2': 'txt',
+            'PARAMETERTYPE3': 'html_new',
+            'PARAMETERTYPE4': 'html_neaspec_version_1_6_3359_1',
+            'PARAMETERTYPE5': 'comsol_txt',
+            'PARAMETERTYPE6': 'new_parameters_txt',
+        }
+        config['TEST'] = {
+            'channels': {'phase_channels': ['O1P','O2P','O3P','O4P','O5P', 'R-O1P','R-O2P','R-O3P','R-O4P','R-O5P'],
+                'amp_channels': ['O1A','O2A','O3A','O4A','O5A', 'R-O1A','R-O2A','R-O3A','R-O4A','R-O5A'],
+                'real_channels': ['O1Re', 'O2Re', 'O3Re', 'O4Re', 'R-O5Re', 'R-O1Re', 'R-O2Re', 'R-O3Re', 'R-O4Re', 'R-O5Re'],
+                'imag_channels': ['O1Im', 'O2Im', 'O3Im', 'O4Im', 'R-O5Im', 'R-O1Im', 'R-O2Im', 'R-O3Im', 'R-O4Im', 'R-O5Im'],
+                'height_channel': 'Z C',
+                },
+            'parameterfile_definitions': {
+                'splitter': ':',
+                'header_indicator': '#',
+                'tags': {
+                    'scan_area': 'Scan Area',
+                    'center_pos': 'Center Pos',
+                    'pixel_area': 'Pixel Area',
+                    'pixel_scaling': 'Pixel Scaling',
+                }
+            },
+        }
+        config['FILETYPE1'] = {
+            'filetype': 'standard',
+            'parametertype': 'new_parameters_txt',
+            'phase_channels': ['O1P','O2P','O3P','O4P','O5P', 'R-O1P','R-O2P','R-O3P','R-O4P','R-O5P'],
+            'amp_channels': ['O1A','O2A','O3A','O4A','O5A', 'R-O1A','R-O2A','R-O3A','R-O4A','R-O5A'],
+            'real_channels': ['O1Re', 'O2Re', 'O3Re', 'O4Re', 'R-O5Re', 'R-O1Re', 'R-O2Re', 'R-O3Re', 'R-O4Re', 'R-O5Re'],
+            'imag_channels': ['O1Im', 'O2Im', 'O3Im', 'O4Im', 'R-O5Im', 'R-O1Im', 'R-O2Im', 'R-O3Im', 'R-O4Im', 'R-O5Im'],
+            'height_channel': 'Z C',
+            'height_channels': ['Z C', 'R-Z C'],
+            'mechanical_channels': ['M0A', 'M0P', 'M1A', 'M1P', 'M2A', 'M2P', 'M3A', 'M3P', 'M4A', 'M4P', 'M5A', 'M5P', 'R-M0A', 'R-M0P', 'R-M1A', 'R-M1P', 'R-M2A', 'R-M2P', 'R-M3A', 'R-M3P', 'R-M4A', 'R-M4P', 'R-M5A', 'R-M5P'],
+            'preview_ampchannel': 'O2A',
+            'preview_phasechannel': 'O2P',
+            'height_indicator': 'Z',
+            'amp_indicator': 'A',
+            'phase_indicator': 'P',
+            'backwards_indicator': 'R-',
+            'real_indicator': 'Re',
+            'imag_indicator': 'Im',
+            'channel_prefix_default': ' ',
+            'channel_prefix_custom': ' ',
+            'channel_suffix_default': ' ',
+            'channel_suffix_custom': '',
+            'file_ending': '.gsf',
+            'phase_offset_default': np.pi, # shift raw data to the interval [0, 2pi]
+            'phase_offset_custom': 0, # assume custom data is already in the interval [0, 2pi]
+            'rounding_decimal_amp_default': 5,
+            'rounding_decimal_amp_custom': 5,
+            'rounding_decimal_phase_default': 5,
+            'rounding_decimal_phase_custom': 5,
+            'rounding_decimal_complex_default': 5,
+            'rounding_decimal_complex_custom': 5,
+            'rounding_decimal_height_default': 2, # when in nm
+            'rounding_decimal_height_custom': 2, # when in nm
+            'height_scaling_default': 10**9, # data is in m convert to nm
+            'height_scaling_custom': 10**9, # data is in m convert to nm
+        }
+        config['FILETYPE2'] = {
+            'filetype': 'standard_new',
+            'parametertype': 'new_parameters_txt',
+            'phase_channels': ['O1P','O2P','O3P','O4P','O5P', 'R-O1P','R-O2P','R-O3P','R-O4P','R-O5P'],
+            'amp_channels': ['O1A','O2A','O3A','O4A','O5A', 'R-O1A','R-O2A','R-O3A','R-O4A','R-O5A'],
+            'real_channels': ['O1Re', 'O2Re', 'O3Re', 'O4Re', 'R-O5Re', 'R-O1Re', 'R-O2Re', 'R-O3Re', 'R-O4Re', 'R-O5Re'],
+            'imag_channels': ['O1Im', 'O2Im', 'O3Im', 'O4Im', 'R-O5Im', 'R-O1Im', 'R-O2Im', 'R-O3Im', 'R-O4Im', 'R-O5Im'],
+            'height_channel': 'Z C',
+            'height_channels': ['Z C', 'R-Z C'],
+            'mechanical_channels': ['M0A', 'M0P', 'M1A', 'M1P', 'M2A', 'M2P', 'M3A', 'M3P', 'M4A', 'M4P', 'M5A', 'M5P', 'R-M0A', 'R-M0P', 'R-M1A', 'R-M1P', 'R-M2A', 'R-M2P', 'R-M3A', 'R-M3P', 'R-M4A', 'R-M4P', 'R-M5A', 'R-M5P'],
+            'preview_ampchannel': 'O2A',
+            'preview_phasechannel': 'O2P',
+            'height_indicator': 'Z',
+            'amp_indicator': 'A',
+            'phase_indicator': 'P',
+            'backwards_indicator': 'R-',
+            'real_indicator': 'Re',
+            'imag_indicator': 'Im',
+            'channel_prefix_default': ' ',
+            'channel_prefix_custom': ' ',
+            'channel_suffix_default': ' raw',
+            'channel_suffix_custom': '',
+            'file_ending': '.gsf',
+            'phase_offset_default': np.pi, # shift raw data to the interval [0, 2pi]
+            'phase_offset_custom': 0, # assume custom data is already in the interval [0, 2pi]
+            'rounding_decimal_amp_default': 5,
+            'rounding_decimal_amp_custom': 5,
+            'rounding_decimal_phase_default': 5,
+            'rounding_decimal_phase_custom': 5,
+            'rounding_decimal_complex_default': 5,
+            'rounding_decimal_complex_custom': 5,
+            'rounding_decimal_height_default': 2, # when in nm
+            'rounding_decimal_height_custom': 2, # when in nm
+            'height_scaling_default': 10**9, # data is in m convert to nm
+            'height_scaling_custom': 10**9, # data is in m convert to nm
+            'measurement_tags': {
+                # carful the keys will be used to create enums, so they should be unique and uppercase, they also must be identical for all filetypes
+                # the values are the tags in the file so they should match the file format
+                'SCAN': 'Scan', # scan type, afm, snom, approach curve, 2d/3d, PsHet...
+                'PROJECT': 'Project',
+                'DESCRIPTION': 'Description',
+                'DATE': 'Date',
+                'SCANNERCENTERPOSITION': 'Scanner Center Position (X, Y)',
+                'ROTATION': 'Rotation',
+                'SCANAREA': 'Scan Area (X, Y, Z)',
+                'PIXELAREA': 'Pixel Area (X, Y, Z)',
+                'AVERAGING': 'Averaging',
+                'INTEGRATIONTIME': 'Integration Time',
+                'LASERSOURCE': 'Laser Source',
+                'DETECTOR': 'Detector',
+                'TARGETWAVELENGTH': 'Target Wavelength',
+                'DEMODULATIONMODE': 'Demodulation Mode',
+                'TIPFREQUENCY': 'Tip Frequency',
+                'TIPAMPLITUTDE': 'Tip Amplitude',
+                'TAPPINGAMPLITUDE': 'Tapping Amplitude',
+                'MODULATIONFREQUENCY': 'Modulation Frequency',
+                'MODULATIONAMPLITUDE': 'Modulation Amplitude',
+                'MODULATIONOFFSET': 'Modulation Offset',
+                'SETPOINT': 'Setpoint',
+                'REGULATOR': 'Regulator (P, I, D)',
+                'TIPPOTENTIAL': 'Tip Potential',
+                'M1ASCALING': 'M1A Scaling',
+                'Q-FACTOR': 'Q-Factor',
+                'VERSION': 'Version',
+            },
+        }
+        config['FILETYPE5'] = {
+            'filetype': 'standard',
+            'parametertype': 'new_parameters_txt',
+            'phase_channels': ['O1P','O2P','O3P','O4P','O5P', 'R-O1P','R-O2P','R-O3P','R-O4P','R-O5P'],
+            'amp_channels': ['O1A','O2A','O3A','O4A','O5A', 'R-O1A','R-O2A','R-O3A','R-O4A','R-O5A'],
+            'real_channels': ['O1Re', 'O2Re', 'O3Re', 'O4Re', 'R-O5Re', 'R-O1Re', 'R-O2Re', 'R-O3Re', 'R-O4Re', 'R-O5Re'],
+            'imag_channels': ['O1Im', 'O2Im', 'O3Im', 'O4Im', 'R-O5Im', 'R-O1Im', 'R-O2Im', 'R-O3Im', 'R-O4Im', 'R-O5Im'],
+            'height_channel': 'Z C',
+            'height_channels': ['Z C', 'R-Z C'],
+            'mechanical_channels': ['M0A', 'M0P', 'M1A', 'M1P', 'M2A', 'M2P', 'M3A', 'M3P', 'M4A', 'M4P', 'M5A', 'M5P', 'R-M0A', 'R-M0P', 'R-M1A', 'R-M1P', 'R-M2A', 'R-M2P', 'R-M3A', 'R-M3P', 'R-M4A', 'R-M4P', 'R-M5A', 'R-M5P'],
+            'preview_ampchannel': 'O2A',
+            'preview_phasechannel': 'O2P',
+            'height_indicator': 'Z',
+            'amp_indicator': 'A',
+            'phase_indicator': 'P',
+            'backwards_indicator': 'R-',
+            'real_indicator': 'Re',
+            'imag_indicator': 'Im',
+            'channel_prefix_default': ' ',
+            'channel_prefix_custom': ' ',
+            'channel_suffix_default': ' ',
+            'channel_suffix_custom': '',
+            'file_ending': '.gsf',
+            'phase_offset_default': np.pi, # shift raw data to the interval [0, 2pi]
+            'phase_offset_custom': 0, # assume custom data is already in the interval [0, 2pi]
+            'rounding_decimal_amp_default': 5,
+            'rounding_decimal_amp_custom': 5,
+            'rounding_decimal_phase_default': 5,
+            'rounding_decimal_phase_custom': 5,
+            'rounding_decimal_complex_default': 5,
+            'rounding_decimal_complex_custom': 5,
+            'rounding_decimal_height_default': 2, # when in nm
+            'rounding_decimal_height_custom': 2, # when in nm
+            'height_scaling_default': 10**9, # data is in m convert to nm
+            'height_scaling_custom': 10**9, # data is in m convert to nm
+            'measurement_tags': {
+                # carful the keys will be used to create enums, so they should be unique and uppercase, they also must be identical for all filetypes
+                # the values are the tags in the file so they should match the file format
+                # 'SCAN': 'Scan', # scan type, afm, snom, approach curve, 2d/3d, PsHet...
+                'PROJECT': 'Project',
+                'DESCRIPTION': 'Description',
+                'DATE': 'Date',
+                'SCANNERCENTERPOSITION': 'Scanner Center Position (X, Y)',
+                'ROTATION': 'Rotation',
+                'SCANAREA': 'Scan Size (X, Y, Z)',
+                'PIXELAREA': 'Resolution (X, Y, Z)',
+                'AVERAGING': 'Number of samples',
+                'INTEGRATIONTIME': 'Pixel Time',
+                'LASERSOURCE': 'Laser Source',
+                # 'DETECTOR': 'Detector',
+                'TARGETWAVELENGTH': 'Target Wavelength',
+                # 'DEMODULATIONMODE': 'Demodulation Mode',
+                'TIPFREQUENCY': 'Tip Frequency',
+                'TIPAMPLITUTDE': 'Tip Amplitude',
+                'TAPPINGAMPLITUDE': 'Tapping Amplitude',
+                'MODULATIONFREQUENCY': 'Modulation Frequency',
+                'MODULATIONAMPLITUDE': 'Modulation Amplitude',
+                'MODULATIONOFFSET': 'Modulation Offset',
+                'SETPOINT': 'Setpoint',
+                'REGULATOR': 'Regulator (P, I, D)',
+                'TIPPOTENTIAL': 'Tip Potential',
+                'M1ASCALING': 'M1A Scaling',
+                # 'Q-FACTOR': 'Q-Factor',
+                'VERSION': 'Version',
+            },
+        }
+        config['FILETYPE6'] = {
+            'filetype': 'comsol_gsf',
+            'parametertype': 'comsol_txt',
+            'all_channels_default': ['abs', 'arg', 'real', 'imag', 'Z'], # Z is not a standard channel, but the user might create it manually to show the simulation design
+            'phase_channels': ['arg'],
+            'amp_channels': ['abs'],
+            'real_channels': ['real'],
+            'imag_channels': ['imag'],
+            'height_channel': 'Z',
+            'height_channels': ['Z'],
+            'mechanical_channels': [],
+            'preview_ampchannel': 'abs',
+            'preview_phasechannel': 'arg',
+            'height_indicator': 'Z',
+            'amp_indicator': 'abs',
+            'phase_indicator': 'arg',
+            'real_indicator': 'real',
+            'imag_indicator': 'imag',
+            'channel_prefix_default': '_',
+            'channel_prefix_custom': '_',
+            'channel_suffix_default': '',
+            'channel_suffix_custom': '',
+            'file_ending': '.gsf',
+
+            # definitions for data loading:
+            'phase_offset_default': 0, # assume default data is already in the interval [0, 2pi]
+            'phase_offset_custom': 0, # assume custom data is already in the interval [0, 2pi]
+            'rounding_decimal_amp_default': 5,
+            'rounding_decimal_amp_custom': 5,
+            'rounding_decimal_phase_default': 5,
+            'rounding_decimal_phase_custom': 5,
+            'rounding_decimal_complex_default': 5,
+            'rounding_decimal_complex_custom': 5,
+            'rounding_decimal_height_default': 2, # when in nm
+            'rounding_decimal_height_custom': 2, # when in nm
+            'height_scaling_default': 10**9, # data is in m convert to nm
+            'height_scaling_custom': 10**9, # data is in m convert to nm
+        }
+        with open(self.config_path, 'w') as configfile:
+            config.write(configfile)
+        self.config = config
+
+    def _load_config(self):
+        """This function loads the config file and returns the config object.
+        """
+        self.config = ConfigParser()
+        self.config.read(self.config_path)
+
+    def _print_config(self):
+        """This function prints the config file.
+        """
+        for section in self.config.sections():
+            print(section)
+            for option in self.config.options(section):
+                print(f'{option} = {self.config.get(section, option)}')
+
+    def _change_config(self, section:str, option:str, value:str):
+        """This function changes the config file.
+        """
+        try:
+            self.config[section][option] = value
+        except:
+            print('The specified section or option does not exist in the config file!')
+            try:
+                print('The available options are: ', self.config.options(section))
+            except:	
+                print('The available sections are: ', self.config.sections())
+        # update the config file        
+        with open(self.config_path, 'w') as configfile:
+            self.config.write(configfile)
+
+    def _init_measurement_tags(self):
+        """This function initializes the measurement tags based on the config file and current filetype.
+        """
+        # todo just for testing:
+        # if self.file_type == File_Type.standard:
+        filetype = 'FILETYPE5'
+        measurement_tags = self.config[filetype]['measurement_tags']
+        measurement_tags = dict(eval(measurement_tags))
+        for key, value in measurement_tags.items():
+            # print('key: ', key)
+            # print('value: ', value)
+            extend_enum(Measurement_Tags, key)
+    
+    # todo implement method to delete measurement tags if for example a second measurement type is loaded
+    def _delete_measurement_tags(self):
+        """This function deletes the measurement tags.
+        """
+        pass
+
+    def _print_measurement_tags(self):
+        """This function prints the measurement tags.
+        """
+        # print the content of the measurement tags class
+        print('All measurement tags: ', list(Measurement_Tags))
+
     def _Find_Filetype(self) -> None:
+        # todo testing
+        # self._Find_Filetype_new_with_config()
         """This function aims at finding specific characteristics in the filename to idendify the filetype.
         For example the difference in File_Type.standard and File_Type.standard_new are an additional ' raw' at the end of the filename."""
         filetype_found = False # local variable to track wether the filetype has been found already
@@ -3505,18 +3841,25 @@ class FileHandler(File_Definitions, Plot_Definitions):
                 self.parameters_dict = Convert_Header_To_Dict(parameters_path)
                 # filetype_found = True
                 print('using new parameters dict!')
+                # print(self.parameters_dict)
             except: pass # seems like an unknown parameters filetype was encountered proceed as usual
             else:
                 # if no exception occured we can use the parameters dict to read in parameter values instead of html of previous version
                 # e.g.
-                version_number = self.parameters_dict['Version']
+                version_number = self.parameters_dict['Version'][0]
+                print('version number: ', version_number)
                 if version_number == '1.6.3359.1':
                     File_Definitions.file_type = File_Type.neaspec_version_1_6_3359_1
                     # File_Definitions.parameters_type = File_Type.html_neaspec_version_1_6_3359_1
                     File_Definitions.parameters_type = File_Type.new_parameters_txt # todo, still experimental
                     print('Old snom version encountered if problems occur check file type definitions')
                     filetype_found = True
-                elif version_number == '1.8.5017.0' or version_number == '1.10.9592.0':
+                elif version_number == '1.8.5017.0':
+                    File_Definitions.file_type = File_Type.standard
+                    File_Definitions.parameters_type = File_Type.new_parameters_txt # todo, still experimental
+                    # print('using new parameters txt definition')
+                    filetype_found = True
+                elif version_number == '1.10.9592.0':
                     File_Definitions.file_type = File_Type.standard_new
                     File_Definitions.parameters_type = File_Type.new_parameters_txt # todo, still experimental
                     # print('using new parameters txt definition')
@@ -3531,20 +3874,16 @@ class FileHandler(File_Definitions, Plot_Definitions):
                     filetype_found = True
         if filetype_found is False: # if parameter txt does not exist try to find the filetype by looking into one of the binary files
             try:
-                # f_1=open(f"{self.directory_name}/{self.filename} O1A.gsf","br")
                 f_1=open(self.directory_name / Path(self.filename.name + ' O1A.gsf'),"br")
             except:
                 # filetype is at least not standard
                 try:
-                    # f_2=open(f"{self.directory_name}/{self.filename} O1A raw.gsf","br")
                     f_2=open(self.directory_name / Path(self.filename.name + ' O1A raw.gsf'),"br")
                 except:
                     try:
-                        # f_3=open(f"{self.directory_name}/{self.filename}_parameters.txt","r")
                         f_3=open(self.directory_name / Path(self.filename.name + '_parameters.txt'),"r")
                     except:
                         try:
-                            # f_4=open(f"{self.directory_name}/{self.filename}_O1-F-abs.ascii", 'r')
                             f_4=open(self.directory_name / Path(self.filename.name + '_O1-F-abs.ascii'), 'r')
                         except:
                             print("The correct filetype could not automatically be found. Please try again and specifiy the filetype.")
@@ -3565,6 +3904,14 @@ class FileHandler(File_Definitions, Plot_Definitions):
                 File_Definitions.file_type = File_Type.standard
                 File_Definitions.parameters_type = File_Type.html
         #alternative way: get the software version from the last entry in the .txt file
+
+    def _Find_Filetype_new_with_config(self) -> None:
+        for key in self.config['FILETYPES']:
+            filetype = self.config['FILETYPES'][key]
+            parameters = self.config[filetype]
+        #     print('key: ', key)
+        #     print('filetype: ', self.config['FILETYPES'][key])
+        # print('done printing keys')
 
     def _Initialize_Logfile(self) -> str:
         # logfile_path = self.directory_name + '/python_manipulation_log.txt'
@@ -3588,7 +3935,6 @@ class FileHandler(File_Definitions, Plot_Definitions):
         print(f'self.parameters_type: {self.parameters_type}')
         print(f'self.file_type:       {self.file_type}')
         if self.parameters_type == File_Type.html:
-            # all_tables = pd.read_html("".join([self.directory_name,"/",self.filename,".html"]))
             all_tables = pd.read_html(self.directory_name / Path(self.filename.name + ".html"))
             tables = all_tables[0]
             self.measurement_tag_dict = {
@@ -3603,7 +3949,6 @@ class FileHandler(File_Definitions, Plot_Definitions):
                 Tag_Type.tapping_amplitude: float(tables[2][15])
             }
         elif self.parameters_type == File_Type.html_new:
-            # all_tables = pd.read_html("".join([self.directory_name,"/",self.filename,".html"]))
             all_tables = pd.read_html(self.directory_name / Path(self.filename.name + ".html"))
             tables = all_tables[0]
             self.measurement_tag_dict = {
@@ -3618,7 +3963,6 @@ class FileHandler(File_Definitions, Plot_Definitions):
                 Tag_Type.tapping_amplitude: float(tables[2][16])
             }
         elif self.parameters_type == File_Type.html_neaspec_version_1_6_3359_1:
-            # all_tables = pd.read_html("".join([self.directory_name,"/",self.filename,".html"]))
             all_tables = pd.read_html(self.directory_name / Path(self.filename.name + ".html"))
             tables = all_tables[0]
             self.measurement_tag_dict = {
@@ -3632,13 +3976,10 @@ class FileHandler(File_Definitions, Plot_Definitions):
                 Tag_Type.tapping_amplitude: float(tables[2][14])
             }
         elif self.parameters_type == File_Type.txt:
-
-            # parameters = self.directory_name + '/' + self.filename + '.parameters.txt'
             parameters = self.directory_name / Path(self.filename.name + '.parameters.txt')
             file = open(parameters, 'r')
             parameter_list = file.read()
             file.close()
-            # print(parameter_list)
             parameter_list = parameter_list.split('\n')
             parameter_list = [element.split(': ') for element in parameter_list]
             center_pos = [float(parameter_list[7][1]), float(parameter_list[8][1])]
@@ -3659,20 +4000,14 @@ class FileHandler(File_Definitions, Plot_Definitions):
                 Tag_Type.tapping_amplitude: None
             }
         elif self.parameters_type == File_Type.comsol_txt:
-            # parameters = self.directory_name + '/' + self.filename + '_parameters.txt'
             parameters = self.directory_name / Path(self.filename.name + '_parameters.txt')
             file = open(parameters, 'r')
             parameter_list = file.read()
             file.close()
-            # print(parameter_list)
             parameter_list = parameter_list.split('\n')
             parameter_list = [element.split('=') for element in parameter_list]
-            # center_pos = [float(parameter_list[7][1]), float(parameter_list[8][1])]
-            # rotation = float(parameter_list[9][1])
             scan_area = [float(parameter_list[2][1]), float(parameter_list[3][1])]
             pixel_area = [int(parameter_list[0][1]), int(parameter_list[1][1])]
-            # integration_time = float(parameter_list[6][1])
-            # tip_frequency = float(parameter_list[10][1])
             self.measurement_tag_dict = {
                 Tag_Type.scan_type: None,
                 Tag_Type.center_pos: None,
@@ -3821,6 +4156,51 @@ class SnomMeasurement(FileHandler):
         # the cannel prefix and suffix are characters surrounding the channel name in the filename, they will be used when loading and saving the data
         # filename = directory_name + channel_prefix + channel + channel_suffix + appendix + '.gsf' (or '.txt') 
         # appendix is just a standard appendix when saving to not overwrite the original files, can be changed by the user default is '_manipulated'
+        # new approach based on cofigfile
+
+        '''
+        section = self.config[self.file_type] # todo rework filetype to work with strings as in config not enums
+        self.phase_channels = section['phase_channels']
+        self.amp_channels = section['amp_channels']
+        self.real_channels = section['real_channels']
+        self.imag_channels = section['imag_channels']
+        self.complex_channels = self.imag_channels + self.real_channels
+        self.height_channel = section['height_channel']
+        self.height_channels = section['height_channels']
+        self.mechanical_channels = section['mechanical_channels']
+        self.all_channels_default = self.phase_channels + self.amp_channels + self.mechanical_channels
+        self.preview_ampchannel = section['preview_ampchannel']
+        self.preview_phasechannel = section['preview_phasechannel']
+        self.height_indicator = section['height_indicator']
+        self.amp_indicator = section['amp_indicator']
+        self.phase_indicator = section['phase_indicator']
+        self.backwards_indicator = section['backwards_indicator']
+        self.real_indicator = section['real_indicator']
+        self.imag_indicator = section['imag_indicator']
+        self.channel_prefix_default = section['channel_prefix_default']
+        self.channel_prefix_custom = section['channel_prefix_custom']
+        self.channel_suffix_default = section['channel_suffix_default']
+        self.channel_suffix_custom = section['channel_suffix_custom']
+        self.file_ending = section['file_ending']
+        self.phase_offset_default = section['phase_offset_default']
+        self.phase_offset_custom = section['phase_offset_custom']
+        self.rounding_decimal_amp_default = section['rounding_decimal_amp_default']
+        self.rounding_decimal_amp_custom = section['rounding_decimal_amp_custom']
+        self.rounding_decimal_phase_default = section['rounding_decimal_phase_default']
+        self.rounding_decimal_phase_custom = section['rounding_decimal_phase_custom']
+        self.rounding_decimal_complex_default = section['rounding_decimal_complex_default']
+        self.rounding_decimal_complex_custom = section['rounding_decimal_complex_custom']
+        self.rounding_decimal_height_default = section['rounding_decimal_height_default']
+        self.rounding_decimal_height_custom = section['rounding_decimal_height_custom']
+        self.height_scaling_default = section['height_scaling_default']
+        self.height_scaling_custom = section['height_scaling_custom']
+        '''
+
+
+
+
+
+
         if self.file_type == File_Type.standard or self.file_type == File_Type.standard_new or self.file_type == File_Type.neaspec_version_1_6_3359_1:
             self.phase_channels = ['O1P','O2P','O3P','O4P','O5P', 'R-O1P','R-O2P','R-O3P','R-O4P','R-O5P']
             self.amp_channels = ['O1A','O2A','O3A','O4A','O5A', 'R-O1A','R-O2A','R-O3A','R-O4A','R-O5A']
@@ -3956,6 +4336,8 @@ class SnomMeasurement(FileHandler):
 
         self.all_channels_custom = self.height_channels + self.complex_channels + self.overlain_phase_channels + self.overlain_amp_channels + self.corrected_phase_channels + self.corrected_overlain_phase_channels
 
+    
+
     def _Create_Channels_Tag_Dict(self, channels:list=None):
         # ToDo optimize everything so new filetypes dont need so much extra copies
         if channels == None:
@@ -3998,6 +4380,7 @@ class SnomMeasurement(FileHandler):
                 YReal = self._Get_Tagval(content, 'YReal')
                 XOffset = self._Get_Tagval(content, 'XOffset')
                 YOffset = self._Get_Tagval(content, 'YOffset')
+                integration_time = self._Get_Tagval(content, 'Integration time')
                 Rotation = 0
                 try:
                     Rotation = self._Get_Tagval(content, 'Rotation')
@@ -4008,7 +4391,8 @@ class SnomMeasurement(FileHandler):
                     Tag_Type.rotation: float(Rotation),
                     Tag_Type.pixel_area: [int(XRes), int(YRes)],
                     Tag_Type.scan_area: [float(XReal), float(YReal)],
-                    Tag_Type.pixel_scaling: 1
+                    Tag_Type.pixel_scaling: 1, # initially this is always 1
+                    Tag_Type.integration_time: integration_time,
                 }
                 self.channel_tag_dict.append(channel_dict)
             pass
@@ -4058,7 +4442,7 @@ class SnomMeasurement(FileHandler):
         content_array = content.split('\n')
         # print(content_array[0:5])
         tag_array = []
-        tagval = 0# if no tag val can be found return 0
+        tagval = 0 # if no tag val can be found return 0
         for element in content_array:
             if len(element) > 50: # its probably not part of the header anymore...
                 break
@@ -4493,8 +4877,12 @@ class SnomMeasurement(FileHandler):
                 prefix = self.channel_prefix_custom
                 channel_type = 'custom'
             else:
-                print('channel not found in default or custom channels')
-                exit()
+                print(f'channel {channel} not found in default or custom channels!')
+                # assume it is a custom channel and try loading anyways
+                suffix = self.channel_suffix_custom
+                prefix = self.channel_prefix_custom
+                channel_type = 'custom'
+                # exit()
             # check the readmode depending on the filetype
             # this also affects the way the data is read and processed
             if self.file_ending == '.gsf':
@@ -4520,7 +4908,8 @@ class SnomMeasurement(FileHandler):
             # we knwo the resolution of the data from the header or parameter file
             # we use that to read the data from the end of the file until the end of the file minus the datasize
             # in this way we ignore the header and read only the data
-            reduced_binarydata=binarydata[-datasize:]
+            if read_mode == 'br':
+                reduced_binarydata=binarydata[-datasize:]
 
             # depending on the channel type set the scaling, phase_offset and rounding_decimal
             scaling = 1 # default scaling, not every channel needs scaling

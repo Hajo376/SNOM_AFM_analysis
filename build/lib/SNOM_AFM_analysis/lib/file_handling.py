@@ -1,6 +1,6 @@
 
 def _Find_Header_Size(filepath) -> int:
-    beginning_symb = '#'
+    beginning_symb = '#' # sadly header lines are not always starting with '#'
     inside_header = True
     header = 0
     max_number = 100 # to avoid endless loop if beginning symbol changes
@@ -10,6 +10,11 @@ def _Find_Header_Size(filepath) -> int:
             if line[0:1] == beginning_symb:
                 header += 1
             else: inside_header = False
+    if header == 0:
+        # in case no line is starting with '#' just count the lines in the document
+        header = sum(1 for line in open(filepath))
+        if header > max_number:
+            exit()
     return header
 
 def Find_Index(header, filepath, channel):
@@ -64,8 +69,29 @@ def _Simplify_Line(line):
 
     return key, value
 
-def Convert_Header_To_Dict(filepath) -> dict:
+def _get_version_number(content) -> str:
+    # print('content: ', content)
+    version = ''
+    for i in range(len(content)):
+        # print(content[i])
+        if 'Version' in content[i]:
+            # print(content[i])
+            line = content[i].replace(u'\xa0', u' ') # replace all non-breaking spaces with normal spaces
+            line = line.replace(u'\t', '') # remove all tabs
+            line = line.replace(u'\n', '') # remove all linebreaks
+            line = line.split(' ') # split line into list
+            # print('line: ', line)
+            version = line[-1]
+            # print('version number: ' + version)
+            break
+    return version
+
+def Convert_Header_To_Dict(filepath, separator=':') -> dict:
     content = _Read_Parameters_Txt(filepath)
+    # try to get version number
+    print('trying to get version number')
+    _get_version_number(content)
+
     parameters_dict = {}
     for i in range(len(content)):
         if i == 0:

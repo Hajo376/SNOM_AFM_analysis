@@ -1,0 +1,22 @@
+Project	 	maintainance
+Description	 	dt20nmwindow1
+Date	 	02/09/2018 15:06:21
+Scanner Center Position (X, Y)	[µm]	51.65	51.10	 
+Rotation	[°]	+2	 	 
+Scan Size (X, Y, Z)	[µm]	5.000	5.000	0.000
+Resolution (X, Y, Z)	[px]	200	200	1
+Number of samples	 	1	 	 
+Pixel time	[ms]	20	 	 
+Laser Source	 	Tunable NIR source
+Target Wavelength	[µm]		 	 
+Tip Frequency	[Hz]	256,825.539	 	 
+Tip Amplitude	[mV]	12.600	 	 
+Tapping Amplitude	[nm]	61.957	 	 
+Modulation Frequency	[Hz]	302.860	 	 
+Modulation Amplitude	[mV]	16,100.000	 	 
+Modulation Offset	[mV]	-3,535.373	 	 
+Setpoint	[%]	80.58	 	 
+Regulator (P, I, D)	 	10.000000	30.000000	1.000000
+Tip Potential	[mV]	0.000	 	 
+M1A Scaling	[nm/V]	140.000	 	 
+Version	 	1.6.3359.1

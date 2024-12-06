@@ -2145,3 +2145,46 @@ set_min_to_zero = True
 filename = 2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R
 quadratic_pixels = True
 set_min_to_zero = True
+27/11/2024 16:24:05
+filename = 2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R
+quadratic_pixels = True
+scaling = 4
+gaussian_filter_complex_sigma = 2
+27/11/2024 16:28:55
+filename = 2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R
+quadratic_pixels = True
+scaling = 4
+gaussian_filter_complex_sigma = 2
+27/11/2024 16:29:49
+filename = 2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R
+27/11/2024 16:30:13
+filename = 2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R
+quadratic_pixels = True
+scaling = 4
+gaussian_filter_complex_sigma = 2
+27/11/2024 16:30:44
+filename = 2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R
+quadratic_pixels = True
+scaling = 4
+gaussian_filter_complex_sigma = 2
+27/11/2024 16:31:16
+filename = 2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R
+27/11/2024 16:33:40
+filename = 2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R
+quadratic_pixels = True
+scaling = 4
+gaussian_filter_complex_sigma = 2
+05/12/2024 12:16:01
+filename = 2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R
+quadratic_pixels = True
+05/12/2024 12:16:08
+filename = 2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R
+quadratic_pixels = True
+06/12/2024 12:25:40
+filename = 2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R
+06/12/2024 16:49:19
+filename = 2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R
+quadratic_pixels = True
+06/12/2024 16:52:10
+filename = 2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R
+quadratic_pixels = True

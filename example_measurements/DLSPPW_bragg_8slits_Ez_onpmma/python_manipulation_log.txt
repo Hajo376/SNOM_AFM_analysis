@@ -111,3 +111,34 @@ quadratic_pixels = True
 27/11/2024 11:21:34
 filename = DLSPPW_bragg_8slits_Ez_onpmma
 quadratic_pixels = True
+27/11/2024 16:23:06
+filename = DLSPPW_bragg_8slits_Ez_onpmma
+quadratic_pixels = True
+27/11/2024 16:37:14
+filename = DLSPPW_bragg_8slits_Ez_onpmma
+quadratic_pixels = True
+05/12/2024 12:19:12
+filename = DLSPPW_bragg_8slits_Ez_onpmma
+05/12/2024 12:21:54
+filename = DLSPPW_bragg_8slits_Ez_onpmma
+05/12/2024 12:26:04
+filename = DLSPPW_bragg_8slits_Ez_onpmma
+05/12/2024 12:26:38
+filename = DLSPPW_bragg_8slits_Ez_onpmma
+05/12/2024 12:27:17
+filename = DLSPPW_bragg_8slits_Ez_onpmma
+05/12/2024 12:27:49
+filename = DLSPPW_bragg_8slits_Ez_onpmma
+05/12/2024 12:28:18
+filename = DLSPPW_bragg_8slits_Ez_onpmma
+05/12/2024 12:30:05
+filename = DLSPPW_bragg_8slits_Ez_onpmma
+05/12/2024 14:43:57
+filename = DLSPPW_bragg_8slits_Ez_onpmma
+05/12/2024 14:49:12
+filename = DLSPPW_bragg_8slits_Ez_onpmma
+quadratic_pixels = True
+05/12/2024 18:41:23
+filename = DLSPPW_bragg_8slits_Ez_onpmma
+06/12/2024 16:49:36
+filename = DLSPPW_bragg_8slits_Ez_onpmma

@@ -93,3 +93,15 @@ scaling = 4
 05/07/2023 14:25:08
 filename = 2018-09-10_16-44-27_scan
 quadratic_pixels = True
+27/11/2024 16:34:22
+filename = 2018-09-10_16-44-27_scan
+27/11/2024 16:36:49
+filename = 2018-09-10_16-44-27_scan
+quadratic_pixels = True
+28/11/2024 14:14:21
+filename = 2018-09-10_16-44-27_scan
+28/11/2024 14:15:36
+filename = 2018-09-10_16-44-27_scan
+quadratic_pixels = True
+scaling = 4
+gaussian_filter_complex_sigma = 2
