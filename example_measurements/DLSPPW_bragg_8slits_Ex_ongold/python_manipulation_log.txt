@@ -83,3 +83,8 @@ quadratic_pixels = True
 06/12/2024 16:52:28
 filename = DLSPPW_bragg_8slits_Ex_ongold
 quadratic_pixels = True
+12/12/2024 12:59:36
+filename = DLSPPW_bragg_8slits_Ex_ongold
+12/12/2024 13:14:21
+filename = DLSPPW_bragg_8slits_Ex_ongold
+quadratic_pixels = True

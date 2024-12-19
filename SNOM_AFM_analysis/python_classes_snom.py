@@ -37,7 +37,7 @@ from SNOM_AFM_analysis.lib.get_directionality import ChiralCoupler
 from SNOM_AFM_analysis.lib import realign
 from SNOM_AFM_analysis.lib import profile
 from SNOM_AFM_analysis.lib import phase_analysis
-from SNOM_AFM_analysis.lib.file_handling import Get_Parameter_Values, Convert_Header_To_Dict, Find_Index, convert_header_to_dict_v2
+from SNOM_AFM_analysis.lib.file_handling import Get_Parameter_Values, Find_Index, convert_header_to_dict
 from SNOM_AFM_analysis.lib.profile_selector import select_profile
 
 # keep this for internal referencing
@@ -131,11 +131,6 @@ class Channel_Tags(Enum):
     # MODULATIONOFFSET = auto()
     # SETPOINT = auto()
     
-# todo delete lateron
-class File_Definitions:
-    #standard file definitions
-    file_type = File_Type.standard
-    parameters_type = File_Type.html
     
     
 
@@ -180,7 +175,7 @@ class Plot_Definitions:
     autodelete_all_subplots = True # if true old subplots will be deleted on creation of new measurement
     
 # new version is based on filehandler to do basic stuff and then a class for each different measurement type like snom/afm, approach curves, spectra etc.
-class FileHandler(File_Definitions, Plot_Definitions):
+class FileHandler(Plot_Definitions):
     """This class handles the filetype and parameter type and all toplevel functionality."""
     def __init__(self, directory_name:str, title:str=None) -> None:
         self.directory_name = Path(directory_name)
@@ -213,10 +208,8 @@ class FileHandler(File_Definitions, Plot_Definitions):
             os.makedirs(self.save_folder)
         
     def _Initialize_File_Type(self) -> None:
-        # self._Find_Filetype() # try to find the filetype automatically
-        self._Find_Filetype_new_with_config() # not yet
-        # self.file_type = File_Definitions.file_type
-        # self.parameters_type = File_Definitions.parameters_type
+        # try to find the filetype automatically
+        self._Find_Filetype_new_with_config() 
 
     def _create_default_config(self):
         """This function creates a default config file in case the script is run for the first time or the old config file is missing.
@@ -284,6 +277,7 @@ class FileHandler(File_Definitions, Plot_Definitions):
             'mechanical_channels': ['M0A', 'M0P', 'M1A', 'M1P', 'M2A', 'M2P', 'M3A', 'M3P', 'M4A', 'M4P', 'M5A', 'M5P', 'R-M0A', 'R-M0P', 'R-M1A', 'R-M1P', 'R-M2A', 'R-M2P', 'R-M3A', 'R-M3P', 'R-M4A', 'R-M4P', 'R-M5A', 'R-M5P'],
             'preview_ampchannel': '<O2A>',
             'preview_phasechannel': '<O2P>',
+            'preview_channels': ['O2A', 'O2P', 'Z C'],
             'height_indicator': '<Z>',
             'amp_indicator': '<A>',
             'phase_indicator': '<P>',
@@ -368,6 +362,7 @@ class FileHandler(File_Definitions, Plot_Definitions):
             'mechanical_channels': ['M0A', 'M0P', 'M1A', 'M1P', 'M2A', 'M2P', 'M3A', 'M3P', 'M4A', 'M4P', 'M5A', 'M5P', 'R-M0A', 'R-M0P', 'R-M1A', 'R-M1P', 'R-M2A', 'R-M2P', 'R-M3A', 'R-M3P', 'R-M4A', 'R-M4P', 'R-M5A', 'R-M5P'],
             'preview_ampchannel': '<O2A>',
             'preview_phasechannel': '<O2P>',
+            'preview_channels': ['O2A', 'O2P', 'Z C'],
             'height_indicator': '<Z>',
             'amp_indicator': '<A>',
             'phase_indicator': '<P>',
@@ -451,6 +446,7 @@ class FileHandler(File_Definitions, Plot_Definitions):
             'height_channels': ['MT-F-abs', 'MT-B-abs'],
             'preview_ampchannel': '<O2-F-abs>',
             'preview_phasechannel': '<O2-F-arg>',
+            'preview_channels': ['O2-F-abs', 'O2-F-arg', 'MT-F-abs'],
             'height_indicator': '<MT>',
             'amp_indicator': '<abs>',
             'phase_indicator': '<arg>',
@@ -514,6 +510,7 @@ class FileHandler(File_Definitions, Plot_Definitions):
             'height_channels': ['MT-F-abs', 'MT-B-abs'],
             'preview_ampchannel': '<O2-F-abs>',
             'preview_phasechannel': '<O2-F-arg>',
+            'preview_channels': ['O2-F-abs', 'O2-F-arg', 'MT-F-abs'],
             'height_indicator': '<MT>',
             'amp_indicator': '<abs>',
             'phase_indicator': '<arg>',
@@ -578,6 +575,7 @@ class FileHandler(File_Definitions, Plot_Definitions):
             'mechanical_channels': ['M0A', 'M0P', 'M1A', 'M1P', 'M2A', 'M2P', 'M3A', 'M3P', 'M4A', 'M4P', 'M5A', 'M5P', 'R-M0A', 'R-M0P', 'R-M1A', 'R-M1P', 'R-M2A', 'R-M2P', 'R-M3A', 'R-M3P', 'R-M4A', 'R-M4P', 'R-M5A', 'R-M5P'],
             'preview_ampchannel': '<O2A>',
             'preview_phasechannel': '<O2P>',
+            'preview_channels': ['O2A', 'O2P', 'Z C'],
             'height_indicator': '<Z>',
             'amp_indicator': '<A>',
             'phase_indicator': '<P>',
@@ -663,6 +661,7 @@ class FileHandler(File_Definitions, Plot_Definitions):
             'mechanical_channels': [],
             'preview_ampchannel': '<abs>',
             'preview_phasechannel': '<arg>',
+            'preview_channels': ['abs', 'arg'],
             'height_indicator': '<Z>',
             'amp_indicator': '<abs>',
             'phase_indicator': '<arg>',
@@ -778,9 +777,9 @@ class FileHandler(File_Definitions, Plot_Definitions):
         """This function gets the value of an option in a section of the config file.
         If no option is specified the whole section is returned."""
         if section is None:
+            # set the section to the file type if it is not specified, but only if file_type is defined
             try: section = self.file_type
-            except:
-                print('Filetype unknown, please specify the section! (In _get_from_config)')
+            except: print('Filetype unknown, please specify the section! (In _get_from_config)')
         if option is None:
             return dict(self.config[section])
         else:
@@ -817,6 +816,7 @@ class FileHandler(File_Definitions, Plot_Definitions):
         # print the content of the measurement tags class
         print('All measurement tags: ', list(Measurement_Tags))
 
+    # old can be deleted
     def _Find_Filetype(self) -> None:
         # todo testing
         new_config_works = self._Find_Filetype_new_with_config()
@@ -916,10 +916,8 @@ class FileHandler(File_Definitions, Plot_Definitions):
             if succsess:
                 # the correct filetype has been found
                 print(f'Filetype found: {filetype}')
-                print('parameter dict was created successfully')
-                # File_Definitions.file_type = filetype
-                File_Definitions.file_type = filetype
-                
+                self.file_type = filetype
+                print('parameter dict was created successfully')                
                 return True
         # if no filetype was found return False
         print('No filetype was found!')
@@ -940,6 +938,7 @@ class FileHandler(File_Definitions, Plot_Definitions):
         file.write(f'{parameter_name} = {parameter}\n')
         file.close()
 
+    # old can be deleted
     def _Create_Measurement_Tag_Dict(self):
         # create tag_dict for each channel individually? if manipulated channels are loaded they might have different diffrent resolution
         # only center_pos, scan_area, pixel_area and rotation must be stored for each channel individually but rotation is not stored in the original .gsf files
@@ -1060,33 +1059,15 @@ class FileHandler(File_Definitions, Plot_Definitions):
                 pass
         except:
             return False
-        # read in the parameters file
-        # separator = self.config[filetype]['parameters_separator']
-        # remove < and > from separator and header_indicator
-        # separator = separator.replace('<', '').replace('>', '')
         separator = self._get_from_config('parameters_separator', filetype)
-        # print(f'separator: <{separator}>')
-        # header_indicator = self.config[filetype]['parameters_header_indicator']
-        # header_indicator = header_indicator.replace('<', '').replace('>', '')
         header_indicator = self._get_from_config('parameters_header_indicator', filetype)
-        # print(f'header_indicator: <{header_indicator}>')
-        # measurement_tags = self.config[filetype]['channel_tags']
         measurement_tags = self._get_from_config('measurement_tags', filetype)
-        # print(f'measurement_tags: {measurement_tags}')
-        # print('measurement tags: ', measurement_tags)
-        # tags = dict(eval(measurement_tags))#.values()
-        # convert the tags dict to a list of values
         tags_list = list(measurement_tags.values())
         # if tags contains a list of values flatten the list
         if any(isinstance(i, list) for i in tags_list):
             tags_list = [item for sublist in tags_list for item in sublist]
                 
-        # print('tags list: ', list(tags.values()))
-        # print('tags list: ', tags_list)
-        # parameters_dict = Convert_Header_To_Dict(parameters_path, separator=separator, header_indicator=header_indicator, tags=tags)
-        # print('trying to convert header to dict v2')
-        parameters_dict = convert_header_to_dict_v2(parameters_path, separator=separator, header_indicator=header_indicator, tags_list=tags_list)
-        # print('parameters dict: ', parameters_dict)
+        parameters_dict = convert_header_to_dict(parameters_path, separator=separator, header_indicator=header_indicator, tags_list=tags_list)
         if parameters_dict is None:
             return False
         # now create the measurement tag dict
@@ -1120,13 +1101,7 @@ class FileHandler(File_Definitions, Plot_Definitions):
         # QFACTOR = auto()   
         # VERSION = auto()
         # '''
-        # all possible tags:
-        # all_available_tags = list(Measurement_Tags)
-        # print('all available tags: ', all_available_tags)
         for key, value in parameters_dict.items():
-            # print('key: ', key)
-            # print('value: ', value)
-            # replace comma with '' in value items, this is sometimes used as an indication for 1000s but leads to errors
             is_unit = False
             is_list = False
             if isinstance(value, list):
@@ -1140,9 +1115,6 @@ class FileHandler(File_Definitions, Plot_Definitions):
                 try: float(value)
                 except: is_unit = True
                 else: is_unit = False
-            # print('key: ', key)
-            # print('value: ', value)
-            # print('is_unit: ', is_unit)
             if value == '':
                 continue
             if key in measurement_tags.values():
@@ -1168,7 +1140,6 @@ class FileHandler(File_Definitions, Plot_Definitions):
                 else: self.measurement_tag_dict[Measurement_Tags.ROTATION] = float(value)
             elif tag_key == 'SCANAREA': # is_unit, x, y, z
                 # some files have only 2 values for the scan area with or without is_unit
-                # print('ScanArea value: ', value)
                 # check if first value is a is_unit
                 if is_unit:
                     try: self.measurement_tag_dict[Measurement_Tags.SCANAREA] = [value[0], float(value[1]), float(value[2]), float(value[3])]
@@ -1272,84 +1243,7 @@ class FileHandler(File_Definitions, Plot_Definitions):
 
 
         
-        # not working properly yet
-        '''for key in parameters_dict:
-            if parameters_dict[key] == '':
-                continue
-            if key == 'SCAN':
-                self.measurement_tag_dict[Measurement_Tags.SCAN] = [parameters_dict[key]]
-            elif key == 'PROJECT':
-                self.measurement_tag_dict[Measurement_Tags.PROJECT] = [parameters_dict[key]]
-            elif key == 'DESCRIPTION':
-                self.measurement_tag_dict[Measurement_Tags.DESCRIPTION] = [parameters_dict[key]]
-            elif key == 'DATE':
-                self.measurement_tag_dict[Measurement_Tags.DATE] = [parameters_dict[key]]
-            elif key == 'SCANNERCENTERPOSITION': # unit, x, y
-                try: self.measurement_tag_dict[Measurement_Tags.SCANNERCENTERPOSITION] = [parameters_dict[key][0], float(parameters_dict[key][1]), float(parameters_dict[key][2])]
-                except: self.measurement_tag_dict[Measurement_Tags.SCANNERCENTERPOSITION] = [float(parameters_dict[key][0]), float(parameters_dict[key][1])]
-            elif key == 'ROTATION': # unit, angle
-                try: self.measurement_tag_dict[Measurement_Tags.ROTATION] = [parameters_dict[key][0], float(parameters_dict[key][1])]
-                except: self.measurement_tag_dict[Measurement_Tags.ROTATION] = [float(parameters_dict[key])]
-            elif key == 'SCANAREA': # unit, x, y, z
-                try: self.measurement_tag_dict[Measurement_Tags.SCANAREA] = [parameters_dict[key][0], float(parameters_dict[key][1]), float(parameters_dict[key][2]), float(parameters_dict[key][3])]
-                except: self.measurement_tag_dict[Measurement_Tags.SCANAREA] = [float(parameters_dict[key][0]), float(parameters_dict[key][1]), float(parameters_dict[key][2])]
-            elif key == 'PIXELAREA': # unit, x, y, z
-                try: self.measurement_tag_dict[Measurement_Tags.PIXELAREA] = [parameters_dict[key][0], int(parameters_dict[key][1]), int(parameters_dict[key][2]), int(parameters_dict[key][3])]
-                except: self.measurement_tag_dict[Measurement_Tags.PIXELAREA] = [int(parameters_dict[key][0]), int(parameters_dict[key][1]), int(parameters_dict[key][2])]
-            elif key == 'AVERAGING':
-                self.measurement_tag_dict[Measurement_Tags.AVERAGING] = int(parameters_dict[key])  
-            elif key == 'INTEGRATIONTIME':
-                try: self.measurement_tag_dict[Measurement_Tags.INTEGRATIONTIME] = [parameters_dict[key][0], float(parameters_dict[key][1])]
-                except: self.measurement_tag_dict[Measurement_Tags.INTEGRATIONTIME] = [float(parameters_dict[key])]
-            elif key == 'LASERSOURCE':
-                self.measurement_tag_dict[Measurement_Tags.LASERSOURCE] = parameters_dict[key]
-            elif key == 'DETECTOR':
-                self.measurement_tag_dict[Measurement_Tags.DETECTOR] = parameters_dict[key]
-            elif key == 'TARGETWAVELENGTH': # wavelength is usually not given...
-                if len(parameters_dict[key]) > 1:
-                    try: self.measurement_tag_dict[Measurement_Tags.TARGETWAVELENGTH] = [parameters_dict[key][0], float(parameters_dict[key][1])]
-                    except: self.measurement_tag_dict[Measurement_Tags.TARGETWAVELENGTH] = [float(parameters_dict[key])]
-                else: self.measurement_tag_dict[Measurement_Tags.TARGETWAVELENGTH] = [parameters_dict[key]]
-            elif key == 'DEMODULATIONMODE':
-                self.measurement_tag_dict[Measurement_Tags.DEMODULATIONMODE] = [parameters_dict[key]]
-            elif key == 'TIPFREQUENCY':
-                try: self.measurement_tag_dict[Measurement_Tags.TIPFREQUENCY] = [parameters_dict[key][0], float(parameters_dict[key][1])]
-                except: self.measurement_tag_dict[Measurement_Tags.TIPFREQUENCY] = [float(parameters_dict[key])]
-            elif key == 'TIPAMPLITUTDE':
-                try: self.measurement_tag_dict[Measurement_Tags.TIPAMPLITUTDE] = [parameters_dict[key][0], float(parameters_dict[key][1])]
-                except: self.measurement_tag_dict[Measurement_Tags.TIPAMPLITUTDE] = [float(parameters_dict[key])]
-            elif key == 'TAPPINGAMPLITUDE':
-                try: self.measurement_tag_dict[Measurement_Tags.TAPPINGAMPLITUDE] = [parameters_dict[key][0], float(parameters_dict[key][1])]
-                except: self.measurement_tag_dict[Measurement_Tags.TAPPINGAMPLITUDE] = [float(parameters_dict[key])]
-            elif key == 'MODULATIONFREQUENCY':
-                try: self.measurement_tag_dict[Measurement_Tags.MODULATIONFREQUENCY] = [parameters_dict[key][0], float(parameters_dict[key][1])]
-                except: self.measurement_tag_dict[Measurement_Tags.MODULATIONFREQUENCY] = [float(parameters_dict[key])]
-            elif key == 'MODULATIONAMPLITUDE':
-                try: self.measurement_tag_dict[Measurement_Tags.MODULATIONAMPLITUDE] = [parameters_dict[key][0], float(parameters_dict[key][1])]
-                except: self.measurement_tag_dict[Measurement_Tags.MODULATIONAMPLITUDE] = [float(parameters_dict[key])]
-            elif key == 'MODULATIONOFFSET':
-                try: self.measurement_tag_dict[Measurement_Tags.MODULATIONOFFSET] = [parameters_dict[key][0], float(parameters_dict[key][1])]
-                except: self.measurement_tag_dict[Measurement_Tags.MODULATIONOFFSET] = [float(parameters_dict[key])]
-            elif key == 'SETPOINT':
-                try: self.measurement_tag_dict[Measurement_Tags.SETPOINT] = [parameters_dict[key][0], float(parameters_dict[key][1])]
-                except: self.measurement_tag_dict[Measurement_Tags.SETPOINT] = [float(parameters_dict[key])]
-            elif key == 'REGULATOR':
-                try: self.measurement_tag_dict[Measurement_Tags.REGULATOR] = [parameters_dict[key][0], float(parameters_dict[key][1])]
-                except: self.measurement_tag_dict[Measurement_Tags.REGULATOR] = [float(parameters_dict[key])]
-            elif key == 'TIPPOTENTIAL':
-                try: self.measurement_tag_dict[Measurement_Tags.TIPPOTENTIAL] = [parameters_dict[key][0], float(parameters_dict[key][1])]
-                except: self.measurement_tag_dict[Measurement_Tags.TIPPOTENTIAL] = [float(parameters_dict[key])]
-            elif key == 'M1ASCALING':
-                try: self.measurement_tag_dict[Measurement_Tags.M1ASCALING] = [parameters_dict[key][0], float(parameters_dict[key][1])]
-                except: self.measurement_tag_dict[Measurement_Tags.M1ASCALING] = [float(parameters_dict[key])]
-            elif key == 'QFACTOR':
-                self.measurement_tag_dict[Measurement_Tags.QFACTOR] = [float(parameters_dict[key])]
-            elif key == 'VERSION':
-                self.measurement_tag_dict[Measurement_Tags.VERSION] = [float[parameters_dict[key]]]'''
-        # print('tags keys list: ', list(tags.keys()))        
-        # print('tags values list: ', list(tags.values()))
-        # print('parameters dict: ', parameters_dict)
-        # print('measurement tag dict: ', self.measurement_tag_dict)
+        
         # only used by synccorrection, every other function should use the channels tag dict version, as pixel resolution could vary
         pixelarea = self.measurement_tag_dict[Measurement_Tags.PIXELAREA]
         scanarea = self.measurement_tag_dict[Measurement_Tags.SCANAREA]
@@ -1360,23 +1254,8 @@ class FileHandler(File_Definitions, Plot_Definitions):
             self.XRes, self.YRes = pixelarea[0], pixelarea[1] # [x, y]
             self.XReal, self.YReal = scanarea[0], scanarea[1]
 
-        # self.XRes, self.YRes = self.measurement_tag_dict[Measurement_Tags.PIXELAREA][1], self.measurement_tag_dict[Measurement_Tags.PIXELAREA][2]
-        # self.XReal, self.YReal = self.measurement_tag_dict[Measurement_Tags.SCANAREA][1], self.measurement_tag_dict[Measurement_Tags.SCANAREA][2] # in µm
         # if everything went well return True
         return True
-        '''
-        self.measurement_tag_dict = {
-            Tag_Type.scan_type: self.parameters_dict['Scan'][0],
-            Tag_Type.center_pos: [float(self.parameters_dict['Scanner Center Position (X, Y)'][0]), float(self.parameters_dict['Scanner Center Position (X, Y)'][1])],
-            Tag_Type.rotation: float(self.parameters_dict['Rotation'][0]),
-            Tag_Type.scan_area: [float(self.parameters_dict['Scan Area (X, Y, Z)'][0]), float(self.parameters_dict['Scan Area (X, Y, Z)'][1]), float(self.parameters_dict['Scan Area (X, Y, Z)'][2])],
-            Tag_Type.scan_unit: self.parameters_dict['Scan Area (X, Y, Z)'][3],
-            Tag_Type.pixel_area: [int(self.parameters_dict['Pixel Area (X, Y, Z)'][0]), int(self.parameters_dict['Pixel Area (X, Y, Z)'][1]), int(self.parameters_dict['Pixel Area (X, Y, Z)'][2])],
-            Tag_Type.integration_time: float(self.parameters_dict['Integration time'][0]),
-            Tag_Type.tip_frequency: [float(self.parameters_dict['Tip Frequency'][0].replace(',', '')), 'Hz'],
-            Tag_Type.tip_amplitude: float(self.parameters_dict['Tip Amplitude'][0]),
-            Tag_Type.tapping_amplitude: float(self.parameters_dict['Tapping Amplitude'][0])
-        }'''
         
     def _Replace_Plotting_Parameter_Placeholders(self, dictionary:dict, placeholders:dict) -> dict:
         """This function replaces the placeholders in the plotting parameters dictionary with the actual values. 
@@ -1480,10 +1359,7 @@ class SnomMeasurement(FileHandler):
         super().__init__(directory_name, title)
         self._Initialize_Measurement_Channel_Indicators()
         if channels == None: # the standard channels which will be used if no channels are specified
-            if self.file_type == File_Type.comsol_gsf:
-                channels = [self.preview_ampchannel, self.preview_phasechannel]
-            else:
-                channels = [self.preview_ampchannel, self.preview_phasechannel, self.height_channel]
+            channels = self.preview_channels
         self.channels = channels.copy() # make sure to copy the list to avoid changing the original list     
         self.autoscale = autoscale
         self._Initialize_Data(self.channels)
@@ -1495,15 +1371,10 @@ class SnomMeasurement(FileHandler):
         # filename = directory_name + channel_prefix + channel + channel_suffix + appendix + '.gsf' (or '.txt') 
         # appendix is just a standard appendix when saving to not overwrite the original files, can be changed by the user default is '_manipulated'
         # new approach based on cofigfile
-        # print('file type: ', self.file_type)
         self.phase_channels = self._get_from_config('phase_channels')
         self.amp_channels = self._get_from_config('amp_channels')
         self.real_channels = self._get_from_config('real_channels')
         self.imag_channels = self._get_from_config('imag_channels')
-        # print('imag channels: ', self.imag_channels)
-        # print('imag channels type: ', type(self.imag_channels))
-        # print('real channels: ', self.real_channels)
-        # print('real channels type: ', type(self.real_channels))
         self.complex_channels = self.imag_channels + self.real_channels
         self.height_channel = self._get_from_config('height_channel')
         self.height_channels = self._get_from_config('height_channels')
@@ -1511,6 +1382,7 @@ class SnomMeasurement(FileHandler):
         self.all_channels_default = self.phase_channels + self.amp_channels + self.mechanical_channels
         self.preview_ampchannel = self._get_from_config('preview_ampchannel')
         self.preview_phasechannel = self._get_from_config('preview_phasechannel')
+        self.preview_channels = self._get_from_config('preview_channels')
         self.height_indicator = self._get_from_config('height_indicator')
         self.amp_indicator = self._get_from_config('amp_indicator')
         self.phase_indicator = self._get_from_config('phase_indicator')
@@ -1673,23 +1545,10 @@ class SnomMeasurement(FileHandler):
 
 
         #create also lists for the overlain channels
-        # if isinstance(self.phase_channels, list):
         self.overlain_phase_channels = [channel+'_overlain' for channel in self.phase_channels]
         self.corrected_phase_channels = [channel+'_corrected' for channel in self.phase_channels]
         self.corrected_overlain_phase_channels = [channel+'_corrected_overlain' for channel in self.phase_channels]
-        # else:
-        #     self.overlain_phase_channels = [self.phase_channels+'_overlain']
-        #     self.corrected_phase_channels = [self.phase_channels+'_corrected']
-        #     self.corrected_overlain_phase_channels = [self.phase_channels+'_corrected_overlain']
-
-        # if isinstance(self.amp_channels, list):
         self.overlain_amp_channels = [channel+'_overlain' for channel in self.amp_channels]
-        # else:  
-        #     print('amp channels: ', self.amp_channels)
-        #     self.overlain_amp_channels = [self.amp_channels[0]+'_overlain']
-        # self.corrected_phase_channels = ['O1P_corrected','O2P_corrected','O3P_corrected','O4P_corrected','O5P_corrected', 'R-O1P_corrected','R-O2P_corrected','R-O3P_corrected','R-O4P_corrected','R-O5P_corrected']
-        
-
         
         self.all_channels_custom = self.height_channels + self.complex_channels + self.overlain_phase_channels + self.overlain_amp_channels + self.corrected_phase_channels + self.corrected_overlain_phase_channels
   
@@ -2046,7 +1905,7 @@ class SnomMeasurement(FileHandler):
         else:
             indicator = None
             indicator_index = None
-            print('optomechanical indicator for this filetype is not yet implemented')
+            # print('optomechanical indicator for this filetype is not yet implemented')
         # check that the channel is not a height channel
         if self.height_indicator in channel:
             indicator = None

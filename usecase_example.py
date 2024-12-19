@@ -516,13 +516,13 @@ def test_comsol_height_data():
     # measurement.Save_to_gsf(['Z'], appendix='')
 
 def test_config():
-    directory_name = 'example_measurements/2018-02-09 1506 PH dt20nmwindow1' # version 1.6.3359.1
+    # directory_name = 'example_measurements/2018-02-09 1506 PH dt20nmwindow1' # version 1.6.3359.1
     # directory_name = 'example_measurements/2022-04-25 1227 PH pentamer_840nm_s50_2' # version 1.8.5017.0
     # directory_name = 'example_measurements/2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R' # version 1.8.5017.0
     # directory_name = 'example_measurements/2024-10-24 104052 PH wg_wv_No3_15slits_pol45deg_anal90deg_fine' # version 1.10.9592.0
-    channels = ['O2P', 'O2A', 'Z C']
-    # channels = ['abs', 'arg']
-    # directory_name = 'example_measurements/DLSPPW_bragg_8slits_Ez_onpmma' # comsol
+    # channels = ['O2P', 'O2A', 'Z C']
+    channels = ['abs', 'arg']
+    directory_name = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo')
     # directory_name = 'example_measurements/DLSPPW_bragg_8slits_Ex_ongold' # comsol
 
     Measurement = SnomMeasurement(directory_name, channels)
