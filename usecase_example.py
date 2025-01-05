@@ -283,10 +283,10 @@ def Gif():
 def Test_3D_Scan():
     # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 144100 PH 3D single_wg_20mu_3d'
     # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
-    directory = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-05-14-ssh-snom')
+    directory = 'C:/Users/hajos/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
     channels = ['O2A', 'O2P', 'O3A', 'O3P', 'Z']
     # channels = ['Z']
-    measurement = Scan_3D(directory, channels)
+    measurement = Scan3D(directory, channels)
     measurement.Set_Min_to_Zero()
     # measurement.Display_Approach_Curve(20, 0, 'Z', ['Z', 'O2A', 'O3A']) 
     # measurement.Display_Cutplane(axis='x', line=0, channel='O3A')
@@ -308,10 +308,10 @@ def Test_3D_Scan():
     measurement.Display_Cutplane_V3_Realpart(axis='x', line=0, demodulation=3)
 
 def Phase_Correction_3D_Scan():
-    directory = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-05-14-ssh-snom')
+    directory = 'C:/Users/hajos/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
     channels = ['O2A', 'O2P', 'O3A', 'O3P', 'Z']
     # channels = ['Z']
-    measurement = Scan_3D(directory, channels)
+    measurement = Scan3D(directory, channels)
     measurement.Set_Min_to_Zero()
     Plot_Definitions.colorbar_width = 3
     measurement.Generate_All_Cutplane_Data()
@@ -325,10 +325,10 @@ def Phase_Correction_3D_Scan():
     measurement.Display_Cutplane_V3_Realpart(axis='x', line=0, demodulation=3)
 
 def Average_3D_Scan():
-    directory = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-05-14-ssh-snom')
+    directory = 'C:/Users/hajos/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
     channels = ['O2A', 'O2P', 'O3A', 'O3P', 'Z']
     # channels = ['Z']
-    measurement = Scan_3D(directory, channels)
+    measurement = Scan3D(directory, channels)
     measurement.Set_Min_to_Zero()
     Plot_Definitions.colorbar_width = 3
     # measurement.Generate_All_Cutplane_Data()
@@ -468,7 +468,7 @@ def test_gauss_filter_v2():
     measurement.Display_Channels()
 
 def test_comsol_data():
-    directory = 'example_measurements/DLSPPW_bragg_8slits_Ez_onpmma'
+    directory = 'example_measurements/DLSPPW_bragg_8slits_Ex_ongold'
     # channels = ['Z C', 'O2P_corrected_aligned', 'O2A']
     measurement = SnomMeasurement(directory)
     measurement.Display_Channels()
@@ -502,7 +502,7 @@ def test_comsol_height_data():
         return height_data
 
     channels = ['abs', 'arg']
-    directory = 'example_measurements/DLSPPW_bragg_8slits_Ez_onpmma'
+    directory = 'example_measurements/DLSPPW_bragg_8slits_Ex_ongold'
     measurement = SnomMeasurement(directory, channels)
     measurement.Display_Channels()
     # create the height data
@@ -548,7 +548,7 @@ def main():
 
     # Test_Export_and_Load_all_subplots()
     # Gif()
-    # Test_3D_Scan()
+    Test_3D_Scan()
     # Phase_Correction_3D_Scan()
     # Average_3D_Scan()
     # Test_Phase_Drift_Correction()
@@ -563,7 +563,7 @@ def main():
     # test_gauss_filter_v2()
     # test_comsol_data()
     # test_comsol_height_data()
-    test_config()
+    # test_config()
 
 
 if __name__ == '__main__':

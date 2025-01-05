@@ -191,25 +191,27 @@ class FileHandler(Plot_Definitions):
             self._create_default_config() # create a default config file if not existing
         
         self._Initialize_File_Type()
-        # self._init_measurement_tags() # this fills the measurement_tag class with all the tags as enums
-        # self._Create_Measurement_Tag_Dict() # old not needed anymore
 
     def _Generate_Savefolder(self):
         """Generate savefolder if not already existing. Careful, has to be the same one as for the snom plotter gui app.
         """
-        # self.logging_folder = Path(os.path.expanduser('~')) / Path('SNOM_Plotter')
-        # self.save_folder = Path(os.path.expanduser('~')) / Path('SNOM_Plotter')
-        self.save_folder = Path(os.path.expanduser('~')) / Path('SNOM_Analysis')
+        # create parent folder in the user directory, both snom analysis and plotting cofig files will be saved there
+        parent_folder = Path(os.path.expanduser('~')) / Path('SNOM_Config')
+        if not Path.exists(parent_folder):
+            os.makedirs(parent_folder)
+        # create a save folder for the snom analysis config files
+        self.save_folder = Path(os.path.expanduser('~')) / parent_folder / Path('SNOM_Analysis')
+        if not Path.exists(self.save_folder):
+            os.makedirs(self.save_folder)
+        # define the paths for the different files
         self.all_subplots_path = self.save_folder / Path('all_subplots.p')
         self.plotting_parameters_path = self.save_folder / Path('plotting_parameters.json') # probably not a good idea to use the same folder as the snom plotter app
         self.config_path = self.save_folder / Path('config.ini')
 
-        if not Path.exists(self.save_folder):
-            os.makedirs(self.save_folder)
         
     def _Initialize_File_Type(self) -> None:
         # try to find the filetype automatically
-        self._Find_Filetype_new_with_config() 
+        self._Find_Filetype() 
 
     def _create_default_config(self):
         """This function creates a default config file in case the script is run for the first time or the old config file is missing.
@@ -816,103 +818,14 @@ class FileHandler(Plot_Definitions):
         # print the content of the measurement tags class
         print('All measurement tags: ', list(Measurement_Tags))
 
-    # old can be deleted
-    def _Find_Filetype(self) -> None:
-        # todo testing
-        new_config_works = self._Find_Filetype_new_with_config()
-        if new_config_works:
-            print('new config works')
-            return 0
-        """This function aims at finding specific characteristics in the filename to idendify the filetype.
-        For example the difference in File_Type.standard and File_Type.standard_new are an additional ' raw' at the end of the filename."""
-        filetype_found = False # local variable to track wether the filetype has been found already
-        # new approach:
-        # new approach does not work for old Version used by Aachen group
-        # todo, adjust such that try except blocks before are uneccesary
-        parameters_path = self.directory_name / Path(self.filename.name + '.txt') #standard snom files, not for aachen files
-        # print('parameters txt path: ', parameters_path)
-        if os.path.exists(parameters_path):
-            # print('trying to get paremeters dict')
-            try:
-                self.parameters_dict = Convert_Header_To_Dict(parameters_path)
-                # filetype_found = True
-                print('using new parameters dict!')
-                # print(self.parameters_dict)
-            except: pass # seems like an unknown parameters filetype was encountered proceed as usual
-            else:
-                # if no exception occured we can use the parameters dict to read in parameter values instead of html of previous version
-                # e.g.
-                version_number = self.parameters_dict['Version'][0]
-                print('version number: ', version_number)
-                if version_number == '1.6.3359.1':
-                    File_Definitions.file_type = File_Type.neaspec_version_1_6_3359_1
-                    # File_Definitions.parameters_type = File_Type.html_neaspec_version_1_6_3359_1
-                    File_Definitions.parameters_type = File_Type.new_parameters_txt # todo, still experimental
-                    print('Old snom version encountered if problems occur check file type definitions')
-                    filetype_found = True
-                elif version_number == '1.8.5017.0':
-                    File_Definitions.file_type = File_Type.standard
-                    File_Definitions.parameters_type = File_Type.new_parameters_txt # todo, still experimental
-                    # print('using new parameters txt definition')
-                    filetype_found = True
-                elif version_number == '1.10.9592.0':
-                    File_Definitions.file_type = File_Type.standard_new
-                    File_Definitions.parameters_type = File_Type.new_parameters_txt # todo, still experimental
-                    # print('using new parameters txt definition')
-                    filetype_found = True
-                if self.parameters_dict['Scan'][0] == 'Approach Curve' or self.parameters_dict['Scan'][0] == 'Approach Curve (PsHet)':
-                    File_Definitions.file_type = File_Type.approach_curve
-                    File_Definitions.parameters_type = File_Type.new_parameters_txt # todo, still experimental
-                    filetype_found = True
-                elif self.parameters_dict['Scan'][0] == '3D' or self.parameters_dict['Scan'][0] == '3D (PsHet)':
-                    File_Definitions.file_type = File_Type.snom_measurement_3d
-                    File_Definitions.parameters_type = File_Type.new_parameters_txt
-                    filetype_found = True
-        if filetype_found is False: # if parameter txt does not exist try to find the filetype by looking into one of the binary files
-            try:
-                f_1=open(self.directory_name / Path(self.filename.name + ' O1A.gsf'),"br")
-            except:
-                # filetype is at least not standard
-                try:
-                    f_2=open(self.directory_name / Path(self.filename.name + ' O1A raw.gsf'),"br")
-                except:
-                    try:
-                        f_3=open(self.directory_name / Path(self.filename.name + '_parameters.txt'),"r")
-                    except:
-                        try:
-                            f_4=open(self.directory_name / Path(self.filename.name + '_O1-F-abs.ascii'), 'r')
-                        except:
-                            print("The correct filetype could not automatically be found. Please try again and specifiy the filetype.")
-                        else:
-                            f_4.close()
-                            File_Definitions.file_type = File_Type.aachen_ascii
-                            File_Definitions.parameters_type = File_Type.txt
-                    else:
-                        f_3.close()
-                        File_Definitions.file_type = File_Type.comsol_gsf
-                        File_Definitions.parameters_type = File_Type.comsol_txt
-                else:
-                    f_2.close()
-                    File_Definitions.file_type = File_Type.standard_new
-                    File_Definitions.parameters_type = File_Type.html_new
-            else:
-                f_1.close()
-                File_Definitions.file_type = File_Type.standard
-                File_Definitions.parameters_type = File_Type.html
-        #alternative way: get the software version from the last entry in the .txt file
-
-    def _Find_Filetype_new_with_config(self) -> bool:
+    def _Find_Filetype(self) -> bool:
         filetypes = self._get_from_config(section='FILETYPES')
-        # for key in self.config['FILETYPES']:
         for key in filetypes:
-            # filetype = self.config['FILETYPES'][key]
             filetype = self._get_from_config(key, 'FILETYPES')
-            print(f'filetype: {filetype}')
-            # parameters_name = self.config[filetype]['parameters_name']
             parameters_name = self._get_from_config('parameters_name', filetype)
             parameters_path = self.directory_name / Path(self.filename.name + parameters_name)
             # try to create the measurement tag dict
-            succsess = self._Create_Measurement_Tag_Dict_new_with_config(parameters_path, filetype)
+            succsess = self._Create_Measurement_Tag_Dict(parameters_path, filetype)
             if succsess:
                 # the correct filetype has been found
                 print(f'Filetype found: {filetype}')
@@ -937,119 +850,8 @@ class FileHandler(Plot_Definitions):
         file = open(self.logfile_path, 'a')
         file.write(f'{parameter_name} = {parameter}\n')
         file.close()
-
-    # old can be deleted
-    def _Create_Measurement_Tag_Dict(self):
-        # create tag_dict for each channel individually? if manipulated channels are loaded they might have different diffrent resolution
-        # only center_pos, scan_area, pixel_area and rotation must be stored for each channel individually but rotation is not stored in the original .gsf files
-        # but rotation could be added in the newly created .gsf files
-        print(f'self.parameters_type: {self.parameters_type}')
-        print(f'self.file_type:       {self.file_type}')
-        if self.parameters_type == File_Type.html:
-            all_tables = pd.read_html(self.directory_name / Path(self.filename.name + ".html"))
-            tables = all_tables[0]
-            self.measurement_tag_dict = {
-                Tag_Type.scan_type: tables[2][0],
-                Tag_Type.center_pos: [float(tables[2][4]), float(tables[3][4])],
-                Tag_Type.rotation: int(tables[2][5]),
-                Tag_Type.scan_area: [float(tables[2][6]), float(tables[3][6])],
-                Tag_Type.pixel_area: [int(tables[2][7]), int(tables[3][7])],
-                Tag_Type.integration_time: float(tables[2][9]),
-                Tag_Type.tip_frequency: float(tables[2][13]),
-                Tag_Type.tip_amplitude: float(tables[2][14]),
-                Tag_Type.tapping_amplitude: float(tables[2][15])
-            }
-        elif self.parameters_type == File_Type.html_new:
-            all_tables = pd.read_html(self.directory_name / Path(self.filename.name + ".html"))
-            tables = all_tables[0]
-            self.measurement_tag_dict = {
-                Tag_Type.scan_type: tables[2][0],
-                Tag_Type.center_pos: [float(tables[2][4]), float(tables[3][4])],
-                Tag_Type.rotation: int(tables[2][5]),
-                Tag_Type.scan_area: [float(tables[2][6]), float(tables[3][6])],
-                Tag_Type.pixel_area: [int(tables[2][7]), int(tables[3][7])],
-                Tag_Type.integration_time: float(tables[2][9]),
-                Tag_Type.tip_frequency: float(tables[2][14]),
-                Tag_Type.tip_amplitude: float(tables[2][15]),
-                Tag_Type.tapping_amplitude: float(tables[2][16])
-            }
-        elif self.parameters_type == File_Type.html_neaspec_version_1_6_3359_1:
-            all_tables = pd.read_html(self.directory_name / Path(self.filename.name + ".html"))
-            tables = all_tables[0]
-            self.measurement_tag_dict = {
-                Tag_Type.center_pos: [float(tables[2][3]), float(tables[3][3])],
-                Tag_Type.rotation: int(tables[2][4]),
-                Tag_Type.scan_area: [float(tables[2][5]), float(tables[3][5])],
-                Tag_Type.pixel_area: [int(tables[2][6]), int(tables[3][6])],
-                Tag_Type.integration_time: float(tables[2][8]),
-                Tag_Type.tip_frequency: float(tables[2][12]),
-                Tag_Type.tip_amplitude: float(tables[2][13]),
-                Tag_Type.tapping_amplitude: float(tables[2][14])
-            }
-        elif self.parameters_type == File_Type.txt:
-            parameters = self.directory_name / Path(self.filename.name + '.parameters.txt')
-            file = open(parameters, 'r')
-            parameter_list = file.read()
-            file.close()
-            parameter_list = parameter_list.split('\n')
-            parameter_list = [element.split(': ') for element in parameter_list]
-            center_pos = [float(parameter_list[7][1]), float(parameter_list[8][1])]
-            rotation = float(parameter_list[9][1])
-            scan_area = [float(parameter_list[0][1]), float(parameter_list[1][1])]
-            pixel_area = [int(parameter_list[3][1]), int(parameter_list[4][1])]
-            integration_time = float(parameter_list[6][1])
-            tip_frequency = float(parameter_list[10][1])
-            self.measurement_tag_dict = {
-                Tag_Type.scan_type: None,
-                Tag_Type.center_pos: center_pos,
-                Tag_Type.rotation: rotation,
-                Tag_Type.scan_area: scan_area,
-                Tag_Type.pixel_area: pixel_area,
-                Tag_Type.integration_time: integration_time,
-                Tag_Type.tip_frequency: tip_frequency,
-                Tag_Type.tip_amplitude: None,
-                Tag_Type.tapping_amplitude: None
-            }
-        elif self.parameters_type == File_Type.comsol_txt:
-            parameters = self.directory_name / Path(self.filename.name + '_parameters.txt')
-            file = open(parameters, 'r')
-            parameter_list = file.read()
-            file.close()
-            parameter_list = parameter_list.split('\n')
-            parameter_list = [element.split('=') for element in parameter_list]
-            scan_area = [float(parameter_list[2][1]), float(parameter_list[3][1])]
-            pixel_area = [int(parameter_list[0][1]), int(parameter_list[1][1])]
-            self.measurement_tag_dict = {
-                Tag_Type.scan_type: None,
-                Tag_Type.center_pos: None,
-                Tag_Type.rotation: None,
-                Tag_Type.scan_area: scan_area,
-                Tag_Type.pixel_area: pixel_area,
-                Tag_Type.integration_time: None,
-                Tag_Type.tip_frequency: None,
-                Tag_Type.tip_amplitude: None,
-                Tag_Type.tapping_amplitude: None
-            }
-        # test new parameters txt type:
-        elif self.parameters_type == File_Type.new_parameters_txt:
-            print('measurement tag dict created with new parameters txt definition')
-            self.measurement_tag_dict = {
-                Tag_Type.scan_type: self.parameters_dict['Scan'][0],
-                Tag_Type.center_pos: [float(self.parameters_dict['Scanner Center Position (X, Y)'][0]), float(self.parameters_dict['Scanner Center Position (X, Y)'][1])],
-                Tag_Type.rotation: float(self.parameters_dict['Rotation'][0]),
-                Tag_Type.scan_area: [float(self.parameters_dict['Scan Area (X, Y, Z)'][0]), float(self.parameters_dict['Scan Area (X, Y, Z)'][1]), float(self.parameters_dict['Scan Area (X, Y, Z)'][2])],
-                Tag_Type.scan_unit: self.parameters_dict['Scan Area (X, Y, Z)'][3],
-                Tag_Type.pixel_area: [int(self.parameters_dict['Pixel Area (X, Y, Z)'][0]), int(self.parameters_dict['Pixel Area (X, Y, Z)'][1]), int(self.parameters_dict['Pixel Area (X, Y, Z)'][2])],
-                Tag_Type.integration_time: float(self.parameters_dict['Integration time'][0]),
-                Tag_Type.tip_frequency: [float(self.parameters_dict['Tip Frequency'][0].replace(',', '')), 'Hz'],
-                Tag_Type.tip_amplitude: float(self.parameters_dict['Tip Amplitude'][0]),
-                Tag_Type.tapping_amplitude: float(self.parameters_dict['Tapping Amplitude'][0])
-            }
-        # only used by synccorrection, every other function should use the channels tag dict version, as pixel resolution could vary
-        self.XRes, self.YRes = self.measurement_tag_dict[Tag_Type.pixel_area][0], self.measurement_tag_dict[Tag_Type.pixel_area][1]
-        self.XReal, self.YReal = self.measurement_tag_dict[Tag_Type.scan_area][0], self.measurement_tag_dict[Tag_Type.scan_area][1] # in µm
-    
-    def _Create_Measurement_Tag_Dict_new_with_config(self, parameters_path:Path, filetype:str) -> bool:
+ 
+    def _Create_Measurement_Tag_Dict(self, parameters_path:Path, filetype:str) -> bool:
         """This function creates a dictionary containing the measurement tags. The tags are extracted from the parameters file.
         If the tag dict cannot be created the function will return False otherwise True.
         """
@@ -1240,10 +1042,6 @@ class FileHandler(Plot_Definitions):
             elif tag_key == 'VERSION':
                 self.measurement_tag_dict[Measurement_Tags.VERSION] = value
 
-
-
-        
-        
         # only used by synccorrection, every other function should use the channels tag dict version, as pixel resolution could vary
         pixelarea = self.measurement_tag_dict[Measurement_Tags.PIXELAREA]
         scanarea = self.measurement_tag_dict[Measurement_Tags.SCANAREA]
@@ -1352,314 +1150,6 @@ class FileHandler(Plot_Definitions):
         with open(self.plotting_parameters_path, 'w') as file:
             json.dump(dictionary, file, indent=4)
    
-class SnomMeasurement(FileHandler):
-    """This class opens a snom measurement and handels all the snom related functions."""
-    all_subplots = []
-    def __init__(self, directory_name:str, channels:list=None, title:str=None, autoscale:bool=True) -> None:
-        super().__init__(directory_name, title)
-        self._Initialize_Measurement_Channel_Indicators()
-        if channels == None: # the standard channels which will be used if no channels are specified
-            channels = self.preview_channels
-        self.channels = channels.copy() # make sure to copy the list to avoid changing the original list     
-        self.autoscale = autoscale
-        self._Initialize_Data(self.channels)
-        if Plot_Definitions.autodelete_all_subplots: self._Delete_All_Subplots() # automatically delete old subplots
-    
-    def _Initialize_Measurement_Channel_Indicators(self):
-        # in the future these indicators should be read from external prameters file to make it easier for the user to add new filetypes with different indicators
-        # the cannel prefix and suffix are characters surrounding the channel name in the filename, they will be used when loading and saving the data
-        # filename = directory_name + channel_prefix + channel + channel_suffix + appendix + '.gsf' (or '.txt') 
-        # appendix is just a standard appendix when saving to not overwrite the original files, can be changed by the user default is '_manipulated'
-        # new approach based on cofigfile
-        self.phase_channels = self._get_from_config('phase_channels')
-        self.amp_channels = self._get_from_config('amp_channels')
-        self.real_channels = self._get_from_config('real_channels')
-        self.imag_channels = self._get_from_config('imag_channels')
-        self.complex_channels = self.imag_channels + self.real_channels
-        self.height_channel = self._get_from_config('height_channel')
-        self.height_channels = self._get_from_config('height_channels')
-        self.mechanical_channels = self._get_from_config('mechanical_channels')
-        self.all_channels_default = self.phase_channels + self.amp_channels + self.mechanical_channels
-        self.preview_ampchannel = self._get_from_config('preview_ampchannel')
-        self.preview_phasechannel = self._get_from_config('preview_phasechannel')
-        self.preview_channels = self._get_from_config('preview_channels')
-        self.height_indicator = self._get_from_config('height_indicator')
-        self.amp_indicator = self._get_from_config('amp_indicator')
-        self.phase_indicator = self._get_from_config('phase_indicator')
-        self.backwards_indicator = self._get_from_config('backwards_indicator')
-        self.real_indicator = self._get_from_config('real_indicator')
-        self.imag_indicator = self._get_from_config('imag_indicator')
-        self.optical_indicator = self._get_from_config('optical_indicator')
-        self.mechanical_indicator = self._get_from_config('mechanical_indicator')
-        self.channel_prefix_default = self._get_from_config('channel_prefix_default')
-        self.channel_prefix_custom = self._get_from_config('channel_prefix_custom')
-        self.channel_suffix_default = self._get_from_config('channel_suffix_default')
-        self.channel_suffix_custom = self._get_from_config('channel_suffix_custom')
-        self.channel_suffix_synccorrected_phase = self._get_from_config('channel_suffix_synccorrected_phase')
-        self.channel_suffix_manipulated = self._get_from_config('channel_suffix_manipulated')
-        self.channel_suffix_overlain = self._get_from_config('channel_suffix_overlain')
-        self.file_ending = self._get_from_config('file_ending')
-        self.phase_offset_default = self._get_from_config('phase_offset_default')
-        self.phase_offset_custom = self._get_from_config('phase_offset_custom')
-        self.rounding_decimal_amp_default = self._get_from_config('rounding_decimal_amp_default')
-        self.rounding_decimal_amp_custom = self._get_from_config('rounding_decimal_amp_custom')
-        self.rounding_decimal_phase_default = self._get_from_config('rounding_decimal_phase_default')
-        self.rounding_decimal_phase_custom = self._get_from_config('rounding_decimal_phase_custom')
-        self.rounding_decimal_complex_default = self._get_from_config('rounding_decimal_complex_default')
-        self.rounding_decimal_complex_custom = self._get_from_config('rounding_decimal_complex_custom')
-        self.rounding_decimal_height_default = self._get_from_config('rounding_decimal_height_default')
-        self.rounding_decimal_height_custom = self._get_from_config('rounding_decimal_height_custom')
-        self.height_scaling_default = self._get_from_config('height_scaling_default')
-        self.height_scaling_custom = self._get_from_config('height_scaling_custom')
-        
-
-
-
-
-
-        '''
-        if self.file_type == File_Type.standard or self.file_type == File_Type.standard_new or self.file_type == File_Type.neaspec_version_1_6_3359_1:
-            self.phase_channels = ['O1P','O2P','O3P','O4P','O5P', 'R-O1P','R-O2P','R-O3P','R-O4P','R-O5P']
-            self.amp_channels = ['O1A','O2A','O3A','O4A','O5A', 'R-O1A','R-O2A','R-O3A','R-O4A','R-O5A']
-            self.real_channels = ['O1Re', 'O2Re', 'O3Re', 'O4Re', 'R-O5Re', 'R-O1Re', 'R-O2Re', 'R-O3Re', 'R-O4Re', 'R-O5Re']
-            self.imag_channels = ['O1Im', 'O2Im', 'O3Im', 'O4Im', 'R-O5Im', 'R-O1Im', 'R-O2Im', 'R-O3Im', 'R-O4Im', 'R-O5Im']
-            self.complex_channels = self.imag_channels + self.real_channels
-            self.height_channel = 'Z C'
-            self.height_channels = ['Z C', 'R-Z C']
-            self.mechanical_channels = ['M0A', 'M0P', 'M1A', 'M1P', 'M2A', 'M2P', 'M3A', 'M3P', 'M4A', 'M4P', 'M5A', 'M5P', 'R-M0A', 'R-M0P', 'R-M1A', 'R-M1P', 'R-M2A', 'R-M2P', 'R-M3A', 'R-M3P', 'R-M4A', 'R-M4P', 'R-M5A', 'R-M5P']
-            # self.all_channels_default = ['O1A','O1P','O2A','O2P','O3A','O3P','O4A','O4P','O5A','O5P','R-O1A','R-O1P','R-O2A','R-O2P','R-O3A','R-O3P','R-O4A','R-O4P','R-O5A','R-O5P']
-            self.all_channels_default = self.phase_channels + self.amp_channels + self.mechanical_channels
-            self.preview_ampchannel = 'O2A'
-            self.preview_phasechannel = 'O2P'
-            self.height_indicator = 'Z'
-            self.amp_indicator = 'A'
-            self.phase_indicator = 'P'
-            self.backwards_indicator = 'R-'
-            self.real_indicator = 'Re'
-            self.imag_indicator = 'Im'
-            
-            self.channel_prefix_default = ' '
-            self.channel_prefix_custom = ' '
-            if self.file_type == File_Type.standard_new:
-                self.channel_suffix_default = ' raw'
-            else:
-                self.channel_suffix_default = ''
-            self.channel_suffix_custom = ''
-            self.file_ending = '.gsf'
-
-            # definitions for data loading:
-            self.phase_offset_default = np.pi # shift raw data to the interval [0, 2pi]
-            self.phase_offset_custom = 0 # assume custom data is already in the interval [0, 2pi]
-            self.rounding_decimal_amp_default = 5
-            self.rounding_decimal_amp_custom = 5
-            self.rounding_decimal_phase_default = 5
-            self.rounding_decimal_phase_custom = 5
-            self.rounding_decimal_complex_default = 5
-            self.rounding_decimal_complex_custom = 5
-            self.rounding_decimal_height_default = 2 # when in nm
-            self.rounding_decimal_height_custom = 2 # when in nm
-            self.height_scaling_default = 10**9 # data is in m convert to nm
-            self.height_scaling_custom = 10**9 # data is in m convert to nm
-
-        elif self.file_type == File_Type.aachen_ascii or self.file_type == File_Type.aachen_gsf:
-            self.phase_channels = ['O1-F-arg','O2-F-arg','O3-F-arg','O4-F-arg', 'O1-B-arg','O2-B-arg','O3-B-arg','O4-B-arg']
-            self.amp_channels = ['O1-F-abs','O2-F-abs','O3-F-abs','O4-F-abs', 'O1-B-abs','O2-B-abs','O3-B-abs','O4-B-abs']
-            self.real_channels = ['O1-F-Re','O2-F-Re','O3-F-Re','O4-F-Re','O1-B-Re','O2-B-Re','O3-B-Re','O4-B-Re']
-            self.imag_channels = ['O1-F-Im','O2-F-Im','O3-F-Im','O4-F-Im','O1-B-Im','O2-B-Im','O3-B-Im','O4-B-Im']
-            self.complex_channels = self.imag_channels + self.real_channels
-            self.height_channel = 'MT-F-abs'
-            self.height_channels = ['MT-F-abs', 'MT-B-abs']
-            # self.all_channels_default = ['O1-F-abs','O1-F-arg','O2-F-abs','O2-F-arg','O3-F-abs','O3-F-arg','O4-F-abs','O4-F-arg', 'O1-B-abs','O1-B-arg','O2-B-abs','O2-B-arg','O3-B-abs','O3-B-arg','O4-B-abs','O4-B-arg']
-            self.all_channels_default = self.phase_channels + self.amp_channels
-            self.preview_ampchannel = 'O2-F-abs'
-            self.preview_phasechannel = 'O2-F-arg'
-            self.height_indicator = 'MT'
-            self.amp_indicator = 'abs'
-            self.phase_indicator = 'arg'
-            self.real_indicator = 'Re'#not used
-            self.imag_indicator = 'Im'#not used
-            self.backwards_indicator = '-B-'
-            self.channel_prefix_default = '_'
-            self.channel_prefix_custom = '_'
-            self.channel_suffix_default = ''
-            self.channel_suffix_custom = ''
-            if self.file_type == File_Type.aachen_ascii:
-                self.file_ending = '.ascii'
-            else:
-                self.file_ending = '.gsf'
-            # definitions for data loading:
-            # todo the detector voltages should be handeled here, the following values are just placeholders
-            # also gsf file reading for the gwyddion dump format is not implemented yet but ascii somewhat works
-            self.phase_offset_default = np.pi # shift raw data to the interval [0, 2pi]
-            self.phase_offset_custom = 0 # assume custom data is already in the interval [0, 2pi]
-            self.rounding_decimal_amp_default = 5
-            self.rounding_decimal_amp_custom = 5
-            self.rounding_decimal_phase_default = 5
-            self.rounding_decimal_phase_custom = 5
-            self.rounding_decimal_complex_default = 5
-            self.rounding_decimal_complex_custom = 5
-            self.rounding_decimal_height_default = 2 # when in nm
-            self.rounding_decimal_height_custom = 2 # when in nm
-            self.height_scaling_default = 10**9 # data is in m convert to nm
-            self.height_scaling_custom = 10**9 # data is in m convert to nm
-
-        elif self.file_type == File_Type.comsol_gsf:
-            self.all_channels_default = ['abs', 'arg', 'real', 'imag', 'Z'] # Z is not a standard channel, but the user might create it manually to show the simulation design
-            self.phase_channels = ['arg']
-            self.amp_channels = ['abs']
-            self.real_channels = ['real']
-            self.imag_channels = ['imag']
-            self.complex_channels = self.imag_channels + self.real_channels
-            self.height_channel = 'Z'
-            self.height_channels = ['Z']
-            self.preview_ampchannel = 'abs'
-            self.preview_phasechannel = 'arg'
-            self.height_indicator = 'Z'
-            self.amp_indicator = 'abs'
-            self.phase_indicator = 'arg'
-            self.real_indicator = 'real'
-            self.imag_indicator = 'imag'
-            self.channel_prefix_default = '_'
-            self.channel_prefix_custom = '_'
-            self.channel_suffix_default = ''
-            self.channel_suffix_custom = ''
-            self.file_ending = '.gsf'
-
-            # definitions for data loading:
-            self.phase_offset_default = 0 # assume default data is already in the interval [0, 2pi]
-            self.phase_offset_custom = 0 # assume custom data is already in the interval [0, 2pi]
-            self.rounding_decimal_amp_default = 5
-            self.rounding_decimal_amp_custom = 5
-            self.rounding_decimal_phase_default = 5
-            self.rounding_decimal_phase_custom = 5
-            self.rounding_decimal_complex_default = 5
-            self.rounding_decimal_complex_custom = 5
-            self.rounding_decimal_height_default = 2 # when in nm
-            self.rounding_decimal_height_custom = 2 # when in nm
-            self.height_scaling_default = 10**9 # data is in m convert to nm
-            self.height_scaling_custom = 10**9 # data is in m convert to nm
-        '''
-        # additional definitions independent of filetype:
-        self.filter_gauss_indicator = 'gauss'
-        self.filter_fourier_indicator = 'fft'
-
-
-        #create also lists for the overlain channels
-        self.overlain_phase_channels = [channel+'_overlain' for channel in self.phase_channels]
-        self.corrected_phase_channels = [channel+'_corrected' for channel in self.phase_channels]
-        self.corrected_overlain_phase_channels = [channel+'_corrected_overlain' for channel in self.phase_channels]
-        self.overlain_amp_channels = [channel+'_overlain' for channel in self.amp_channels]
-        
-        self.all_channels_custom = self.height_channels + self.complex_channels + self.overlain_phase_channels + self.overlain_amp_channels + self.corrected_phase_channels + self.corrected_overlain_phase_channels
-  
-    def _create_channel_tag_dict_new_with_config(self, channels:list=None):
-        """This function reads in the header of the gsf file for the specified channel and extracts the tag values. The tag values are stored in a dictionary for each channel.
-        This tag dict is very similar to the measurement_tag_dict, but the measurement_tag_dict is only created on the basis of the parameter file.
-        If individual channels have been modified this will only be stored in the channel_tag_dict.
-
-        Args:
-            channel (str): channel name for which the tag values should be extracted
-        """
-        if channels == None:
-            channels = self.channels
-        # create a list containing the tag dictionary for each channel
-        self.channel_tag_dict = []
-        for channel in channels:
-            channel_dict = {}
-            if channel in self.all_channels_default:
-                suffix = self.channel_suffix_default
-                prefix = self.channel_prefix_default
-                channel_type = 'default'
-            elif channel in self.all_channels_custom:
-                suffix = self.channel_suffix_custom
-                prefix = self.channel_prefix_custom
-                channel_type = 'custom'
-            else:
-                print(f'channel {channel} not found in default or custom channels!')
-                # assume it is a custom channel and try loading anyways
-                suffix = self.channel_suffix_custom
-                prefix = self.channel_prefix_custom
-                channel_type = 'custom'
-                # exit()
-            # we want to read the non binary part of the datafile
-            if self.file_ending == '.gsf':
-                encod = 'latin1'
-            elif self.file_ending == '.ascii':
-                encod = 'latin1'
-            else:
-                print('file ending not supported')
-            with open(self.directory_name / Path(self.filename.name + f'{prefix}{channel}{suffix}{self.file_ending}'), 'r', encoding=encod) as f:
-                content=f.read()
-
-
-            channel_tags = self._get_from_config('channel_tags')
-            # convert the string to a dict
-            # tags = dict(eval(channel_tags))
-            # convert the tags dict to a list of values
-            # tags_list = list(tags.values())
-            # for tag in tags_list:
-            for key, tag in channel_tags.items():
-                is_list = False
-                is_unit = False
-                tag_value_found = False
-                value = None
-                values = [None]
-                if isinstance(tag, list):
-                    is_list = True
-                # so far each tag contains a maximum of 2 values
-                if is_list:
-                    values = []
-                    for element in tag:
-                        try: value = self._Get_Tagval(content, element)
-                        except: 
-                            values.append(None)
-                            tag_value_found = False
-                        else: 
-                            values.append(value)
-                            tag_value_found = True
-                else:
-                    try: value = self._Get_Tagval(content, tag)
-                    except: value = None
-                    else: tag_value_found = True
-                    # try to find out if the value is a number or a unit
-                    try: float(value)
-                    except: is_unit = True
-                # print('tag: ', tag)
-                # print('values: ', values)
-                # print('value: ', value)
-                # print('is list: ', is_list)
-                # print('is unit: ', is_unit)
-                # print('tag value found: ', tag_value_found)
-                # check if tag value was found
-                if not tag_value_found:
-                    print(f'Could not find the tag value for {tag} in channel {channel}. You should probably check the config file.')
-                    continue
-                if key == 'PIXELAREA':
-                    try: channel_dict[Channel_Tags.PIXELAREA] = [int(values[0]), int(values[1]), int(values[2])]
-                    except: channel_dict[Channel_Tags.PIXELAREA] = [int(values[0]), int(values[1])]
-                elif key == 'YINCOMPLETE':
-                    channel_dict[Channel_Tags.YINCOMPLETE] = int(value)
-                elif key == 'SCANNERCENTERPOSITION':
-                    try: channel_dict[Channel_Tags.SCANNERCENTERPOSITION] = [float(values[0]), float(values[1]), float(values[2])]
-                    except: channel_dict[Channel_Tags.SCANNERCENTERPOSITION] = [float(values[0]), float(values[1])]
-                elif key == 'ROTATION':
-                    channel_dict[Channel_Tags.ROTATION] = float(value)
-                elif key == 'SCANAREA':
-                    try: channel_dict[Channel_Tags.SCANAREA] = [float(values[0]), float(values[1]), float(values[2])]
-                    except: channel_dict[Channel_Tags.SCANAREA] = [float(values[0]), float(values[1])]
-                elif key == 'XYUNIT':
-                    channel_dict[Channel_Tags.XYUNIT] = value
-                elif key == 'ZUNIT':
-                    channel_dict[Channel_Tags.ZUNIT] = value
-                elif key == 'WAVENUMBERSCALING':
-                    channel_dict[Channel_Tags.WAVENUMBERSCALING] = float(value)
-            # add pixel scaling to the channel dict, initially this is always 1
-            channel_dict[Channel_Tags.PIXELSCALING] = 1
-            # print('channel: ', channel)
-            # print('new channel dict: ', channel_dict)
-                    
-            self.channel_tag_dict.append(channel_dict)
-
     def _get_channel_tag_dict_value(self, channel:str, tag:Channel_Tags) -> list:
         """This function returns the value of the specified tag for the specified channel. If the tag is not found, it will return None.
 
@@ -1685,6 +1175,31 @@ class SnomMeasurement(FileHandler):
             else:
                 return [value]
 
+    def _get_measurement_tag_dict_value(self, tag:Channel_Tags) -> list:
+        """This function returns the value of the specified tag for the current measurement. If the tag is not found, it will return None.
+
+        Args:
+            channel (str): channel name
+            tag (Channel_Tags): tag name
+
+        Returns:
+            list: tag value or values as a list
+        """
+        value = self.measurement_tag_dict[tag]
+        # check if a unit is part of the value
+        if isinstance(value, list):
+            for element in value:
+                # if a unit is part of the value it must be in first place
+                if isinstance(element, str):
+                    return value[1:] 
+                else:
+                    return value
+        else:
+            if isinstance(value, str):
+                return None
+            else:
+                return [value]
+
     def _get_channel_tag_dict_unit(self, channel:str, tag:Channel_Tags) -> str:
         """This function returns the value of the specified tag for the specified channel. If the tag is not found, it will return None.
 
@@ -1696,6 +1211,31 @@ class SnomMeasurement(FileHandler):
             float: tag unit if there is one
         """
         value = self.channel_tag_dict[self.channels.index(channel)][tag]
+        # check if a unit is part of the value
+        if isinstance(value, list):
+            for element in value:
+                # if a unit is part of the value it must be in first place
+                if isinstance(element, str):
+                    return value[0] 
+                else:
+                    return None
+        else:
+            if isinstance(value, str):
+                return value
+            else:
+                return None
+
+    def _get_measurement_tag_dict_unit(self, tag:Channel_Tags) -> str:
+        """This function returns the value of the specified tag for the current measurement. If the tag is not found, it will return None.
+
+        Args:
+            channel (str): channel name
+            tag (Channel_Tags): tag name
+
+        Returns:
+            float: tag unit if there is one
+        """
+        value = self.measurement_tag_dict[tag]
         # check if a unit is part of the value
         if isinstance(value, list):
             for element in value:
@@ -1766,101 +1306,9 @@ class SnomMeasurement(FileHandler):
         else:
             self.channel_tag_dict[self.channels.index(channel)][tag][0] = value
 
-
-    '''def _Create_Channels_Tag_Dict(self, channels:list=None):
-        # ToDo optimize everything so new filetypes dont need so much extra copies
-        if channels == None:
-            channels = self.channels
-        if (self.file_type == File_Type.standard) or (self.file_type == File_Type.standard_new) or (self.file_type == File_Type.aachen_gsf) or (self.file_type == File_Type.comsol_gsf) or (self.file_type == File_Type.neaspec_version_1_6_3359_1):
-            cod="latin1"
-            # get the tag values from each .gsf file individually
-            if channels == self.channels:
-                self.channel_tag_dict = []
-            for channel in channels:
-                if (self.file_type == File_Type.standard_new or self.file_type==File_Type.neaspec_version_1_6_3359_1) and '_corrected' not in channel:
-                    # if ' C' in channel or '_manipulated' in channel: #channel == 'Z C' or channel == 'R-Z C':
-                    #     filepath = self.directory_name / Path(self.filename.name + ' ' + channel + '.gsf')
-                    # else:
-                    #     filepath = self.directory_name / Path(self.filename.name + ' ' + channel + ' raw.gsf')
-                    if channel in self.all_channels_default and 'C' not in channel:
-                        filepath = self.directory_name / Path(self.filename.name + ' ' + channel + ' raw.gsf')
-                    else:
-                        filepath = self.directory_name / Path(self.filename.name + ' ' + channel + '.gsf')
-
-                # elif self.file_type == File_Type.aachen_ascii:
-                #     if '_corrected' in channel or '_manipulated' in channel: 
-                #         filepath = self.directory_name + '/' + self.filename + ' ' + channel + '.gsf'
-                #     else:
-                #         filepath = self.directory_name + '/' + self.filename + '_' + channel + '.ascii'
-                #         cod = None
-                elif self.file_type == File_Type.comsol_gsf:
-                    filepath = self.directory_name / Path(self.filename.name + '_' + channel + '.gsf')
-
-                else:
-                    # filepath = self.directory_name + '/' + self.filename + ' ' + channel + '.gsf'
-                    filepath = self.directory_name / Path(self.filename.name + ' ' + channel + '.gsf')
-                # print(self.file_type, filepath, self.channels)
-                file = open(filepath, 'r', encoding=cod)
-                content = file.read()
-                file.close()
-                XRes = self._Get_Tagval(content, 'XRes')
-                YRes = self._Get_Tagval(content, 'YRes')
-                XReal = self._Get_Tagval(content, 'XReal')
-                YReal = self._Get_Tagval(content, 'YReal')
-                XOffset = self._Get_Tagval(content, 'XOffset')
-                YOffset = self._Get_Tagval(content, 'YOffset')
-                integration_time = self._Get_Tagval(content, 'Integration time')
-                Rotation = 0
-                try:
-                    Rotation = self._Get_Tagval(content, 'Rotation')
-                except:
-                    print('Could not find the rotation tag value, proceeding anyways.')
-                channel_dict = {
-                    Tag_Type.center_pos: [float(XOffset), float(YOffset)],
-                    Tag_Type.rotation: float(Rotation),
-                    Tag_Type.pixel_area: [int(XRes), int(YRes)],
-                    Tag_Type.scan_area: [float(XReal), float(YReal)],
-                    Tag_Type.pixel_scaling: 1, # initially this is always 1
-                    Tag_Type.integration_time: integration_time,
-                }
-                self.channel_tag_dict.append(channel_dict)
-            pass
-        else:
-            if self.parameters_type == File_Type.txt: #only for aachen files
-                if channels == self.channels:
-                    self.channel_tag_dict = []
-                # parameters = self.directory_name + '/' + self.filename + '.parameters.txt'
-                parameters = self.directory_name / Path(self.filename.name + '.parameters.txt')
-                file = open(parameters, 'r')
-                parameter_list = file.read()
-                file.close()
-                # print(parameter_list)
-                parameter_list = parameter_list.split('\n')
-                parameter_list = [element.split(': ') for element in parameter_list]
-                center_pos = [float(parameter_list[7][1]), float(parameter_list[8][1])]
-                rotation = float(parameter_list[9][1])
-                scan_area = [float(parameter_list[0][1]), float(parameter_list[1][1])]
-                pixel_area = [int(parameter_list[3][1]), int(parameter_list[4][1])]
-                channel_dict = {
-                        Tag_Type.center_pos: center_pos,
-                        Tag_Type.rotation: rotation,
-                        Tag_Type.pixel_area: pixel_area,
-                        Tag_Type.scan_area: scan_area,
-                        Tag_Type.pixel_scaling: 1
-                    }
-                # for this file type all channels must be of same size
-                for channel in channels:
-                    self.channel_tag_dict.append(channel_dict)
-            else:
-                print('channel tag dict for this filetype is not yet implemented')
-    '''
-
     def _Get_Tagval(self, content, tag):
         """This function gets the value of the tag listed in the file header"""
-        # print('trying to split the content')
-        # print(content)
         content_array = content.split('\n')
-        # print(content_array[0:5])
         tag_array = []
         tagval = 0 # if no tag val can be found return 0
         for element in content_array:
@@ -1978,7 +1426,175 @@ class SnomMeasurement(FileHandler):
             # height channel for example has no demodulation number but should not cause an error
             print('demodulation number could not be found')
         return demodulation_num
+    
+    def _Initialize_Measurement_Channel_Indicators(self):
+        # in the future these indicators should be read from external prameters file to make it easier for the user to add new filetypes with different indicators
+        # the cannel prefix and suffix are characters surrounding the channel name in the filename, they will be used when loading and saving the data
+        # filename = directory_name + channel_prefix + channel + channel_suffix + appendix + '.gsf' (or '.txt') 
+        # appendix is just a standard appendix when saving to not overwrite the original files, can be changed by the user default is '_manipulated'
+        # new approach based on cofigfile
+        self.phase_channels = self._get_from_config('phase_channels')
+        self.amp_channels = self._get_from_config('amp_channels')
+        self.real_channels = self._get_from_config('real_channels')
+        self.imag_channels = self._get_from_config('imag_channels')
+        self.complex_channels = self.imag_channels + self.real_channels
+        self.height_channel = self._get_from_config('height_channel')
+        self.height_channels = self._get_from_config('height_channels')
+        self.mechanical_channels = self._get_from_config('mechanical_channels')
+        self.all_channels_default = self.phase_channels + self.amp_channels + self.mechanical_channels
+        self.preview_ampchannel = self._get_from_config('preview_ampchannel')
+        self.preview_phasechannel = self._get_from_config('preview_phasechannel')
+        self.preview_channels = self._get_from_config('preview_channels')
+        self.height_indicator = self._get_from_config('height_indicator')
+        self.amp_indicator = self._get_from_config('amp_indicator')
+        self.phase_indicator = self._get_from_config('phase_indicator')
+        self.backwards_indicator = self._get_from_config('backwards_indicator')
+        self.real_indicator = self._get_from_config('real_indicator')
+        self.imag_indicator = self._get_from_config('imag_indicator')
+        self.optical_indicator = self._get_from_config('optical_indicator')
+        self.mechanical_indicator = self._get_from_config('mechanical_indicator')
+        self.channel_prefix_default = self._get_from_config('channel_prefix_default')
+        self.channel_prefix_custom = self._get_from_config('channel_prefix_custom')
+        self.channel_suffix_default = self._get_from_config('channel_suffix_default')
+        self.channel_suffix_custom = self._get_from_config('channel_suffix_custom')
+        self.channel_suffix_synccorrected_phase = self._get_from_config('channel_suffix_synccorrected_phase')
+        self.channel_suffix_manipulated = self._get_from_config('channel_suffix_manipulated')
+        self.channel_suffix_overlain = self._get_from_config('channel_suffix_overlain')
+        self.file_ending = self._get_from_config('file_ending')
+        self.phase_offset_default = self._get_from_config('phase_offset_default')
+        self.phase_offset_custom = self._get_from_config('phase_offset_custom')
+        self.rounding_decimal_amp_default = self._get_from_config('rounding_decimal_amp_default')
+        self.rounding_decimal_amp_custom = self._get_from_config('rounding_decimal_amp_custom')
+        self.rounding_decimal_phase_default = self._get_from_config('rounding_decimal_phase_default')
+        self.rounding_decimal_phase_custom = self._get_from_config('rounding_decimal_phase_custom')
+        self.rounding_decimal_complex_default = self._get_from_config('rounding_decimal_complex_default')
+        self.rounding_decimal_complex_custom = self._get_from_config('rounding_decimal_complex_custom')
+        self.rounding_decimal_height_default = self._get_from_config('rounding_decimal_height_default')
+        self.rounding_decimal_height_custom = self._get_from_config('rounding_decimal_height_custom')
+        self.height_scaling_default = self._get_from_config('height_scaling_default')
+        self.height_scaling_custom = self._get_from_config('height_scaling_custom')
+        
+        # additional definitions independent of filetype:
+        self.filter_gauss_indicator = 'gauss'
+        self.filter_fourier_indicator = 'fft'
 
+        #create also lists for the overlain channels
+        self.overlain_phase_channels = [channel+'_overlain' for channel in self.phase_channels]
+        self.corrected_phase_channels = [channel+'_corrected' for channel in self.phase_channels]
+        self.corrected_overlain_phase_channels = [channel+'_corrected_overlain' for channel in self.phase_channels]
+        self.overlain_amp_channels = [channel+'_overlain' for channel in self.amp_channels]
+        
+        self.all_channels_custom = self.height_channels + self.complex_channels + self.overlain_phase_channels + self.overlain_amp_channels + self.corrected_phase_channels + self.corrected_overlain_phase_channels
+  
+    def _create_channel_tag_dict(self, channels:list=None):
+        """This function reads in the header of the gsf file for the specified channel and extracts the tag values. The tag values are stored in a dictionary for each channel.
+        This tag dict is very similar to the measurement_tag_dict, but the measurement_tag_dict is only created on the basis of the parameter file.
+        If individual channels have been modified this will only be stored in the channel_tag_dict.
+
+        Args:
+            channel (str): channel name for which the tag values should be extracted
+        """
+        if channels == None:
+            channels = self.channels
+        # create a list containing the tag dictionary for each channel
+        self.channel_tag_dict = []
+        for channel in channels:
+            channel_dict = {}
+            if channel in self.all_channels_default:
+                suffix = self.channel_suffix_default
+                prefix = self.channel_prefix_default
+                channel_type = 'default'
+            elif channel in self.all_channels_custom:
+                suffix = self.channel_suffix_custom
+                prefix = self.channel_prefix_custom
+                channel_type = 'custom'
+            else:
+                print(f'channel {channel} not found in default or custom channels!')
+                # assume it is a custom channel and try loading anyways
+                suffix = self.channel_suffix_custom
+                prefix = self.channel_prefix_custom
+                channel_type = 'custom'
+                # exit()
+            # we want to read the non binary part of the datafile
+            if self.file_ending == '.gsf':
+                encod = 'latin1'
+            elif self.file_ending == '.ascii':
+                encod = 'latin1'
+            else:
+                print('file ending not supported')
+            with open(self.directory_name / Path(self.filename.name + f'{prefix}{channel}{suffix}{self.file_ending}'), 'r', encoding=encod) as f:
+                content=f.read()
+
+
+            channel_tags = self._get_from_config('channel_tags')
+            for key, tag in channel_tags.items():
+                is_list = False
+                is_unit = False
+                tag_value_found = False
+                value = None
+                values = [None]
+                if isinstance(tag, list):
+                    is_list = True
+                # so far each tag contains a maximum of 2 values
+                if is_list:
+                    values = []
+                    for element in tag:
+                        try: value = self._Get_Tagval(content, element)
+                        except: 
+                            values.append(None)
+                            tag_value_found = False
+                        else: 
+                            values.append(value)
+                            tag_value_found = True
+                else:
+                    try: value = self._Get_Tagval(content, tag)
+                    except: value = None
+                    else: tag_value_found = True
+                    # try to find out if the value is a number or a unit
+                    try: float(value)
+                    except: is_unit = True
+                # check if tag value was found
+                if not tag_value_found:
+                    print(f'Could not find the tag value for {tag} in channel {channel}. You should probably check the config file.')
+                    continue
+                if key == 'PIXELAREA':
+                    try: channel_dict[Channel_Tags.PIXELAREA] = [int(values[0]), int(values[1]), int(values[2])]
+                    except: channel_dict[Channel_Tags.PIXELAREA] = [int(values[0]), int(values[1])]
+                elif key == 'YINCOMPLETE':
+                    channel_dict[Channel_Tags.YINCOMPLETE] = int(value)
+                elif key == 'SCANNERCENTERPOSITION':
+                    try: channel_dict[Channel_Tags.SCANNERCENTERPOSITION] = [float(values[0]), float(values[1]), float(values[2])]
+                    except: channel_dict[Channel_Tags.SCANNERCENTERPOSITION] = [float(values[0]), float(values[1])]
+                elif key == 'ROTATION':
+                    channel_dict[Channel_Tags.ROTATION] = float(value)
+                elif key == 'SCANAREA':
+                    try: channel_dict[Channel_Tags.SCANAREA] = [float(values[0]), float(values[1]), float(values[2])]
+                    except: channel_dict[Channel_Tags.SCANAREA] = [float(values[0]), float(values[1])]
+                elif key == 'XYUNIT':
+                    channel_dict[Channel_Tags.XYUNIT] = value
+                elif key == 'ZUNIT':
+                    channel_dict[Channel_Tags.ZUNIT] = value
+                elif key == 'WAVENUMBERSCALING':
+                    channel_dict[Channel_Tags.WAVENUMBERSCALING] = float(value)
+            # add pixel scaling to the channel dict, initially this is always 1
+            channel_dict[Channel_Tags.PIXELSCALING] = 1
+                    
+            self.channel_tag_dict.append(channel_dict)
+
+
+class SnomMeasurement(FileHandler):
+    """This class opens a snom measurement and handels all the snom related functions."""
+    all_subplots = []
+    def __init__(self, directory_name:str, channels:list=None, title:str=None, autoscale:bool=True) -> None:
+        super().__init__(directory_name, title)
+        self._Initialize_Measurement_Channel_Indicators()
+        if channels == None: # the standard channels which will be used if no channels are specified
+            channels = self.preview_channels
+        self.channels = channels.copy() # make sure to copy the list to avoid changing the original list     
+        self.autoscale = autoscale
+        self._Initialize_Data(self.channels)
+        if Plot_Definitions.autodelete_all_subplots: self._Delete_All_Subplots() # automatically delete old subplots
+    
     def _Initialize_Data(self, channels=None) -> None:
         """This function initializes the data in memory. If no channels are specified the already existing data is used,
         which is created automatically in the instance init method. If channels are specified, the instance data is overwritten.
@@ -1990,7 +1606,7 @@ class SnomMeasurement(FileHandler):
         else:
             self.channels = channels
             # update the channel tag dictionary, makes the program compatible with differrently sized datasets, like original data plus manipulated, eg. cut data
-            self._create_channel_tag_dict_new_with_config()
+            self._create_channel_tag_dict()
             # self._Create_Channels_Tag_Dict()
             self.all_data, self.channels_label = self._Load_Data(channels)
             xres = len(self.all_data[0][0])
@@ -2032,16 +1648,6 @@ class SnomMeasurement(FileHandler):
         # self.scaling_factor = 1
         if self.autoscale == True:
             self.Quadratic_Pixels(channels)
-
-    def Print_test(self) -> None:
-        '''Testfunction to print several instance values.'''
-        # print('test:')
-        # print('self.directory_name: ', self.directory_name)
-        # print('self.filename: ', self.filename)
-        # print('self.XRes: ', self.XRes)
-        # print('self.YRes: ', self.YRes)
-        # print('self.channels: ', self.channels)
-        # print('self.all_subplots[-1]: ', [element[3] for element in self.all_subplots])
 
     def _Load_All_Subplots(self) -> None:
         """Load all subplots from memory (located under APPDATA/SNOM_Plotter/all_subplots.p).
@@ -2093,15 +1699,6 @@ class SnomMeasurement(FileHandler):
         if channels is None:
             channels = self.channels
         self._Write_to_Logfile('scaling', scaling)
-        # self.scaling_factor = scaling
-        # dataset = self.all_data
-        # channel_tag_dict = self.channel_tag_dict
-        # yres = len(dataset[0])
-        # xres = len(dataset[0][0])
-        # self.all_data = np.zeros((len(dataset), yres*scaling, xres*scaling))
-        # re initialize data storage and channel_tag_dict, since resolution is changed
-        # self.all_data = []
-        # self.channel_tag_dict = []
         for channel in channels:
             if channel in self.channels:
                 self.all_data[self.channels.index(channel)] = self._Scale_Array(self.all_data[self.channels.index(channel)], scaling)
@@ -2114,147 +1711,6 @@ class SnomMeasurement(FileHandler):
             else:
                 print(f'Channel {channel} is not in memory! Please initiate the channels you want to use first!')
 
-    # old not needed anymore
-    def _Load_Data_old(self, channels:list) -> list:
-        """Loads all binary data of the specified channels and returns them in a list plus the dictionary with the channel information.
-        Height data is automatically converted to nm. """
-        if self.file_type == File_Type.comsol_gsf:
-            return self._Load_Data_comsol(channels)
-        # print('load data for self.channels: ', self.channels)
-        # datasize=int(self.XRes*self.YRes*4)
-        #create a list containing all the lists of the individual channels
-        all_binary_data = []
-        #safe the information about which channel is which list in a dictionary
-        data_dict = []
-        # data_dict = {}
-        # all_data = np.zeros((len(channels), self.YRes, self.XRes))
-        all_data = []
-        # why not safe channel and data as a dictionary? Maybe change it later
-        if self.file_type==File_Type.standard or self.file_type==File_Type.standard_new or self.file_type ==File_Type.neaspec_version_1_6_3359_1:
-            for i in range(len(channels)):
-                # print(channels[i])
-                if (self.file_type==File_Type.standard_new or self.file_type==File_Type.neaspec_version_1_6_3359_1) and '_corrected' not in channels[i]:
-                    # if ' C' in channels[i] or '_manipulated' in channels[i]: #channels[i] == 'Z C' or channels[i] == 'R-Z C':
-                    #     f=open(self.directory_name / Path(self.filename.name + f' {channels[i]}.gsf'),"br")
-                    # else:
-                    #     f=open(self.directory_name / Path(self.filename.name + f' {channels[i]} raw.gsf'),"br")
-                    if channels[i] in self.all_channels_default and 'C' not in channels[i]:
-                        f=open(self.directory_name / Path(self.filename.name + f' {channels[i]} raw.gsf'),"br")
-                    else:
-                        f=open(self.directory_name / Path(self.filename.name + f' {channels[i]}.gsf'),"br")
-
-                else:
-                    f=open(self.directory_name / Path(self.filename.name + f' {channels[i]}.gsf'),"br")
-                binarydata=f.read()
-                f.close()
-                all_binary_data.append(binarydata)
-                data_dict.append(channels[i])
-            count = 0
-            for channel in channels:
-                # if _manipulated in channel name use channel dict, because resolution etc could be different to original data
-                # XRes, YRes = self.channel_tag_dict[self.channels.index(channel)][Channel_Tags.PIXELAREA]
-                XRes, YRes = self._get_channel_tag_dict_value(channel, Channel_Tags.PIXELAREA)
-                
-                datasize=int(XRes*YRes*4)
-                channel_data = np.zeros((YRes, XRes))
-                reduced_binarydata=all_binary_data[count][-datasize:]
-                phaseoffset = 0
-                rounding_decimal = 2
-                scaling = 1
-                if self.amp_indicator in channel:
-                    rounding_decimal = 5
-                if self.height_indicator in channel:
-                    # print('channel: ', channel)
-                    scaling = 1000000000#convert to nm
-                if self.phase_indicator in channel:
-                    # normal phase data ranges from -pi to pi and gets shifted by +pi
-                    phaseoffset = np.pi
-                    # if '_corrected' in channel:
-                    if channel not in self.phase_channels:
-                        # if the data is not from a raw channel we assume it is already shifted
-                        phaseoffset = 0
-                if self.real_indicator in channel or self.imag_indicator in channel:
-                    rounding_decimal = 4
-                for y in range(0,YRes):
-                    for x in range(0,XRes):
-                        pixval=unpack("f",reduced_binarydata[4*(y*XRes+x):4*(y*XRes+x+1)])[0]
-                        channel_data[y][x] = round(pixval*scaling + phaseoffset, rounding_decimal)
-                all_data.append(channel_data)
-                count+=1
-
-        elif self.file_type == File_Type.aachen_ascii:
-            for i in range(len(channels)):
-                # file = open(f"{self.directory_name}/{self.filename}_{channels[i]}.ascii", 'r')
-                file = open(self.directory_name / Path(self.filename.name + f'_{channels[i]}.ascii'), 'r')
-                string_data = file.read()
-                datalist = string_data.split('\n')
-                datalist = [element.split(' ') for element in datalist]
-                datalist = np.array(datalist[:-1], dtype=float)#, dtype=np.float convert list to np.array and strings to float
-                channel = channels[i]
-                phaseoffset = 0
-                rounding_decimal = 2
-                scaling = 1
-                if (self.amp_indicator in channel) and (self.height_indicator not in channel):
-                    rounding_decimal = 5
-                if self.phase_indicator in channel:
-                    phaseoffset = np.pi
-                    flattened_data = datalist.flatten()# ToDo just for now, in future the voltages have to be converted
-                    phaseoffset = min(flattened_data)
-                    if '_corrected' in channel:
-                        # if the data is from a corrected channel it is already shifted
-                        phaseoffset = 0
-                if self.height_indicator in channel:
-                    scaling = pow(10, 9)
-                XRes, YRes = self._get_channel_tag_dict_value(channel, Channel_Tags.PIXELAREA)
-                for y in range(0,YRes):
-                    for x in range(0,XRes):
-                        datalist[y][x] = round(datalist[y][x]*scaling + phaseoffset, rounding_decimal)
-                all_data.append(datalist)
-                data_dict.append(channels[i])
-
-        elif self.file_type == File_Type.aachen_gsf:
-            for i in range(len(channels)):
-                # f=open(f"{self.directory_name}/{self.filename}_{channels[i]}.gsf","br")
-                f=open(self.directory_name / Path(self.filename.name + f'_{channels[i]}.gsf'),"br")
-                binarydata=f.read()
-                f.close()
-                all_binary_data.append(binarydata)
-                data_dict.append(channels[i])
-            scaling = 1
-            count = 0
-            for channel in channels:
-                XRes, YRes = self._get_channel_tag_dict_value(channel, Channel_Tags.PIXELAREA)
-                datasize=int(XRes*YRes*4)
-                reduced_binarydata=all_binary_data[count][-datasize:]
-                phaseoffset = 0
-                rounding_decimal = 2
-                if (self.amp_indicator in channel) and (self.height_indicator not in channel):
-                    rounding_decimal = 5
-                    scaling = pow(10, 6)
-                if self.phase_indicator in channel:
-                    phaseoffset = np.pi
-                    
-                    if '_corrected' in channel:
-                        # if the data is from a corrected channel it is already shifted
-                        phaseoffset = 0
-                if self.height_indicator in channel:
-
-                    # scaling_factor = 1000000000
-                    scaling = pow(10, 9)
-                    rounding_decimal = 5
-                    # scaling_factor = 1
-                    # print()
-                for y in range(0,YRes):
-                    for x in range(0,XRes):
-                        pixval=unpack("f",reduced_binarydata[4*(y*XRes+x):4*(y*XRes+x+1)])[0]
-                        all_data[count][y][x] = round(pixval*scaling + phaseoffset, rounding_decimal)
-                count+=1
-        # data_dict currently is just a list of the channels, this list is not equivalent to self.channels as the data_dict
-        # or later self.channels_label contains the names of the channels which are used as the plot title, they will change depending on the functions applied, eg. 'channel_blurred' or channel_manipulated'...
-        # but self.channels will always contain the original channel name as this is used for internal referencing
-        return all_data, data_dict
-
-    # same as _Load_Data but using channel prefixes and suffixes to make it more generic and independent of the filetype
     def _Load_Data(self, channels:list) -> list:
         """Loads all binary data of the specified channels and returns them in a list plus the dictionary with the channel information.
         Height data is automatically converted to nm. """
@@ -2360,51 +1816,6 @@ class SnomMeasurement(FileHandler):
         # data_dict currently is just a list of the channels, this list is not equivalent to self.channels as the data_dict
         # or later self.channels_label contains the names of the channels which are used as the plot title, they will change depending on the functions applied, eg. 'channel_blurred' or channel_manipulated'...
         # but self.channels will always contain the original channel name as this is used for internal referencing
-        return all_data, data_dict
-
-    # old not needed anymore
-    def _Load_Data_comsol(self, channels):
-        # datasize=int(self.XRes*self.YRes*4)
-        #create a list containing all the lists of the individual channels
-        all_binary_data = []
-        #safe the information about which channel is which list in a dictionary
-        data_dict = []
-        # data_dict = {}
-        # all_data = np.zeros((len(channels), self.YRes, self.XRes))
-        all_data = []
-        for i in range(len(channels)):
-            # print(channels[i])
-            # f=open(f"{self.directory_name}/{self.filename} {channels[i]}.gsf","br")
-            f=open(self.directory_name / Path(self.filename.name + f'_{channels[i]}.gsf'),"br")
-            binarydata=f.read()
-            f.close()
-            all_binary_data.append(binarydata)
-            data_dict.append(channels[i])
-        count = 0
-        for channel in channels:
-            XRes, YRes = self.measurement_tag_dict[Measurement_Tags.PIXELAREA]
-
-            
-            datasize=int(XRes*YRes*4)
-            channel_data = np.zeros((YRes, XRes))
-            reduced_binarydata=all_binary_data[count][-datasize:]
-            phaseoffset = 0
-            rounding_decimal = 2
-            scaling = 1
-            if self.amp_indicator in channel:
-                rounding_decimal = 5
-            if self.phase_indicator in channel:
-                # normal phase data ranges from -pi to pi and gets shifted by +pi
-                # phaseoffset = np.pi # in the newest version of the comsol script the phase is already shifted
-                phaseoffset = 0
-            if self.real_indicator in channel or self.imag_indicator in channel:
-                rounding_decimal = 4
-            for y in range(0,YRes):
-                for x in range(0,XRes):
-                    pixval=unpack("f",reduced_binarydata[4*(y*XRes+x):4*(y*XRes+x+1)])[0]
-                    channel_data[y][x] = round(pixval*scaling + phaseoffset, rounding_decimal)
-            all_data.append(channel_data)
-            count+=1
         return all_data, data_dict
 
     def _Load_Data_Binary(self, channels) -> list:
@@ -2878,7 +2289,7 @@ class SnomMeasurement(FileHandler):
                     axis.axis('off')
                 counter += 1
 
-        plt.subplots_adjust(hspace=self.hspace)
+        plt.subplots_adjust(hspace=Plot_Definitions.hspace)
         if self.tight_layout is True:
             plt.tight_layout()
         if Plot_Definitions.show_plot is True:
@@ -3148,140 +2559,7 @@ class SnomMeasurement(FileHandler):
             self.all_data[remaining_channels[i]] = data_blurred
             self.channels_label[remaining_channels[i]] = self.channels_label[remaining_channels[i]] + '_' + self.filter_gauss_indicator
         print('Blurring process finished!')
-         
-    # old mehtod, not used anymore
-    def Gauss_Filter_Channels_complex_old(self, channels:list=None, sigma=2) -> None:
-        """This function gauss filters the instance channels. For optical channels, amplitude and phase have to be specified!
-        Please make shure you scale your data prior to calling this function rather improve the visibility than loosing to much information
-                
-        Args:
-            channels [list]: list of channels to blurr, must contain amplitude and phase of same channels.
-            sigma [int]: the sigma used for blurring the data, bigger sigma means bigger blurr radius
-
-        """
-        # self._Initialize_Data(channels) # remove initialization and only filter specified channels
-        self._Write_to_Logfile('gaussian_filter_complex_sigma', sigma)
-        #check if data is scaled, this should be done prior to blurring
-        # check pixel scaling from channel tag dict for each channel
-            
-        if channels is None:
-            channels = self.channels
-        for channel in channels:
-            if channel not in self.channels:
-                print(f'Channel {channel} is not in memory! Please initiate the channels you want to use first!')
-        channels_to_filter = []
-        # if optical channels should be blurred, the according amp and phase data are used to get the complex values and blurr those
-        # before backconversion to amp and phase, the realpart could also be returned in future... ToDo
-        # print(f'self.channels: {self.channels}')
-        # print(f'self.overlain_amp_channels: {self.overlain_amp_channels}')
-        # print(f'self.overlain_phase_channels: {self.overlain_phase_channels}')
-        # print(f'self.corrected_overlain_phase_channels: {self.corrected_overlain_phase_channels}')
-        for i in range(len(self.phase_channels)):
-            if (self.amp_channels[i] in channels):
-                if (self.phase_channels[i] in channels):
-                    channels_to_filter.append(self.channels.index(self.amp_channels[i]))
-                    channels_to_filter.append(self.channels.index(self.phase_channels[i]))
-                elif (self.corrected_phase_channels[i] in channels):
-                    channels_to_filter.append(self.channels.index(self.amp_channels[i]))
-                    channels_to_filter.append(self.channels.index(self.corrected_phase_channels[i]))
-            elif self.overlain_amp_channels[i] in channels:
-                if self.overlain_phase_channels[i] in channels:
-                    channels_to_filter.append(self.channels.index(self.overlain_amp_channels[i]))
-                    channels_to_filter.append(self.channels.index(self.overlain_phase_channels[i]))
-                elif self.corrected_overlain_phase_channels[i] in channels:
-                    channels_to_filter.append(self.channels.index(self.overlain_amp_channels[i]))
-                    channels_to_filter.append(self.channels.index(self.corrected_overlain_phase_channels[i]))
-        
-        # should not be necessary anymore since backwards channesl are now included in standart channle lists
-        # also for backwards direction:
-        for i in range(len(self.phase_channels)):
-            if (self.backwards_indicator + self.amp_channels[i] in channels):
-                if (self.backwards_indicator + self.phase_channels[i] in channels):
-                    channels_to_filter.append(self.channels.index(self.backwards_indicator + self.amp_channels[i]))
-                    channels_to_filter.append(self.channels.index(self.backwards_indicator + self.phase_channels[i]))
-                elif (self.backwards_indicator + self.corrected_phase_channels[i] in channels):
-                    channels_to_filter.append(self.channels.index(self.backwards_indicator + self.amp_channels[i]))
-                    channels_to_filter.append(self.channels.index(self.backwards_indicator + self.corrected_phase_channels[i]))
-        # print(f'channels to filter: {channels_to_filter}')
-        # for i in range(len(channels_to_filter)):
-        #     print(self.channels[channels_to_filter[i]])
-        # if not at least one pair is found:
-        if len(channels_to_filter) == 0:
-            print('In order to apply the gaussian_filter amplitude and phase of the same channel number must be in the channels list!')
-            print('Otherwise only height cannels will be filtered!')
-        # add all channels which are not optical to the 'to filter' list
-        # print('channels_to_filter:', channels_to_filter)
-        for channel in channels:
-            # if (channel not in self.amp_channels) and ((self.phase_channels[i] not in self.channels) or (self.corrected_phase_channels[i] not in self.channels)):
-            if self.height_indicator in channel:
-                channels_to_filter.append(self.channels.index(channel))
-                channels_to_filter.append(self.channels.index(channel))# just add twice for now, change later! ToDo
-            elif self.real_indicator in channel or self.imag_indicator in channel:
-                channels_to_filter.append(self.channels.index(channel))
-                channels_to_filter.append(self.channels.index(channel))# just add twice for now, change later! ToDo
-            elif self.channels.index(channel) not in channels_to_filter:
-                print(f'You wanted to blurr {channel}, but that is not implemented! 1')
-        # print('channels_to_filter:', channels_to_filter)
-        
-        for i in range(int(len(channels_to_filter)/2)):
-            # print(f'channel {self.channels[channels_to_filter[2*i]]} is blurred!')
-            if (self.channels[channels_to_filter[2*i]] in self.amp_channels) or (self.channels[channels_to_filter[2*i]] in [self.backwards_indicator + element for element in self.amp_channels]) or (self.channels[channels_to_filter[2*i]] in self.overlain_amp_channels):
-                pixel_scaling_amp = self._get_channel_tag_dict_value(channels_to_filter[2*i], Channel_Tags.PIXELSCALING)
-                pixel_scaling_phase = self._get_channel_tag_dict_value(channels_to_filter[2*i+1], Channel_Tags.PIXELSCALING)
-                if pixel_scaling_amp == 1 and pixel_scaling_phase == 1:
-                    if Plot_Definitions.show_plot:# is only false if no plots should be shown or if user inputs are unwanted, eg. for gui
-                        print('The data is not yet scaled! Do you want to scale the data?')
-                        user_input = self._User_Input_Bool()
-                        if user_input == True:
-                            self.Scale_Channels([self.channels[channels_to_filter[2*i]], self.channels[channels_to_filter[2*i+1]]])
-                amp = self.all_data[channels_to_filter[2*i]]
-                phase = self.all_data[channels_to_filter[2*i+1]]
-                # compl = np.add(amp*np.cos(phase), 1J*amp*np.sin(phase))
-                real = amp*np.cos(phase)
-                imag = amp*np.sin(phase)
-
-                # compl_blurred = self._Gauss_Blurr_Data(compl, sigma)
-                real_blurred = self._Gauss_Blurr_Data(real, sigma)
-                imag_blurred = self._Gauss_Blurr_Data(imag, sigma)
-                compl_blurred = np.add(real_blurred, 1J*imag_blurred)
-                amp_blurred = np.abs(compl_blurred)
-                phase_blurred = self._Get_Compl_Angle(compl_blurred)
-
-                self.all_data[channels_to_filter[2*i]] = amp_blurred
-                self.channels_label[channels_to_filter[2*i]] = self.channels_label[channels_to_filter[2*i]] + '_' + self.filter_gauss_indicator
-                # self.channels[channels_to_filter[2*i]] += '_' + self.filter_gauss_indicator
-                self.all_data[channels_to_filter[2*i+1]] = phase_blurred
-                self.channels_label[channels_to_filter[2*i+1]] = self.channels_label[channels_to_filter[2*i+1]] + '_' + self.filter_gauss_indicator
-                # self.channels[channels_to_filter[2*i+1]] += '_' + self.filter_gauss_indicator
-
-            elif self.height_indicator in self.channels[channels_to_filter[2*i]]:
-                pixel_scaling = self._get_channel_tag_dict_value(channels_to_filter[2*i], Channel_Tags.PIXELSCALING)
-                if pixel_scaling == 1:
-                    if Plot_Definitions.show_plot:
-                        print('The data is not yet scaled! Do you want to scale the data?')
-                        user_input = self._User_Input_Bool()
-                        if user_input == True:
-                            self.Scale_Channels([self.channels[channels_to_filter[2*i]]])
-                height = self.all_data[channels_to_filter[2*i]]
-                height_blurred = self._Gauss_Blurr_Data(height, sigma)
-                self.all_data[channels_to_filter[2*i]] = height_blurred
-                self.channels_label[channels_to_filter[2*i]] = self.channels_label[channels_to_filter[2*i]] + '_' + self.filter_gauss_indicator
-            elif self.real_indicator in self.channels[channels_to_filter[2*i]] or self.imag_indicator in self.channels[channels_to_filter[2*i]]:
-                pixel_scaling = self._get_channel_tag_dict_value(channels_to_filter[2*i], Channel_Tags.PIXELSCALING)
-                if pixel_scaling == 1:
-                    if Plot_Definitions.show_plot:
-                        print('The data is not yet scaled! Do you want to scale the data?')
-                        user_input = self._User_Input_Bool()
-                        if user_input == True:
-                            self.Scale_Channels([self.channels[channels_to_filter[2*i]]])
-                data = self.all_data[channels_to_filter[2*i]]
-                data_blurred = self._Gauss_Blurr_Data(data, sigma)
-                self.all_data[channels_to_filter[2*i]] = data_blurred
-                self.channels_label[channels_to_filter[2*i]] = self.channels_label[channels_to_filter[2*i]] + '_' + self.filter_gauss_indicator
-            
-            else:
-                print(f'You wanted to blurr {self.channels[channels_to_filter[2*i]]}, but that is not implemented! 2')
-                
+                   
     def _Get_Compl_Angle(self, compl_number_array) -> np.array:
         """This function returns the angles of a clomplex number array."""
         YRes = len(compl_number_array)
@@ -5952,8 +5230,6 @@ class SnomMeasurement(FileHandler):
             self.profile_orientation = 'unknown'
             print('The profile orientation could not be determined!')'''
 
-
-
 class ApproachCurve(FileHandler):
     """This class opens an approach curve measurement and handels all the approach curve related functions."""
     def __init__(self, directory_name:str, channels:list=None, title:str=None) -> None:
@@ -5968,15 +5244,39 @@ class ApproachCurve(FileHandler):
         self._Load_Data()
 
     def _Initialize_Measurement_Channel_Indicators(self):
-        if self.file_type == File_Type.approach_curve:
-            self.height_channel = 'Z'
-            self.height_channels = ['Z']
-            self.mechanical_channels = ['M1A', 'M1P'] # todo
-            self.phase_channels = ['O1P','O2P','O3P','O4P','O5P']
-            self.amp_channels = ['O1A','O2A','O3A','O4A','O5A']
-            self.all_channels_default = self.height_channels + self.mechanical_channels + self.phase_channels + self.amp_channels
-            self.height_indicator = 'Z'
-            self.backwards_indicator = 'R-'
+        self.height_channel = 'Z'
+        self.height_channels = ['Z']
+        self.mechanical_channels = ['M1A', 'M1P'] # todo
+        self.phase_channels = ['O1P','O2P','O3P','O4P','O5P']
+        self.amp_channels = ['O1A','O2A','O3A','O4A','O5A']
+        self.all_channels_default = self.height_channels + self.mechanical_channels + self.phase_channels + self.amp_channels
+        self.height_indicator = self._get_from_config('height_indicator')
+        self.amp_indicator = self._get_from_config('amp_indicator')
+        self.phase_indicator = self._get_from_config('phase_indicator')
+        self.backwards_indicator = self._get_from_config('backwards_indicator')
+        self.real_indicator = self._get_from_config('real_indicator')
+        self.imag_indicator = self._get_from_config('imag_indicator')
+        self.optical_indicator = self._get_from_config('optical_indicator')
+        self.mechanical_indicator = self._get_from_config('mechanical_indicator')
+        self.channel_prefix_default = self._get_from_config('channel_prefix_default')
+        self.channel_prefix_custom = self._get_from_config('channel_prefix_custom')
+        self.channel_suffix_default = self._get_from_config('channel_suffix_default')
+        self.channel_suffix_custom = self._get_from_config('channel_suffix_custom')
+        self.channel_suffix_manipulated = self._get_from_config('channel_suffix_manipulated')
+        self.channel_suffix_overlain = self._get_from_config('channel_suffix_overlain')
+        self.file_ending = self._get_from_config('file_ending')
+        self.phase_offset_default = self._get_from_config('phase_offset_default')
+        self.phase_offset_custom = self._get_from_config('phase_offset_custom')
+        self.rounding_decimal_amp_default = self._get_from_config('rounding_decimal_amp_default')
+        self.rounding_decimal_amp_custom = self._get_from_config('rounding_decimal_amp_custom')
+        self.rounding_decimal_phase_default = self._get_from_config('rounding_decimal_phase_default')
+        self.rounding_decimal_phase_custom = self._get_from_config('rounding_decimal_phase_custom')
+        self.rounding_decimal_complex_default = self._get_from_config('rounding_decimal_complex_default')
+        self.rounding_decimal_complex_custom = self._get_from_config('rounding_decimal_complex_custom')
+        self.rounding_decimal_height_default = self._get_from_config('rounding_decimal_height_default')
+        self.rounding_decimal_height_custom = self._get_from_config('rounding_decimal_height_custom')
+        self.height_scaling_default = self._get_from_config('height_scaling_default')
+        self.height_scaling_custom = self._get_from_config('height_scaling_custom')
 
     def _Load_Data(self):
         self.all_data = {}
@@ -6142,6 +5442,7 @@ class ApproachCurve(FileHandler):
         
         if Plot_Definitions.show_plot:
             plt.show()
+        gc.collect()
 
 
     def find_index(self, filepath, channel):
@@ -6154,8 +5455,7 @@ class ApproachCurve(FileHandler):
         # print(split_line)
         return split_line.index(channel)
 
-
-class Scan_3D(FileHandler):
+class Scan3D(FileHandler):
     """A 3D scan is a measurement where one approach curve is saved per pixel. This class is ment to handle such measurements.
 
     Args:
@@ -6175,26 +5475,30 @@ class Scan_3D(FileHandler):
         # define header, probably same as for approach curve
         self.header = 27
         # initialize the channel indicators
+        print('filetype: ', self.file_type)
         self._Initialize_Measurement_Channel_Indicators()
+        self._Update_Measurement_Channel_Indicators()
+        # for some reason the naming convention does not always follow the default for the snom measurements of the same filetype
+        try:
+            self._create_channel_tag_dict()
+        except:
+            self.channel_suffix_default = ''
+            try:
+                self._create_channel_tag_dict()
+            except:
+                print('The channel tag dict could not be created!')
+                exit()
         # load the channels from the datafile
         self._Load_Data()
 
-    def _Initialize_Measurement_Channel_Indicators(self):
-        if self.file_type == File_Type.snom_measurement_3d:
-            self.height_channel = 'Z'
-            self.height_channels = ['Z']
-            self.mechanical_channels = ['M1A', 'M1P'] # todo
-            self.phase_channels = ['O1P','O2P','O3P','O4P','O5P']
-            self.amp_channels = ['O1A','O2A','O3A','O4A','O5A']
-            self.all_channels_default = self.height_channels + self.mechanical_channels + self.phase_channels + self.amp_channels
-            self.preview_ampchannel = 'O2A'
-            self.preview_phasechannel = 'O2P'
-            self.height_indicator = 'Z'
-            self.amp_indicator = 'A'
-            self.phase_indicator = 'P'
-            self.real_indicator = 'Re'
-            self.imag_indicator = 'Im'
-
+    
+    def _Update_Measurement_Channel_Indicators(self):
+        self.height_channel = 'Z'
+        self.height_channels = ['Z']
+        self.mechanical_channels = ['M1A', 'M1P'] # todo
+        self.phase_channels = ['O1P','O2P','O3P','O4P','O5P']
+        self.amp_channels = ['O1A','O2A','O3A','O4A','O5A']
+    
     def _Load_Data(self):
         datafile = self.directory_name / Path(self.filename.name + '.txt')
         # initialize all data dict
@@ -6246,7 +5550,6 @@ class Scan_3D(FileHandler):
         for channel in self.channels:
             self.all_cutplane_data[channel] = self.Get_Cutplane_Data(axis=axis, line=line, channel=channel)
 
-
     def Display_Cutplane(self, axis:str='x', line:int=0, channel:str=None):
         # todo: shift each y column by offset value depending on average z position, to correct for varying starting position, due to non flat substrates
         if channel == None:
@@ -6281,10 +5584,13 @@ class Scan_3D(FileHandler):
             z_shifts = z_shifts - z_min
         # now we need to shift each approach curve by the corresponding z_shift
         # therefore we need to create a new data array which can encorporate the shifted data
-        XRes, YRes, ZRes = self.measurement_tag_dict[Measurement_Tags.PIXELAREA]
+        # XRes, YRes, ZRes = self.measurement_tag_dict[Measurement_Tags.PIXELAREA]
+        XRes, YRes, ZRes = self._get_measurement_tag_dict_value(Measurement_Tags.PIXELAREA)
         print('ZR: ', ZRes)
-        XRange, YRange, ZRange = self.measurement_tag_dict[Measurement_Tags.SCANAREA]
-        XYZUnit = self.parameters_dict['Scan Area (X, Y, Z)'][-1]
+        # XRange, YRange, ZRange = self.measurement_tag_dict[Measurement_Tags.SCANAREA]
+        XRange, YRange, ZRange = self._get_measurement_tag_dict_value(Measurement_Tags.SCANAREA)
+        # XYZUnit = self.parameters_dict['Scan Area (X, Y, Z)'][-1]
+        XYZUnit = self._get_measurement_tag_dict_unit(Measurement_Tags.SCANAREA)
         # convert Range to nm
         if XYZUnit == '[µm]':
             XRange = XRange*1e3
@@ -6347,10 +5653,14 @@ class Scan_3D(FileHandler):
         if channel == None:
             channel = self.channels[0]
         cutplane_data = self.all_cutplane_data[channel]
-        XRes, YRes, ZRes = self.measurement_tag_dict[Measurement_Tags.PIXELAREA]
+        # sadly the data definitions for this filytype are off, eg. missing 'raw' suffix for 3D scan, also the channel headers are incomplete, z res is false
+        # XRes, YRes, ZRes = self._get_channel_tag_dict_value(channel, Channel_Tags.PIXELAREA)
+        # therefore we use the measurement tag dict
+        XRes, YRes, ZRes = self._get_measurement_tag_dict_value(Measurement_Tags.PIXELAREA)
+
         # YRes, XRes = cutplane_data.shape # cutplane data might have been
-        XRange, YRange, ZRange = self.measurement_tag_dict[Measurement_Tags.SCANAREA]
-        XYZUnit = self.parameters_dict['Scan Area (X, Y, Z)'][-1]
+        XRange, YRange, ZRange = self._get_measurement_tag_dict_value(Measurement_Tags.SCANAREA)
+        XYZUnit = self._get_measurement_tag_dict_unit(Measurement_Tags.SCANAREA)
         # convert Range to nm
         if XYZUnit == '[µm]':
             XRange = XRange*1e3
@@ -6421,7 +5731,11 @@ class Scan_3D(FileHandler):
             ax.set_xticks([])
             ax.set_yticks([])
         # plt.colorbar(img)
-        plt.show()
+        if self.tight_layout is True:
+            plt.tight_layout()
+        if Plot_Definitions.show_plot is True:
+            plt.show()
+        gc.collect()
     
     def Display_Cutplane_V2_Realpart(self, axis:str='x', line:int=0, demodulation:int=2, align='auto'):
         
@@ -6455,10 +5769,10 @@ class Scan_3D(FileHandler):
             z_shifts = z_shifts - z_min
         # now we need to shift each approach curve by the corresponding z_shift
         # therefore we need to create a new data array which can encorporate the shifted data
-        XRes, YRes, ZRes = self.measurement_tag_dict[Measurement_Tags.PIXELAREA]
+        XRes, YRes, ZRes = self._get_measurement_tag_dict_value(Measurement_Tags.PIXELAREA)
         print('ZR: ', ZRes)
-        XRange, YRange, ZRange = self.measurement_tag_dict[Measurement_Tags.SCANAREA]
-        XYZUnit = self.parameters_dict['Scan Area (X, Y, Z)'][-1]
+        XRange, YRange, ZRange = self._get_measurement_tag_dict_value(Measurement_Tags.SCANAREA)
+        XYZUnit = self._get_measurement_tag_dict_unit(Measurement_Tags.SCANAREA)
         # convert Range to nm
         if XYZUnit == '[µm]':
             XRange = XRange*1e3
@@ -6536,9 +5850,9 @@ class Scan_3D(FileHandler):
         # create real part cutplane data
         self.all_cutplane_data[real_channel] = np.multiply(self.all_cutplane_data[f'O{demodulation}A'], np.cos(self.all_cutplane_data[f'O{demodulation}P']))
         cutplane_data = self.all_cutplane_data[real_channel]
-        XRes, YRes, ZRes = self.measurement_tag_dict[Measurement_Tags.PIXELAREA]
-        XRange, YRange, ZRange = self.measurement_tag_dict[Measurement_Tags.SCANAREA]
-        XYZUnit = self.parameters_dict['Scan Area (X, Y, Z)'][-1]
+        XRes, YRes, ZRes = self._get_measurement_tag_dict_value(Measurement_Tags.PIXELAREA)
+        XRange, YRange, ZRange = self._get_measurement_tag_dict_value(Measurement_Tags.SCANAREA)
+        XYZUnit = self._get_measurement_tag_dict_unit(Measurement_Tags.SCANAREA)
         # convert Range to nm
         if XYZUnit == '[µm]':
             XRange = XRange*1e3
@@ -6616,9 +5930,11 @@ class Scan_3D(FileHandler):
             # remove ticks on x and y axis, they only show pixelnumber anyways, better to add a scalebar
             ax.set_xticks([])
             ax.set_yticks([])
-        plt.tight_layout()
-        # plt.colorbar(img)
-        plt.show()
+        if self.tight_layout is True:
+            plt.tight_layout()
+        if Plot_Definitions.show_plot is True:
+            plt.show()
+        gc.collect()
 
     def _Get_Z_Shift_(self, z_data):
         # get the average z position for each approach curve
@@ -6686,6 +6002,7 @@ class Scan_3D(FileHandler):
         
         if Plot_Definitions.show_plot:
             plt.show()
+        gc.collect()
 
     def Match_Phase_Offset(self, channels:list=None, reference_channel=None, reference_area=None, manual_width=5, axis='x', line=0) -> None:
         """This function matches the phase offset of all phase channels in memory to the reference channel.
@@ -6829,7 +6146,6 @@ class Scan_3D(FileHandler):
                 # print('Max phase value:', np.max(self.all_cutplane_data[channel]))
         gc.collect()
 
-
     def Cut_Data(self):
         pass
 
@@ -6866,7 +6182,6 @@ class Scan_3D(FileHandler):
         # ax.invert_yaxis()
         # plt.show()
         
-
     def Align_Lines(self):
         # idea: take the height channel and average each approach curve, then compare the averaged lines to each other and aplly a shift to align them
         height_data = self.all_data[self.height_channel]
@@ -6885,7 +6200,7 @@ class Scan_3D(FileHandler):
             indices.append(index)
         # make a new data array with the shifted data
         # apply the shift to all channels
-        XRes, YRes, ZRes = self.measurement_tag_dict[Measurement_Tags.PIXELAREA]
+        XRes, YRes, ZRes = self._get_measurement_tag_dict_value(Measurement_Tags.PIXELAREA)
         # ac_zeros = np.zeros(ZRes)
         # idea: create a new data array where each approach curve is shifted by the corresponding index
         # get the biggest differnce in indices

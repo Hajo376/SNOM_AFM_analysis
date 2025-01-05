@@ -1,5 +1,0 @@
-XRes=501
-YRes=301
-XReal=1e-05
-YReal=6e-06
-XYUnits=m

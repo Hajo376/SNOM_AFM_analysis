@@ -184,3 +184,11 @@ scaling = 4
 realign_bounds = [143, 244]
 gaussian_filter_complex_sigma = 2
 height_leveling_coordinates = [[470, 168], [1792, 377], [2716, 163]]
+04/01/2025 16:26:26
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+04/01/2025 16:26:26
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+04/01/2025 16:26:26
+filename = 2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long
+quadratic_pixels = True
+set_min_to_zero = True

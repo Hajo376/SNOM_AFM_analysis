@@ -298,3 +298,26 @@ quadratic_pixels = True
 25/11/2024 16:08:00
 filename = 2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm
 quadratic_pixels = True
+03/01/2025 15:10:10
+filename = 2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm
+03/01/2025 15:10:10
+filename = 2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm
+quadratic_pixels = True
+03/01/2025 15:10:11
+filename = 2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm
+quadratic_pixels = True
+03/01/2025 15:10:11
+filename = 2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm
+quadratic_pixels = True
+03/01/2025 15:10:11
+filename = 2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm
+quadratic_pixels = True
+set_min_to_zero = True
+03/01/2025 15:10:14
+filename = 2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm
+quadratic_pixels = True
+03/01/2025 15:11:34
+filename = 2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm
+03/01/2025 15:11:34
+filename = 2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm
+quadratic_pixels = True
