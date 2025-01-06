@@ -86,13 +86,13 @@ def Cut_Masked():
     channels = ['O2P', 'O2A', 'Z C']
     Measurement = SnomMeasurement(directory_name, channels)
     Measurement.Set_Min_to_Zero(['Z C'])
-    Measurement.Scale_Channels()
-    Measurement.Gauss_Filter_Channels_complex()
+    # Measurement.Scale_Channels()
+    # Measurement.Gauss_Filter_Channels_complex()
     Measurement.Heigth_Mask_Channels()
-    Measurement.Display_Channels()
+    # Measurement.Display_Channels()
     Measurement.Cut_Channels(autocut=True) # autocut will remove all empty lines and columns
     Measurement.Display_Channels()
-    Measurement.Display_All_Subplots()
+    # Measurement.Display_All_Subplots()
 
 def Test_Scalebar():
     directory_name = 'example_measurements/2022-04-25 1227 PH pentamer_840nm_s50_2'
@@ -168,10 +168,11 @@ def Synccorrection():
     directory_name = 'example_measurements/2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R'
     channels = ['O2P', 'O2A', 'Z C']
     # channels = ['O2P_corrected', 'O2A', 'Z C']
-    channels = ['O2Re_corrected', 'O2A', 'Z C']
+    # channels = ['O2Re_corrected', 'O2A', 'Z C']
     Measurement = SnomMeasurement(directory_name, channels, autoscale=False)
-    # Measurement.Synccorrection(1.6)
-    Measurement.Display_Channels(['O2Re_corrected', 'O2A', 'Z C'])
+    Measurement.Synccorrection(1.6)
+    # Measurement.Display_Channels(['O2Re_corrected', 'O2A', 'Z C'])
+    Measurement.Display_Channels(['O2A', 'Z C'])
 
 def Complete_Example_1():
     # examples from aachen group Taubner
@@ -535,7 +536,7 @@ def test_config():
 def main():
      
     # Realign()
-    # Cut_Masked()
+    Cut_Masked()
     # Test_Scalebar()
     # Test_Phaseshift()
     # Compare_Measurements()
@@ -548,7 +549,7 @@ def main():
 
     # Test_Export_and_Load_all_subplots()
     # Gif()
-    Test_3D_Scan()
+    # Test_3D_Scan()
     # Phase_Correction_3D_Scan()
     # Average_3D_Scan()
     # Test_Phase_Drift_Correction()

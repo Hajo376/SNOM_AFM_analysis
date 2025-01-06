@@ -2188,3 +2188,35 @@ quadratic_pixels = True
 06/12/2024 16:52:10
 filename = 2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R
 quadratic_pixels = True
+06/01/2025 13:03:16
+filename = 2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R
+06/01/2025 13:03:40
+filename = 2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R
+06/01/2025 13:04:32
+filename = 2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R
+06/01/2025 13:06:32
+filename = 2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R
+06/01/2025 13:08:38
+filename = 2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R
+synccorrection_wavelength = 1.6
+synccorrection_phasedir = 1
+06/01/2025 13:10:58
+filename = 2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R
+synccorrection_wavelength = 1.6
+synccorrection_phasedir = 1
+06/01/2025 13:11:44
+filename = 2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R
+synccorrection_wavelength = 1.6
+synccorrection_phasedir = 1
+06/01/2025 13:12:51
+filename = 2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R
+synccorrection_wavelength = 1.6
+synccorrection_phasedir = 1
+06/01/2025 13:16:55
+filename = 2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R
+synccorrection_wavelength = 1.6
+synccorrection_phasedir = 1
+06/01/2025 13:20:49
+filename = 2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R
+synccorrection_wavelength = 1.6
+synccorrection_phasedir = 1

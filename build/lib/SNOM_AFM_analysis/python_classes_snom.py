@@ -828,9 +828,9 @@ class FileHandler(Plot_Definitions):
             succsess = self._Create_Measurement_Tag_Dict(parameters_path, filetype)
             if succsess:
                 # the correct filetype has been found
-                print(f'Filetype found: {filetype}')
+                # print(f'Filetype found: {filetype}')
                 self.file_type = filetype
-                print('parameter dict was created successfully')                
+                # print('parameter dict was created successfully')                
                 return True
         # if no filetype was found return False
         print('No filetype was found!')
@@ -1043,8 +1043,9 @@ class FileHandler(Plot_Definitions):
                 self.measurement_tag_dict[Measurement_Tags.VERSION] = value
 
         # only used by synccorrection, every other function should use the channels tag dict version, as pixel resolution could vary
-        pixelarea = self.measurement_tag_dict[Measurement_Tags.PIXELAREA]
-        scanarea = self.measurement_tag_dict[Measurement_Tags.SCANAREA]
+        pixelarea = self._get_measurement_tag_dict_value(Measurement_Tags.PIXELAREA)
+        # scanarea = self.measurement_tag_dict[Measurement_Tags.SCANAREA]
+        scanarea = self._get_measurement_tag_dict_value(Measurement_Tags.SCANAREA)
         if len(pixelarea) >= 3 and isinstance(pixelarea[0], str):
             self.XRes, self.YRes = pixelarea[1], pixelarea[2] # [unit, x, y, (z)]
             self.XReal, self.YReal = scanarea[1], scanarea[2]
@@ -1175,12 +1176,12 @@ class FileHandler(Plot_Definitions):
             else:
                 return [value]
 
-    def _get_measurement_tag_dict_value(self, tag:Channel_Tags) -> list:
+    def _get_measurement_tag_dict_value(self, tag:Measurement_Tags) -> list:
         """This function returns the value of the specified tag for the current measurement. If the tag is not found, it will return None.
 
         Args:
             channel (str): channel name
-            tag (Channel_Tags): tag name
+            tag (Measurement_Tags): tag name
 
         Returns:
             list: tag value or values as a list
@@ -1225,12 +1226,12 @@ class FileHandler(Plot_Definitions):
             else:
                 return None
 
-    def _get_measurement_tag_dict_unit(self, tag:Channel_Tags) -> str:
+    def _get_measurement_tag_dict_unit(self, tag:Measurement_Tags) -> str:
         """This function returns the value of the specified tag for the current measurement. If the tag is not found, it will return None.
 
         Args:
             channel (str): channel name
-            tag (Channel_Tags): tag name
+            tag (Measurement_Tags): tag name
 
         Returns:
             float: tag unit if there is one
@@ -1284,6 +1285,39 @@ class FileHandler(Plot_Definitions):
                 # set new value
                 self.channel_tag_dict[self.channels.index(channel)][tag] = value
 
+    def _set_measurement_tag_dict_value(self, tag:Measurement_Tags, value) -> None:
+        """This function sets the value of the specified tag for the current measurement.
+        It automatically tries to keep the unit of the value if there is one. 
+
+        Args:
+            tag (Measurement_Tags): tag name
+            value (list): tag values as a list, or single value
+        """
+        # ckeck if value is a list
+        if isinstance(value, list):
+            # check that no strings are in the list
+            if isinstance(value[0], str):
+                print('One of the provided values is a string, use set_channel_tag_dict_unit to change the unit!')
+                return 0
+            else:
+                # try to get old unit
+                unit = self._get_measurement_tag_dict_unit(tag)
+                if unit is not None:
+                    new_value = [unit] + value
+                else:
+                    new_value = value
+                # set the new values
+                self.measurement_tag_dict[tag] = new_value
+        else:
+            # check if unit is provided
+            if isinstance(value, str):
+                # dont add the str value to the channel dict, if a unit should be changed use the set_channel_tag_dict_unit function
+                print('Provided value is a string, use set_channel_tag_dict_unit to change the unit!')
+                return 0
+            else:
+                # set new value
+                self.measurement_tag_dict[tag] = value
+
     def _set_channel_tag_dict_unit(self, channel:str, tag:Channel_Tags, value:str) -> None:
         """This function sets the unit of the specified tag for the specified channel.
 
@@ -1305,6 +1339,27 @@ class FileHandler(Plot_Definitions):
             self.channel_tag_dict[self.channels.index(channel)][tag] = new_values
         else:
             self.channel_tag_dict[self.channels.index(channel)][tag][0] = value
+
+    def _set_measurement_tag_dict_unit(self, tag:Measurement_Tags, value:str) -> None:
+        """This function sets the unit of the specified tag for the current measurement.
+
+        Args:
+            tag (Measurement_Tags): tag name
+            value (str): unit of the specified tag
+        """
+        # check if old unit exists
+        old_unit = self._get_measurement_tag_dict_unit(tag)
+        if old_unit is None:
+            print('This filtype has no unit for the specified tag!\nSetting the unit anayways...')
+            old_values = self._get_measurement_tag_dict_value(tag) # shift the old values to the right
+            # check if old values are in a list
+            if isinstance(old_values, list):
+                new_values = [value] + old_values
+            else:
+                new_values = [value, old_values]
+            self.measurement_tag_dict[tag] = new_values
+        else:
+            self.measurement_tag_dict[tag][0] = value
 
     def _Get_Tagval(self, content, tag):
         """This function gets the value of the tag listed in the file header"""
@@ -2636,9 +2691,13 @@ class SnomMeasurement(FileHandler):
         if data is None:
             # channel is not in memory, so the standard values will be used
             data = self._Load_Data([channel])[0][0]
-            XReal, YReal = self.measurement_tag_dict[Measurement_Tags.SCANAREA]# change to self.channel_dat_dict?
-            rotation = self.measurement_tag_dict[Measurement_Tags.ROTATION]
-            XOffset, YOffset = self.measurement_tag_dict[Measurement_Tags.SCANNERCENTERPOSITION]
+            # XReal, YReal = self.measurement_tag_dict[Measurement_Tags.SCANAREA]# change to self.channel_dat_dict?
+            try: XReal, YReal = self._get_measurement_tag_dict_value(Measurement_Tags.SCANAREA)
+            except: XReal, YReal, ZReal = self._get_measurement_tag_dict_value(Measurement_Tags.SCANAREA)
+            # rotation = self.measurement_tag_dict[Measurement_Tags.ROTATION]
+            rotation = self._get_measurement_tag_dict_value(Measurement_Tags.ROTATION)[0]
+            # XOffset, YOffset = self.measurement_tag_dict[Measurement_Tags.SCANNERCENTERPOSITION]
+            XOffset, YOffset = self._get_measurement_tag_dict_value(Measurement_Tags.SCANNERCENTERPOSITION)
         else: 
             # if channel is in memory it has to have a channel dict, where all necessary infos are stored
             XReal, YReal = self._get_channel_tag_dict_value(channel, Channel_Tags.SCANAREA)
@@ -2761,7 +2820,8 @@ class SnomMeasurement(FileHandler):
         Wavelength must be given in µm.
         Scanangle is the rotation angle of the scan in radians.
         """
-        scanangle = self.measurement_tag_dict[Measurement_Tags.ROTATION]*np.pi/180
+        # scanangle = self.measurement_tag_dict[Measurement_Tags.ROTATION]*np.pi/180
+        scanangle = self._get_measurement_tag_dict_value(Measurement_Tags.ROTATION)[0]*np.pi/180
         phasedir_positive = 1
         phasedir_negative = -1
         phase_data = self.all_data[self.channels.index(channel)]
@@ -2801,6 +2861,9 @@ class SnomMeasurement(FileHandler):
         The wavelength must be given in µm.
         The phasedir is either 1 or -1. If you are unshure about the direction just leave the parameter out.
         You will be shown a preview for both directions and then you must choose the correct one.
+        The synccorrection will then be applied to all phase channels in memory.
+        The corrected channels will then be saved as new files with the synccorrection appendix specified in the config.ini file.
+        Afterwards the original channels and data will be reloaded in memory.
                 
         Args:
             wavelenght (float): please enter the wavelength in µm.
@@ -2810,9 +2873,17 @@ class SnomMeasurement(FileHandler):
         if self.autoscale == True:
             print('careful! The synccorretion does not work when autoscale is enabled.')
             exit()
+        # now load all channels in memory for the synccorrection, but save the original data and channels and reinitialize the data lateron
+        old_channels = self.channels.copy()
+        old_data = self.all_data.copy()
+        old_channel_tag_dict = self.channel_tag_dict.copy()
+        old_channels_label = self.channels_label.copy()
+        old_measurement_tag_dict = self.measurement_tag_dict.copy()
+        # load new channels for synccorrection
         all_channels = self.phase_channels + self.amp_channels
         self._Initialize_Data(all_channels)
-        scanangle = self.measurement_tag_dict[Measurement_Tags.ROTATION]*np.pi/180
+        # scanangle = self.measurement_tag_dict[Measurement_Tags.ROTATION]*np.pi/180
+        scanangle = self._get_measurement_tag_dict_value(Measurement_Tags.ROTATION)[0]*np.pi/180
         if phasedir == None:
             phasedir = self._Create_Synccorr_Preview(self.preview_phasechannel, wavelength)
         self._Write_to_Logfile('synccorrection_wavelength', wavelength)
@@ -2845,6 +2916,12 @@ class SnomMeasurement(FileHandler):
                     realf.write(pack("f",realpixval))
             phasef.close()
             realf.close()
+        # reinitialize the old data
+        self.channels = old_channels
+        self.all_data = old_data
+        self.channel_tag_dict = old_channel_tag_dict
+        self.channels_label = old_channels_label
+        self.measurement_tag_dict = old_measurement_tag_dict
         gc.collect()
 
     def _Gen_From_Input_Phasedir(self) -> int:
@@ -3928,37 +4005,35 @@ class SnomMeasurement(FileHandler):
                     # self.channels[index] += '_reduced'
             else:
                 print('There does not seem to be an old mask... ')
-        else:
-            if autocut == True:
-                self._Auto_Cut_Channels(channels)
-                self._Write_to_Logfile('auto_cut', True)
-            else:
-                # if self.height_channel in self.channels:
-                #     data = self.all_data[self.channels.index(self.height_channel)]
-                #     channel = self.height_channel
-                # else:
-                #     data = self.all_data[0]
-                #     channel = self.channels[0]
-                data = self.all_data[self.channels.index(preview_channel)]
-                # get the coordinates of the selection rectangle
-                if coords is None:
-                    coords = Select_Rectangle(data, preview_channel)
-                self._Write_to_Logfile('cut_coords', coords)
-                # use the selection to create a mask and multiply to all channels, then apply auto_cut function
-                yres = len(data)
-                xres = len(data[0])
-                self.mask_array = np.zeros((yres, xres))
-                for y in range(yres):
-                    if y in range(coords[0][1], coords[1][1]):
-                        for x in range(xres):
-                            if x in range(coords[0][0], coords[1][0]):
-                                self.mask_array[y][x] = 1
-                for channel in channels:
-                    index = self.channels.index(channel)
-                    # set all values outside of the mask to zero and then cut all zero away from the outside with _Auto_Cut_Channels(channels)
-                    self.all_data[index] = np.multiply(self.all_data[index], self.mask_array)
-                    # self.channels[index] += '_reduced'
-                self._Auto_Cut_Channels(channels)
+        # generate new mask by selecting a region in the preview channel
+        elif autocut is False:
+            # if self.height_channel in self.channels:
+            #     data = self.all_data[self.channels.index(self.height_channel)]
+            #     channel = self.height_channel
+            # else:
+            #     data = self.all_data[0]
+            #     channel = self.channels[0]
+            data = self.all_data[self.channels.index(preview_channel)]
+            # get the coordinates of the selection rectangle
+            if coords is None:
+                coords = Select_Rectangle(data, preview_channel)
+            self._Write_to_Logfile('cut_coords', coords)
+            # use the selection to create a mask and multiply to all channels, then apply auto_cut function
+            yres = len(data)
+            xres = len(data[0])
+            self.mask_array = np.zeros((yres, xres))
+            for y in range(yres):
+                if y in range(coords[0][1], coords[1][1]):
+                    for x in range(xres):
+                        if x in range(coords[0][0], coords[1][0]):
+                            self.mask_array[y][x] = 1
+            for channel in channels:
+                index = self.channels.index(channel)
+                # set all values outside of the mask to zero and then cut all zero away from the outside with _Auto_Cut_Channels(channels)
+                self.all_data[index] = np.multiply(self.all_data[index], self.mask_array)
+                # self.channels[index] += '_reduced'
+        # apply the auto cut function to remove masked areas around the data
+        self._Auto_Cut_Channels(channels)
         gc.collect()
 
     def _Auto_Cut_Channels(self, channels:list=None) -> None:
@@ -3984,8 +4059,8 @@ class SnomMeasurement(FileHandler):
         for channel in channels:
             index = self.channels.index(channel)
             # get the old size of the data
-            xres, yres = self._get_channel_tag_dict_value(index, Channel_Tags.PIXELAREA)
-            xreal, yreal = self._get_channel_tag_dict_value(index, Channel_Tags.SCANAREA)
+            xres, yres = self._get_channel_tag_dict_value(channel, Channel_Tags.PIXELAREA)
+            xreal, yreal = self._get_channel_tag_dict_value(channel, Channel_Tags.SCANAREA)
             self.all_data[index] = self._Auto_Cut_Data(self.all_data[index])
             xres_new = len(self.all_data[index][0])
             yres_new = len(self.all_data[index])
@@ -5296,15 +5371,17 @@ class ApproachCurve(FileHandler):
                 self.all_data[channel] = y_data
         # scale the x data to nm
         x_scaling = 1
-        try: x_unit = self.measurement_tag_dict[Measurement_Tags.SCANAREA][0]
-        except: x_unit = None
-        else:
-            # we want to convert the xaxis to nm
-            if x_unit == '[µm]':
-                x_scaling = pow(10,3)
-            elif x_unit == '[nm]':
-                x_scaling = 1
-            elif x_unit == '[m]':
+        # try: x_unit = self.measurement_tag_dict[Measurement_Tags.SCANAREA][0]
+        x_unit = self._get_measurement_tag_dict_unit(Measurement_Tags.SCANAREA)
+        # except: x_unit = None
+
+        # else:
+        # we want to convert the xaxis to nm
+        if x_unit == '[µm]':
+            x_scaling = pow(10,3)
+        elif x_unit == '[nm]':
+            x_scaling = 1
+        elif x_unit == '[m]':
                 x_scaling = pow(10,9)
         # ok forget about that, the software from neaspec saves the scan area parameters as µm but the actual data is stored in m...
         x_scaling = pow(10,9)
@@ -5509,19 +5586,20 @@ class Scan3D(FileHandler):
             file = open(datafile, 'r')
             self.all_data[channel] = np.genfromtxt(file ,skip_header=self.header+1, usecols=(index), delimiter='\t', invalid_raise = False)
             file.close()
-            x,y,z = self.measurement_tag_dict[Measurement_Tags.PIXELAREA][1:]
+            x,y,z = self._get_measurement_tag_dict_value(Measurement_Tags.PIXELAREA)
             self.all_data[channel] = np.reshape(self.all_data[channel], (y,x,z))
         # scale the x data to nm
         x_scaling = 1
-        try: x_unit = self.measurement_tag_dict[Measurement_Tags.SCANAREA][0]
-        except: x_unit = None
-        else:
-            # we want to convert the xaxis to nm
-            if x_unit == '[µm]':
-                x_scaling = pow(10,3)
-            elif x_unit == '[nm]':
-                x_scaling = 1
-            elif x_unit == '[m]':
+        # try: x_unit = self.measurement_tag_dict[Measurement_Tags.SCANAREA][0]
+        x_unit = self._get_measurement_tag_dict_unit(Measurement_Tags.SCANAREA)
+        # except: x_unit = None
+        # else:
+        # we want to convert the xaxis to nm
+        if x_unit == '[µm]':
+            x_scaling = pow(10,3)
+        elif x_unit == '[nm]':
+            x_scaling = 1
+        elif x_unit == '[m]':
                 x_scaling = pow(10,9)
         # ok forget about that, the software from neaspec saves the scan area parameters as µm but the actual data is stored in m...
         x_scaling = pow(10,9)
@@ -5536,7 +5614,7 @@ class Scan3D(FileHandler):
     def Get_Cutplane_Data(self, axis:str='x', line:int=0, channel:str=None):
         if channel == None:
             channel = self.channels[0]
-        x,y,z = self.measurement_tag_dict[Measurement_Tags.PIXELAREA][1:]
+        x,y,z = self._get_measurement_tag_dict_value(Measurement_Tags.PIXELAREA)
         data = self.all_data[channel].copy()
         if axis == 'x':
             cutplane_data = np.zeros((z,x)) 
@@ -5564,7 +5642,7 @@ class Scan3D(FileHandler):
         if channel == None:
             channel = self.channels[0]
         cutplane_data = self.Get_Cutplane_Data(axis=axis, line=line, channel=channel)
-        x,y,z = self.measurement_tag_dict[Measurement_Tags.PIXELAREA][1:]
+        x,y,z = self._get_measurement_tag_dict_value(Measurement_Tags.PIXELAREA)
         # todo: shift each y column by offset value depending on average z position, to correct for varying starting position, due to non flat substrates
         z_shifts = np.zeros(x)
         # idea: get all the lowest points of the approach curves and shift them to the same z position, herefore we shift them only upwards relative to the lowest point
@@ -5584,7 +5662,6 @@ class Scan3D(FileHandler):
             z_shifts = z_shifts - z_min
         # now we need to shift each approach curve by the corresponding z_shift
         # therefore we need to create a new data array which can encorporate the shifted data
-        # XRes, YRes, ZRes = self.measurement_tag_dict[Measurement_Tags.PIXELAREA]
         XRes, YRes, ZRes = self._get_measurement_tag_dict_value(Measurement_Tags.PIXELAREA)
         print('ZR: ', ZRes)
         # XRange, YRange, ZRange = self.measurement_tag_dict[Measurement_Tags.SCANAREA]
@@ -5741,7 +5818,7 @@ class Scan3D(FileHandler):
         
         amp_channel = f'O{demodulation}A'
         phase_channel = f'O{demodulation}P'
-        x,y,z = self.measurement_tag_dict[Measurement_Tags.PIXELAREA][1:]
+        x,y,z = self._get_measurement_tag_dict_value(Measurement_Tags.PIXELAREA)
         amp_data = self.all_data[amp_channel].copy()
         phase_data = self.all_data[phase_channel].copy()
         if axis == 'x':
@@ -6213,7 +6290,8 @@ class Scan3D(FileHandler):
                 for x in range(XRes):
                     new_data[y][x+shift] = self.all_data[channel][y][x]
             self.all_data[channel] = new_data
-        self.measurement_tag_dict[Measurement_Tags.PIXELAREA] = (XRes+max_shift, YRes, ZRes)
+        # self.measurement_tag_dict[Measurement_Tags.PIXELAREA] = (XRes+max_shift, YRes, ZRes)
+        self._set_measurement_tag_dict_value(Measurement_Tags.PIXELAREA, [XRes+max_shift, YRes, ZRes])
 
 
 
