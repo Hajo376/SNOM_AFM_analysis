@@ -13,3 +13,5 @@ This memory can of course be deleted at will, which is by default every time a n
 For ease of use i also created a GUI version of this package which allows to use many functions more easily. I typically use it to quickly generate images of my measurements with minimal modifications.
 
 ## Documentation will follow soon. ##
+
+## Still need to implement testing. ##
