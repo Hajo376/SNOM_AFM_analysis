@@ -6,7 +6,7 @@ import cv2
 from SNOM_AFM_analysis.lib.snom_colormaps import SNOM_amplitude, SNOM_phase, SNOM_height
 
 
-def Select_Data_Range(data, channel):
+def select_data_range(data, channel):
     root = tk.Tk()
     selector = ArraySelector(root, data, channel)
     root.mainloop()
@@ -36,8 +36,6 @@ class ArraySelector:
         self.resizing = None  # 'left', 'right', or None
         self.inverted = False  # Track if the selection is inverted
         self.is_horizontal = True  # Track selection mode
-        # padding_x = 20
-        # padding_y = 20
         
         # scale the data to a size usable for the canvas, min should be 300x300 pixels
         # if both axes are smaller than 300 pixels then scale the data such that the bigger axis has at least 300 pixels
@@ -68,10 +66,6 @@ class ArraySelector:
         elif self.height > max_size:
             self.scaling_factor = max_size/self.height
         self.update_scaling_factor()
-        print(f"Scaling factor: {self.scaling_factor}")
-        # self.scaling_factor = round(self.scaling_factor)
-        # print(f"Scaling factor: {self.scaling_factor}")
-        # print(f"Data size: {self.width} x {self.height}")
 
         # change colormap depending on the channel
         if ('Z' in self.channel) or ('MT' in self.channel):
@@ -94,8 +88,6 @@ class ArraySelector:
         self.canvas.grid(row=0, column=0, sticky='nsew')
 
         self.fill_canvas()
-        
-        
 
         self.canvas.bind("<ButtonPress-1>", self.on_button_press)
         self.canvas.bind("<B1-Motion>", self.on_mouse_drag)
@@ -104,21 +96,16 @@ class ArraySelector:
         self.canvas.bind("<Configure>", self.on_windowsize_changed)
         
         self.toggle_button = tk.Button(root, text="Toggle Selection Mode", command=self.toggle_selection_mode)
-        # self.toggle_button.pack()
         self.toggle_button.grid(row=1, column=0)
         
         self.invert_button = tk.Button(root, text="Invert Selection", command=self.invert_selection)
-        # self.invert_button.pack()
         self.invert_button.grid(row=2, column=0)
 
         self.select_button = tk.Button(root, text="Get Coordinates", command=self.get_coordinates)
-        # self.select_button.pack()
         self.select_button.grid(row=3, column=0)
         
         # Center the window
         root.eval(f'tk::PlaceWindow {str(self.root)} center')
-
-        
 
         # configure canvas to scale with window
         self.root.grid_rowconfigure(0, weight=1)
@@ -289,9 +276,6 @@ class ArraySelector:
                 highlighted_img[self.start:self.end, :] = 128#self.array[self.start:self.end, :]  # Highlight selected area
         mask = Image.fromarray(highlighted_img)
         # create an overlay in red with 30% opacity of the highlighted area with the original image
-        # highlighted_img = Image.fromarray(highlighted_img).convert('RGBA')
-
-
         overlay = Image.new('RGBA', self.image.size, (255, 0, 0, 0))  # Red with 30% opacity
         combined = Image.composite(self.image.convert('RGBA'), overlay, mask)
         # convert to rgb
@@ -299,38 +283,6 @@ class ArraySelector:
         # now update the image
         self.tk_image = ImageTk.PhotoImage(combined)
         self.canvas.create_image(0, 0, anchor=tk.NW, image=self.tk_image)
-
-
-
-
-        '''# we dont need to delete the original image
-        if self.highlighted_image:
-            self.canvas.delete(self.highlighted_image)
-
-        # Create an image for the highlighting based on inverted state
-        highlighted_img = np.zeros_like(self.array)
-        # highlighted_img = self.array.copy()
-        if self.inverted:
-            highlighted_img[:, :] = self.array  # Copy original array
-            if self.is_horizontal:
-                highlighted_img[:, self.start:self.end] = 0  # Set selected area to black
-            else:
-                highlighted_img[self.start:self.end, :] = 0  # Set selected area to black
-        else:
-            if self.is_horizontal and self.start is not None and self.end is not None:
-                highlighted_img[:, self.start:self.end] = self.array[:, self.start:self.end]  # Highlight selected area
-            elif not self.is_horizontal and self.start is not None and self.end is not None:
-                highlighted_img[self.start:self.end, :] = self.array[self.start:self.end, :]  # Highlight selected area
-
-        # Create an image for the highlighted area
-        # highlighted_img = Image.fromarray(highlighted_img)
-        highlighted_img = Image.fromarray(highlighted_img)
-        overlay = Image.new('RGBA', highlighted_img.size, (255, 0, 0, 77))  # Red with 30% opacity
-        combined = Image.alpha_composite(highlighted_img.convert('RGBA'), overlay)
-
-        self.tk_highlighted = ImageTk.PhotoImage(combined)
-        
-        self.highlighted_image = self.canvas.create_image(0, 0, anchor=tk.NW, image=self.tk_highlighted)'''
 
     def invert_selection(self):
         self.inverted = not self.inverted  # Toggle inverted state
@@ -349,9 +301,6 @@ class ArraySelector:
 
     def get_coordinates(self):
         # reduze the coordinates to the original size
-        # print(f"Data size: {self.width} x {self.height}")
-        # print(f"Scaling factor: {self.scaling_factor}")
-        # print(f"Selected coordinates: {self.start}, {self.end}")
         if self.scaling_factor != 1:
             self.start = int(self.start/self.scaling_factor)
             self.end = int(self.end/self.scaling_factor)-1 # '-1' due to conversion between pixel in image and array index
@@ -360,19 +309,6 @@ class ArraySelector:
                 print(f"Selected horizontal coordinates: {self.start}, {self.end}")
             else:
                 print(f"Selected vertical coordinates: {self.start}, {self.end}")
-        # print all parameters
-        # print(f"Selection mode: {'horizontal' if self.is_horizontal else 'vertical'}")
-        # print(f"Selection inverted: {self.inverted}")
 
         # close the window
         self.root.destroy()
-'''
-if __name__ == "__main__":
-    root = tk.Tk()
-    
-    # Create a random 2D numpy array to simulate image data
-    array_data = np.random.rand(200, 400)  # Example size: 200 rows by 400 columns
-    app = ArraySelector(root, array_data)
-    
-    root.mainloop()
-'''

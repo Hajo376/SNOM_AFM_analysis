@@ -4,5 +4,6 @@ example_measurements.zip
 /example_measurements
 /dist
 /build
+/SNOM_AFM_analysis/tests
 SNOM_AFM_analysis.egg-info
 check_licenses.xlsx

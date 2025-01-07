@@ -215,17 +215,3 @@ class CutlineSelector:
         print(f"Cutline from {self.start} to {self.end} extracted.")
         # close the figure
         plt.close(self.fig)
-
-
-
-# testing:
-'''def main():
-    x, y = np.mgrid[-0:100:1, 0:200:1]
-    # z = np.sqrt(x**2 + y**2) + np.sin(x**2 + y**2)
-    z = np.sin(x/2)*np.exp(-x/100)
-    array_2d = z
-    # plt.pcolormesh(array_2d)
-    # plt.show()
-    profile = select_profile(array_2d, 'height')
-    plt.plot(profile)
-    plt.show()'''

@@ -30,48 +30,20 @@ from configparser import ConfigParser
 
 # import own functionality
 from SNOM_AFM_analysis.lib.snom_colormaps import SNOM_height, SNOM_amplitude, SNOM_phase, SNOM_realpart, all_colormaps
-from SNOM_AFM_analysis.lib.phase_slider import Get_Phase_Offset
-from SNOM_AFM_analysis.lib.rectangle_selector import Select_Rectangle
-from SNOM_AFM_analysis.lib.data_range_selector import Select_Data_Range
+from SNOM_AFM_analysis.lib.phase_slider import get_phase_offset
+from SNOM_AFM_analysis.lib.rectangle_selector import select_rectangle
+from SNOM_AFM_analysis.lib.data_range_selector import select_data_range
 from SNOM_AFM_analysis.lib.get_directionality import ChiralCoupler
 from SNOM_AFM_analysis.lib import realign
 from SNOM_AFM_analysis.lib import profile
 from SNOM_AFM_analysis.lib import phase_analysis
-from SNOM_AFM_analysis.lib.file_handling import Get_Parameter_Values, Find_Index, convert_header_to_dict
+from SNOM_AFM_analysis.lib.file_handling import get_parameter_values, find_index, convert_header_to_dict
 from SNOM_AFM_analysis.lib.profile_selector import select_profile
 
 # keep this for internal referencing
 class Definitions(Enum):
     vertical = auto()
     horizontal = auto()
-
-# get rid of this class, the allowed filetypes should be saved in the config.ini file
-# make a enum class for the measurement types which are implemented
-class File_Type(Enum):
-    """Different file types may vary accross different platforms."""
-    standard = auto()
-    standard_new = auto()
-    aachen_ascii = auto()
-    aachen_gsf = auto()
-    neaspec_version_1_6_3359_1 = auto()
-    # for the parameters:
-    html = auto()
-    txt = auto() # only for aachen style txt?!
-    html_new = auto()# new software version creates slightly different html file
-    html_neaspec_version_1_6_3359_1 = auto()
-    comsol_gsf = auto()
-    comsol_txt = auto()
-    # new standard for getting the scan parameters from txt file, does not work for Aachen files
-    # only tested for Versions: 1.8.5017.0, 1.10.9592.0
-    new_parameters_txt = auto()
-    # measurement types
-    approach_curve = auto()
-    snom_measurement = auto()
-    afm_measurement = auto()
-    spectrum_measurement = auto()
-    snom_measurement_3d = auto()
-    ''' Data from a snom 3D measurement has the same shape as a standard snom measurement, but each pixel contains an approach curve.'''
-
 
 class Measurement_Tags(Enum):
     """This class keeps track of the implemented measurement tags. 
@@ -180,9 +152,9 @@ class FileHandler(Plot_Definitions):
     def __init__(self, directory_name:str, title:str=None) -> None:
         self.directory_name = Path(directory_name)
         self.filename = Path(PurePath(self.directory_name).parts[-1])
-        self._Generate_Savefolder()
+        self._generate_savefolder()
         self.measurement_title = title # If a measurement_title is specified it will precede the automatically created title based on the channel dictionary
-        self.logfile_path = self._Initialize_Logfile()
+        self.logfile_path = self._initialize_logfile()
         # testing the new config file:
         
         if self.config_path.exists():
@@ -190,9 +162,9 @@ class FileHandler(Plot_Definitions):
         else:
             self._create_default_config() # create a default config file if not existing
         
-        self._Initialize_File_Type()
+        self._initialize_file_type()
 
-    def _Generate_Savefolder(self):
+    def _generate_savefolder(self):
         """Generate savefolder if not already existing. Careful, has to be the same one as for the snom plotter gui app.
         """
         # create parent folder in the user directory, both snom analysis and plotting cofig files will be saved there
@@ -209,9 +181,9 @@ class FileHandler(Plot_Definitions):
         self.config_path = self.save_folder / Path('config.ini')
 
         
-    def _Initialize_File_Type(self) -> None:
+    def _initialize_file_type(self) -> None:
         # try to find the filetype automatically
-        self._Find_Filetype() 
+        self._find_filetype() 
 
     def _create_default_config(self):
         """This function creates a default config file in case the script is run for the first time or the old config file is missing.
@@ -274,7 +246,7 @@ class FileHandler(Plot_Definitions):
             'amp_channels': ['O1A','O2A','O3A','O4A','O5A', 'R-O1A','R-O2A','R-O3A','R-O4A','R-O5A'],
             'real_channels': ['O1Re', 'O2Re', 'O3Re', 'O4Re', 'R-O5Re', 'R-O1Re', 'R-O2Re', 'R-O3Re', 'R-O4Re', 'R-O5Re'],
             'imag_channels': ['O1Im', 'O2Im', 'O3Im', 'O4Im', 'R-O5Im', 'R-O1Im', 'R-O2Im', 'R-O3Im', 'R-O4Im', 'R-O5Im'],
-            'height_channel': 'Z C',
+            'height_channel': '<Z C>',
             'height_channels': ['Z C', 'R-Z C'],
             'mechanical_channels': ['M0A', 'M0P', 'M1A', 'M1P', 'M2A', 'M2P', 'M3A', 'M3P', 'M4A', 'M4P', 'M5A', 'M5P', 'R-M0A', 'R-M0P', 'R-M1A', 'R-M1P', 'R-M2A', 'R-M2P', 'R-M3A', 'R-M3P', 'R-M4A', 'R-M4P', 'R-M5A', 'R-M5P'],
             'preview_ampchannel': '<O2A>',
@@ -818,14 +790,14 @@ class FileHandler(Plot_Definitions):
         # print the content of the measurement tags class
         print('All measurement tags: ', list(Measurement_Tags))
 
-    def _Find_Filetype(self) -> bool:
+    def _find_filetype(self) -> bool:
         filetypes = self._get_from_config(section='FILETYPES')
         for key in filetypes:
             filetype = self._get_from_config(key, 'FILETYPES')
             parameters_name = self._get_from_config('parameters_name', filetype)
             parameters_path = self.directory_name / Path(self.filename.name + parameters_name)
             # try to create the measurement tag dict
-            succsess = self._Create_Measurement_Tag_Dict(parameters_path, filetype)
+            succsess = self._create_measurement_tag_dict(parameters_path, filetype)
             if succsess:
                 # the correct filetype has been found
                 # print(f'Filetype found: {filetype}')
@@ -836,7 +808,7 @@ class FileHandler(Plot_Definitions):
         print('No filetype was found!')
         return False
             
-    def _Initialize_Logfile(self) -> str:
+    def _initialize_logfile(self) -> str:
         # logfile_path = self.directory_name + '/python_manipulation_log.txt'
         logfile_path = self.directory_name / Path('python_manipulation_log.txt')
         file = open(logfile_path, 'a') # the new logdata will be appended to the existing file
@@ -846,12 +818,12 @@ class FileHandler(Plot_Definitions):
         file.close()
         return logfile_path
 
-    def _Write_to_Logfile(self, parameter_name:str, parameter):
+    def _write_to_logfile(self, parameter_name:str, parameter):
         file = open(self.logfile_path, 'a')
         file.write(f'{parameter_name} = {parameter}\n')
         file.close()
  
-    def _Create_Measurement_Tag_Dict(self, parameters_path:Path, filetype:str) -> bool:
+    def _create_measurement_tag_dict(self, parameters_path:Path, filetype:str) -> bool:
         """This function creates a dictionary containing the measurement tags. The tags are extracted from the parameters file.
         If the tag dict cannot be created the function will return False otherwise True.
         """
@@ -1056,7 +1028,7 @@ class FileHandler(Plot_Definitions):
         # if everything went well return True
         return True
         
-    def _Replace_Plotting_Parameter_Placeholders(self, dictionary:dict, placeholders:dict) -> dict:
+    def _replace_plotting_parameter_placeholders(self, dictionary:dict, placeholders:dict) -> dict:
         """This function replaces the placeholders in the plotting parameters dictionary with the actual values. 
         Afterwards it replaces the colormap placeholders with the actual colormaps.
 
@@ -1087,7 +1059,7 @@ class FileHandler(Plot_Definitions):
                     break
         return dictionary
 
-    def _Get_Plotting_Parameters(self) -> dict:
+    def _get_plotting_parameters(self) -> dict:
         """This will load the plotting parameters dictionary from the plotting_parameters.json file. If the file does not exist, it will be created with default values.
         The dictionary contains definitions for the colormaps, the colormap labels and the titles of the subplots. It also contains placeholders, which can be replaced by the actual values.
         The user can change the values in the plotting_parameters.json file to customize the plotting.
@@ -1099,12 +1071,12 @@ class FileHandler(Plot_Definitions):
             with open(self.plotting_parameters_path, 'r') as file:
                 plotting_parameters = json.load(file)
         except:
-            self._Generate_Default_Plotting_Parameters()
+            self._generate_default_plotting_parameters()
             with open(self.plotting_parameters_path, 'r') as file:
                 plotting_parameters = json.load(file)
         return plotting_parameters
     
-    def _Generate_Default_Plotting_Parameters(self):
+    def _generate_default_plotting_parameters(self):
         dictionary = {
             "amplitude_cmap": "<SNOM_amplitude>",
             "amplitude_cbar_label": "Amplitude / a.u.",
@@ -1361,7 +1333,7 @@ class FileHandler(Plot_Definitions):
         else:
             self.measurement_tag_dict[tag][0] = value
 
-    def _Get_Tagval(self, content, tag):
+    def _get_tagval(self, content, tag):
         """This function gets the value of the tag listed in the file header"""
         content_array = content.split('\n')
         tag_array = []
@@ -1482,7 +1454,7 @@ class FileHandler(Plot_Definitions):
             print('demodulation number could not be found')
         return demodulation_num
     
-    def _Initialize_Measurement_Channel_Indicators(self):
+    def _initialize_measurement_channel_indicators(self):
         # in the future these indicators should be read from external prameters file to make it easier for the user to add new filetypes with different indicators
         # the cannel prefix and suffix are characters surrounding the channel name in the filename, they will be used when loading and saving the data
         # filename = directory_name + channel_prefix + channel + channel_suffix + appendix + '.gsf' (or '.txt') 
@@ -1594,7 +1566,7 @@ class FileHandler(Plot_Definitions):
                 if is_list:
                     values = []
                     for element in tag:
-                        try: value = self._Get_Tagval(content, element)
+                        try: value = self._get_tagval(content, element)
                         except: 
                             values.append(None)
                             tag_value_found = False
@@ -1602,7 +1574,7 @@ class FileHandler(Plot_Definitions):
                             values.append(value)
                             tag_value_found = True
                 else:
-                    try: value = self._Get_Tagval(content, tag)
+                    try: value = self._get_tagval(content, tag)
                     except: value = None
                     else: tag_value_found = True
                     # try to find out if the value is a number or a unit
@@ -1642,15 +1614,15 @@ class SnomMeasurement(FileHandler):
     all_subplots = []
     def __init__(self, directory_name:str, channels:list=None, title:str=None, autoscale:bool=True) -> None:
         super().__init__(directory_name, title)
-        self._Initialize_Measurement_Channel_Indicators()
+        self._initialize_measurement_channel_indicators()
         if channels == None: # the standard channels which will be used if no channels are specified
             channels = self.preview_channels
         self.channels = channels.copy() # make sure to copy the list to avoid changing the original list     
         self.autoscale = autoscale
-        self._Initialize_Data(self.channels)
-        if Plot_Definitions.autodelete_all_subplots: self._Delete_All_Subplots() # automatically delete old subplots
+        self._initialize_data(self.channels)
+        if Plot_Definitions.autodelete_all_subplots: self._delete_all_subplots() # automatically delete old subplots
     
-    def _Initialize_Data(self, channels=None) -> None:
+    def _initialize_data(self, channels=None) -> None:
         """This function initializes the data in memory. If no channels are specified the already existing data is used,
         which is created automatically in the instance init method. If channels are specified, the instance data is overwritten.
         Channels must be specified as a list of channels."""
@@ -1663,13 +1635,13 @@ class SnomMeasurement(FileHandler):
             # update the channel tag dictionary, makes the program compatible with differrently sized datasets, like original data plus manipulated, eg. cut data
             self._create_channel_tag_dict()
             # self._Create_Channels_Tag_Dict()
-            self.all_data, self.channels_label = self._Load_Data(channels)
+            self.all_data, self.channels_label = self._load_data(channels)
             xres = len(self.all_data[0][0])
             yres = len(self.all_data[0])
             # reset all the instance variables dependent on the data, but nor the ones responsible for plotting
             # self.scaling_factor = 1
             if self.autoscale == True:
-                self.Quadratic_Pixels()
+                self.quadratic_pixels()
             # initialize instance variables:
             self.mask_array = [] # not shure if it's best to reset the mask...
             self.upper_y_bound = None
@@ -1678,15 +1650,15 @@ class SnomMeasurement(FileHandler):
             self.y_shifts = None
             self.scalebar = []    
 
-    def Initialize_Channels(self, channels:list) -> None:
+    def initialize_channels(self, channels:list) -> None:
         """This function will load the data from the specified channels and replace the ones in memory.
         
         Args:
             channels [list]: a list containing the channels you want to initialize
         """
-        self._Initialize_Data(channels)
+        self._initialize_data(channels)
 
-    def Add_Channels(self, channels:list) -> None:
+    def add_channels(self, channels:list) -> None:
         """This function will add the specified channels to memory without changing the already existing ones.
 
         Args:
@@ -1694,17 +1666,17 @@ class SnomMeasurement(FileHandler):
         """
         self.channels += channels
         # update the channel tag dictionary, makes the program compatible with differrently sized datasets, like original data plus manipulated, eg. cut data
-        self._Create_Channels_Tag_Dict(channels)
-        all_data, channels_label = self._Load_Data(channels)
+        self._create_channel_tag_dict(channels)
+        all_data, channels_label = self._load_data(channels)
         for i in range(len(channels)):
             self.all_data.append(all_data[i])
             self.channels_label.append(channels_label[i])
         # reset all the instance variables dependent on the data, but nor the ones responsible for plotting
         # self.scaling_factor = 1
         if self.autoscale == True:
-            self.Quadratic_Pixels(channels)
+            self.quadratic_pixels(channels)
 
-    def _Load_All_Subplots(self) -> None:
+    def _load_all_subplots(self) -> None:
         """Load all subplots from memory (located under APPDATA/SNOM_Plotter/all_subplots.p).
         """
         try:
@@ -1712,14 +1684,14 @@ class SnomMeasurement(FileHandler):
                 self.all_subplots = pkl.load(file)
         except: self.all_subplots = []
          
-    def _Export_All_Subplots(self) -> None:
+    def _export_all_subplots(self) -> None:
         """Export all subplots to memory.
         """
         with open(self.all_subplots_path, 'wb') as file:
             pkl.dump(self.all_subplots, file)
         self.all_subplots = []
 
-    def _Delete_All_Subplots(self):
+    def _delete_all_subplots(self):
         """Delete the subplot memory. Should be done always if new measurement row is investigated.
         """
         try:
@@ -1727,7 +1699,7 @@ class SnomMeasurement(FileHandler):
         except: pass
         self.all_subplots = []
         
-    def _Scale_Array(self, array, scaling) -> np.array:
+    def _scale_array(self, array, scaling) -> np.array:
         """This function scales a given 2D Array, it thus creates 'scaling'**2 subpixels per pixel.
         The scaled array is returned."""
         yres = len(array)
@@ -1742,47 +1714,31 @@ class SnomMeasurement(FileHandler):
                         scaled_array[i*scaling + k][j*scaling + l] = array[i][j]
         return scaled_array
 
-    def Scale_Channels(self, channels:list=None, scaling:int=4) -> None:
+    def scale_channels(self, channels:list=None, scaling:int=4) -> None:
         """This function scales all the data in memory or the specified channels.
                 
         Args:
             channels (list, optional): List of channels to scale. If not specified all channels in memory will be scaled. Defaults to None.
             scaling (int, optional): Defines scaling factor. Each pixel will be scaled to scaling**2 subpixels. Defaults to 4.
         """
-        # ToDo: reimplement scaling dependent on axis, x and y independently
-        # self._Initialize_Data(channels)
         if channels is None:
             channels = self.channels
-        self._Write_to_Logfile('scaling', scaling)
+        self._write_to_logfile('scaling', scaling)
         for channel in channels:
             if channel in self.channels:
-                self.all_data[self.channels.index(channel)] = self._Scale_Array(self.all_data[self.channels.index(channel)], scaling)
-                # XReal, YReal = self.channel_tag_dict[self.channels.index(channel)][Channel_Tags.PIXELAREA]
+                self.all_data[self.channels.index(channel)] = self._scale_array(self.all_data[self.channels.index(channel)], scaling)
                 XReal, YReal = self._get_channel_tag_dict_value(channel, Channel_Tags.PIXELAREA)
-                # self.channel_tag_dict[self.channels.index(channel)][Channel_Tags.PIXELAREA] = [XReal*scaling, YReal*scaling]
                 self._set_channel_tag_dict_value(channel, Channel_Tags.PIXELAREA, [XReal*scaling, YReal*scaling])
-                # self.channel_tag_dict[self.channels.index(channel)][Channel_Tags.PIXELSCALING] = scaling
                 self._set_channel_tag_dict_value(channel, Channel_Tags.PIXELSCALING, scaling)
             else:
                 print(f'Channel {channel} is not in memory! Please initiate the channels you want to use first!')
 
-    def _Load_Data(self, channels:list) -> list:
+    def _load_data(self, channels:list) -> list:
         """Loads all binary data of the specified channels and returns them in a list plus the dictionary with the channel information.
         Height data is automatically converted to nm. """
 
-        # try to make loading independent of filetype and make use of channel prefixes and suffixes
-        # if self.file_type == File_Type.comsol_gsf:
-        #     return self._Load_Data_comsol(channels)
-        #create a list containing all the lists of the individual channels
-        # all_binary_data = []
-        #safe the information about which channel is which list in a dictionary
         data_dict = []
         all_data = []
-        # why not safe channel and data as a dictionary? Maybe change it later
-        
-        
-        
-
         for channel in channels:
             # check if channel is a default channel or something user made
             # if default use the standard naming convention
@@ -1873,7 +1829,7 @@ class SnomMeasurement(FileHandler):
         # but self.channels will always contain the original channel name as this is used for internal referencing
         return all_data, data_dict
 
-    def _Load_Data_Binary(self, channels) -> list:
+    def _load_data_binary(self, channels) -> list:
         """Loads all binary data of the specified channels and returns them in a list plus the dictionary for access"""
         #create a list containing all the lists of the individual channels
         all_binary_data = []
@@ -1888,7 +1844,7 @@ class SnomMeasurement(FileHandler):
             data_dict.append(channels[i])
         return all_binary_data, data_dict
 
-    def Set_Min_to_Zero(self, channels:list=None) -> None:
+    def set_min_to_zero(self, channels:list=None) -> None:
         """This function sets the min value of the specified channels to zero.
                 
         Args:
@@ -1900,7 +1856,7 @@ class SnomMeasurement(FileHandler):
                 if self.height_indicator in channel:
                     channels.append(channel)
 
-        self._Write_to_Logfile('set_min_to_zero', True)
+        self._write_to_logfile('set_min_to_zero', True)
         for channel in channels:
             if channel in self.channels:
                 data = self.all_data[self.channels.index(channel)]
@@ -1912,7 +1868,7 @@ class SnomMeasurement(FileHandler):
 
     def _get_plotting_values(self, channel) -> tuple:
         # import plotting_parameters.json, here the user can tweek some options for the plotting, like automatic titles and colormap choices
-        plotting_parameters = self._Get_Plotting_Parameters()
+        plotting_parameters = self._get_plotting_parameters()
 
         # update the placeholders in the dictionary
         # the dictionary contains certain placeholders, which are now being replaced with the actual values
@@ -1920,44 +1876,8 @@ class SnomMeasurement(FileHandler):
         # placeholders are indicated by the '<' and '>' characters
         # this step insures, that for example the title contains the correct channel name
         placeholders = {'<channel>': channel}
-        plotting_parameters = self._Replace_Plotting_Parameter_Placeholders(plotting_parameters, placeholders)
-        
-        '''
-        if self.amp_indicator in channel and self.height_indicator not in channel:
-            cmap=SNOM_amplitude
-            label = 'Amplitude [a.u.]'
-            title = f'Amplitude {channel}'
-        elif self.phase_indicator in channel:
-            cmap = SNOM_phase
-            if 'positive' in channel:
-                title = f'Positively corrected phase O{channel[1]}P'
-            elif 'negative' in channel:
-                title = f'Negatively corrected phase O{channel[1]}P'
-            else:
-                title = f'Phase {channel}'
-            label = 'Phase'
-        elif self.height_indicator in channel:
-            cmap=SNOM_height
-            label = 'Height [nm]'
-            title = f'Height {channel}'
-        elif self.real_indicator in channel or self.imag_indicator in channel:
-            cmap=SNOM_realpart
-            label = 'E [a.u.]'
-            if self.real_indicator in channel:
-                title = f'Real part {channel}'
-            else:
-                title = f'Imaginary part {channel}'
-        
-        
-        
-        elif self.filter_fourier_indicator in channel:
-            cmap='viridis'
-            label = 'Intensity [a.u.]'
-            title =  f'Fourier Transform {channel}'
-        elif self.filter_gauss_indicator in channel:
-            title = f'Gauss blurred {channel}'
-        '''
-
+        plotting_parameters = self._replace_plotting_parameter_placeholders(plotting_parameters, placeholders)
+    
         if self.amp_indicator in channel and self.height_indicator not in channel:
             cmap = plotting_parameters["amplitude_cmap"]
             label = plotting_parameters["amplitude_cbar_label"]
@@ -1982,9 +1902,6 @@ class SnomMeasurement(FileHandler):
                 title = plotting_parameters["real_title_real"]
             else:
                 title = plotting_parameters["real_title_imag"]
-        
-        
-        
         elif self.filter_fourier_indicator in channel:
             cmap = plotting_parameters["fourier_cmap"]
             label = plotting_parameters["fourier_cbar_label"]
@@ -1999,12 +1916,11 @@ class SnomMeasurement(FileHandler):
             print('self.height_indicator: ', self.height_indicator)
             print('self.real_indicator: ', self.real_indicator)
             print('self.imag_indicator: ', self.imag_indicator)
-
-            print('In _Add_Subplot(), encountered unknown channel')
+            print('In _add_subplot(), encountered unknown channel')
             exit()
         return cmap, label, title
 
-    def _Add_Subplot(self, data, channel, scalebar=None) -> list:
+    def _add_subplot(self, data, channel, scalebar=None) -> list:
         """This function adds the specified data to the list of subplots. The list of subplots contains the data, the colormap,
         the colormap label and a title, which are generated from the channel information. The same array is also returned,
         so it can also be iterated by an other function to only plot the data of interest."""
@@ -2021,77 +1937,12 @@ class SnomMeasurement(FileHandler):
             return [data, cmap, label, title]
         '''
         supplot = {'data': np.copy(data), 'cmap': cmap, 'label': label, 'title': title, 'scalebar': scalebar}
-        self._Load_All_Subplots()
+        self._load_all_subplots()
         self.all_subplots.append(supplot)
-        self._Export_All_Subplots()
+        self._export_all_subplots()
         return supplot
-        
-        #old:
-        '''
-        if self.file_type == File_Type.standard or self.file_type == File_Type.standard_new or self.file_type==File_Type.neaspec_version_1_6_3359_1:
-            if self.amp_indicator in channel:
-                cmap=SNOM_amplitude
-                label = 'Amplitude [a.u.]'
-                title = f'Amplitude {channel}'
-            elif self.phase_indicator in channel:
-                if 'positive' in channel:
-                    cmap = SNOM_phase
-                    title = f'Positively corrected phase O{channel[1]}P'
-                elif 'negative' in channel:
-                    cmap = SNOM_phase
-                    title = f'Negatively corrected phase O{channel[1]}P'
-                else:
-                    cmap=SNOM_phase
-                    title = f'Phase {channel}'
-                label = 'Phase'
-            elif self.height_indicator in channel:
-                cmap=SNOM_height
-                label = 'Height [nm]'
-                title = f'Height {channel}'
-            elif self.real_indicator in channel or self.imag_indicator in channel:
-                cmap=SNOM_realpart
-                label = 'E [a.u.]'
-                if self.real_indicator in channel:
-                    title = f'Real part {channel}'
-                else:
-                    title = f'Imaginary part {channel}'
-
-        elif self.file_type == File_Type.aachen_ascii or self.file_type == File_Type.aachen_gsf:
-            if 'abs' in channel and not 'MT' in channel:
-                cmap=SNOM_amplitude
-                label = 'Amplitude [a.u.]'
-                title = f'Amplitude {channel}'
-            elif 'arg' in channel:
-                if 'positive' in channel:
-                    cmap = SNOM_phase
-                    title = f'Positively corrected phase O{channel[1]}P' # ToDo
-                elif 'negative' in channel:
-                    cmap = SNOM_phase
-                    title = f'Negatively corrected phase O{channel[1]}P'
-                else:
-                    cmap=SNOM_phase
-                    title = f'Phase {channel}'
-                label = 'phase'
-            elif 'MT' in channel:
-                cmap=SNOM_height
-                label = 'Height [nm]'
-                title = f'Height {channel}'
-        elif self.file_type == File_Type.comsol_gsf:
-            if 'abs' in channel:
-                cmap=SNOM_amplitude
-                label = 'Amplitude [a.u.]'
-                title = f'Amplitude {channel}'
-            elif 'arg' in channel:
-                cmap=SNOM_phase
-                title = f'Phase {channel}'
-                label = 'phase'
-            elif 'real' in channel:
-                cmap=SNOM_realpart
-                label = 'E [a.u.]'
-                title = f'Realpart {channel}'
-        '''
     
-    def Remove_Subplots(self, index_array:list) -> None:
+    def remove_subplots(self, index_array:list) -> None:
         """This function removes the specified subplot from the memory.
         
         Args:
@@ -2099,12 +1950,12 @@ class SnomMeasurement(FileHandler):
         """
         #sort the index array in descending order and delete the corresponding plots from the memory
         index_array.sort(reverse=True)
-        self._Load_All_Subplots()
+        self._load_all_subplots()
         for index in index_array:
             del self.all_subplots[index]
-        self._Export_All_Subplots()
+        self._export_all_subplots()
 
-    def Remove_Last_Subplots(self, times:int=1) -> None:
+    def remove_last_subplots(self, times:int=1) -> None:
         """This function removes the last added subplots from the memory.
         Times specifies how often the last subplot should be removed.
         Times=1 means only the last, times=2 means the two last, ...
@@ -2112,12 +1963,12 @@ class SnomMeasurement(FileHandler):
         Args:
             times [int]: how many subplots should be removed from the end of the list?
         """
-        self._Load_All_Subplots()
+        self._load_all_subplots()
         for i in range(times):
             self.all_subplots.pop()
-        self._Export_All_Subplots()
+        self._export_all_subplots()
 
-    def _Plot_Subplots(self, subplots) -> None:
+    def _plot_subplots(self, subplots) -> None:
         """This function plots the subplots. The plots are created in a grid, by default the grid is optimized for 3 by 3. The layout changes dependent on the number of subplots
         of subplots and also the dimensions. Wider subplots are prefferably created vertically, otherwise they are plotted horizontally. Probably subject to future changes..."""
         number_of_axis = 9
@@ -2146,7 +1997,6 @@ class SnomMeasurement(FileHandler):
             ncols = 2
             nrows = 2
             changed_orientation = True
-        # data = subplots[0][0]
         data = subplots[0]['data']
         # calculate the ratio (x/y) of the data, if the ratio is larger than 1 the images are wider than high,
         # and they will prefferably be positiond vertically instead of horizontally
@@ -2156,8 +2006,6 @@ class SnomMeasurement(FileHandler):
             ncols = 1
             changed_orientation = True
         #create the figure with subplots
-        # plt.clf()
-        # plt.cla()
         fig, ax = plt.subplots(nrows, ncols)    
         fig.set_figheight(self.figsizey)
         fig.set_figwidth(self.figsizex) 
@@ -2176,19 +2024,6 @@ class SnomMeasurement(FileHandler):
                         axis = ax[row]
                     else:
                         axis = ax[row, col]
-                    '''
-                    data = subplots[counter][0]
-                    cmap = subplots[counter][1]
-                    label = subplots[counter][2]
-                    title = subplots[counter][3]
-                    if len(subplots[counter]) == 5:
-                        dx, units, dimension, scalebar_label, length_fraction, height_fraction, width_fraction, location, loc, pad, border_pad, sep, frameon, color, box_color, box_alpha, scale_loc, label_loc, font_properties, label_formatter, scale_formatter, fixed_value, fixed_units, animated, rotation = subplots[counter][4]
-                        scalebar = ScaleBar(dx, units, dimension, scalebar_label, length_fraction, height_fraction, width_fraction,
-                            location, loc, pad, border_pad, sep, frameon, color, box_color, box_alpha, scale_loc,
-                            label_loc, font_properties, label_formatter, scale_formatter, fixed_value, fixed_units, animated, rotation) 
-                        axis.add_artist(scalebar)
-                        # print('added a scalebar')
-                    '''
                     data = subplots[counter]['data']
                     cmap = subplots[counter]['cmap']
                     label = subplots[counter]['label']
@@ -2206,18 +2041,11 @@ class SnomMeasurement(FileHandler):
                     flattened_data = data.flatten()
                     min_data = np.min(flattened_data)
                     max_data = np.max(flattened_data)
-                    # print('min: ', min_data)
-                    # print('max: ', max_data)
-
                     if self.real_indicator in title or self.imag_indicator in title: # for real part or imaginary part data
-                        if self.file_type == File_Type.comsol_gsf:
+                        if self.file_type == 'FILETYPE6':
                             data = Set_nan_to_zero(data) #comsol data can contain nan values which are problematic for min and max
                         data_limit = Get_Largest_Abs(min_data, max_data)
                         if Plot_Definitions.vlimit_real is None: Plot_Definitions.vlimit_real = data_limit
-                        
-                        
-
-                        
                         if Plot_Definitions.real_cbar_range is True:
                             if Plot_Definitions.vlimit_real < data_limit: Plot_Definitions.vlimit_real = data_limit
                             img = axis.pcolormesh(data, cmap=cmap, vmin=-Plot_Definitions.vlimit_real, vmax=Plot_Definitions.vlimit_real)
@@ -2225,7 +2053,6 @@ class SnomMeasurement(FileHandler):
                             img = axis.pcolormesh(data, cmap=cmap, vmin=-data_limit, vmax=data_limit)
                     else:
                         if cmap == SNOM_phase and Plot_Definitions.full_phase_range is True: # for phase data
-                            # print('plotting full range phase')
                             vmin = 0
                             vmax = 2*np.pi
                             img = axis.pcolormesh(data, cmap=cmap, vmin=vmin, vmax=vmax)
@@ -2238,8 +2065,6 @@ class SnomMeasurement(FileHandler):
                             else:
                                 Plot_Definitions.vmin_phase = min_data
                                 Plot_Definitions.vmax_phase = max_data
-                                # vmin = min_data
-                                # vmax = max_data
                             img = axis.pcolormesh(data, cmap=cmap, vmin=Plot_Definitions.vmin_phase, vmax=Plot_Definitions.vmax_phase)
                             
                         elif cmap == SNOM_amplitude and Plot_Definitions.amp_cbar_range is True:
@@ -2274,7 +2099,7 @@ class SnomMeasurement(FileHandler):
                         white_pixels = np.zeros((yres, xres))
                         for y in range(border_width, yres - border_width):
                             for x in range(border_width, xres - border_width):
-                                mean = self._Get_Mean_Value(self.mask_array, x, y, border_width)
+                                mean = self._get_mean_value(self.mask_array, x, y, border_width)
                                 if (self.mask_array[y][x] == 0) and (0 < mean) and (mean < 1):
                                     white_pixels[y, x] = 100
                         # The idea is to plot a second pcolormesh on the same axis as the height data
@@ -2295,45 +2120,21 @@ class SnomMeasurement(FileHandler):
                         axis.pcolormesh(white_pixels, cmap='rainbow_alpha')
                     '''
                     
-                    # elif '_shifted' in title:
-                    #     XRes = len(data[0])
-                    #     axis.plot(self.align_points, [element +int((self.upper_y_bound - self.lower_y_bound)/2) for element in self.y_shifts], color='red')
-                    #     axis.hlines([self.upper_y_bound, self.lower_y_bound], xmin=0, xmax=XRes, color='white')
-
-                    # axis = ax[col][row]
                     # invert y axis to fit to the scanning procedure which starts in the top left corner
                     axis.invert_yaxis()
-                    # ratio = len(data[0])/len(data)
                     divider = make_axes_locatable(axis)
                     cax = divider.append_axes("right", size=f"{self.colorbar_width}%", pad=0.05) # size is the size of colorbar relative to original axis, 100% means same size, 10% means 10% of original
                     cbar = plt.colorbar(img, aspect=1, cax=cax)
                     cbar.ax.get_yaxis().labelpad = 15
                     cbar.ax.set_ylabel(label, rotation=270)
-                    # print('label: ', label)
                     if self.hide_ticks == True:
                         # remove ticks on x and y axis, they only show pixelnumber anyways, better to add a scalebar
                         axis.set_xticks([])
                         axis.set_yticks([])
-                    # adjust the colorbar range for realpart images, such that 0 is in the middle
-                    # if 'R_corrected' in title:
-                    #     flattened_data = data.flatten()
-                    #     min_real = min(flattened_data)
-                    #     max_real = max(flattened_data)
-                    #     if abs(min_real) > abs(max_real):
-                    #         limit = min_real
-                    #     else: limit = max_real
-                    #     cbar.set_clim(-limit, limit)
                     if self.show_titles == True:
                         axis.set_title(title)
                     axis.axis('scaled')
                     counter += 1
-                    # add scalebar:
-                    # ToDo
-                    '''print('title: ', title)
-                    print('channel: ', self.scalebar[counter][0])
-                    if self.scalebar[counter][0] in title:
-                        scalebar = self.scalebar[counter][1]
-                        axis.add_artist(scalebar)'''
 
         #turn off all unneeded axes
         counter = 0
@@ -2351,7 +2152,7 @@ class SnomMeasurement(FileHandler):
             plt.show()
         gc.collect()
     
-    def Switch_Supplots(self, first_id:int=None, second_id:int=None) -> None:
+    def switch_supplots(self, first_id:int=None, second_id:int=None) -> None:
         """
         This function changes the position of the subplots.
         The first and second id corresponds to the positions of the two subplots which should be switched.
@@ -2364,23 +2165,23 @@ class SnomMeasurement(FileHandler):
         if (first_id == None) or (second_id == None):
             first_id = int(input('Please enter the id of the first image: '))
             second_id = int(input('Please enter the id of the second image: '))
-        self._Load_All_Subplots()
+        self._load_all_subplots()
         first_subplot = self.all_subplots[first_id]
         self.all_subplots[first_id] = self.all_subplots[second_id]
         self.all_subplots[second_id] = first_subplot
-        self._Export_All_Subplots()
-        self.Display_All_Subplots()
+        self._export_all_subplots()
+        self.display_all_subplots()
         print('Are you happy with the new positioning?')
-        user_input = self._User_Input_Bool()
+        user_input = self._user_input_bool()
         if user_input == False:
             print('Do you want to change the order again?')
-            user_input = self._User_Input_Bool()
+            user_input = self._user_input_bool()
             if user_input == False:
                 exit()
             else:
-                self.Switch_Supplots()
+                self.switch_supplots()
 
-    def _Display_Dataset(self, dataset, channels) -> None:
+    def _display_dataset(self, dataset, channels) -> None:
         """Add all data contained in dataset as subplots to one figure.
         The data has to be shaped beforehand!
         channels should contain the information which channel is stored at which position in the dataset.
@@ -2391,51 +2192,43 @@ class SnomMeasurement(FileHandler):
             for j in range(len(self.scalebar)):
                 if self.channels[i] == self.scalebar[j][0]:
                     scalebar = self.scalebar[j][1]
-            subplots.append(self._Add_Subplot(dataset[i], channels[i], scalebar))
-        self._Plot_Subplots(subplots)
+            subplots.append(self._add_subplot(dataset[i], channels[i], scalebar))
+        self._plot_subplots(subplots)
 
-    def Display_All_Subplots(self) -> None:
+    def display_all_subplots(self) -> None:
         """
         This function displays all the subplots which have been created until this point.
         """
-        self._Load_All_Subplots()
-        self._Plot_Subplots(self.all_subplots)
+        self._load_all_subplots()
+        self._plot_subplots(self.all_subplots)
         self.all_subplots = []
         gc.collect()
 
-    def Display_Channels(self, channels:list=None) -> None: #, show_plot:bool=True
+    def display_channels(self, channels:list=None) -> None: #, show_plot:bool=True
         """This function displays the channels in memory or the specified ones.
                 
         Args:
             channels (list, optional): List of channels to display. If not specified all channels from memory will be plotted. Defaults to None.
 
         """
-        # self.show_plot = show_plot
         if channels == None:
             dataset = self.all_data
-            # plot_channels_dict = self.channels_label
-            # plot_channels_dict = self.channels
             plot_channels = self.channels
         else:
             dataset = []
-            # plot_channels_dict = []
             plot_channels = []
             for channel in channels:
                 if channel in self.channels:
                     dataset.append(self.all_data[self.channels.index(channel)])
-                    # plot_channels_dict.append(self.channels_label[self.channels.index(channel)])
-                    # plot_channels_dict.append(channel)
                     plot_channels.append(channel)
                 else: 
                     print(f'Channel {channel} is not in memory! Please initiate the channels you want to display first!')
                     print(self.channels)
 
-            # dataset, dict = self._Load_Data(channels)
-        # self._Display_Dataset(dataset, plot_channels_dict)
-        self._Display_Dataset(dataset, plot_channels)
+        self._display_dataset(dataset, plot_channels)
         gc.collect()
 
-    def Display_Overlay(self, channel1:str, channel2:str, alpha=0.5) -> None:
+    def display_overlay(self, channel1:str, channel2:str, alpha=0.5) -> None:
         """This function displays an overlay of two channels. The first channel is displayed in full color, the second channel is displayed width a specified alpha.
         """
         # get the colormaps
@@ -2449,8 +2242,6 @@ class SnomMeasurement(FileHandler):
         fig.set_figheight(self.figsizey)
         fig.set_figwidth(self.figsizex)
         # plot the data
-        # img1 = ax.pcolormesh(data1, cmap=cmap1)
-        # img2 = ax.pcolormesh(data2, cmap=cmap2, alpha=alpha)
         img1 = ax.imshow(data1, cmap=cmap1)
         img2 = ax.imshow(data2, cmap=cmap2, alpha=alpha)
         # add the colorbar
@@ -2462,7 +2253,7 @@ class SnomMeasurement(FileHandler):
         # invert y axis to fit to the scanning procedure which starts in the top left corner
         ax.invert_yaxis()
         # add the title
-        # ax.set_title(title1)
+        # ax.set_title(title)
         # remove ticks on x and y axis, they only show pixelnumber anyways, better to add a scalebar
         if self.hide_ticks == True:
             ax.set_xticks([])
@@ -2470,21 +2261,20 @@ class SnomMeasurement(FileHandler):
         plt.show()
         gc.collect()
 
-    def _Gauss_Blurr_Data(self, array, sigma) -> np.array:
+    def _gauss_blurr_data(self, array, sigma) -> np.array:
         """Applies a gaussian blurr to the specified array, with a specified sigma. The blurred data is returned as a list."""
         return gaussian_filter(array, sigma)
 
-    def Gauss_Filter_Channels(self, channels:list=None, sigma=2):
+    def gauss_filter_channels(self, channels:list=None, sigma=2):
         """This function will gauss filter the specified channels. If no channels are specified, the ones in memory will be used.
 
         Args:
             channels (list, optional): List of channels to blurr, if not specified all channels will be blurred. Should not be used for phase. Defaults to None.
             sigma (int, optional): The 'width' of the gauss blurr in pixels, you should scale the data before blurring. Defaults to 2.
         """
-        # self._Initialize_Data(channels) # remove initialization and only filter specified channels
         if channels is None:
             channels = self.channels
-        self._Write_to_Logfile('gaussian_filter_sigma', sigma)
+        self._write_to_logfile('gaussian_filter_sigma', sigma)
         
         # start the blurring:
         for channel in channels:
@@ -2495,10 +2285,10 @@ class SnomMeasurement(FileHandler):
                 if pixel_scaling == 1:
                     if Plot_Definitions.show_plot:
                         print(f'The data in channel {channel} is not yet scaled! Do you want to scale the data?')
-                        user_input = self._User_Input_Bool()
+                        user_input = self._user_input_bool()
                         if user_input == True:
-                            self.Scale_Channels([channel])
-                self.all_data[channel_index] = self._Gauss_Blurr_Data(self.all_data[channel_index], sigma)
+                            self.scale_channels([channel])
+                self.all_data[channel_index] = self._gauss_blurr_data(self.all_data[channel_index], sigma)
                 self.channels_label[channel_index] += '_' + self.filter_gauss_indicator
             else: 
                 print(f'Channel {channel} is not in memory! Please initiate the channels you want to use first!')
@@ -2532,7 +2322,7 @@ class SnomMeasurement(FileHandler):
         
         return channel_pairs
 
-    def Gauss_Filter_Channels_complex(self, channels:list=None, scaling=4, sigma=2) -> None:
+    def gauss_filter_channels_complex(self, channels:list=None, scaling:int=4, sigma:int=2) -> None:
         """This fucton gauss filters the specified channels. If no channels are specified, all channels in memory will be used.
         The function is designed to work with complex data, where amplitude and phase are stored in separate channels.
         It will also blur heiht, real part and imaginary part channels and amplitude channels without phase partner and phase channels without amplitude partner if you want to.
@@ -2544,7 +2334,7 @@ class SnomMeasurement(FileHandler):
             sigma [int]: the sigma used for blurring the data, bigger sigma means bigger blurr radius
 
         """
-        self._Write_to_Logfile('gaussian_filter_complex_sigma', sigma)
+        self._write_to_logfile('gaussian_filter_complex_sigma', sigma)
         if channels is None:
             channels = self.channels
         for channel in channels:
@@ -2553,8 +2343,6 @@ class SnomMeasurement(FileHandler):
 
         # get pairs of amplitude and phase channels
         channel_pairs = self._find_gauss_compatible_channels()
-        # print('All channels:', self.channels)
-        # print('Found the following channel pairs for blurring:', channel_pairs)
         # make a list of the remaining channels
         remaining_channels = []
         for i in range(len(self.channels)):
@@ -2563,27 +2351,26 @@ class SnomMeasurement(FileHandler):
                     remaining_channels.append(i)
                 else:
                     print(f'Channel {self.channels[i]} is a phase channel and does not have a compatible amplitude channel!')
-                    print('For phase data without amplitude please use the Gauss_Filter_Channels() function!')
+                    print('For phase data without amplitude please use the gauss_filter_channels() function!')
                     # get user input if the phase channel should be blurred without amplitude, might be useful in some cases when the phase is flat
                     print('Do you want to blur this channel without amplitude anyways?')
-                    user_input = self._User_Input_Bool()
+                    user_input = self._user_input_bool()
                     if user_input == True:
                         remaining_channels.append(i)
-        # print('Remaining channels:', remaining_channels)
         
         # check if the data is scaled, if not scale it
         for i in range(len(channel_pairs)):
             if self._get_channel_tag_dict_value(self.channels[channel_pairs[i][0]], Channel_Tags.PIXELSCALING) == 1:
                 # scale the data
-                self.Scale_Channels([self.channels[channel_pairs[i][0]]], scaling)
+                self.scale_channels([self.channels[channel_pairs[i][0]]], scaling)
             if self._get_channel_tag_dict_value(self.channels[channel_pairs[i][1]], Channel_Tags.PIXELSCALING) == 1:
                 # scale the data
-                self.Scale_Channels([self.channels[channel_pairs[i][1]]], scaling)
+                self.scale_channels([self.channels[channel_pairs[i][1]]], scaling)
         
         for i in range(len(remaining_channels)):
             if self._get_channel_tag_dict_value(self.channels[remaining_channels[i]], Channel_Tags.PIXELSCALING) == 1:
                 # scale the data
-                self.Scale_Channels([self.channels[remaining_channels[i]]], scaling)
+                self.scale_channels([self.channels[remaining_channels[i]]], scaling)
 
         # now start the blurring process for the amplitude and phase channel pairs
         print('Starting the blurring process, this might take a while...')
@@ -2593,12 +2380,12 @@ class SnomMeasurement(FileHandler):
             real = amp*np.cos(phase)
             imag = amp*np.sin(phase)
 
-            # compl_blurred = self._Gauss_Blurr_Data(compl, sigma)
-            real_blurred = self._Gauss_Blurr_Data(real, sigma)
-            imag_blurred = self._Gauss_Blurr_Data(imag, sigma)
+            # compl_blurred = self._gauss_blurr_data(compl, sigma)
+            real_blurred = self._gauss_blurr_data(real, sigma)
+            imag_blurred = self._gauss_blurr_data(imag, sigma)
             compl_blurred = np.add(real_blurred, 1J*imag_blurred)
             amp_blurred = np.abs(compl_blurred)
-            phase_blurred = self._Get_Compl_Angle(compl_blurred)
+            phase_blurred = self._get_compl_angle(compl_blurred)
 
             # update the data in memory and the labels used for plotting but not the channel names
             self.all_data[channel_pairs[i][0]] = amp_blurred
@@ -2610,12 +2397,12 @@ class SnomMeasurement(FileHandler):
         # this will blurr height, real part, imaginary part channels and amplitude channels without phase partner and phase channels without amplitude partner if the user wants to
         for i in range(len(remaining_channels)):
             data = self.all_data[remaining_channels[i]]
-            data_blurred = self._Gauss_Blurr_Data(data, sigma)
+            data_blurred = self._gauss_blurr_data(data, sigma)
             self.all_data[remaining_channels[i]] = data_blurred
             self.channels_label[remaining_channels[i]] = self.channels_label[remaining_channels[i]] + '_' + self.filter_gauss_indicator
         print('Blurring process finished!')
                    
-    def _Get_Compl_Angle(self, compl_number_array) -> np.array:
+    def _get_compl_angle(self, compl_number_array) -> np.array:
         """This function returns the angles of a clomplex number array."""
         YRes = len(compl_number_array)
         XRes = len(compl_number_array[0])
@@ -2629,21 +2416,21 @@ class SnomMeasurement(FileHandler):
                     phase[i][j]+=2*np.pi
         return phase
 
-    def _Fourier_Filter_Array(self, complex_array) -> np.array:
+    def _fourier_filter_array(self, complex_array) -> np.array:
         '''
         Takes a complex array and returns the fourier transformed complex array
         '''
         FS_compl = np.fft.fftn(complex_array)
         return FS_compl
     
-    def Fourier_Filter_Channels(self, channels:list=None) -> None:
+    def fourier_filter_channels(self, channels:list=None) -> None:
         """This function applies the Fourier filter to all data in memory or specified channels
                 
         Args:
             channels [list]: list of channels, will override the already existing channels
         """
-        self._Initialize_Data(channels)
-        self._Write_to_Logfile('fourier_filter', True)
+        self._initialize_data(channels)
+        self._write_to_logfile('fourier_filter', True)
         channels_to_filter = []
         for i in range(len(self.amp_channels)):
             if (self.amp_channels[i] in self.channels) and (self.phase_channels[i] in self.channels):
@@ -2655,48 +2442,36 @@ class SnomMeasurement(FileHandler):
             amp = self.all_data[channels_to_filter[i]]
             phase = self.all_data[channels_to_filter[i+1]]
             compl = np.add(amp*np.cos(phase), 1J*amp*np.sin(phase))
-            FS_compl = self._Fourier_Filter_Array(compl)
+            FS_compl = self._fourier_filter_array(compl)
             FS_compl_abs = np.absolute(FS_compl)
-            FS_compl_angle = self._Get_Compl_Angle(FS_compl)
+            FS_compl_angle = self._get_compl_angle(FS_compl)
             self.all_data[channels_to_filter[i]] = np.log(np.abs(np.fft.fftshift(FS_compl_abs))**2)
             self.channels_label[channels_to_filter[i]] = self.channels_label[channels_to_filter[i]] + '_fft'
             self.all_data[channels_to_filter[i+1]] = FS_compl_angle
             self.channels_label[channels_to_filter[i+1]] = self.channels_label[channels_to_filter[i+1]] + '_fft'
 
-    def Fourier_Filter_Channels_V2(self, channels:list=None) -> None:
+    def fourier_filter_channels_V2(self, channels:list=None) -> None:
         """This function applies the Fourier filter to all data in memory or specified channels
                 
         Args:
             channels [list]: list of channels, will override the already existing channels
         """
-        # self._Initialize_Data(channels)
-        self._Write_to_Logfile('fourier_filter', True)
+        self._write_to_logfile('fourier_filter', True)
         if channels is None:
             channels = self.channels
-        # for i in range(len(self.amp_channels)):
-        #     if (self.amp_channels[i] in self.channels) and (self.phase_channels[i] in self.channels):
-        #         channels_to_filter.append(self.channels.index(self.amp_channels[i]))
-        #         channels_to_filter.append(self.channels.index(self.phase_channels[i]))
-        #     else:
-        #         print('In order to apply the fourier_filter amplitude and phase of the same channel number must be in the channels list!')
         
         for i in range(len(channels)):
-            FS = self._Fourier_Filter_Array(self.all_data[self.channels.index(channels[i])])
+            FS = self._fourier_filter_array(self.all_data[self.channels.index(channels[i])])
             self.all_data[channels[i]] = np.log(np.abs(np.fft.fftshift(FS))**2)
             self.channels_label[channels[i]] = self.channels_label[channels[i]] + '_fft'
 
-    def _Create_Header(self, channel, data=None, filetype='gsf'):
-        # data = self.all_data[self.channels.index(channel)]
-        # load data instead, because sometimes the channel is not in memory
+    def _create_header(self, channel, data=None, filetype='gsf'):
         if data is None:
             # channel is not in memory, so the standard values will be used
-            data = self._Load_Data([channel])[0][0]
-            # XReal, YReal = self.measurement_tag_dict[Measurement_Tags.SCANAREA]# change to self.channel_dat_dict?
+            data = self._load_data([channel])[0][0]
             try: XReal, YReal = self._get_measurement_tag_dict_value(Measurement_Tags.SCANAREA)
             except: XReal, YReal, ZReal = self._get_measurement_tag_dict_value(Measurement_Tags.SCANAREA)
-            # rotation = self.measurement_tag_dict[Measurement_Tags.ROTATION]
             rotation = self._get_measurement_tag_dict_value(Measurement_Tags.ROTATION)[0]
-            # XOffset, YOffset = self.measurement_tag_dict[Measurement_Tags.SCANNERCENTERPOSITION]
             XOffset, YOffset = self._get_measurement_tag_dict_value(Measurement_Tags.SCANNERCENTERPOSITION)
         else: 
             # if channel is in memory it has to have a channel dict, where all necessary infos are stored
@@ -2728,7 +2503,7 @@ class SnomMeasurement(FileHandler):
             NUL += b'\0' # add NUL terminator
         return header, NUL
 
-    def Save_to_gsf(self, channels:list=None, appendix:str='_manipulated'):
+    def save_to_gsf(self, channels:list=None, appendix:str='default'):
         """This function is ment to save all specified channels to external .gsf files.
         
         Args:
@@ -2736,11 +2511,11 @@ class SnomMeasurement(FileHandler):
                                 Careful! The data will be saved as it is right now, so with all the manipulations.
                                 Therefor the data will have an '_manipulated' appendix in the filename.
         """
-        self._Write_to_Logfile('save_to_gsf_appendix', appendix)
+        if appendix == 'default':
+            appendix = self.channel_suffix_manipulated
         if channels == None:
             channels = self.channels
         for channel in channels:
-            # filepath = self.directory_name + '/' + self.filename + ' ' + channel + appendix + '.gsf'
             # find out if channel is default or not
             if channel in self.all_channels_default:
                 suffix = self.channel_suffix_default
@@ -2750,15 +2525,19 @@ class SnomMeasurement(FileHandler):
                 suffix = self.channel_suffix_custom
                 prefix = self.channel_prefix_custom
                 channel_type = 'custom'
+                # ignore the default appendix if the channel is not a default channel 
+                if self.channel_suffix_overlain in channel:
+                    appendix = ''
+                elif self.channel_suffix_synccorrected_phase in channel:
+                    appendix = ''
             else:
                 print('channel not found in default or custom channels')
                 exit()
-            # filepath = self.directory_name / Path(self.filename.name + f' {channel}{appendix}.gsf')
             filepath = self.directory_name / Path(self.filename.name + f'{prefix}{channel}{suffix}{appendix}.gsf')
             data = self.all_data[self.channels.index(channel)]
             XRes = len(data[0])
             YRes  = len(data)
-            header, NUL = self._Create_Header(channel, data)
+            header, NUL = self._create_header(channel, data)
             file = open(filepath, 'bw')
             file.write(header.encode('utf-8'))
             file.write(NUL) # the NUL marks the end of the header and konsists of 0 characters in the first dataline
@@ -2772,9 +2551,9 @@ class SnomMeasurement(FileHandler):
                         file.write(pack('f', round(data[y][x], 5)))
             file.close()
             print(f'successfully saved channel {channel} to .gsf')
-            print(filepath)
+        self._write_to_logfile('save_to_gsf_appendix', appendix)
 
-    def Save_to_txt(self, channels:list=None, appendix:str='_manipulated'):
+    def save_to_txt(self, channels:list=None, appendix:str='default'):
         """This function is ment to save all specified channels to external .txt files.
         
         Args:
@@ -2782,7 +2561,8 @@ class SnomMeasurement(FileHandler):
                                 Careful! The data will be saved as it is right now, so with all the manipulations.
                                 Therefor the data will have an '_manipulated' appendix in the filename.
         """
-        self._Write_to_Logfile('save_to_txt_appendix', appendix)
+        if appendix == 'default':
+            appendix = self.channel_suffix_manipulated
         if channels == None:
             channels = self.channels
         for channel in channels:
@@ -2794,15 +2574,20 @@ class SnomMeasurement(FileHandler):
                 suffix = self.channel_suffix_custom
                 prefix = self.channel_prefix_custom
                 channel_type = 'custom'
+                # ignore the default appendix if the channel is not a default channel 
+                if self.channel_suffix_overlain in channel:
+                    appendix = ''
+                elif self.channel_suffix_synccorrected_phase in channel:
+                    appendix = ''
             else:
                 print('channel not found in default or custom channels')
                 exit()
-            # filepath = self.directory_name / Path(self.filename.name + f' {channel}{appendix}.txt')
+            
             filepath = self.directory_name / Path(self.filename.name + f'{prefix}{channel}{suffix}{appendix}.txt')
             data = self.all_data[self.channels.index(channel)]
             XRes = len(data[0])
             YRes  = len(data)
-            header, NUL = self._Create_Header(channel, data, 'txt')
+            header, NUL = self._create_header(channel, data, 'txt')
             file = open(filepath, 'w')
             file.write(header)
             # file.write(NUL) # the NUL marks the end of the header and konsists of 0 characters in the first dataline
@@ -2811,16 +2596,15 @@ class SnomMeasurement(FileHandler):
                     file.write(f'{round(data[y][x], 5)} ')
             file.close()
             print(f'successfully saved channel {channel} to .txt')
-            print(filepath)
+        self._write_to_logfile('save_to_txt_appendix', appendix)
     
-    def _Create_Synccorr_Preview(self, channel, wavelength, nouserinput=False) -> None:
+    def _create_synccorr_preview(self, channel, wavelength, nouserinput=False) -> None:
         """
-        This function is part of the Synccorrection and creates a preview of the corrected data.
+        This function is part of the synccorrection and creates a preview of the corrected data.
         channel specifies which channel should be used for the preview.
         Wavelength must be given in µm.
         Scanangle is the rotation angle of the scan in radians.
         """
-        # scanangle = self.measurement_tag_dict[Measurement_Tags.ROTATION]*np.pi/180
         scanangle = self._get_measurement_tag_dict_value(Measurement_Tags.ROTATION)[0]*np.pi/180
         phasedir_positive = 1
         phasedir_negative = -1
@@ -2835,27 +2619,23 @@ class SnomMeasurement(FileHandler):
                 xreal=x*self.XReal/XRes
                 yreal=y*self.YReal/YRes
                 #phase accumulated by movement of parabolic mirror only depends on 'x' direction
-                phase_no_correction[y][x] = phase_data[y][x]# + np.pi
+                phase_no_correction[y][x] = phase_data[y][x]
                 phase_positive[y][x] = np.mod(phase_data[y][x] - phasedir_positive*(np.cos(-scanangle)*xreal + np.sin(-scanangle)*yreal)/wavelength*2*np.pi, 2*np.pi)
-                # phase_positive[y][x] = np.mod(phase_data[y][x] + np.pi - phasedir_positive*(np.cos(-scanangle)*xreal + np.sin(-scanangle)*yreal)/wavelength*2*np.pi, 2*np.pi)
                 phase_negative[y][x] = np.mod(phase_data[y][x] - phasedir_negative*(np.cos(-scanangle)*xreal + np.sin(-scanangle)*yreal)/wavelength*2*np.pi, 2*np.pi)
-                # phase_negative[y][x] = np.mod(phase_data[y][x] + np.pi - phasedir_negative*(np.cos(-scanangle)*xreal + np.sin(-scanangle)*yreal)/wavelength*2*np.pi, 2*np.pi)
         #create plots of the uncorrected and corrected images
         subplots = []
-        subplots.append(self._Add_Subplot(phase_no_correction, channel))
-        subplots.append(self._Add_Subplot(phase_positive, channel + '_positive'))
-        subplots.append(self._Add_Subplot(phase_negative, channel + '_negative'))
-        self._Plot_Subplots(subplots)
+        subplots.append(self._add_subplot(phase_no_correction, channel))
+        subplots.append(self._add_subplot(phase_positive, channel + '_positive'))
+        subplots.append(self._add_subplot(phase_negative, channel + '_negative'))
+        self._plot_subplots(subplots)
         # remove the preview subplots from the subplot memory after plotting
-        self.Remove_Last_Subplots(3)
+        self.remove_last_subplots(3)
         #ask the user to chose a correction direction
         if nouserinput is False:
-            phasedir = self._Gen_From_Input_Phasedir()
+            phasedir = self._gen_from_input_phasedir()
             return phasedir
-        #start the correction
-        # self.Synccorrection(wavelength, phasedir)
 
-    def Synccorrection(self, wavelength:float, phasedir:int=None) -> None:
+    def synccorrection(self, wavelength:float, phasedir:int=None) -> None:
         """This function corrects all the phase channels for the linear phase gradient
         which stems from the synchronized measurement mode.
         The wavelength must be given in µm.
@@ -2881,33 +2661,27 @@ class SnomMeasurement(FileHandler):
         old_measurement_tag_dict = self.measurement_tag_dict.copy()
         # load new channels for synccorrection
         all_channels = self.phase_channels + self.amp_channels
-        self._Initialize_Data(all_channels)
-        # scanangle = self.measurement_tag_dict[Measurement_Tags.ROTATION]*np.pi/180
+        self._initialize_data(all_channels)
         scanangle = self._get_measurement_tag_dict_value(Measurement_Tags.ROTATION)[0]*np.pi/180
         if phasedir == None:
-            phasedir = self._Create_Synccorr_Preview(self.preview_phasechannel, wavelength)
-        self._Write_to_Logfile('synccorrection_wavelength', wavelength)
-        self._Write_to_Logfile('synccorrection_phasedir', phasedir)
-        header, NUL = self._Create_Header(self.preview_phasechannel) # channel for header just important to distinguish z axis unit either m or nothing
+            phasedir = self._create_synccorr_preview(self.preview_phasechannel, wavelength)
+        self._write_to_logfile('synccorrection_wavelength', wavelength)
+        self._write_to_logfile('synccorrection_phasedir', phasedir)
+        header, NUL = self._create_header(self.preview_phasechannel) # channel for header just important to distinguish z axis unit either m or nothing
         for channel in self.phase_channels:
             i = self.phase_channels.index(channel)
-            # phasef = open(self.directory_name + '/' + self.filename + ' ' + channel + '_corrected.gsf', 'bw')
             phasef = open(self.directory_name / Path(self.filename.name + f' {channel}_corrected.gsf'), 'bw')
-            # realf = open(self.directory_name + '/' + self.filename + ' ' + self.real_channels[i] + '_corrected.gsf', 'bw')
             realf = open(self.directory_name / Path(self.filename.name + f' {self.real_channels[i]}_corrected.gsf'), 'bw')
             phasef.write(header.encode('utf-8'))
             realf.write(header.encode('utf-8'))
             phasef.write(NUL) # add NUL terminator
             realf.write(NUL)
-            # XRes = len(dataset[0][0])
-            # XRes = len(dataset[0])
             for y in range(0,self.YRes):
                 for x in range(0,self.XRes):
                     #convert pixel number to realspace coordinates in µm
                     xreal=x*self.XReal/self.XRes
                     yreal=y*self.YReal/self.YRes
                     #open the phase, add pi to change the range from 0 to 2 pi and then substract the linear phase gradient, which depends on the scanangle!
-                    # amppixval = dataset[2*i][y][x]
                     amppixval = self.all_data[self.channels.index(self.amp_channels[i])][y][x]
                     phasepixval = self.all_data[self.channels.index(self.phase_channels[i])][y][x]
                     phasepixval_corr = np.mod(phasepixval + np.pi - phasedir*(np.cos(-scanangle)*xreal + np.sin(-scanangle)*yreal)/wavelength*2*np.pi, 2*np.pi)
@@ -2924,7 +2698,7 @@ class SnomMeasurement(FileHandler):
         self.measurement_tag_dict = old_measurement_tag_dict
         gc.collect()
 
-    def _Gen_From_Input_Phasedir(self) -> int:
+    def _gen_from_input_phasedir(self) -> int:
         """
         This function asks the user to input a phase direction, input must be either n or p, for negative or positive respectively.
         """
@@ -2935,15 +2709,14 @@ class SnomMeasurement(FileHandler):
             return 1
         else:
             print('Wrong letter! Please try again.')
-            self._Gen_From_Input_Phasedir()
+            self._gen_from_input_phasedir()
     
-    def _Get_Channel_Scaling(self, channel_id) -> int :
+    def _get_channel_scaling(self, channel_id) -> int :
         """This function checks if an instance channel is scaled and returns the scaling factor."""
         channel_yres = len(self.all_data[channel_id])
-        # channel_xres = len(self.all_data[channel_id][0])
         return int(channel_yres/self.YRes)
 
-    def _Create_Height_Mask_Preview(self, mask_array) -> None:
+    def _create_height_mask_preview(self, mask_array) -> None:
         """This function creates a preview of the height masking.
         The preview is based on all channels in the instance"""
         channels = self.channels
@@ -2951,12 +2724,12 @@ class SnomMeasurement(FileHandler):
         subplots = []
         for i in range(len(dataset)):
             masked_array = np.multiply(dataset[i], mask_array)
-            subplots.append(self._Add_Subplot(np.copy(masked_array), channels[i]))
-        self._Plot_Subplots(subplots)
+            subplots.append(self._add_subplot(np.copy(masked_array), channels[i]))
+        self._plot_subplots(subplots)
         # remove the preview subplots from the memory
-        self.Remove_Last_Subplots(3)
+        self.remove_last_subplots(3)
         
-    def _User_Input_Bool(self) -> bool: 
+    def _user_input_bool(self) -> bool: 
         """This function asks the user to input yes or no and returns a boolean value."""
         user_input = input('Please type y for yes or n for no. \nInput: ')
         if user_input == 'y':
@@ -2965,7 +2738,7 @@ class SnomMeasurement(FileHandler):
             user_bool = False
         return user_bool
 
-    def _User_Input(self, message:str):
+    def _user_input(self, message:str):
         """This function confronts the user with the specified message and returns the user input
 
         Args:
@@ -2973,7 +2746,7 @@ class SnomMeasurement(FileHandler):
         """
         return input(message)
 
-    def _Create_Mask_Array(self, height_data, threshold) -> np.array:
+    def _create_mask_array(self, height_data, threshold) -> np.array:
         """This function takes the height data and a threshold value to create a mask array containing 0 and 1 values.
         """
         height_flattened = height_data.flatten()
@@ -2991,27 +2764,27 @@ class SnomMeasurement(FileHandler):
                 mask_array[y][x] = value
         return mask_array
 
-    def _Get_Height_Treshold(self, height_data, mask_array, threshold) -> float:
+    def _get_height_treshold(self, height_data, mask_array, threshold) -> float:
         """This function returns the height threshold value dependent on the user input"""
-        self._Create_Height_Mask_Preview(mask_array)
+        self._create_height_mask_preview(mask_array)
         print('Do you want to use these parameters to mask the data?')
-        mask_data = self._User_Input_Bool()
+        mask_data = self._user_input_bool()
         if mask_data == False:
             print('Do you want to change the treshold?')
-            change_treshold = self._User_Input_Bool()
+            change_treshold = self._user_input_bool()
             if change_treshold == True:
                 print(f'The old threshold was {threshold}')
                 threshold = float(input('Please enter the new treshold value: '))
-                mask_array = self._Create_Mask_Array(height_data, threshold)
-                self._Get_Height_Treshold(height_data, mask_array, threshold)
+                mask_array = self._create_mask_array(height_data, threshold)
+                self._get_height_treshold(height_data, mask_array, threshold)
             else:
                 print('Do you want to abort the masking procedure?')
-                abort = self._User_Input_Bool()
+                abort = self._user_input_bool()
                 if abort == True:
                     exit()
         return threshold
 
-    def Heigth_Mask_Channels(self, channels:list=None, mask_channel=None, threshold=0.5, mask_data=False, export:bool=False) -> None:
+    def heigth_mask_channels(self, channels:list=None, mask_channel=None, threshold=0.5, mask_data=False, export:bool=False) -> None:
         """
         The treshold factor should be between 0 and 1. It sets the threshold for the height pixels.
         Every pixel below threshold will be set to 0. This also applies for all other channels. 
@@ -3029,38 +2802,37 @@ class SnomMeasurement(FileHandler):
         """
         if export == True:
             channels = self.all_channels_default
-        self._Initialize_Data(channels)
+        self._initialize_data(channels)
         if (mask_channel == None) or (mask_channel not in self.channels):
             if self.height_channel in self.channels:
                 height_data = self.all_data[self.channels.index(self.height_channel)]
                 if 'leveled' not in self.channels_label[self.channels.index(self.height_channel)]:
-                    leveled_height_data = self._Height_Levelling_3Point(height_data)
+                    leveled_height_data = self._height_levelling_3point(height_data)
                 else:
                     leveled_height_data = height_data # since height_data is already leveled
                 
                 # if the height channel is used in the instance for example with gaussian blurr, this data will be used and not the raw data
                 # because the data might be scaled, careful to always use the corrected height channel 'Z C'
             else:
-                height_data, trash = self._Load_Data([self.height_channel])
-                leveled_height_data = self._Height_Levelling_3Point(height_data[0])
+                height_data, trash = self._load_data([self.height_channel])
+                leveled_height_data = self._height_levelling_3point(height_data[0])
         else:
-            leveled_height_data = self._Height_Levelling_3Point(self.all_data[self.channels.index(mask_channel)])
+            leveled_height_data = self._height_levelling_3point(self.all_data[self.channels.index(mask_channel)])
 
-        mask_array = self._Create_Mask_Array(leveled_height_data, threshold)
+        mask_array = self._create_mask_array(leveled_height_data, threshold)
 
         
         if mask_data == False:
-            threshold = self._Get_Height_Treshold(leveled_height_data, mask_array, threshold)
+            threshold = self._get_height_treshold(leveled_height_data, mask_array, threshold)
             mask_data == True #unnecessary from now on...
-        self._Write_to_Logfile('height_masking_threshold', threshold)
-        mask_array = self._Create_Mask_Array(leveled_height_data, threshold)
+        self._write_to_logfile('height_masking_threshold', threshold)
+        mask_array = self._create_mask_array(leveled_height_data, threshold)
         self.mask_array = mask_array # todo, mask array must be saved as part of the image, otherwise multiple measurement creations will use the same mask
         if export == True:
             # open files for the masked data:
             for channel in channels:
-                header, NUL= self._Create_Header(channel)
-                data, trash = self._Load_Data([channel])
-                # datafile = open("".join([self.directory_name,"/",self.filename," ",channel,"_masked.gsf"]),"bw")
+                header, NUL= self._create_header(channel)
+                data, trash = self._load_data([channel])
                 datafile = open(self.directory_name / Path(self.filename.name + f' {channel}_masked.gsf'),"bw")
                 datafile.write(header)
                 datafile.write(NUL)
@@ -3079,7 +2851,7 @@ class SnomMeasurement(FileHandler):
                     self.all_data[i] = np.multiply(dataset[i], mask_array)
                 self.channels_label[i] = self.channels_label[i] + '_masked'
 
-    def _Check_Pixel_Position(self, xres, yres, x, y) -> bool:
+    def _check_pixel_position(self, xres, yres, x, y) -> bool:
         """This function checks if the pixel position is within the bounds"""
         if x < 0 or x > xres:
             return False
@@ -3087,7 +2859,7 @@ class SnomMeasurement(FileHandler):
             return False
         else: return True
 
-    def _Get_Mean_Value(self, data, x_coord, y_coord, zone) -> float:
+    def _get_mean_value(self, data, x_coord, y_coord, zone) -> float:
         """This function returns the mean value of the pixel and its nearest neighbors.
         The zone specifies the number of neighbors. 1 means the pixel and the 8 nearest pixels.
         2 means zone 1 plus the next 16, so a total of 25 with the pixel in the middle. 
@@ -3101,12 +2873,12 @@ class SnomMeasurement(FileHandler):
             for x in range(size):
                 y_pixel = int(y_coord -(size-1)/2 + y)
                 x_pixel = int(x_coord -(size-1)/2 + x)
-                if self._Check_Pixel_Position(xres, yres, x_pixel, y_pixel) == True:
+                if self._check_pixel_position(xres, yres, x_pixel, y_pixel) == True:
                     mean += data[y_pixel][x_pixel]
                     count += 1
         return mean/count
 
-    def Get_Pixel_Coordinates(self, channel) -> list:
+    def get_pixel_coordinates(self, channel) -> list:
         """This function returns the pixel coordinates of the clicked pixel."""
         data = self.all_data[self.channels.index(channel)]
         # identify the colormap
@@ -3119,7 +2891,7 @@ class SnomMeasurement(FileHandler):
         else:
             cmap = 'viridis'
         fig, ax = plt.subplots()
-        ax.pcolormesh(data, cmap='viridis')
+        ax.pcolormesh(data, cmap=cmap)
         klicker = clicker(ax, ["event"], markers=["x"])
         ax.legend()
         ax.axis('scaled')
@@ -3129,10 +2901,9 @@ class SnomMeasurement(FileHandler):
             plt.show()
         klicker_coords = klicker.get_positions()['event'] #klicker returns a dictionary for the events
         coordinates = [[round(element[0]), round(element[1])] for element in klicker_coords]
-        # return coordinates
         # display image with the clicked pixel
         fig, ax = plt.subplots()
-        ax.pcolormesh(data, cmap='viridis')
+        ax.pcolormesh(data, cmap=cmap)
         ax.plot(coordinates[0][0], coordinates[0][1], 'rx')
         ax.legend()
         ax.axis('scaled')
@@ -3142,52 +2913,31 @@ class SnomMeasurement(FileHandler):
             plt.show()
         return coordinates
 
-    def Get_Pixel_Value(self, channel, coordinates:list=None, zone=1) -> float:
+    def get_pixel_value(self, channel, coordinates:list=None, zone=1) -> float:
         """This function returns the pixel value of a channel at the specified coordinates.
         The zone specifies the number of neighbors. 0 means only the pixel itself. 1 means the pixel and the 8 nearest pixels.
         2 means zone 1 plus the next 16, so a total of 25 with the pixel in the middle.
         If the channel is scaled the zone will be scaled as well."""
         # adjust the zone if the data is scaled
-        zone = zone*self._Get_Channel_Scaling(self.channels.index(channel))
+        zone = zone*self._get_channel_scaling(self.channels.index(channel))
         # display the channel
         data = self.all_data[self.channels.index(channel)]
         if coordinates == None:
-            coordinates = self.Get_Pixel_Coordinates(channel)
-            '''fig, ax = plt.subplots()
-            # identify the colormap
-            if self.height_indicator in channel:
-                cmap = SNOM_height
-            elif self.phase_indicator in channel:
-                cmap = SNOM_phase
-            elif self.amp_indicator in channel:
-                cmap = SNOM_amplitude
-            else:
-                cmap = 'viridis'
-            ax.pcolormesh(data, cmap=cmap)
-            klicker = clicker(ax, ["event"], markers=["x"])
-            ax.legend()
-            ax.axis('scaled')
-            # invert the y axis to match the image
-            ax.invert_yaxis()
-            plt.title('Please click on the pixel you want to get the value from.')
-            if Plot_Definitions.show_plot:
-                plt.show()
-            klicker_coords = klicker.get_positions()['event'] #klicker returns a dictionary for the events
-            coordinates = [[round(element[0]), round(element[1])] for element in klicker_coords]'''
+            coordinates = self.get_pixel_coordinates(channel)
         if len(coordinates) != 1:
             print('You need to specify one pixel coordinate! \nDo you want to try again?')
-            user_input = self._User_Input_Bool()
+            user_input = self._user_input_bool()
             if user_input == True:
-                self.Get_Pixel_Value(channel, zone)
+                self.get_pixel_value(channel, zone)
             else:
                 exit()
         x = coordinates[0][0]
         y = coordinates[0][1]
         # get the mean value of the pixel and its neighbors
-        pixel_value = self._Get_Mean_Value(data, x, y, zone)
+        pixel_value = self._get_mean_value(data, x, y, zone)
         return pixel_value
 
-    def _Height_Levelling_3Point(self, height_data, zone=1) -> np.array:
+    def _height_levelling_3point(self, height_data, zone=1) -> np.array:
         fig, ax = plt.subplots()
         ax.pcolormesh(height_data, cmap=SNOM_height)
         klicker = clicker(ax, ["event"], markers=["x"])
@@ -3198,16 +2948,16 @@ class SnomMeasurement(FileHandler):
             plt.show()
         klicker_coords = klicker.get_positions()['event'] #klicker returns a dictionary for the events
         klick_coordinates = [[round(element[0]), round(element[1])] for element in klicker_coords]
-        self._Write_to_Logfile('height_leveling_coordinates', klick_coordinates)
+        self._write_to_logfile('height_leveling_coordinates', klick_coordinates)
         if len(klick_coordinates) != 3:
             print('You need to specify 3 point coordinates! \nDo you want to try again?')
-            user_input = self._User_Input_Bool()
+            user_input = self._user_input_bool()
             if user_input == True:
-                self._Height_Levelling_3Point(zone)
+                self._height_levelling_3point(zone)
             else:
                 exit()
         # for the 3 point coordinates the height data is calculated over a small area around the clicked pixels to reduce deviations due to noise
-        mean_values = [self._Get_Mean_Value(height_data, klick_coordinates[i][0], klick_coordinates[i][1], zone) for i in range(len(klick_coordinates))]
+        mean_values = [self._get_mean_value(height_data, klick_coordinates[i][0], klick_coordinates[i][1], zone) for i in range(len(klick_coordinates))]
         matrix = [[klick_coordinates[i][0], klick_coordinates[i][1], mean_values[i]] for i in range(3)]
         A = matrix
         b = [100,100,100] # not sure why, 100 is a bit random, but 0 didn't work
@@ -3228,7 +2978,7 @@ class SnomMeasurement(FileHandler):
         return leveled_height_data
     
     def _level_height_data(self, height_data, klick_coordinates, zone):
-        mean_values = [self._Get_Mean_Value(height_data, klick_coordinates[i][0], klick_coordinates[i][1], zone) for i in range(len(klick_coordinates))]
+        mean_values = [self._get_mean_value(height_data, klick_coordinates[i][0], klick_coordinates[i][1], zone) for i in range(len(klick_coordinates))]
         matrix = [[klick_coordinates[i][0], klick_coordinates[i][1], mean_values[i]] for i in range(3)]
         A = matrix
         b = [100,100,100] # not sure why, 100 is a bit random, but 0 didn't work
@@ -3255,28 +3005,21 @@ class SnomMeasurement(FileHandler):
         ax.legend()
         ax.axis('scaled')
         plt.title('3 Point leveling: please click on three points\nto specify the underground plane.')
-        # if Plot_Definitions.show_plot:
         plt.show()
         klicker_coords = klicker.get_positions()['event'] #klicker returns a dictionary for the events
         klick_coordinates = [[round(element[0]), round(element[1])] for element in klicker_coords]
         return klick_coordinates
 
-    def _Height_Levelling_3Point_forGui(self, height_data, zone=1) -> np.array:
+    def _height_levelling_3point_forGui(self, height_data, zone=1) -> np.array:
         klick_coordinates = self._get_klicker_coordinates(height_data, SNOM_height)
         if len(klick_coordinates) != 3:
             print('You need to specify 3 point coordinates! Data was not leveled!')
             return height_data
-        #     klick_coordinates = get_coordinates()
-        #     user_input = self._User_Input_Bool()
-        #     if user_input == True:
-        #         self._Height_Levelling_3Point(zone)
-        #     else:
-        #         exit()
         # for the 3 point coordinates the height data is calculated over a small area around the clicked pixels to reduce deviations due to noise
-        self._Write_to_Logfile('height_leveling_coordinates', klick_coordinates)
+        self._write_to_logfile('height_leveling_coordinates', klick_coordinates)
         return self._level_height_data(klick_coordinates, zone)
 
-    def _Level_Phase_Slope(self, data, slope) -> np.array:
+    def _level_phase_slope(self, data, slope) -> np.array:
         """This function substracts a linear phase gradient in y direction from the specified phase data.
         """
         yres = len(data)
@@ -3284,9 +3027,9 @@ class SnomMeasurement(FileHandler):
         for y in range(yres):
             for x in range(xres):
                 data[y][x] -= y*slope
-        return self._Shift_Phase_Data(data, 0)
+        return self._shift_phase_data(data, 0)
 
-    def Correct_Phase_Drift(self, channels:list=None, export:bool=False, phase_slope=None, zone:int=1) -> None:
+    def correct_phase_drift(self, channels:list=None, export:bool=False, phase_slope=None, zone:int=1) -> None:
         """This function asks the user to click on two points which should have the same phase value.
         Only the slow drift in y-direction will be compensated. Could in future be extended to include a percentual drift compensation along the x-direction.
         But should usually not be necessary.
@@ -3299,25 +3042,14 @@ class SnomMeasurement(FileHandler):
             zone [int]: defines the area which is used to calculate the mean around the click position in the preview,
                         0 means only the click position, 1 means the nearest 9 ...
         """
-        # zone = int(zone*self.scaling_factor/4) #automatically enlargen the zone if the data has been scaled by more than a factor of 4
-        self._Initialize_Data(channels)
+        self._initialize_data(channels)
         phase_data = None
         if self.preview_phasechannel in self.channels:
             phase_data = np.copy(self.all_data[self.channels.index(self.preview_phasechannel)])
             phase_channel = self.preview_phasechannel
         else:
-            phase_data = self._Load_Data([self.preview_phasechannel])[0][0]
+            phase_data = self._load_data([self.preview_phasechannel])[0][0]
             phase_channel = self.preview_phasechannel
-        # for i in range(len(self.channels)):
-            # if '3P' in self.channels[i]:
-            #     phase_data = np.copy(self.all_data[i])
-            #     phase_channel = self.channels[i]
-            # elif ('2P' in self.channels[i]) and ('3P' not in self.channels[i]):
-            #     phase_data = np.copy(self.all_data[i])
-            #     phase_channel = self.channels[i]
-            # elif ('4P' in self.channels[i]) and ('3P' not in self.channels[i])  and ('2P' not in self.channels[i]):
-            #     phase_data = np.copy(self.all_data[i])
-            #     phase_channel = self.channels[i]
         if export == True:
             # ToDo
             # do something with the phase slope...
@@ -3326,10 +3058,10 @@ class SnomMeasurement(FileHandler):
         else:
             if phase_slope != None:
                 #level all phase channels in memory...
-                self._Write_to_Logfile('phase_driftcomp_slope', phase_slope)
+                self._write_to_logfile('phase_driftcomp_slope', phase_slope)
                 for i in range(len(self.channels)):
                     if 'P' in self.channels[i]:
-                        self.all_data[i] = self._Level_Phase_Slope(self.all_data[i], phase_slope)
+                        self.all_data[i] = self._level_phase_slope(self.all_data[i], phase_slope)
                         self.channels_label[i] += '_driftcomp'
             else:
                 fig, ax = plt.subplots()
@@ -3350,12 +3082,12 @@ class SnomMeasurement(FileHandler):
                 if len(klick_coordinates) != 2:
                     print('You must specify two points which should have the same phase, along the y-direction')
                     print('Do you want to try again?')
-                    user_input = self._User_Input_Bool()
+                    user_input = self._user_input_bool()
                     if user_input == True:
-                        self.Correct_Phase_Drift(channels, export, None)
+                        self.correct_phase_drift(channels, export, None)
                     else: 
                         exit()
-                mean_values = [self._Get_Mean_Value(phase_data, klick_coordinates[i][0], klick_coordinates[i][1], zone) for i in range(len(klick_coordinates))]
+                mean_values = [self._get_mean_value(phase_data, klick_coordinates[i][0], klick_coordinates[i][1], zone) for i in range(len(klick_coordinates))]
                 #order points from top to bottom
                 if klick_coordinates[0][1] > klick_coordinates[1][1]:
                     second_corrd = klick_coordinates[0]
@@ -3365,7 +3097,7 @@ class SnomMeasurement(FileHandler):
                     mean_values[0] = mean_values[1]
                     mean_values[1] = second_mean
                 phase_slope = (mean_values[1] - mean_values[0])/(klick_coordinates[1][1] - klick_coordinates[0][1])
-                leveled_phase_data = self._Level_Phase_Slope(phase_data, phase_slope)
+                leveled_phase_data = self._level_phase_slope(phase_data, phase_slope)
                 fig, ax = plt.subplots()
                 ax.pcolormesh(leveled_phase_data, cmap=SNOM_phase)
                 ax.invert_yaxis()
@@ -3379,21 +3111,21 @@ class SnomMeasurement(FileHandler):
                 plt.title('Leveled Pase: ' + phase_channel)
                 plt.show()
                 print('Are you satisfied with the phase leveling?')
-                user_input = self._User_Input_Bool()
+                user_input = self._user_input_bool()
                 if user_input == True:
                     #use the phase slope to level all phase channels in memory
-                    self.Correct_Phase_Drift(None, False, phase_slope)
+                    self.correct_phase_drift(None, False, phase_slope)
                 else:
                     print('Do you want to repeat the leveling?')
-                    user_input = self._User_Input_Bool()
+                    user_input = self._user_input_bool()
                     if user_input == True:
                         #start the leveling process again
-                        self.Correct_Phase_Drift()
+                        self.correct_phase_drift()
                     else:
                         exit()
         gc.collect()
 
-    def Correct_Phase_Drift_Nonlinear(self, channels:list=None, reference_area:list = [None, None]) -> None:
+    def correct_phase_drift_nonlinear(self, channels:list=None, reference_area:list = [None, None]) -> None:
         """This function corrects the phase drift in the y-direction by using a reference area across the full length of the scan.	
         The reference area is used to calculate the average phase value per row.
         This value is then substracted from the phase data to level the phase.
@@ -3406,9 +3138,8 @@ class SnomMeasurement(FileHandler):
                 If not specified the whole image will be used. Defaults to [None, None].
         """
 
-        # zone = int(zone*self.scaling_factor/4) #automatically enlargen the zone if the data has been scaled by more than a factor of 4
         # if a list of channels is specified those will be loaded and the old ones will be overwritten
-        self._Initialize_Data(channels)
+        self._initialize_data(channels)
         # define local list of channels to use for leveling
         channels = self.channels
         phase_data = None
@@ -3416,7 +3147,7 @@ class SnomMeasurement(FileHandler):
             phase_data = np.copy(self.all_data[self.channels.index(self.preview_phasechannel)])
             phase_channel = self.preview_phasechannel
         else:
-            phase_data = self._Load_Data([self.preview_phasechannel])[0][0]
+            phase_data = self._load_data([self.preview_phasechannel])[0][0]
             phase_channel = self.preview_phasechannel
         
         # cut out the reference area
@@ -3426,40 +3157,16 @@ class SnomMeasurement(FileHandler):
         if reference_area[1] == None:
             reference_area[1] = len(phase_data[0]) # right border
 
-        # get the average phase value of the reference area per line
-        # reference_values = [np.mean(phase_data[i][reference_area[0]:reference_area[1]]) for i in range(len(phase_data))]
-
-        # # display phase before flattening
-        # reference_values = [phase_data[i][0] for i in range(len(phase_data))]
-        # fig, ax = plt.subplots()
-        # ax.plot(reference_values)
-        # plt.title('Reference values')
-        # plt.show()
-        # print(reference_values)
-
         # get the phase values per column of the reference area, then flatten each column 
         flattened_phase_profiles = []
         for j in range(reference_area[0], reference_area[1]):
             reference_values = [phase_data[i][j] for i in range(len(phase_data))]
-            reference_values_flattened = phase_analysis.Flatten_Phase_Profile(reference_values, 1)
+            reference_values_flattened = phase_analysis.flatten_phase_profile(reference_values, 1)
             # reference_values_flattened = np.unwrap(reference_values)
             flattened_phase_profiles.append(reference_values_flattened)
 
-        # # display all the flattened phase profiles
-        # fig, ax = plt.subplots()
-        # for i in range(len(flattened_phase_profiles)):
-        #     ax.plot(flattened_phase_profiles[i])
-        # plt.title('Flattened phase profiles')
-        # plt.show()
-
         # average all flattened profiles
         reference_values_flattened = np.mean(flattened_phase_profiles, axis=0)
-
-        # # display the reference values
-        # fig, ax = plt.subplots()
-        # ax.plot(reference_values_flattened)
-        # plt.title('Reference values')
-        # plt.show()
 
         # remove the averaged reference data per line from the phase data
         leveled_phase_data = np.copy(phase_data)
@@ -3481,10 +3188,10 @@ class SnomMeasurement(FileHandler):
         plt.show()
 
         print('Are you satisfied with the phase leveling?')
-        user_input = self._User_Input_Bool()
+        user_input = self._user_input_bool()
         if user_input == True:
             # write to logfile
-            self._Write_to_Logfile('phase_driftcomp_nonlinear_reference_area', reference_area)
+            self._write_to_logfile('phase_driftcomp_nonlinear_reference_area', reference_area)
             # do the leveling for all channels but use always the same reference data, channels should only differ in phase offset
             for i in range(len(channels)):
                 if 'P' in channels[i]:
@@ -3492,10 +3199,10 @@ class SnomMeasurement(FileHandler):
                     # also apply a phase shift to ensure that the phase is between 0 and 2pi
                     # for now take the average phase an shift it to pi/2 should be white on the colormap
                     phase_shift = np.pi/2 - np.mean(self.all_data[self.channels.index(channels[i])])
-                    self.all_data[self.channels.index(channels[i])] = self._Shift_Phase_Data(self.all_data[self.channels.index(channels[i])], phase_shift)
+                    self.all_data[self.channels.index(channels[i])] = self._shift_phase_data(self.all_data[self.channels.index(channels[i])], phase_shift)
         gc.collect()
 
-    def Match_Phase_Offset(self, channels:list=None, reference_channel=None, reference_area=None, manual_width=5) -> None:
+    def match_phase_offset(self, channels:list=None, reference_channel=None, reference_area=None, manual_width=5) -> None:
         """This function matches the phase offset of all phase channels in memory to the reference channel.
         The reference channel is the first phase channel in memory if not specified.
 
@@ -3508,7 +3215,7 @@ class SnomMeasurement(FileHandler):
             manual_width (int, optional): The width of the manual reference area. Only applies if reference_area='manual'. Defaults to 5.
         """
         # if a list of channels is specified those will be loaded and the old ones will be overwritten
-        self._Initialize_Data(channels)
+        self._initialize_data(channels)
         # define local list of channels to use for leveling
         channels = self.channels
         if reference_channel == None:
@@ -3535,9 +3242,9 @@ class SnomMeasurement(FileHandler):
             if len(klick_coordinates) != 1 and type(klick_coordinates[0]) != list:
                 print('You must specify one point which should define the reference area!')
                 print('Do you want to try again?')
-                user_input = self._User_Input_Bool()
+                user_input = self._user_input_bool()
                 if user_input == True:
-                    self.Match_Phase_Offset(channels, reference_channel, 'manual')
+                    self.match_phase_offset(channels, reference_channel, 'manual')
                 else:
                     exit()
             reference_area = [[klick_coordinates[0][0] - manual_width,klick_coordinates[0][0] + manual_width],[klick_coordinates[0][1] - manual_width, klick_coordinates[0][1] + manual_width]]
@@ -3566,11 +3273,11 @@ class SnomMeasurement(FileHandler):
                 phase_data = self.all_data[self.channels.index(channel)]
                 # phase_offset = np.mean(phase_data) - reference_phase
                 phase_offset = np.mean([phase_data[i][reference_area[0][0]:reference_area[0][1]] for i in range(reference_area[1][0], reference_area[1][1])]) - reference_phase
-                self.all_data[self.channels.index(channel)] = self._Shift_Phase_Data(phase_data, -phase_offset)
-        self._Write_to_Logfile('match_phase_offset_reference_area', reference_area)
+                self.all_data[self.channels.index(channel)] = self._shift_phase_data(phase_data, -phase_offset)
+        self._write_to_logfile('match_phase_offset_reference_area', reference_area)
         gc.collect()
 
-    def Correct_Amplitude_Drift_Nonlinear(self, channels:list=None, reference_area:list = [None, None]) -> None:
+    def correct_amplitude_drift_nonlinear(self, channels:list=None, reference_area:list = [None, None]) -> None:
         """This function corrects the amplitude drift in the y-direction by using a reference area across the full length of the scan.	
         The reference area is used to calculate the average amplitude value per row.
         This value is then divided from the amplitude data to level the amplitude.
@@ -3583,9 +3290,8 @@ class SnomMeasurement(FileHandler):
                 If not specified the whole image will be used. Defaults to [None, None].
         """
 
-        # zone = int(zone*self.scaling_factor/4) #automatically enlargen the zone if the data has been scaled by more than a factor of 4
         # if a list of channels is specified those will be loaded and the old ones will be overwritten
-        self._Initialize_Data(channels)
+        self._initialize_data(channels)
         # define local list of channels to use for leveling
         channels = self.channels
         amplitude_data = None
@@ -3593,7 +3299,7 @@ class SnomMeasurement(FileHandler):
             amplitude_data = np.copy(self.all_data[self.channels.index(self.preview_ampchannel)])
             amplitude_channel = self.preview_ampchannel
         else:
-            amplitude_data = self._Load_Data([self.preview_ampchannel])[0][0]
+            amplitude_data = self._load_data([self.preview_ampchannel])[0][0]
             amplitude_channel = self.preview_ampchannel
         
         # cut out the reference area
@@ -3637,7 +3343,7 @@ class SnomMeasurement(FileHandler):
 
         # ask the user if he is satisfied with the leveling
         print('Are you satisfied with the amplitude leveling?')
-        user_input = self._User_Input_Bool()
+        user_input = self._user_input_bool()
         if user_input == True:
             # do the leveling for all channels, each channel should be referenced to itself since the amplitudes of the channels will be different
             for i in range(len(channels)):
@@ -3647,17 +3353,17 @@ class SnomMeasurement(FileHandler):
                     self.all_data[self.channels.index(channels[i])] = [(self.all_data[self.channels.index(channels[i])][j] / reference_values[j] * np.mean(reference_values)) for j in range(len(reference_values))]
         else:
             print('Do you want to repeat the leveling?')
-            user_input = self._User_Input_Bool()
+            user_input = self._user_input_bool()
             if user_input == True:
                 # write to logfile
-                self._Write_to_Logfile('amplitude_driftcomp_nonlinear_reference_area', reference_area)
+                self._write_to_logfile('amplitude_driftcomp_nonlinear_reference_area', reference_area)
                 #start the leveling process again
-                self.Correct_Amplitude_Drift_Nonlinear(channels, reference_area)
+                self.correct_amplitude_drift_nonlinear(channels, reference_area)
             else:
                 exit()
         gc.collect()
 
-    def Correct_Height_Drift_Nonlinear(self, channels:list=None, reference_area:list = [None, None]) -> None:
+    def correct_height_drift_nonlinear(self, channels:list=None, reference_area:list = [None, None]) -> None:
         """This function corrects the height drift in the y-direction by using a reference area across the full length of the scan.	
         The reference area is used to calculate the average height value per row.
         This value is then divided from the height data to level the height.
@@ -3672,7 +3378,7 @@ class SnomMeasurement(FileHandler):
 
         # zone = int(zone*self.scaling_factor/4) #automatically enlargen the zone if the data has been scaled by more than a factor of 4
         # if a list of channels is specified those will be loaded and the old ones will be overwritten
-        self._Initialize_Data(channels)
+        self._initialize_data(channels)
         # define local list of channels to use for leveling
         channels = self.channels
         height_data = None
@@ -3680,7 +3386,7 @@ class SnomMeasurement(FileHandler):
             height_data = np.copy(self.all_data[self.channels.index(self.height_channel)])
             height_channel = self.height_channel
         else:
-            height_data = self._Load_Data([self.height_channel])[0][0]
+            height_data = self._load_data([self.height_channel])[0][0]
             height_channel = self.height_channel
         
         # cut out the reference area
@@ -3725,7 +3431,7 @@ class SnomMeasurement(FileHandler):
 
         # ask the user if he is satisfied with the leveling
         print('Are you satisfied with the height leveling?')
-        user_input = self._User_Input_Bool()
+        user_input = self._user_input_bool()
         if user_input == True:
             # do the leveling for all channels, each channel should be referenced to itself since the heights of the channels will be different
             for i in range(len(channels)):
@@ -3735,52 +3441,32 @@ class SnomMeasurement(FileHandler):
                     self.all_data[self.channels.index(channels[i])] = [(self.all_data[self.channels.index(channels[i])][j] / reference_values[j] * np.mean(reference_values)) for j in range(len(reference_values))]
         else:
             print('Do you want to repeat the leveling?')
-            user_input = self._User_Input_Bool()
+            user_input = self._user_input_bool()
             if user_input == True:
                 # write to logfile
-                self._Write_to_Logfile('height_driftcomp_nonlinear_reference_area', reference_area)
+                self._write_to_logfile('height_driftcomp_nonlinear_reference_area', reference_area)
                 #start the leveling process again
-                self.Correct_Height_Drift_Nonlinear(channels, reference_area)
+                self.correct_height_drift_nonlinear(channels, reference_area)
             else:
                 exit()
         gc.collect()
 
-
-
-
-
-        # fig, ax = plt.subplots()
-        # img = ax.pcolormesh(leveled_amplitude_data, cmap=SNOM_amplitude)
-        # # also plot the original data
-        # # ax.pcolormesh(amplitude_data, cmap=SNOM_amplitude)
-        # ax.invert_yaxis()
-        # divider = make_axes_locatable(ax)
-        # cax = divider.append_axes("right", size="10%", pad=0.05)
-        # cbar = plt.colorbar(img, cax=cax)
-        # cbar.ax.get_yaxis().labelpad = 15
-        # cbar.ax.set_ylabel('amplitude', rotation=270)
-        # # ax.legend()
-        # ax.axis('scaled')
-        # plt.title('Leveled Amplitude: ' + amplitude_channel)
-        # plt.show()
-
-    def Level_Height_Channels(self, channels:list=None) -> None:
+    def level_height_channels(self, channels:list=None) -> None:
         """This function levels all height channels which are either user specified or in the instance memory.
         The leveling will prompt the user with a preview to select 3 points for getting the coordinates of the leveling plane.
         
         Args:
             channels (list, optional): List of channels to level. If not specified all channels in memory will be used. Defaults to None.
         """
-        # self._Initialize_Data(channels)
         if channels is None:
             channels = self.channels
         for channel in channels:
             if self.height_indicator in channel:
-                self.all_data[self.channels.index(channel)] = self._Height_Levelling_3Point(self.all_data[self.channels.index(channel)])
+                self.all_data[self.channels.index(channel)] = self._height_levelling_3point(self.all_data[self.channels.index(channel)])
                 self.channels_label[self.channels.index(channel)] += '_leveled' 
         gc.collect()
 
-    def Level_Height_Channels_forGui(self, channels:list=None):# todo not used?
+    def level_height_channels_forGui(self, channels:list=None):# todo not used?
         """This function levels all height channels which are either user specified or in the instance memory.
         The leveling will prompt the user with a preview to select 3 points for getting the coordinates of the leveling plane.
         This function is specifically for use with GUI.
@@ -3788,16 +3474,15 @@ class SnomMeasurement(FileHandler):
         Args:
             channels (list, optional): List of channels to level. If not specified all channels in memory will be used. Defaults to None.
         """
-        # self._Initialize_Data(channels)
         if channels is None:
             channels = self.channels
         for channel in channels:
             if self.height_indicator in channel:
-                self.all_data[self.channels.index(channel)] = self._Height_Levelling_3Point_forGui(self.all_data[self.channels.index(channel)])
+                self.all_data[self.channels.index(channel)] = self._height_levelling_3point_forGui(self.all_data[self.channels.index(channel)])
                 self.channels_label[self.channels.index(channel)] += '_leveled' 
         gc.collect()
 
-    def _Shift_Phase_Data(self, data, shift) -> np.array:
+    def _shift_phase_data(self, data, shift) -> np.array:
         """This function adds a phaseshift to the specified phase data. The phase data is automatically kept in the 0 to 2 pi range.
         Could in future be extended to show a live view of the phase data while it can be modified by a slider...
         e.g. by shifting the colorscale in the preview rather than the actual data..."""
@@ -3808,7 +3493,7 @@ class SnomMeasurement(FileHandler):
                 data[y][x] = (data[y][x] + shift) % (2*np.pi)
         return data
 
-    def Shift_Phase(self, shift:float=None, channels:list=None) -> None:
+    def shift_phase(self, shift:float=None, channels:list=None) -> None:
         """This function will prompt the user with a preview of the first phase channel in memory.
         Under the preview is a slider, by changing the slider value the phase preview will shift accordingly.
         If you are satisfied with the shift, hit the 'accept' button. The preview will close and the shift will
@@ -3821,7 +3506,6 @@ class SnomMeasurement(FileHandler):
         """
         if channels is None:
             channels = self.channels
-        # self._Initialize_Data(channels)
         if shift == None:
             shift_known = False
         else:
@@ -3835,15 +3519,13 @@ class SnomMeasurement(FileHandler):
                 for channel in channels:
                     if self.phase_indicator in channel:
                         phase_data = np.copy(self.all_data[self.channels.index(channel)])
-                        # print(len(phase_data))
-                        # print(len(phase_data[0]))
                         break
-            shift = Get_Phase_Offset(phase_data)
+            shift = get_phase_offset(phase_data)
             print('The phase shift you chose is:', shift)
             shift_known = True
 
         # export shift value to logfile
-        self._Write_to_Logfile('phase_shift', shift)
+        self._write_to_logfile('phase_shift', shift)
         # shift all phase channels in memory
         # could also be implemented to shift each channel individually...
         
@@ -3853,13 +3535,13 @@ class SnomMeasurement(FileHandler):
                 print('Before phase shift: ', channel)
                 print('Min phase value:', np.min(self.all_data[self.channels.index(channel)]))
                 print('Max phase value:', np.max(self.all_data[self.channels.index(channel)]))
-                self.all_data[self.channels.index(channel)] = self._Shift_Phase_Data(self.all_data[self.channels.index(channel)], shift)
+                self.all_data[self.channels.index(channel)] = self._shift_phase_data(self.all_data[self.channels.index(channel)], shift)
                 print('After phase shift: ', channel)
                 print('Min phase value:', np.min(self.all_data[self.channels.index(channel)]))
                 print('Max phase value:', np.max(self.all_data[self.channels.index(channel)]))
         gc.collect()
 
-    def _Fit_Horizontal_WG(self, data):
+    def _fit_horizontal_wg(self, data):
         YRes = len(data)
         XRes = len(data[0])
         #just calculate the shift for each pixel for now
@@ -3869,19 +3551,18 @@ class SnomMeasurement(FileHandler):
         for element in align_points:
             cutline = []
             for i in range(YRes):
-                cutline.append(data[i][element]) # *pow(10, 9) transform height data to nm
+                cutline.append(data[i][element])
             cutline_data_sets.append(cutline)
         list_of_coefficients = []
         p0 = [100, (YRes)/2, 5, 0]
         bounds = ([0, -YRes, 0, -1000], [1000, YRes, YRes/2, 1000])
         for cutline in cutline_data_sets:
-            coeff, var_matrix = curve_fit(Gauss_Function, range(0, YRes), cutline, p0=p0, bounds=bounds)
+            coeff, var_matrix = curve_fit(gauss_function, range(0, YRes), cutline, p0=p0, bounds=bounds)
             list_of_coefficients.append(coeff)
             p0 = coeff #set the starting parameters for the next fit
-        # print("fit succsessful")
         return align_points, list_of_coefficients
 
-    def _Shift_Data(self, data, y_shifts) -> np.array:
+    def _shift_data(self, data, y_shifts) -> np.array:
         YRes = len(data)
         XRes = len(data[0])
         min_shift = round(min(y_shifts))
@@ -3895,7 +3576,7 @@ class SnomMeasurement(FileHandler):
                 data_shifted[y + y_shift][x] = data[y][x]
         return data_shifted
 
-    def Realign(self, channels:list=None):
+    def realign(self, channels:list=None):
         """This function corrects the drift of the piezo motor. As of now it needs to be fitted to a region of the sample which is assumed to be straight.
         In the future this could be implemented with a general map containing the distortion created by the piezo motor, if it turns out to be constant...
         Anyways, you will be prompted with a preview of the height data, please select an area of the scan with only one 'straight' waveguide. 
@@ -3907,28 +3588,28 @@ class SnomMeasurement(FileHandler):
             channels [list]: list of channels, will override the already existing channels
         
         """
-        self._Initialize_Data(channels)
+        self._initialize_data(channels)
         # store the bounds in the instance so the plotting algorithm can access them
         # get the bounds from drawing a rectangle:
         if self.height_channel in self.channels:
             data = self.all_data[self.channels.index(self.height_channel)]
         else:
-            data, trash = self._Load_Data([self.height_channel])
-        coords = Select_Rectangle(data, self.height_channel)
+            data, trash = self._load_data([self.height_channel])
+        coords = select_rectangle(data, self.height_channel)
         lower = coords[0][1]
         upper = coords[1][1]
         self.lower_y_bound = lower
         self.upper_y_bound = upper
-        self._Write_to_Logfile('realign_bounds', [lower, upper])
+        self._write_to_logfile('realign_bounds', [lower, upper])
         if self.height_channel in self.channels:
             height_data = self.all_data[self.channels.index(self.height_channel)]
         else:
-            height_data_array, trash = self._Load_Data([self.height_channel])
+            height_data_array, trash = self._load_data([self.height_channel])
             height_data = height_data_array[0]
             # if the channels have been scaled, the height has to be scaled as well
-            scaling = self._Get_Channel_Scaling(0)
+            scaling = self._get_channel_scaling(0)
             if scaling != 1:
-                height_data = self._Scale_Array(height_data, self.height_channel, scaling)
+                height_data = self._scale_array(height_data, self.height_channel, scaling)
         YRes = len(height_data)
         XRes = len(height_data[0])
         reduced_height_data = np.zeros((upper-lower +1,XRes))
@@ -3936,7 +3617,7 @@ class SnomMeasurement(FileHandler):
             if (lower <= y) and (y <= upper):
                 for x in range(XRes):
                     reduced_height_data[y-lower][x] = height_data[y][x]
-        align_points, fit_coefficients = self._Fit_Horizontal_WG(reduced_height_data)
+        align_points, fit_coefficients = self._fit_horizontal_wg(reduced_height_data)
         y_shifts = [round(coeff[1],0) -int((upper - lower)/2) for coeff in fit_coefficients]
         # save the align points and y_shifts as instance variables so the plotting algorithm can access them
         self.align_points = align_points
@@ -3965,16 +3646,15 @@ class SnomMeasurement(FileHandler):
         max_shift = round(max(y_shifts))
         new_YRes = YRes + int(abs(min_shift-max_shift))
         all_data = self.all_data
-        # self.all_data = np.zeros((len(all_data), new_YRes, XRes))
         self.all_data = []
         for i in range(len(self.channels)):
-            shifted_data = self._Shift_Data(all_data[i], y_shifts)
+            shifted_data = self._shift_data(all_data[i], y_shifts)
             
             self.all_data.append(shifted_data)
             self.channels_label[i] += '_shifted'
         gc.collect()
 
-    def Cut_Channels(self, channels:list=None, preview_channel:str=None, autocut:bool=False, coords:list=None, reset_mask:bool=False) -> None:
+    def cut_channels(self, channels:list=None, preview_channel:str=None, autocut:bool=False, coords:list=None, reset_mask:bool=False) -> None:
         """This function cuts the specified channels to the specified region. If no coordinates are specified you will be prompted with a window to select an area.
         If you created a mask previously for this instance the old mask will be reused! Otherwise you should manually change the reset_mask parameter to True.
 
@@ -3986,7 +3666,6 @@ class SnomMeasurement(FileHandler):
             coords (list, optional): If you already now the coordinates ([[x1,y1], [x2,y2], [x3,y3], [x4,y4]]) to which you want to cut your data. Defaults to None.
             reset_mask (bool, optional): If you dont want to reuse an old mask set to True. Defaults to False.
         """
-        # self._Initialize_Data(channels)
         if channels is None:
             channels = self.channels # if nothing is specified, the cut will be applied to all channels in memory!
         # check if height channel in channels and apply mask to it, until now it has not been masked in order to show the mask in the image
@@ -4007,17 +3686,11 @@ class SnomMeasurement(FileHandler):
                 print('There does not seem to be an old mask... ')
         # generate new mask by selecting a region in the preview channel
         elif autocut is False:
-            # if self.height_channel in self.channels:
-            #     data = self.all_data[self.channels.index(self.height_channel)]
-            #     channel = self.height_channel
-            # else:
-            #     data = self.all_data[0]
-            #     channel = self.channels[0]
             data = self.all_data[self.channels.index(preview_channel)]
             # get the coordinates of the selection rectangle
             if coords is None:
-                coords = Select_Rectangle(data, preview_channel)
-            self._Write_to_Logfile('cut_coords', coords)
+                coords = select_rectangle(data, preview_channel)
+            self._write_to_logfile('cut_coords', coords)
             # use the selection to create a mask and multiply to all channels, then apply auto_cut function
             yres = len(data)
             xres = len(data[0])
@@ -4029,14 +3702,13 @@ class SnomMeasurement(FileHandler):
                             self.mask_array[y][x] = 1
             for channel in channels:
                 index = self.channels.index(channel)
-                # set all values outside of the mask to zero and then cut all zero away from the outside with _Auto_Cut_Channels(channels)
+                # set all values outside of the mask to zero and then cut all zero away from the outside with _auto_cut_channels(channels)
                 self.all_data[index] = np.multiply(self.all_data[index], self.mask_array)
-                # self.channels[index] += '_reduced'
         # apply the auto cut function to remove masked areas around the data
-        self._Auto_Cut_Channels(channels)
+        self._auto_cut_channels(channels)
         gc.collect()
 
-    def _Auto_Cut_Channels(self, channels:list=None) -> None:
+    def _auto_cut_channels(self, channels:list=None) -> None:
         """This function automatically cuts away all rows and lines which are only filled with zeros.
         This function applies to all channels in memory.
         """
@@ -4044,24 +3716,15 @@ class SnomMeasurement(FileHandler):
             channels = self.channels
         
         # get the new size of the reduced channels
-        reduced_data = self._Auto_Cut_Data(self.all_data[0])
+        reduced_data = self._auto_cut_data(self.all_data[0])
         yres = len(reduced_data)
         xres = len(reduced_data[0])
-        # copy old data to local variable
-        all_data = self.all_data
-        # reinitialize self.all_data, all channels must have the same size
-        # self.all_data = np.zeros((len(all_data), yres, xres))
-        # self.all_data = []
-        # for i in range(len(self.channels)):
-        #     reduced_data = self._Auto_Cut_Data(all_data[i])
-        #     self.all_data.append(reduced_data)
-        #     self.channels_label[i] += '_reduced'
         for channel in channels:
             index = self.channels.index(channel)
             # get the old size of the data
             xres, yres = self._get_channel_tag_dict_value(channel, Channel_Tags.PIXELAREA)
             xreal, yreal = self._get_channel_tag_dict_value(channel, Channel_Tags.SCANAREA)
-            self.all_data[index] = self._Auto_Cut_Data(self.all_data[index])
+            self.all_data[index] = self._auto_cut_data(self.all_data[index])
             xres_new = len(self.all_data[index][0])
             yres_new = len(self.all_data[index])
             xreal_new = xreal*xres_new/xres
@@ -4071,9 +3734,9 @@ class SnomMeasurement(FileHandler):
             self._set_channel_tag_dict_value(channel, Channel_Tags.SCANAREA, [xreal_new, yreal_new])
             # add new appendix to channel
             self.channels_label[index] += '_reduced'
-        self._Write_to_Logfile('cut', 'autocut')
+        self._write_to_logfile('cut', 'autocut')
 
-    def _Auto_Cut_Data(self, data) -> np.array:
+    def _auto_cut_data(self, data) -> np.array:
         """This function cuts the data and removes zero values from the outside."""
         xres = len(data[0])
         yres = len(data)
@@ -4112,7 +3775,7 @@ class SnomMeasurement(FileHandler):
                 count_y += 1
         return data_reduced
 
-    def Scalebar(self, channels:list=[], units="m", dimension="si-length", label=None, length_fraction=None, height_fraction=None, width_fraction=None,
+    def scalebar(self, channels:list=[], units="m", dimension="si-length", label=None, length_fraction=None, height_fraction=None, width_fraction=None,
             location=None, loc=None, pad=None, border_pad=None, sep=None, frameon=None, color=None, box_color=None, box_alpha=None, scale_loc=None,
             label_loc=None, font_properties=None, label_formatter=None, scale_formatter=None, fixed_value=None, fixed_units=None, animated=False, rotation=None):
         """Adds a scalebar to all specified channels.
@@ -4131,7 +3794,6 @@ class SnomMeasurement(FileHandler):
             XRes, YRes = self._get_channel_tag_dict_value(channel, Channel_Tags.PIXELAREA)
             XReal, YReal = self._get_channel_tag_dict_value(channel, Channel_Tags.SCANAREA)
             pixel_scaling = self._get_channel_tag_dict_value(channel, Channel_Tags.PIXELSCALING)
-            # dx = XReal/(XRes*pixel_scaling)
             dx = XReal/(XRes)
             scalebar_var = [dx, units, dimension, label, length_fraction, height_fraction, width_fraction,
                             location, loc, pad, border_pad, sep, frameon, color, box_color, box_alpha, scale_loc,
@@ -4142,24 +3804,21 @@ class SnomMeasurement(FileHandler):
                 self.scalebar.append([channel, None])                
             count += 1
 
-    def Rotate_90_deg(self, orientation:str = 'right'):
+    def rotate_90_deg(self, orientation:str = 'right'):
         """This function will rotate all data in memory by 90 degrees.
 
         Args:
             orientation (str, optional): rotate clockwise ('right') or counter clockwise ('left'). Defaults to 'right'.
         """
-        # self._Write_to_Logfile('rotate_90_deg', orientation)
         if orientation == 'right':
             axes=(1,0)
-            self._Write_to_Logfile('rotation', +90)
+            self._write_to_logfile('rotation', +90)
         elif orientation == 'left':
             axes=(0,1)
-            self._Write_to_Logfile('rotation', -90)
+            self._write_to_logfile('rotation', -90)
         #rotate data:
-        all_data = self.all_data
+        all_data = self.all_data.copy()
         # initialize data array
-        # print(self.channels)
-        # self.all_data = np.zeros((len(self.channels), self.XRes, self.YRes))
         self.all_data = []
         for channel in self.channels:
             # flip pixelarea and scanarea as well
@@ -4169,7 +3828,7 @@ class SnomMeasurement(FileHandler):
             self._set_channel_tag_dict_value(channel, Channel_Tags.PIXELAREA, [YRes, XRes])
             self.all_data.append(np.rot90(all_data[self.channels.index(channel)], axes=axes))
 
-    def _Get_Positions_from_Plot(self, channel, data, coordinates:list=None, orientation=None) -> list:
+    def _get_positions_from_plot(self, channel, data, coordinates:list=None, orientation=None) -> list:
         if self.phase_indicator in channel:
             cmap = SNOM_phase
         elif self.amp_indicator in channel:
@@ -4189,7 +3848,7 @@ class SnomMeasurement(FileHandler):
         ax.legend()
         ax.axis('scaled')
         if coordinates != None and orientation != None:
-            self._Plot_Profile_Lines(data, ax, coordinates, orientation)
+            self._plot_profile_lines(data, ax, coordinates, orientation)
         plt.title('Please select one or more points to continue.')
         plt.tight_layout()
         plt.show()
@@ -4197,7 +3856,7 @@ class SnomMeasurement(FileHandler):
         klick_coordinates = [[round(element[0]), round(element[1])] for element in klicker_coords]
         return klick_coordinates
 
-    def _Get_Profile(self, data, coordinates:list, orientation:Definitions, width:int) -> list:
+    def _get_profile(self, data, coordinates:list, orientation:Definitions, width:int) -> list:
         YRes = len(data)
         XRes = len(data[0])
         all_profiles = []
@@ -4205,15 +3864,11 @@ class SnomMeasurement(FileHandler):
             profile = []
             if orientation == Definitions.vertical:
                 for y in range(YRes):
-                    # count = 0
                     value = 0
                     for x in range(int(coord[0] - width/2), int(coord[0] + width/2)):
                         value += data[y][x]
-                        # count += 1
                     value = value/width
                     profile.append(value)
-                    # print('count: ', count)
-                    # print('width: ', width)
             if orientation == Definitions.horizontal:
                 for x in range(XRes):
                     value = 0
@@ -4224,7 +3879,7 @@ class SnomMeasurement(FileHandler):
             all_profiles.append(profile)
         return all_profiles
 
-    def Select_Profile(self, profile_channel:str, preview_channel:str=None, orientation:Definitions=Definitions.vertical, width:int=10, phase_orientation:int=1, coordinates:list=None):
+    def select_profile(self, profile_channel:str, preview_channel:str=None, orientation:Definitions=Definitions.vertical, width:int=10, phase_orientation:int=1, coordinates:list=None):
         """This function lets the user select a profile with given width in pixels and displays the data.
 
         Args:
@@ -4239,8 +3894,7 @@ class SnomMeasurement(FileHandler):
             preview_channel = self.height_channel
         if coordinates == None:
             previewdata = self.all_data[self.channels.index(preview_channel)]
-            coordinates = self._Get_Positions_from_Plot(preview_channel, previewdata)
-            # print('The coordinates you selected are:', coordinates)
+            coordinates = self._get_positions_from_plot(preview_channel, previewdata)
 
         profiledata = self.all_data[self.channels.index(profile_channel)]
 
@@ -4267,7 +3921,7 @@ class SnomMeasurement(FileHandler):
         # it would be nice to be able to add non pcolormesh plots to the subplotslist
         # self.all_subplots.append()
 
-        profiles = self._Get_Profile(profiledata, coordinates, orientation, width)
+        profiles = self._get_profile(profiledata, coordinates, orientation, width)
         for profile in profiles:
             xvalues = np.linspace(0, 10, len(profile))
             plt.plot(xvalues, profile, 'x')
@@ -4275,7 +3929,7 @@ class SnomMeasurement(FileHandler):
         plt.tight_layout()
         plt.show()
 
-        flattened_profiles = [phase_analysis.Flatten_Phase_Profile(profile, phase_orientation) for profile in profiles]
+        flattened_profiles = [phase_analysis.flatten_phase_profile(profile, phase_orientation) for profile in profiles]
         for profile in flattened_profiles:
             xvalues = np.linspace(0, 10, len(profile))
             plt.plot(xvalues, profile)
@@ -4283,13 +3937,12 @@ class SnomMeasurement(FileHandler):
         plt.tight_layout()
         plt.show()
 
-        difference_profile = phase_analysis.Get_Profile_Difference(profiles[0], profiles[1])
-        # difference_profile = Get_Profile_Difference(flattened_profiles[0], flattened_profiles[1])
+        difference_profile = phase_analysis.get_profile_difference(profiles[0], profiles[1])
+        # difference_profile = get_profile_difference(flattened_profiles[0], flattened_profiles[1])
         xres, yres = self._get_channel_tag_dict_value(self.channels.index(profile_channel), Channel_Tags.PIXELAREA)
         xreal, yreal = self._get_channel_tag_dict_value(self.channels.index(profile_channel), Channel_Tags.SCANAREA)
         pixel_scaling = self._get_channel_tag_dict_value(self.channels.index(profile_channel), Channel_Tags.PIXELSCALING)
         xvalues = [i*yreal/yres/pixel_scaling for i in range(yres*pixel_scaling)]
-        # xvalues = np.linspace(0, 10, len(difference_profile))
         plt.plot(xvalues, difference_profile)
         plt.xlabel('Y [µm]')
         plt.ylabel('Phase difference')
@@ -4299,7 +3952,7 @@ class SnomMeasurement(FileHandler):
         plt.show()
         gc.collect()
 
-    def _Plot_Data_and_Profile_pos(self, channel, data, coordinates, orientation):
+    def _plot_data_and_profile_pos(self, channel, data, coordinates, orientation):
         if self.phase_indicator in channel:
             cmap = SNOM_phase
         elif self.amp_indicator in channel:
@@ -4316,12 +3969,12 @@ class SnomMeasurement(FileHandler):
         cbar.ax.set_ylabel('phase', rotation=270)
         ax.legend()
         ax.axis('scaled')
-        self._Plot_Profile_Lines(data, ax, coordinates, orientation)
+        self._plot_profile_lines(data, ax, coordinates, orientation)
         plt.title('You chose the following line profiles')
         plt.tight_layout()
         plt.show()
 
-    def _Plot_Profile_Lines(self, data, ax, coordinates, orientation):
+    def _plot_profile_lines(self, data, ax, coordinates, orientation):
         xcoord = [coord[0] for coord in coordinates]
         ycoord = [coord[1] for coord in coordinates]
         if orientation == Definitions.vertical:
@@ -4329,31 +3982,31 @@ class SnomMeasurement(FileHandler):
         elif orientation == Definitions.horizontal:
             ax.hlines(ycoord, xmin=0, xmax=len(data[0]))
 
-    def _Get_Profiles_Coordinates(self, profile_channel, profiledata, preview_channel, previewdata, orientation, redo:bool=False, coordinates=None, redo_coordinates=None):
+    def _get_profiles_Coordinates(self, profile_channel, profiledata, preview_channel, previewdata, orientation, redo:bool=False, coordinates=None, redo_coordinates=None):
         if redo == False:
-            coordinates = self._Get_Positions_from_Plot(preview_channel, previewdata)
+            coordinates = self._get_positions_from_plot(preview_channel, previewdata)
         else:
             display_coordinates = [coordinates[i] for i in range(len(coordinates)) if i not in redo_coordinates]# remove coordinates to redo and plot the other ones while selecton is active
-            redone_coordinates = self._Get_Positions_from_Plot(preview_channel, previewdata, display_coordinates, orientation)
+            redone_coordinates = self._get_positions_from_plot(preview_channel, previewdata, display_coordinates, orientation)
             count = 0
             for index in redo_coordinates:
                 coordinates[index] = redone_coordinates[count]
                 count += 1
 
-        self._Plot_Data_and_Profile_pos(profile_channel, profiledata, coordinates, orientation)
+        self._plot_data_and_profile_pos(profile_channel, profiledata, coordinates, orientation)
         print('Are you satisfied with the profile positions? Or would you like to change one ore more profile positions?')
-        user_input_bool = self._User_Input_Bool() 
+        user_input_bool = self._user_input_bool() 
         if user_input_bool == False:
-            user_input = self._User_Input('Please enter the indices of the profiles you like to redo, separated by a space character e.g. (0 1 3 11 ...)\nYour indices: ') 
+            user_input = self._user_input('Please enter the indices of the profiles you like to redo, separated by a space character e.g. (0 1 3 11 ...)\nYour indices: ') 
             redo_coordinates = user_input.split(' ')
             redo_coordinates = [int(coord) for coord in redo_coordinates]
             print('coordinates to redo: ', redo_coordinates)
             print('Please select the new positons only for the indices you selected and in the same ordering, those were: ', redo_coordinates)
-            coordinates = self._Get_Profiles_Coordinates(profile_channel, profiledata, preview_channel, previewdata, orientation, redo=True, coordinates=coordinates, redo_coordinates=redo_coordinates)
+            coordinates = self._get_profiles_Coordinates(profile_channel, profiledata, preview_channel, previewdata, orientation, redo=True, coordinates=coordinates, redo_coordinates=redo_coordinates)
         
         return coordinates
 
-    def Select_Profiles(self, profile_channel:str, preview_channel:str=None, orientation:Definitions=Definitions.vertical, width:int=10, coordinates:list=None):
+    def select_profiles(self, profile_channel:str, preview_channel:str=None, orientation:Definitions=Definitions.vertical, width:int=10, coordinates:list=None):
         """This function lets the user select a profile with given width in pixels and displays the data.
 
         Args:
@@ -4368,23 +4021,23 @@ class SnomMeasurement(FileHandler):
             preview_channel = self.height_channel
         if preview_channel not in self.channels and profile_channel not in self.channels:
             print('The channels for preview and the profiles were not found in the memory, they will be loaded automatically.\nBe aware that all prior modifications will get deleted.')  
-            self._Initialize_Data([profile_channel, preview_channel])#this will negate any modifications done prior like blurr...
+            self._initialize_data([profile_channel, preview_channel])#this will negate any modifications done prior like blurr...
         profiledata = self.all_data[self.channels.index(profile_channel)]
         previewdata = self.all_data[self.channels.index(preview_channel)]
 
         if coordinates == None:
-            coordinates = self._Get_Profiles_Coordinates(profile_channel, profiledata, preview_channel, previewdata, orientation)
+            coordinates = self._get_profiles_Coordinates(profile_channel, profiledata, preview_channel, previewdata, orientation)
         
         print('The final profiles are shown in this plot.')
-        self._Plot_Data_and_Profile_pos(profile_channel, profiledata, coordinates, orientation)
+        self._plot_data_and_profile_pos(profile_channel, profiledata, coordinates, orientation)
         # get the profile data and save to class variables
         # additional infos are also stored and can be used by plotting and analysis functions
-        self.profiles = self._Get_Profile(profiledata, coordinates, orientation, width)
+        self.profiles = self._get_profile(profiledata, coordinates, orientation, width)
         self.profile_channel = profile_channel
         self.profile_orientation = orientation
         return self.profiles
 
-    def Select_Profiles_SSH(self, profile_channel_amp:str, profile_channel_phase:str, preview_channel:str=None, orientation:Definitions=Definitions.vertical, width_amp:int=10, width_phase:int=1, coordinates:list=None):
+    def select_profiles_SSH(self, profile_channel_amp:str, profile_channel_phase:str, preview_channel:str=None, orientation:Definitions=Definitions.vertical, width_amp:int=10, width_phase:int=1, coordinates:list=None):
         """This function lets the user select a profile with given width in pixels and displays the data.
         Specific function for ssh model measurements. This will create a plot of field per waveguide index for the topological array.
         The field is calculated from the amplitude profiles times the cosine of the phasedifference to the central waveguide. 
@@ -4402,34 +4055,34 @@ class SnomMeasurement(FileHandler):
             preview_channel = self.height_channel
         if preview_channel not in self.channels or profile_channel_amp not in self.channels or profile_channel_phase not in self.channels:
             print('The channels for preview and the profiles were not found in the memory, they will be loaded automatically.\nBe aware that all prior modifications will get deleted.')  
-            self._Initialize_Data([profile_channel_amp, profile_channel_phase, preview_channel])#this will negate any modifications done prior like blurr...
+            self._initialize_data([profile_channel_amp, profile_channel_phase, preview_channel])#this will negate any modifications done prior like blurr...
         profiledata_amp = self.all_data[self.channels.index(profile_channel_amp)]
         profiledata_phase = self.all_data[self.channels.index(profile_channel_phase)]
         previewdata = self.all_data[self.channels.index(preview_channel)]
         # get the profile coordinates
         if coordinates == None:
-            coordinates = self._Get_Profiles_Coordinates(profile_channel_phase, profiledata_phase, preview_channel, previewdata, orientation)
+            coordinates = self._get_profiles_Coordinates(profile_channel_phase, profiledata_phase, preview_channel, previewdata, orientation)
         print(f'You selected the following coordinates: ', coordinates)
         print('The final profiles are shown in this plot.')
-        self._Plot_Data_and_Profile_pos(profile_channel_phase, profiledata_phase, coordinates, orientation)
-        self._Plot_Data_and_Profile_pos(profile_channel_amp, profiledata_amp, coordinates, orientation)
+        self._plot_data_and_profile_pos(profile_channel_phase, profiledata_phase, coordinates, orientation)
+        self._plot_data_and_profile_pos(profile_channel_amp, profiledata_amp, coordinates, orientation)
         self.profile_channel = profile_channel_phase
         self.profile_orientation = orientation
 
         # get the profile data for amp and phase
-        self.phase_profiles = self._Get_Profile(profiledata_phase, coordinates, orientation, width_phase)
+        self.phase_profiles = self._get_profile(profiledata_phase, coordinates, orientation, width_phase)
         # test:
-        self._Display_Profile([self.phase_profiles[6], self.phase_profiles[16]])
+        self._display_profile([self.phase_profiles[6], self.phase_profiles[16]])
 
-        self.amp_profiles = self._Get_Profile(profiledata_amp, coordinates, orientation, width_amp)
+        self.amp_profiles = self._get_profile(profiledata_amp, coordinates, orientation, width_amp)
         mean_amp = [np.mean(amp) for amp in self.amp_profiles]
         reference_index = int((len(self.phase_profiles)-1)/2)
-        # phase_difference_profiles = [Phase_Analysis.Get_Profile_Difference(self.phase_profiles[reference_index], self.phase_profiles[i]) for i in range(len(self.phase_profiles))]
-        flattened_profiles = [phase_analysis.Flatten_Phase_Profile(profile, +1) for profile in self.phase_profiles]
-        self._Display_Profile(flattened_profiles, linestyle='-', title='Flattened phase profiles') # display the flattened profiles
-        # phase_difference_profiles = [Phase_Analysis.Get_Profile_Difference_2(self.phase_profiles[reference_index], self.phase_profiles[i]) for i in range(len(self.phase_profiles))]
-        phase_difference_profiles = [phase_analysis.Get_Profile_Difference_2(flattened_profiles[reference_index], flattened_profiles[i]) for i in range(len(flattened_profiles))]
-        self._Display_Profile(phase_difference_profiles, linestyle='-', title='Phase difference to center wg') # display the phase difference profiles, no jumps close to 2 pi should occure or the average will lead to false values!
+        # phase_difference_profiles = [Phase_Analysis.get_profile_difference(self.phase_profiles[reference_index], self.phase_profiles[i]) for i in range(len(self.phase_profiles))]
+        flattened_profiles = [phase_analysis.flatten_phase_profile(profile, +1) for profile in self.phase_profiles]
+        self._display_profile(flattened_profiles, linestyle='-', title='Flattened phase profiles') # display the flattened profiles
+        # phase_difference_profiles = [Phase_Analysis.get_profile_difference_2(self.phase_profiles[reference_index], self.phase_profiles[i]) for i in range(len(self.phase_profiles))]
+        phase_difference_profiles = [phase_analysis.get_profile_difference_2(flattened_profiles[reference_index], flattened_profiles[i]) for i in range(len(flattened_profiles))]
+        self._display_profile(phase_difference_profiles, linestyle='-', title='Phase difference to center wg') # display the phase difference profiles, no jumps close to 2 pi should occure or the average will lead to false values!
         # mean_phase_differences = [np.mean(diff) for diff in phase_difference_profiles]# todo this does not work!
         mean_phase_differences = [np.mean(diff) if np.mean(diff)>0 else np.mean(diff) + np.pi*2 for diff in phase_difference_profiles]# todo this does not work!
         real_per_wg_index = [mean_amp[i]*np.cos(mean_phase_differences[i]) for i in range(len(self.phase_profiles))]
@@ -4447,20 +4100,8 @@ class SnomMeasurement(FileHandler):
         plt.legend()
         plt.tight_layout()
         plt.show()
-
-        #same for intensity: hm not thought throu...
-        # plt.plot(wg_indices, real_per_wg_index, '-o', label='Intensity per wg index')
-        # plt.hlines(0, xmin=-10, xmax=10, linestyles='--')
-        # plt.ylabel(r'I$_z$ [arb.u]')
-        # plt.xlabel('Waveguide index')
-        # # plt.ylim([-0.04,0.04])
         
-        # plt.xticks(range(-reference_index, reference_index, 2))
-        # plt.legend()
-        # plt.tight_layout()
-        # plt.show()
-        
-    def _Display_Profile(self, profiles, ylabel=None, labels=None, linestyle='x', title=None):
+    def _display_profile(self, profiles, ylabel=None, labels=None, linestyle='x', title=None):
         if self.profile_orientation == Definitions.horizontal:
             xrange, yrange = self._get_channel_tag_dict_value(self.channels.index(self.profile_channel), Channel_Tags.SCANAREA)
             x_center_pos, y_center_pos = self._get_channel_tag_dict_value(self.channels.index(self.profile_channel), Channel_Tags.SCANNERCENTERPOSITION)
@@ -4494,48 +4135,47 @@ class SnomMeasurement(FileHandler):
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
         plt.title(title)
-        # if labels != None:
         plt.legend()
         plt.tight_layout()
         plt.show()
 
-    def Display_Profiles(self, ylabel:str=None, labels:list=None):
+    def display_profiles(self, ylabel:str=None, labels:list=None):
         """This function will display all current profiles from memory.
 
         Args:
             ylabel (str, optional): label of the y axis. The x axis label is in µm per default. Defaults to None.
             labels (list, optional): the description of the profiles. Will be displayed in the legend. Defaults to None.
         """
-        self._Display_Profile(self.profiles)
+        self._display_profile(self.profiles)
         gc.collect()
 
-    def Display_Flattened_Profile(self, phase_orientation:int):
+    def display_flattened_profile(self, phase_orientation:int):
         """This function will flatten all profiles in memory and display them. Only useful for phase profiles!
 
         Args:
             phase_orientation (int): direction of the phase, must be '1' or '-1'
         """
-        flattened_profiles = [phase_analysis.Flatten_Phase_Profile(profile, phase_orientation) for profile in self.profiles]
-        self._Display_Profile(flattened_profiles)
+        flattened_profiles = [phase_analysis.flatten_phase_profile(profile, phase_orientation) for profile in self.profiles]
+        self._display_profile(flattened_profiles)
         gc.collect()
 
-    def Display_Phase_Difference(self, reference_index:int):
+    def display_phase_difference(self, reference_index:int):
         """This function will calculate the phase difference of all profiles relative to the profile specified by the reference index.
 
         Args:
             reference_index (int): index of the reference profile. Basically the nth-1 selected profile.
         """
-        difference_profiles = [phase_analysis.Get_Profile_Difference(self.profiles[reference_index], self.profiles[i]) for i in range(len(self.profiles)) if i != reference_index]
+        difference_profiles = [phase_analysis.get_profile_difference(self.profiles[reference_index], self.profiles[i]) for i in range(len(self.profiles)) if i != reference_index]
         labels = ['Wg index ' + str(i) for i in range(len(difference_profiles))]
-        self._Display_Profile(difference_profiles, 'Phase difference', labels)
+        self._display_profile(difference_profiles, 'Phase difference', labels)
         gc.collect()
 
-    def _Get_Mean_Phase_Difference(self, profiles, reference_index:int):
-        difference_profiles = [phase_analysis.Get_Profile_Difference(profiles[reference_index], profiles[i]) for i in range(len(profiles)) if i != reference_index]
+    def _get_mean_phase_difference(self, profiles, reference_index:int):
+        difference_profiles = [phase_analysis.get_profile_difference(profiles[reference_index], profiles[i]) for i in range(len(profiles)) if i != reference_index]
         mean_differences = [np.mean(diff) for diff in difference_profiles]
         return mean_differences
 
-    def _Scale_Data_XY(self, data, scale_x, scale_y) -> np.array:
+    def _scale_data_xy(self, data, scale_x, scale_y) -> np.array:
         XRes = len(data[0])
         YRes = len(data)
         new_data = np.zeros((YRes*scale_y, XRes*scale_x))
@@ -4546,14 +4186,14 @@ class SnomMeasurement(FileHandler):
                         new_data[y*scale_y + i][x*scale_x + j]= data[y][x]
         return new_data
 
-    def Quadratic_Pixels(self, channels:list=None):
+    def quadratic_pixels(self, channels:list=None):
         """This function scales the data such that each pixel is quadratic, eg. the physical dimensions are equal.
         This is important because the pixels will be set to quadratic in the plotting function.
         
         Args:
             channels [list]: list of channels the scaling should be applied to. If not specified the scaling will be applied to all channels
         """
-        self._Write_to_Logfile('quadratic_pixels', True)
+        self._write_to_logfile('quadratic_pixels', True)
         if channels == None:
             channels = self.channels
         for channel in channels:
@@ -4562,25 +4202,18 @@ class SnomMeasurement(FileHandler):
                 XReal, YReal = self._get_channel_tag_dict_value(channel, Channel_Tags.SCANAREA)
                 pixel_size_x = round(XReal/XRes *1000000000) # pixel size in nm
                 pixel_size_y = round(YReal/YRes *1000000000)
-                # print('pixelsize x: ', pixel_size_x)
-                # print('pixelsize y: ', pixel_size_y)
                 scale_x = 1
                 scale_y = 1
                 if pixel_size_x < pixel_size_y:
-                    # print('scale y: ', pixel_size_y/pixel_size_x)
                     scale_y = int(pixel_size_y/pixel_size_x)
                 elif pixel_size_x > pixel_size_y:
-                    # print('scale x: ', pixel_size_x/pixel_size_y)
                     scale_x = int(pixel_size_x/pixel_size_y)
-                # print(pixel_size_x/scale_x, '!=', pixel_size_y/scale_y)
                 if pixel_size_x/scale_x != pixel_size_y/scale_y:
                     print('The pixel size does not fit perfectly, you probably chose weired resolution values. You should probably not use this function then...')
-                # print('scale x: ', scale_x)
-                # print('scale y: ', scale_y)
-                self.all_data[self.channels.index(channel)] = self._Scale_Data_XY(self.all_data[self.channels.index(channel)], scale_x, scale_y)
+                self.all_data[self.channels.index(channel)] = self._scale_data_xy(self.all_data[self.channels.index(channel)], scale_x, scale_y)
                 self._set_channel_tag_dict_value(channel, Channel_Tags.PIXELAREA, [XRes*scale_x, YRes*scale_y])
 
-    def Overlay_Forward_and_Backward_Channels(self, height_channel_forward:str, height_channel_backward:str, channels:list=None):
+    def overlay_forward_and_backward_channels(self, height_channel_forward:str, height_channel_backward:str, channels:list=None):
         """This function is ment to overlay the backwards and forwards version of the specified channels.
         You should only specify the forward version of the channels you want to overlay. The function will create a mean version
         which can then be displayed and saved. Note that the new version will be larger then the previous ones.
@@ -4592,33 +4225,28 @@ class SnomMeasurement(FileHandler):
         """
         all_channels = []
         for channel in channels:
-            # print('extension: ', channel, self.backwards_indicator + channel)
             all_channels.extend([channel, self.backwards_indicator + channel])
         all_channels.extend([height_channel_forward, height_channel_backward])
-        # print('specified channels to overlay: ', channels)
-        # print('all channels:', all_channels)
-        self._Initialize_Data(all_channels)
-        # print('after initialisation' , self.channels)
+        self._initialize_data(all_channels)
 
-        self.Set_Min_to_Zero([height_channel_forward, height_channel_backward])
+        self.set_min_to_zero([height_channel_forward, height_channel_backward])
         
         #scale and blurr channels for better overlap
-        self.Scale_Channels()
-        # self.Gauss_Filter_Channels()
-        # self.Gauss_Filter_Channels_complex()
+        self.scale_channels()
+        # self.gauss_filter_channels_complex()
 
         height_data_forward = self.all_data[self.channels.index(height_channel_forward)]
         height_data_backward = self.all_data[self.channels.index(height_channel_backward)]
         
         #gauss blurr the data used for the alignment, so it might be a litte more precise
-        height_channel_forward_blurr = self._Gauss_Blurr_Data(height_data_forward, 2)
-        height_channel_backward_blurr = self._Gauss_Blurr_Data(height_data_backward, 2)
+        height_channel_forward_blurr = self._gauss_blurr_data(height_data_forward, 2)
+        height_channel_backward_blurr = self._gauss_blurr_data(height_data_backward, 2)
 
         # array_1 = height_data_forward[0]
         # array_2 = height_data_backward[0]
 
         '''
-        mean_deviation_array = Realign.Calculate_Squared_Deviation(array_1, array_2)
+        mean_deviation_array = realign.Calculate_Squared_Deviation(array_1, array_2)
         mean_deviation = np.mean(mean_deviation_array)
         x = range(len(array_1))
         plt.plot(x, array_1, label='array_2')
@@ -4633,13 +4261,13 @@ class SnomMeasurement(FileHandler):
         pixel_scaling = self._get_channel_tag_dict_value(self.channels[0], Channel_Tags.PIXELSCALING)
         N = 5*pixel_scaling #maximum iterations, scaled if pixelnumber was increased
 
-        # Realign.Minimize_Deviation_1D(array_1, array_2, n_tries=N)
-        # Realign.Minimize_Deviation_2D(height_data_forward, height_data_backward, n_tries=N)
+        # realign.minimize_deviation_1d(array_1, array_2, n_tries=N)
+        # realign.Minimize_Deviation_2D(height_data_forward, height_data_backward, n_tries=N)
 
         # get the index which minimized the deviation of the height channels
-        # index = Realign.Minimize_Deviation_2D(height_data_forward, height_data_backward, N, False)
+        # index = realign.Minimize_Deviation_2D(height_data_forward, height_data_backward, N, False)
         index = realign.Minimize_Deviation_2D(height_channel_forward_blurr, height_channel_backward_blurr, N, False)
-        # self.all_data[self.channels.index(height_channel_forward)], self.all_data[self.channels.index(height_channel_backward)] = Realign.Shift_Array_2D_by_Index(height_data_forward, height_data_backward, index)
+        # self.all_data[self.channels.index(height_channel_forward)], self.all_data[self.channels.index(height_channel_backward)] = realign.Shift_Array_2D_by_Index(height_data_forward, height_data_backward, index)
 
 
         for channel in channels:
@@ -4666,8 +4294,8 @@ class SnomMeasurement(FileHandler):
 
                     #test realign (per scan) based on minimization of differences 
                     #not usable right now, drift compensation might lead to differently sized data
-                    # self.all_data[self.channels.index(height_channel_forward)] = Realign.Minimize_Drift(self.all_data[self.channels.index(height_channel_forward)], display=False)
-                    # self.all_data[self.channels.index(height_channel_backward)] = Realign.Minimize_Drift(self.all_data[self.channels.index(height_channel_backward)])
+                    # self.all_data[self.channels.index(height_channel_forward)] = realign.Minimize_Drift(self.all_data[self.channels.index(height_channel_forward)], display=False)
+                    # self.all_data[self.channels.index(height_channel_backward)] = realign.Minimize_Drift(self.all_data[self.channels.index(height_channel_backward)])
 
                     # shift the data of the forward and backwards channel to match
                     self.all_data[self.channels.index(channel)], self.all_data[self.channels.index(self.backwards_indicator+ channel)] = realign.Shift_Array_2D_by_Index(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index(self.backwards_indicator+ channel)], index)
@@ -4695,8 +4323,8 @@ class SnomMeasurement(FileHandler):
                     self._set_channel_tag_dict_value(channel + '_overlain', Channel_Tags.SCANAREA, [XReal_new, YReal])
 
                     #test realign (per scan) based on minimization of differences 
-                    # self.all_data[self.channels.index(channel)] = Realign.Minimize_Drift(self.all_data[self.channels.index(channel)], display=False)
-                    # self.all_data[self.channels.index(self.backwards_indicator+ channel)] = Realign.Minimize_Drift(self.all_data[self.channels.index(self.backwards_indicator+ channel)])
+                    # self.all_data[self.channels.index(channel)] = realign.Minimize_Drift(self.all_data[self.channels.index(channel)], display=False)
+                    # self.all_data[self.channels.index(self.backwards_indicator+ channel)] = realign.Minimize_Drift(self.all_data[self.channels.index(self.backwards_indicator+ channel)])
 
                     # shift the data of the forward and backwards channel to match
                     self.all_data[self.channels.index(channel)], self.all_data[self.channels.index(self.backwards_indicator+ channel)] = realign.Shift_Array_2D_by_Index(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index(self.backwards_indicator+ channel)], index)
@@ -4706,7 +4334,7 @@ class SnomMeasurement(FileHandler):
 
         gc.collect()
 
-    def Overlay_Forward_and_Backward_Channels_V2(self, height_channel_forward:str, height_channel_backward:str, channels:list=None):
+    def overlay_forward_and_backward_channels_V2(self, height_channel_forward:str, height_channel_backward:str, channels:list=None):
         """
         Caution! This variant is ment to keep the scan size identical!
 
@@ -4728,17 +4356,17 @@ class SnomMeasurement(FileHandler):
             all_channels.extend([channel, self.backwards_indicator + channel])
         if height_channel_forward not in channels:
             all_channels.extend([height_channel_forward, height_channel_backward])
-        self._Initialize_Data(all_channels)
-        self.Set_Min_to_Zero([height_channel_forward, height_channel_backward])
+        self._initialize_data(all_channels)
+        self.set_min_to_zero([height_channel_forward, height_channel_backward])
         
         #scale channels for more precise overlap
-        self.Scale_Channels()
+        self.scale_channels()
         height_data_forward = self.all_data[self.channels.index(height_channel_forward)]
         height_data_backward = self.all_data[self.channels.index(height_channel_backward)]
         
         #gauss blurr the data used for the alignment, so it might be a litte more precise
-        height_channel_forward_blurr = self._Gauss_Blurr_Data(height_data_forward, 2)
-        height_channel_backward_blurr = self._Gauss_Blurr_Data(height_data_backward, 2)
+        height_channel_forward_blurr = self._gauss_blurr_data(height_data_forward, 2)
+        height_channel_backward_blurr = self._gauss_blurr_data(height_data_backward, 2)
 
         # try to optimize by shifting second array and minimizing mean deviation
         pixel_scaling = self._get_channel_tag_dict_value(self.channels[0], Channel_Tags.PIXELSCALING)
@@ -4775,7 +4403,7 @@ class SnomMeasurement(FileHandler):
                     self.all_data.append(realign.Create_Mean_Array_V2(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index(self.backwards_indicator+ channel)], index))
         gc.collect()
 
-    def Manually_Create_Complex_Channel(self, amp_channel:str, phase_channel:str, complex_type:str=None) -> None:
+    def manually_create_complex_channel(self, amp_channel:str, phase_channel:str, complex_type:str=None) -> None:
         """This function will manually create a realpart channel depending on the amp and phase channel you give.
         The channels don't have to be in memory. If they are not they will be loaded but not added to memory, only the realpart will be added.
         Carful, only for expert users!
@@ -4793,17 +4421,17 @@ class SnomMeasurement(FileHandler):
         if self.amp_indicator not in amp_channel or self.phase_indicator not in phase_channel:
             print('The specified channels are not specified as needed!')
             exit()
-        demodulation = amp_channel[1:2]
+        demodulation = self._get_demodulation_num(amp_channel)
         if demodulation not in phase_channel:
             print('The channels you specified are not from the same demodulation order!\nProceeding anyways...')
         # check if channels are in memory, if not load the data
         if amp_channel not in self.channels:
-            amp_data, amp_dict = self._Load_Data(amp_channel)
+            amp_data, amp_dict = self._load_data(amp_channel)
         else:
             amp_data = self.all_data[self.channels.index(amp_channel)]
             amp_dict = self.channel_tag_dict[self.channels.index(amp_channel)]
         if phase_channel not in self.channels:
-            phase_data, phase_dict = self._Load_Data(phase_channel)
+            phase_data, phase_dict = self._load_data(phase_channel)
         else:
             phase_data = self.all_data[self.channels.index(phase_channel)]
             phase_dict = self.channel_tag_dict[self.channels.index(phase_channel)]
@@ -4822,8 +4450,8 @@ class SnomMeasurement(FileHandler):
                 real_data[y][x] = amp_data[y][x]*np.cos(phase_data[y][x])
                 imag_data[y][x] = amp_data[y][x]*np.sin(phase_data[y][x])
         # create realpart and imaginary part channel and dict and add to memory
-        real_channel = f'O{demodulation}' + self.real_indicator# + '_manipulated' # make shure not to overwrite the realpart created by the Synccorrection
-        imag_channel = f'O{demodulation}' + self.imag_indicator# + '_manipulated' # make shure not to overwrite the imagpart created by the Synccorrection
+        real_channel = f'O{demodulation}' + self.real_indicator
+        imag_channel = f'O{demodulation}' + self.imag_indicator
         real_channel_dict = amp_dict
         imag_channel_dict = amp_dict
 
@@ -4850,7 +4478,7 @@ class SnomMeasurement(FileHandler):
             self.channels_label.append(imag_channel)
         gc.collect()
 
-    def Create_Gif_Old(self, amp_channel:str, phase_channel:str, frames:int=20, fps:int=10) -> None:
+    def create_gif_old(self, amp_channel:str, phase_channel:str, frames:int=20, fps:int=10) -> None:
         framenumbers=frames
         Duration=1000/fps # in ms
 
@@ -4865,7 +4493,8 @@ class SnomMeasurement(FileHandler):
         if self.amp_indicator not in amp_channel or self.phase_indicator not in phase_channel:
             print('The specified channels are not specified as needed!')
             exit()
-        demodulation = amp_channel[1:2]
+        # demodulation = amp_channel[1:2]
+        demodulation = self._get_demodulation_num(amp_channel)
         print('demodulation: ', demodulation)
         if demodulation not in phase_channel:
             print('The channels you specified are not from the same demodulation order!\nProceeding anyways...')
@@ -4873,7 +4502,7 @@ class SnomMeasurement(FileHandler):
         if amp_channel not in self.channels or phase_channel not in self.channels:
             print('The channels for amplitude or phase were not found in the memory, they will be loaded automatically.\nBe aware that all prior modifications will get deleted.')
             # reload all channels
-            self._Initialize_Data([amp_channel, phase_channel])
+            self._initialize_data([amp_channel, phase_channel])
         amp_data = self.all_data[self.channels.index(amp_channel)]
         amp_dict = self.channel_tag_dict[self.channels.index(amp_channel)]
         phase_data = self.all_data[self.channels.index(phase_channel)]
@@ -4908,7 +4537,7 @@ class SnomMeasurement(FileHandler):
         # self.filename is actually a windows path element not a str filename, to get the string use: self.filename.name
         # print('savefile path: ', self.directory_name / Path(self.filename.name + f'{channel}_gif.gif'))
         frames[0].save(self.directory_name / Path(self.filename.name + f'{channel}_gif_old.gif'), format='GIF', append_images=frames[1:], save_all=True,duration=Duration, loop=0)
-        self._Display_Gif(self.directory_name / Path(self.filename.name + f'{channel}_gif_old.gif'), fps=fps)
+        self._display_gif(self.directory_name / Path(self.filename.name + f'{channel}_gif_old.gif'), fps=fps)
 
     def Create_Gif(self, amp_channel:str, phase_channel:str, frames:int=20, fps:int=10, dpi=100) -> Path:
         framenumbers=frames
@@ -4930,7 +4559,8 @@ class SnomMeasurement(FileHandler):
         if self.amp_indicator not in amp_channel or self.phase_indicator not in phase_channel:
             print('The specified channels are not specified as needed!')
             exit()
-        demodulation = amp_channel[1:2]
+        # demodulation = amp_channel[1:2]
+        demodulation = self._get_demodulation_num(amp_channel)
         print('demodulation: ', demodulation)
         if demodulation not in phase_channel:
             print('The channels you specified are not from the same demodulation order!\nProceeding anyways...')
@@ -4938,7 +4568,7 @@ class SnomMeasurement(FileHandler):
         if amp_channel not in self.channels or phase_channel not in self.channels:
             print('The channels for amplitude or phase were not found in the memory, they will be loaded automatically.\nBe aware that all prior modifications will get deleted.')
             # reload all channels
-            self._Initialize_Data([amp_channel, phase_channel])
+            self._initialize_data([amp_channel, phase_channel])
         amp_data = self.all_data[self.channels.index(amp_channel)]
         amp_dict = self.channel_tag_dict[self.channels.index(amp_channel)]
         phase_data = self.all_data[self.channels.index(phase_channel)]
@@ -4971,10 +4601,10 @@ class SnomMeasurement(FileHandler):
         # plt.show()
         # plt.close(fig)
         if Plot_Definitions.show_plot:
-            self._Display_Gif(gif_path, fps=fps)
+            self._display_gif(gif_path, fps=fps)
         return gif_path
 
-    def _Display_Gif(self, gif_path, fps=10):
+    def _display_gif(self, gif_path, fps=10):
         # Load the gif
         frames = imageio.mimread(gif_path)
 
@@ -4997,13 +4627,14 @@ class SnomMeasurement(FileHandler):
         # Display the animation
         plt.show()
 
-    def Create_Gif_V2(self, amp_channel:str, phase_channel:str, frames:int=20, fps:int=10) -> None:
+    def create_gif_v2(self, amp_channel:str, phase_channel:str, frames:int=20, fps:int=10) -> None:
         frame_numer = frames
 
         if self.amp_indicator not in amp_channel or self.phase_indicator not in phase_channel:
             print('The specified channels are not specified as needed!')
             exit()
-        demodulation = amp_channel[1:2]
+        # demodulation = amp_channel[1:2]
+        demodulation = self._get_demodulation_num(amp_channel)
         # print('demodulation: ', demodulation)
         if demodulation not in phase_channel:
             print('The channels you specified are not from the same demodulation order!\nProceeding anyways...')
@@ -5011,7 +4642,7 @@ class SnomMeasurement(FileHandler):
         if amp_channel not in self.channels or phase_channel not in self.channels:
             print('The channels for amplitude or phase were not found in the memory, they will be loaded automatically.\nBe aware that all prior modifications will get deleted.')
             # reload all channels
-            self._Initialize_Data([amp_channel, phase_channel])
+            self._initialize_data([amp_channel, phase_channel])
         amp_data = self.all_data[self.channels.index(amp_channel)]
         amp_dict = self.channel_tag_dict[self.channels.index(amp_channel)]
         phase_data = self.all_data[self.channels.index(phase_channel)]
@@ -5095,20 +4726,12 @@ class SnomMeasurement(FileHandler):
         # delete the figure
         plt.close(fig)
         # display the gif
-        self._Display_Gif(self.directory_name / Path(self.filename.name + f'{channel}_gif_v2.gif'), fps=fps)
+        self._display_gif(self.directory_name / Path(self.filename.name + f'{channel}_gif_v2.gif'), fps=fps)
 
-    def _Get_Demodulation_Order(self, channel:str) -> str:
-        # The demodulation order is typically the second character of the channel name and it should be the only number in the channel name
-        numbers = [int(i) for i in channel.split() if i.isdigit()]
-        if len(numbers) == 0:
-            return None
-        else:
-            return numbers[0]
-
-    def Substract_Channels(self, channel1:str, channel2:str) -> None:
+    def substract_channels(self, channel1:str, channel2:str) -> None:
         if channel1 not in self.channels or channel2 not in self.channels:
             print('The specified channels are not in memory, they will be loaded automatically.')
-            self._Initialize_Data([channel1, channel2])
+            self._initialize_data([channel1, channel2])
         data1 = self.all_data[self.channels.index(channel1)]
         data2 = self.all_data[self.channels.index(channel2)]
         if data1.shape != data2.shape:
@@ -5120,7 +4743,7 @@ class SnomMeasurement(FileHandler):
         self.channel_tag_dict.append(self.channel_tag_dict[self.channels.index(channel1)])
         self.channels_label.append(channel1 + '-' + channel2)
 
-    def _Select_Data_Range(self, channel:str, data:np.ndarray=None, use_memory=True) -> tuple:
+    def _select_data_range(self, channel:str, data:np.ndarray=None, use_memory=True) -> tuple:
         """This function will use the data range selector to select a range of data. If use_memory is True the function will use the data from memory for the specified channel.
         In that case it will ignore the data argument. If use_memory is False the function will use the data argument and ignore the channel argument. The channel argument is only
         used to get the correct colormap. The function will return the selected data.
@@ -5141,10 +4764,10 @@ class SnomMeasurement(FileHandler):
             print('No data was specified!')
             return None
         # get the range selection
-        start, end, is_horizontal, inverted = Select_Data_Range(data, channel)
+        start, end, is_horizontal, inverted = select_data_range(data, channel)
         return start, end, is_horizontal, inverted
 
-    def _Get_Data_From_selected_Range(self, data:np.ndarray, start:int, end:int, is_horizontal:bool, inverted:bool) -> list:
+    def _get_data_from_selected_range(self, data:np.ndarray, start:int, end:int, is_horizontal:bool, inverted:bool) -> list:
         """This function will return one or two arrays from the data using the coordinates of the range selection.
 
         Args:
@@ -5157,7 +4780,7 @@ class SnomMeasurement(FileHandler):
         Returns:
             list: The list contains one or two arrays depending on the selection. Each array contains the selected data.
         """
-        # start, end, is_horizontal, inverted = self._Select_Data_Range(channel, data, use_memory)
+        # start, end, is_horizontal, inverted = self._select_data_range(channel, data, use_memory)
         # create one or two arrays from the data using the coordinates
         reduced_data = []
         if is_horizontal:
@@ -5179,7 +4802,7 @@ class SnomMeasurement(FileHandler):
                 selected_data = data[start:end,:]
         return reduced_data
     
-    def Level_Data_Columnwise(self, channel_list:list=None, display_channel:str=None) -> None:
+    def level_data_columnwise(self, channel_list:list=None, display_channel:str=None) -> None:
         """This function will level the data of the specified channels columnwise. The function will use the data from the display channel to select the range for leveling.
 
         Args:
@@ -5194,20 +4817,15 @@ class SnomMeasurement(FileHandler):
         if display_channel is None:
             display_channel = self.channels[0]
         # get the selection from the display channel
-        selection = self._Select_Data_Range(display_channel)
+        selection = self._select_data_range(display_channel)
         # now use the selection to level all channels
         import time
-        # print('test: ', channel_list==self.channels)
         for channel in channel_list:
             # get the data from memory
             data = self.all_data[self.channels.index(channel)]
             # get the reduced data
-            reduced_data = self._Get_Data_From_selected_Range(data, *selection)
+            reduced_data = self._get_data_from_selected_range(data, *selection)
             # level the data
-            # print('data: ', data)
-            # print('selection: ', selection)
-            # print('reduced_data: ', reduced_data)
-            # print('reduced_data.shape: ', reduced_data.shape())
             if len(reduced_data) == 1:
                 print('leveling with one reference area')
                 # get the reference data from the mean of the reduced data for each row
@@ -5232,45 +4850,29 @@ class SnomMeasurement(FileHandler):
                     # if phase is leveled make sure no phase jumps occur otherwise the leveling will not work
                     # first correct the overall drift of the mean per line
                     if i > 0:
-                        # mean_drift = np.mean([reference_data_left[i], reference_data_right[i]]) - np.mean([reference_data_left[i-1], reference_data_right[i-1]])
                         mean_drift = np.mean([reference_data_left[i], reference_data_right[i]]) - np.mean([reference_data_left[0], reference_data_right[0]])
                         leveled_data[i] = data[i] - mean_drift
-                        # print(f'line {i}, mean data: {np.mean([reference_data_left[i], reference_data_right[i]])}, mean drift: {mean_drift}')
                     else:
-                        # print('first line')
-                        # print('mean data: ', np.mean([reference_data_left[0], reference_data_right[0]]))
                         leveled_data[i] = data[i]
                     # then correct the drift within each individual line by interpolating between the two reference data arrays
                     line_drift = np.interp(np.linspace(0, 1, data.shape[1]), [0, 1], [reference_data_left[i], reference_data_right[i]])
                     # shift line_drift such that the mean is zero
                     line_drift = line_drift - np.mean(line_drift)
                     leveled_data[i] = leveled_data[i] - line_drift
-                    # if i == 0: plot the linedata and the linedrift
-                    # if i == 0:
-                    # plt.plot(data[i], label='data')
-                    # plt.plot(line_drift + np.mean(data[i]), label='line drift')
-                    # plt.plot(leveled_data[i], label='leveled data')
-                    # plt.legend()
-                    # plt.show()
             # if phase channel, shift the data to match the leveled data to the original data
             if self.phase_indicator in channel:
                 # todo, for now just shift by 0 to make sure the data is within the 0 to 2pi range
                 # shift the data such that the mean is pi
                 mean_phase = np.mean(leveled_data)
                 shift = np.pi - mean_phase
-                self._Shift_Phase_Data(leveled_data, shift=shift)
+                self._shift_phase_data(leveled_data, shift=shift)
             # save the leveled data
             self.channels.append(channel + '_leveled')
             self.all_data.append(leveled_data)
             self.channel_tag_dict.append(self.channel_tag_dict[self.channels.index(channel)])
             self.channels_label.append(channel + '_leveled')
 
-            # # modify hei
-            # if self.height_indicator in channel:
-            #     # set the min to zero
-            #     self.Set_Min_to_Zero([channel + '_leveled'])
-
-    def Create_New_Channel(self, data, channel_name:str, channel_tag_dict:dict, channel_label:str=None) -> None:
+    def create_new_channel(self, data, channel_name:str, channel_tag_dict:dict, channel_label:str=None) -> None:
         if channel_label is None:
             channel_label = channel_name
         self.channels.append(channel_name)
@@ -5279,7 +4881,7 @@ class SnomMeasurement(FileHandler):
         self.channels_label.append(channel_label)
 
     # not yet fully implemented, eg. the profile plot function is only ment for full horizontal or vertical profiles only
-    def Test_Profile_Selection(self, channel:str=None) -> None:
+    def test_profile_selection(self, channel:str=None) -> None:
         if channel is None:
             channel = self.channels[0]
         
@@ -5311,17 +4913,16 @@ class ApproachCurve(FileHandler):
         if channels == None:
             channels = ['M1A']
         self.channels = channels.copy()
-        # x_channel = 'Depth'
         self.x_channel = 'Z'
         super().__init__(directory_name, title)
         self.header = 27
-        self._Initialize_Measurement_Channel_Indicators()
-        self._Load_Data()
+        self._initialize_measurement_channel_indicators()
+        self._load_data()
 
-    def _Initialize_Measurement_Channel_Indicators(self):
+    def _initialize_measurement_channel_indicators(self):
         self.height_channel = 'Z'
         self.height_channels = ['Z']
-        self.mechanical_channels = ['M1A', 'M1P'] # todo
+        self.mechanical_channels = ['M1A', 'M1P']
         self.phase_channels = ['O1P','O2P','O3P','O4P','O5P']
         self.amp_channels = ['O1A','O2A','O3A','O4A','O5A']
         self.all_channels_default = self.height_channels + self.mechanical_channels + self.phase_channels + self.amp_channels
@@ -5353,29 +4954,22 @@ class ApproachCurve(FileHandler):
         self.height_scaling_default = self._get_from_config('height_scaling_default')
         self.height_scaling_custom = self._get_from_config('height_scaling_custom')
 
-    def _Load_Data(self):
+    def _load_data(self):
         self.all_data = {}
-        
-        
         datafile = self.directory_name / Path(self.filename.name + '.txt')
         x_channel_index = self.find_index(datafile, self.x_channel)
         with open(datafile, 'r') as file:
             xdata = np.genfromtxt(file ,skip_header=self.header, usecols=(x_channel_index), delimiter='\t', invalid_raise = False)
         self.all_data[self.x_channel] = xdata
-         # y_data = []
         for channel in self.channels:
             channel_index = self.find_index(datafile, channel)
-            # y_data.append(np.genfromtxt(file ,skip_header=header, usecols=(channel_index), delimiter=',', invalid_raise = False))
             with open(datafile, 'r') as file:
                 y_data = np.genfromtxt(file ,skip_header=self.header, usecols=(channel_index), delimiter='\t', invalid_raise = False)
                 self.all_data[channel] = y_data
         # scale the x data to nm
         x_scaling = 1
-        # try: x_unit = self.measurement_tag_dict[Measurement_Tags.SCANAREA][0]
         x_unit = self._get_measurement_tag_dict_unit(Measurement_Tags.SCANAREA)
-        # except: x_unit = None
 
-        # else:
         # we want to convert the xaxis to nm
         if x_unit == '[µm]':
             x_scaling = pow(10,3)
@@ -5386,34 +4980,24 @@ class ApproachCurve(FileHandler):
         # ok forget about that, the software from neaspec saves the scan area parameters as µm but the actual data is stored in m...
         x_scaling = pow(10,9)
         # scale xdata:
-        # self.all_data[self.x_channel] = [i*x_scaling for i in self.all_data[self.x_channel]]
         self.all_data[self.x_channel] = np.multiply(self.all_data[self.x_channel], x_scaling)
 
 
-    def Set_Min_to_Zero(self) -> None:
+    def set_min_to_zero(self) -> None:
         # set the min of the xdata array to zero
-        # print('all data before set to zero: ', self.all_data[self.x_channel])
         min_x = np.nanmin(self.all_data[self.x_channel]) # for some reason at least the first value seems to be nan 
-        # self.all_data[self.x_channel] = [i-min_x for i in self.all_data[self.x_channel]]
         self.all_data[self.x_channel] = self.all_data[self.x_channel] - min_x
-        # print('all data after set to zero: ', self.all_data[self.x_channel])
 
-    def Display_Channels(self, y_channels=None):
+    def display_channels(self, y_channels=None):
         if y_channels == None:
             y_channels = self.channels
-        # x_channel = 'Depth'
         x_channel = 'Z'
         
         for channel in y_channels:
-            # i = self.channels.index(channel)
             plt.plot(self.all_data[self.x_channel], self.all_data[channel], label=channel)
-        # print(self.all_data[self.x_channel])
-        # print(self.all_data[y_channels[0]])
-        # print(self.channels)
 
         # labels for axes:
         plt.xlabel(f'Z [nm]')
-        # plt.xlabel(f'Depth [px]')
         if len(self.channels) == 1:
             plt.ylabel(self.channels[0])
         plt.legend()
@@ -5423,62 +5007,16 @@ class ApproachCurve(FileHandler):
         if Plot_Definitions.show_plot:
             plt.show()
     
-    def Display_Channels_V2(self, y_channels=None):
+    def display_channels_V2(self, y_channels=None):
         x_channel = 'Z'
         if y_channels == None:
             y_channels = self.channels
         y_data = []
         for channel in y_channels:
             y_data.append(self.all_data[channel])
-        self._Display_Approach_Curve(x_data=self.all_data[self.x_channel], y_data=y_data, x_channel=x_channel, y_channels=y_channels)
-        '''if y_channels == None:
-            y_channels = self.channels
-        # x_channel = 'Depth'
-        x_channel = 'Z'
-        # import matplotlib.colors as mcolors
-        # colors = mcolors.TABLEAU_COLORS
-        colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:olive']
-        fig, ax1 = plt.subplots()
-        line1, = ax1.plot(self.all_data[self.x_channel], self.all_data[y_channels[0]], label=y_channels[0], color=colors[0])
-        if len(y_channels) == 1:
-            ax1.legend()
-        elif len(y_channels) == 2:
-            ax2 = ax1.twinx()
-            line2, = ax2.plot(self.all_data[self.x_channel], self.all_data[y_channels[1]], label=y_channels[1], color=colors[1])
-            ax2.set_ylabel(y_channels[1])
-            ax1.legend(handles=[line1, line2])
-        else: # deactivate ticks for all except the first or it will get messy
-            handles = [line1]
-            for channel in y_channels[1:]: # ignore the first as it was plotted already
-                # i = self.channels.index(channel)
-                # plt.plot(self.all_data[self.x_channel], self.all_data[channel], label=channel)
-                ax = ax1.twinx()
-                ax.tick_params(right=False, labelright=False)
-                line, = ax.plot(self.all_data[self.x_channel], self.all_data[channel], label=channel, color=colors[y_channels.index(channel)])
-                handles.append(line)
-            ax1.legend(handles=handles)
-            
-        # print(self.all_data[self.x_channel])
-        # print(self.all_data[y_channels[0]])
-        # print(self.channels)
+        self._display_approach_curve(x_data=self.all_data[self.x_channel], y_data=y_data, x_channel=x_channel, y_channels=y_channels)
 
-        # labels for axes:
-        ax1.set_xlabel(f'Z [nm]')
-        ax1.set_ylabel(y_channels[0])
-        # plt.xlabel(f'Depth [px]')
-        # if len(self.channels) == 1:
-        #     plt.ylabel(self.channels[0])
-        # plt.legend()
-        if Plot_Definitions.tight_layout:
-            plt.tight_layout()
-        
-        if Plot_Definitions.show_plot:
-            plt.show()'''
-
-    def _Display_Approach_Curve(self, x_data, y_data:list, x_channel, y_channels):
-        
-        # x_channel = 'Depth'
-        
+    def _display_approach_curve(self, x_data, y_data:list, x_channel, y_channels):        
         # import matplotlib.colors as mcolors
         # colors = mcolors.TABLEAU_COLORS
         colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:olive']
@@ -5496,27 +5034,17 @@ class ApproachCurve(FileHandler):
             for channel in y_channels[1:]: # ignore the first as it was plotted already
                 # i = self.channels.index(channel)
                 i = y_channels.index(channel)
-                # plt.plot(x_data, self.all_data[channel], label=channel)
                 ax = ax1.twinx()
                 ax.tick_params(right=False, labelright=False)
                 line, = ax.plot(x_data, y_data[i], label=channel, color=colors[i])
                 handles.append(line)
             ax1.legend(handles=handles)
-            
-        # print(x_data)
-        # print(self.all_data[y_channels[0]])
-        # print(self.channels)
 
         # labels for axes:
         ax1.set_xlabel(f'Z [nm]')
         ax1.set_ylabel(y_channels[0])
-        # plt.xlabel(f'Depth [px]')
-        # if len(self.channels) == 1:
-        #     plt.ylabel(self.channels[0])
-        # plt.legend()
         if Plot_Definitions.tight_layout:
             plt.tight_layout()
-        
         if Plot_Definitions.show_plot:
             plt.show()
         gc.collect()
@@ -5526,10 +5054,8 @@ class ApproachCurve(FileHandler):
         with open(filepath, 'r') as file:
             for i in range(self.header+1):
                 line = file.readline()
-        # print(line)
         split_line = line.split('\t')
         split_line.remove('\n')
-        # print(split_line)
         return split_line.index(channel)
 
 class Scan3D(FileHandler):
@@ -5553,8 +5079,8 @@ class Scan3D(FileHandler):
         self.header = 27
         # initialize the channel indicators
         print('filetype: ', self.file_type)
-        self._Initialize_Measurement_Channel_Indicators()
-        self._Update_Measurement_Channel_Indicators()
+        self._initialize_measurement_channel_indicators()
+        self._update_measurement_channel_indicators()
         # for some reason the naming convention does not always follow the default for the snom measurements of the same filetype
         try:
             self._create_channel_tag_dict()
@@ -5566,17 +5092,17 @@ class Scan3D(FileHandler):
                 print('The channel tag dict could not be created!')
                 exit()
         # load the channels from the datafile
-        self._Load_Data()
+        self._load_data()
 
     
-    def _Update_Measurement_Channel_Indicators(self):
+    def _update_measurement_channel_indicators(self):
         self.height_channel = 'Z'
         self.height_channels = ['Z']
         self.mechanical_channels = ['M1A', 'M1P'] # todo
         self.phase_channels = ['O1P','O2P','O3P','O4P','O5P']
         self.amp_channels = ['O1A','O2A','O3A','O4A','O5A']
     
-    def _Load_Data(self):
+    def _load_data(self):
         datafile = self.directory_name / Path(self.filename.name + '.txt')
         # initialize all data dict
         self.all_data = {} # (key, value) = (channelname, 3d matrix, shape:(xres, yres, zres)) 
@@ -5606,12 +5132,12 @@ class Scan3D(FileHandler):
         # scale xdata:
         self.all_data[self.x_channel] = np.multiply(self.all_data[self.x_channel], x_scaling)
 
-    def Set_Min_to_Zero(self) -> None:
+    def set_min_to_zero(self) -> None:
         # set the min of the xdata array to zero
         min_x = np.nanmin(self.all_data[self.x_channel]) # for some reason at least the first value seems to be nan 
         self.all_data[self.x_channel] = self.all_data[self.x_channel] - min_x
 
-    def Get_Cutplane_Data(self, axis:str='x', line:int=0, channel:str=None):
+    def get_cutplane_data(self, axis:str='x', line:int=0, channel:str=None):
         if channel == None:
             channel = self.channels[0]
         x,y,z = self._get_measurement_tag_dict_value(Measurement_Tags.PIXELAREA)
@@ -5623,25 +5149,25 @@ class Scan3D(FileHandler):
                     cutplane_data[j][i] = data[line][i][j]
         return cutplane_data
 
-    def Generate_All_Cutplane_Data(self, axis:str='x', line:int=0):
+    def generate_all_cutplane_data(self, axis:str='x', line:int=0):
         self.all_cutplane_data = {}
         for channel in self.channels:
-            self.all_cutplane_data[channel] = self.Get_Cutplane_Data(axis=axis, line=line, channel=channel)
+            self.all_cutplane_data[channel] = self.get_cutplane_data(axis=axis, line=line, channel=channel)
 
-    def Display_Cutplane(self, axis:str='x', line:int=0, channel:str=None):
+    def display_cutplane(self, axis:str='x', line:int=0, channel:str=None):
         # todo: shift each y column by offset value depending on average z position, to correct for varying starting position, due to non flat substrates
         if channel == None:
             channel = self.channels[0]
-        cutplane_data = self.Get_Cutplane_Data(axis=axis, line=line, channel=channel)
+        cutplane_data = self.get_cutplane_data(axis=axis, line=line, channel=channel)
 
         img = plt.pcolormesh(cutplane_data)
         plt.colorbar(img)
         plt.show()
 
-    def Display_Cutplane_V2(self, axis:str='x', line:int=0, channel:str=None, align='auto'):
+    def display_cutplane_V2(self, axis:str='x', line:int=0, channel:str=None, align='auto'):
         if channel == None:
             channel = self.channels[0]
-        cutplane_data = self.Get_Cutplane_Data(axis=axis, line=line, channel=channel)
+        cutplane_data = self.get_cutplane_data(axis=axis, line=line, channel=channel)
         x,y,z = self._get_measurement_tag_dict_value(Measurement_Tags.PIXELAREA)
         # todo: shift each y column by offset value depending on average z position, to correct for varying starting position, due to non flat substrates
         z_shifts = np.zeros(x)
@@ -5654,7 +5180,7 @@ class Scan3D(FileHandler):
                 for j in range(z):
                     z_data[j][i] = z_data_raw[line][i][j]
         for i in range(x):
-            z_shifts[i] = self._Get_Z_Shift_(z_data[:,i])
+            z_shifts[i] = self._get_z_shift_(z_data[:,i])
         # z_data is in nm
         z_shifts = z_shifts
         if align == 'auto':
@@ -5691,7 +5217,7 @@ class Scan3D(FileHandler):
         Maybe try to use a 2d scan of the same region to align the approach curves.'''
         
         # import plotting_parameters.json, here the user can tweek some options for the plotting, like automatic titles and colormap choices
-        plotting_parameters = self._Get_Plotting_Parameters()
+        plotting_parameters = self._get_plotting_parameters()
 
         # update the placeholders in the dictionary
         # the dictionary contains certain placeholders, which are now being replaced with the actual values
@@ -5699,7 +5225,7 @@ class Scan3D(FileHandler):
         # placeholders are indicated by the '<' and '>' characters
         # this step insures, that for example the title contains the correct channel name
         placeholders = {'<channel>': channel}
-        plotting_parameters = self._Replace_Plotting_Parameter_Placeholders(plotting_parameters, placeholders)
+        plotting_parameters = self._replace_plotting_parameter_placeholders(plotting_parameters, placeholders)
 
         # set colormap depending on channel
         if self.amp_indicator in channel:
@@ -5726,7 +5252,7 @@ class Scan3D(FileHandler):
         # plt.colorbar(img)
         plt.show()
 
-    def Display_Cutplane_V3(self, axis:str='x', line:int=0, channel:str=None, align='auto'):
+    def display_cutplane_V3(self, axis:str='x', line:int=0, channel:str=None, align='auto'):
         if channel == None:
             channel = self.channels[0]
         cutplane_data = self.all_cutplane_data[channel]
@@ -5755,7 +5281,7 @@ class Scan3D(FileHandler):
             z_data = self.all_cutplane_data[self.x_channel]
             # reshape the data to the correct shape
             for i in range(XRes):
-                z_shifts[i] = self._Get_Z_Shift_(z_data[:,i])
+                z_shifts[i] = self._get_z_shift_(z_data[:,i])
             # z_data is in nm
             z_shifts = z_shifts
             z_min = np.min(z_shifts)
@@ -5775,7 +5301,7 @@ class Scan3D(FileHandler):
             # Maybe try to use a 2d scan of the same region to align the approach curves.
         
         # import plotting_parameters.json, here the user can tweek some options for the plotting, like automatic titles and colormap choices
-        plotting_parameters = self._Get_Plotting_Parameters()
+        plotting_parameters = self._get_plotting_parameters()
 
         # update the placeholders in the dictionary
         # the dictionary contains certain placeholders, which are now being replaced with the actual values
@@ -5783,7 +5309,7 @@ class Scan3D(FileHandler):
         # placeholders are indicated by the '<' and '>' characters
         # this step insures, that for example the title contains the correct channel name
         placeholders = {'<channel>': channel}
-        plotting_parameters = self._Replace_Plotting_Parameter_Placeholders(plotting_parameters, placeholders)
+        plotting_parameters = self._replace_plotting_parameter_placeholders(plotting_parameters, placeholders)
 
         # set colormap depending on channel
         if self.amp_indicator in channel:
@@ -5814,7 +5340,7 @@ class Scan3D(FileHandler):
             plt.show()
         gc.collect()
     
-    def Display_Cutplane_V2_Realpart(self, axis:str='x', line:int=0, demodulation:int=2, align='auto'):
+    def display_cutplane_v2_realpart(self, axis:str='x', line:int=0, demodulation:int=2, align='auto'):
         
         amp_channel = f'O{demodulation}A'
         phase_channel = f'O{demodulation}P'
@@ -5839,7 +5365,7 @@ class Scan3D(FileHandler):
                 for j in range(z):
                     z_data[j][i] = z_data_raw[line][i][j]
         for i in range(x):
-            z_shifts[i] = self._Get_Z_Shift_(z_data[:,i])
+            z_shifts[i] = self._get_z_shift_(z_data[:,i])
         z_shifts = z_shifts
         if align == 'auto':
             z_min = np.min(z_shifts)
@@ -5874,7 +5400,7 @@ class Scan3D(FileHandler):
         Maybe try to use a 2d scan of the same region to align the approach curves.'''
         
         # import plotting_parameters.json, here the user can tweek some options for the plotting, like automatic titles and colormap choices
-        plotting_parameters = self._Get_Plotting_Parameters()
+        plotting_parameters = self._get_plotting_parameters()
 
         # update the placeholders in the dictionary
         # the dictionary contains certain placeholders, which are now being replaced with the actual values
@@ -5882,7 +5408,7 @@ class Scan3D(FileHandler):
         # placeholders are indicated by the '<' and '>' characters
         # this step insures, that for example the title contains the correct channel name
         placeholders = {'<channel>': channel}
-        plotting_parameters = self._Replace_Plotting_Parameter_Placeholders(plotting_parameters, placeholders)
+        plotting_parameters = self._replace_plotting_parameter_placeholders(plotting_parameters, placeholders)
 
         # set colormap depending on channel
         if self.amp_indicator in channel:
@@ -5915,7 +5441,7 @@ class Scan3D(FileHandler):
         # plt.colorbar(img)
         plt.show()
     
-    def Display_Cutplane_V3_Realpart(self, axis:str='x', line:int=0, demodulation:int=2, align='auto'):
+    def display_cutplane_v3_realpart(self, axis:str='x', line:int=0, demodulation:int=2, align='auto'):
         
         amp_channel = f'O{demodulation}A'
         phase_channel = f'O{demodulation}P'
@@ -5947,7 +5473,7 @@ class Scan3D(FileHandler):
             z_data = self.all_cutplane_data[self.x_channel]
             # reshape the data to the correct shape
             for i in range(XRes):
-                z_shifts[i] = self._Get_Z_Shift_(z_data[:,i])
+                z_shifts[i] = self._get_z_shift_(z_data[:,i])
             # z_data is in nm
             z_shifts = z_shifts
             z_min = np.min(z_shifts)
@@ -5970,7 +5496,7 @@ class Scan3D(FileHandler):
         Maybe try to use a 2d scan of the same region to align the approach curves.'''
         
         # import plotting_parameters.json, here the user can tweek some options for the plotting, like automatic titles and colormap choices
-        plotting_parameters = self._Get_Plotting_Parameters()
+        plotting_parameters = self._get_plotting_parameters()
 
         # update the placeholders in the dictionary
         # the dictionary contains certain placeholders, which are now being replaced with the actual values
@@ -5978,7 +5504,7 @@ class Scan3D(FileHandler):
         # placeholders are indicated by the '<' and '>' characters
         # this step insures, that for example the title contains the correct channel name
         placeholders = {'<channel>': channel}
-        plotting_parameters = self._Replace_Plotting_Parameter_Placeholders(plotting_parameters, placeholders)
+        plotting_parameters = self._replace_plotting_parameter_placeholders(plotting_parameters, placeholders)
 
         # set colormap depending on channel
         if self.amp_indicator in channel:
@@ -6013,7 +5539,7 @@ class Scan3D(FileHandler):
             plt.show()
         gc.collect()
 
-    def _Get_Z_Shift_(self, z_data):
+    def _get_z_shift_(self, z_data):
         # get the average z position for each approach curve
         # might change in the future to a more sophisticated method
         # return np.mean(z_data)
@@ -6021,7 +5547,7 @@ class Scan3D(FileHandler):
         # return the shift of the starting point of the approach curve
         return z_data[0]
 
-    def Display_Approach_Curve(self, x_pixel, y_pixel, x_channel:str=None, y_channels:list=None):
+    def display_approach_curve(self, x_pixel, y_pixel, x_channel:str=None, y_channels:list=None):
         if x_channel == None:
             x_channel = 'Z'
         if x_channel not in self.channels:
@@ -6033,9 +5559,9 @@ class Scan3D(FileHandler):
         y_data = []
         for channel in y_channels:
             y_data.append(self.all_data[channel][y_pixel][x_pixel])
-        self._Display_Approach_Curve(x_data, y_data, x_channel, y_channels)
+        self._display_approach_curve(x_data, y_data, x_channel, y_channels)
 
-    def _Display_Approach_Curve(self, x_data, y_data:list, x_channel, y_channels):
+    def _display_approach_curve(self, x_data, y_data:list, x_channel, y_channels):
         
         # x_channel = 'Depth'
         
@@ -6081,7 +5607,7 @@ class Scan3D(FileHandler):
             plt.show()
         gc.collect()
 
-    def Match_Phase_Offset(self, channels:list=None, reference_channel=None, reference_area=None, manual_width=5, axis='x', line=0) -> None:
+    def match_phase_offset(self, channels:list=None, reference_channel=None, reference_area=None, manual_width=5, axis='x', line=0) -> None:
         """This function matches the phase offset of all phase channels in memory to the reference channel.
         The reference channel is the first phase channel in memory if not specified.
 
@@ -6094,7 +5620,7 @@ class Scan3D(FileHandler):
             manual_width (int, optional): The width of the manual reference area. Only applies if reference_area='manual'. Defaults to 5.
         """
         # if a list of channels is specified those will be loaded and the old ones will be overwritten
-        # self._Initialize_Data(channels)
+        # self._initialize_data(channels)
         # define local list of channels to use for leveling
         channels = self.channels
         if reference_channel == None:
@@ -6102,7 +5628,7 @@ class Scan3D(FileHandler):
                 if self.phase_indicator in channel:
                     reference_channel = channel
                     break
-        cutplane_data = self.Get_Cutplane_Data(axis=axis, line=line, channel=reference_channel)
+        cutplane_data = self.get_cutplane_data(axis=axis, line=line, channel=reference_channel)
         if reference_area is None:
             # reference_area = [[xmin, xmax][ymin, ymax]]
             reference_area = [[0, len(cutplane_data[0])],[0, len(cutplane_data)]]
@@ -6122,9 +5648,9 @@ class Scan3D(FileHandler):
             if len(klick_coordinates) != 1 and type(klick_coordinates[0]) != list:
                 print('You must specify one point which should define the reference area!')
                 print('Do you want to try again?')
-                user_input = self._User_Input_Bool()
+                user_input = self._user_input_bool()
                 if user_input == True:
-                    self.Match_Phase_Offset(channels, reference_channel, 'manual', manual_width, axis, line)
+                    self.match_phase_offset(channels, reference_channel, 'manual', manual_width, axis, line)
                 else:
                     exit()
             reference_area = [[klick_coordinates[0][0] - manual_width,klick_coordinates[0][0] + manual_width],[klick_coordinates[0][1] - manual_width, klick_coordinates[0][1] + manual_width]]
@@ -6150,15 +5676,15 @@ class Scan3D(FileHandler):
 
         for channel in channels:
             if self.phase_indicator in channel:
-                # phase_data = self.Get_Cutplane_Data(axis=axis, line=line, channel=channel)
+                # phase_data = self.get_cutplane_data(axis=axis, line=line, channel=channel)
                 phase_data = self.all_cutplane_data[channel]
                 # phase_offset = np.mean(phase_data) - reference_phase
                 phase_offset = np.mean([phase_data[i][reference_area[0][0]:reference_area[0][1]] for i in range(reference_area[1][0], reference_area[1][1])]) - reference_phase
-                self.all_cutplane_data[channel] = self._Shift_Phase_Data(phase_data, -phase_offset)
-        self._Write_to_Logfile('match_phase_offset_reference_area', reference_area)
+                self.all_cutplane_data[channel] = self._shift_phase_data(phase_data, -phase_offset)
+        self._write_to_logfile('match_phase_offset_reference_area', reference_area)
         gc.collect()
 
-    def _Shift_Phase_Data(self, data, shift) -> np.array:
+    def _shift_phase_data(self, data, shift) -> np.array:
         """This function adds a phaseshift to the specified phase data. The phase data is automatically kept in the 0 to 2 pi range.
         Could in future be extended to show a live view of the phase data while it can be modified by a slider...
         e.g. by shifting the colorscale in the preview rather than the actual data..."""
@@ -6169,7 +5695,7 @@ class Scan3D(FileHandler):
                 data[y][x] = (data[y][x] + shift) % (2*np.pi)
         return data
 
-    def Shift_Phase(self, shift:float=None, channels:list=None) -> None:
+    def shift_phase(self, shift:float=None, channels:list=None) -> None:
         """This function will prompt the user with a preview of the first phase channel in memory.
         Under the preview is a slider, by changing the slider value the phase preview will shift accordingly.
         If you are satisfied with the shift, hit the 'accept' button. The preview will close and the shift will
@@ -6182,7 +5708,7 @@ class Scan3D(FileHandler):
         """
         if channels is None:
             channels = self.channels
-        # self._Initialize_Data(channels)
+        # self._initialize_data(channels)
         if shift == None:
             shift_known = False
         else:
@@ -6201,12 +5727,12 @@ class Scan3D(FileHandler):
                         # print(len(phase_data))
                         # print(len(phase_data[0]))
                         break
-            shift = Get_Phase_Offset(phase_data)
+            shift = get_phase_offset(phase_data)
             print('The phase shift you chose is:', shift)
             shift_known = True
 
         # export shift value to logfile
-        self._Write_to_Logfile('phase_shift', shift)
+        self._write_to_logfile('phase_shift', shift)
         # shift all phase channels in memory
         # could also be implemented to shift each channel individually...
         
@@ -6216,17 +5742,17 @@ class Scan3D(FileHandler):
                 # print('Before phase shift: ', channel)
                 # print('Min phase value:', np.min(self.all_cutplane_data[channel]))
                 # print('Max phase value:', np.max(self.all_cutplane_data[channel]))
-                # self.all_data[self.channels.index(channel)] = self._Shift_Phase_Data(self.all_data[self.channels.index(channel)], shift)
-                self.all_cutplane_data[channel] = self._Shift_Phase_Data(self.all_cutplane_data[channel], shift)
+                # self.all_data[self.channels.index(channel)] = self._shift_phase_data(self.all_data[self.channels.index(channel)], shift)
+                self.all_cutplane_data[channel] = self._shift_phase_data(self.all_cutplane_data[channel], shift)
                 # print('After phase shift: ', channel)
                 # print('Min phase value:', np.min(self.all_cutplane_data[channel]))
                 # print('Max phase value:', np.max(self.all_cutplane_data[channel]))
         gc.collect()
 
-    def Cut_Data(self):
+    def cut_data(self):
         pass
 
-    def Average_Data(self, channels:list=None):
+    def average_data(self, channels:list=None):
         if channels == None:
             channels = self.channels
         # create a cutplane of the data by averaging over the y axis
@@ -6259,7 +5785,7 @@ class Scan3D(FileHandler):
         # ax.invert_yaxis()
         # plt.show()
         
-    def Align_Lines(self):
+    def align_lines(self):
         # idea: take the height channel and average each approach curve, then compare the averaged lines to each other and aplly a shift to align them
         height_data = self.all_data[self.height_channel]
         averaged_height_data = np.mean(height_data, axis=2)
@@ -6273,7 +5799,7 @@ class Scan3D(FileHandler):
         indices = []
         for line in averaged_height_data:
             # calculate the index which minimizes the deviation of the height data
-            index = realign.Minimize_Deviation_1D(averaged_height_data[0], line, 5, False)
+            index = realign.minimize_deviation_1d(averaged_height_data[0], line, 5, False)
             indices.append(index)
         # make a new data array with the shifted data
         # apply the shift to all channels
@@ -6308,8 +5834,8 @@ def Set_nan_to_zero(data) -> np.array:
                 data[y][x] = 0
     return data       
 
-# needed for the Realign function
-def Gauss_Function(x, A, mu, sigma, offset):
+# needed for the realign function
+def gauss_function(x, A, mu, sigma, offset):
     return A*np.exp(-(x-mu)**2/(2.*sigma**2)) + offset
 
 def Get_Largest_Abs(val1, val2):

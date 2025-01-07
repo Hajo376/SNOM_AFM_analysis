@@ -12,12 +12,12 @@ from datetime import datetime
 
 
 from SNOM_AFM_analysis.lib.snom_colormaps import *
-from SNOM_AFM_analysis.python_classes_snom import Open_Measurement
+from SNOM_AFM_analysis.snom_analysis import SnomMeasurement
 from SNOM_AFM_analysis.lib.phase_analysis import *
 # from SNOM_AFM_analysis.lib.get_directionality import ChiralCoupler
 from SNOM_AFM_analysis.lib.rectangle_selector import Select_Rectangle
 
-class ChiralCouplers(Open_Measurement):
+class ChiralCouplers(SnomMeasurement):
     """This class builds on the Open_Measurement base class for snom analysis.
     This class was initiated for a more detailed analysis of measurements of the chiral couplers.
     The basic idea is to find the waveguides by reducing the measurement and then fitting the waveguide positions.

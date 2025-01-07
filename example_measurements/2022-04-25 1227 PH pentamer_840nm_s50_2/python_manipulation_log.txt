@@ -896,3 +896,10 @@ set_min_to_zero = True
 height_leveling_coordinates = [[10, 7], [22, 45], [42, 27]]
 height_masking_threshold = 0.5
 cut = autocut
+07/01/2025 16:25:58
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+set_min_to_zero = True
+height_leveling_coordinates = [[15, 43], [44, 32], [30, 3]]
+height_masking_threshold = 0.5
+cut = autocut
