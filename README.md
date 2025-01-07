@@ -10,4 +10,6 @@ The package also creates a folder in the users 'home' directory to store the 'co
 Each plotting command generates a plot and that plot is automatically appended to the plot memory file, allowing to view multiple measurements besides each other.
 This memory can of course be deleted at will, which is by default every time a new measurement is opened.
 
+For ease of use i also created a GUI version of this package which allows to use many functions more easily. I typically use it to quickly generate images of my measurements with minimal modifications.
+
 ## Documentation will follow soon. ##
