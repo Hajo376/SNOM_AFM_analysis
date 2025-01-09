@@ -1,7 +1,7 @@
 import tkinter as tk
 import numpy as np
 from PIL import Image, ImageTk
-import cv2
+# import cv2 # not needed anymore, and very big package
 
 from SNOM_AFM_analysis.lib.snom_colormaps import SNOM_amplitude, SNOM_phase, SNOM_height
 
@@ -215,7 +215,9 @@ class ArraySelector:
                     self.resizing = None
 
     def fill_canvas(self):#
-        self.array = cv2.resize(self.original_array, (int(self.scaling_factor*self.original_width), int(self.scaling_factor*self.original_height)),interpolation=cv2.INTER_NEAREST)
+        # self.array = cv2.resize(self.original_array, (int(self.scaling_factor*self.original_width), int(self.scaling_factor*self.original_height)),interpolation=cv2.INTER_NEAREST)
+        # same using pillows image to get rid of cv2
+        self.array = Image.resize((int(self.scaling_factor*self.original_width), int(self.scaling_factor*self.original_height)), Image.NEAREST)
         # Normalize array to 0-255 for display
         self.array = ((self.array - np.min(self.array)) / (np.max(self.array) - np.min(self.array)) * 255).astype(np.uint8)
 

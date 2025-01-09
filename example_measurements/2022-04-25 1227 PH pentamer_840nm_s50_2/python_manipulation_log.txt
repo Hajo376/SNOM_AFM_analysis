@@ -918,3 +918,27 @@ filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
 quadratic_pixels = True
 scaling = 4
 gaussian_filter_complex_sigma = 2
+09/01/2025 10:03:59
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+scaling = 4
+gaussian_filter_complex_sigma = 2
+09/01/2025 10:05:43
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+cut = autocut
+09/01/2025 10:07:45
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+cut_coords = [[2, 3], [40, 40]]
+cut = autocut
+09/01/2025 10:08:02
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+cut_coords = [[13, 26], [30, 38]]
+cut = autocut
+09/01/2025 10:13:40
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+cut_coords = [[27, 15], [41, 28]]
+cut = autocut

@@ -36,5 +36,4 @@ snom_analysis.egg-info/PKG-INFO
 snom_analysis.egg-info/SOURCES.txt
 snom_analysis.egg-info/dependency_links.txt
 snom_analysis.egg-info/not-zip-safe
-snom_analysis.egg-info/requires.txt
 snom_analysis.egg-info/top_level.txt

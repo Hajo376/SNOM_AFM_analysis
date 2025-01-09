@@ -146,6 +146,7 @@ def test_rectangle_selector():
     channels = ['O2P', 'O2A', 'Z C']
     Measurement = SnomMeasurement(directory_name, channels)
     Measurement.display_channels()
+    # print('Select a rectangle in the plot')
     Measurement.cut_channels(reset_mask=True)
     Measurement.display_channels()
     Measurement.display_all_subplots()
@@ -534,10 +535,10 @@ def main():
      
     # realign()
     # cut_masked()
-    test_scalebar()
+    # test_scalebar()
     # test_phaseshift()
     # compare_measurements()
-    # test_rectangle_selector()
+    test_rectangle_selector()
     # correct_phase_drift()
     # synccorrection()
     # complete_example_1()
