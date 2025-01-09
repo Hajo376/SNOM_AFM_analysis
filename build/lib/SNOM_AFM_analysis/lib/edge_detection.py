@@ -93,8 +93,6 @@ class EdgeDetection():
 
         plt.show()
         
-
-
     def calculate_edges(self, sigma, threshold_low, threshold_high):
         edges = feature.canny(self.data, sigma=sigma, use_quantiles=True, low_threshold=threshold_low, high_threshold=threshold_high)
         return edges
@@ -138,7 +136,6 @@ class EdgeDetection():
         if self.iterations != 0:
             self.edges = ndimage.binary_dilation(self.edges, iterations=self.iterations)
 
-    	
         # update the plot
         # mask the edges where the edges are not 1 to make onl the edges visible in the overlay with the height data
         masked_data = np.ma.masked_where(self.edges != 1, self.edges)

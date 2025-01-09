@@ -533,8 +533,8 @@ def test_config():
 def main():
      
     # realign()
-    cut_masked()
-    # test_scalebar()
+    # cut_masked()
+    test_scalebar()
     # test_phaseshift()
     # compare_measurements()
     # test_rectangle_selector()

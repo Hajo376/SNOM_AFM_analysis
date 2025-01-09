@@ -10,10 +10,8 @@ from mpl_point_clicker import clicker# used for getting coordinates from images
 from matplotlib_scalebar.scalebar import ScaleBar # used for creating scale bars
 from matplotlib import patches # used for creating rectangles 
 import numpy as np
-import pandas as pd # used for getting data out of html files
 from datetime import datetime
 from enum import Enum, auto
-# from aenum import Enum, auto, extend_enum
 from pathlib import Path, PurePath
 import os
 import pickle as pkl
@@ -1648,7 +1646,7 @@ class SnomMeasurement(FileHandler):
             self.lower_y_bound = None
             self.align_points = None
             self.y_shifts = None
-            self.scalebar = []    
+            self.scalebar_channels = []    
 
     def initialize_channels(self, channels:list) -> None:
         """This function will load the data from the specified channels and replace the ones in memory.
@@ -2189,9 +2187,9 @@ class SnomMeasurement(FileHandler):
         subplots = []
         for i in range(len(dataset)):
             scalebar = None
-            for j in range(len(self.scalebar)):
-                if self.channels[i] == self.scalebar[j][0]:
-                    scalebar = self.scalebar[j][1]
+            for j in range(len(self.scalebar_channels)):
+                if self.channels[i] == self.scalebar_channels[j][0]:
+                    scalebar = self.scalebar_channels[j][1]
             subplots.append(self._add_subplot(dataset[i], channels[i], scalebar))
         self._plot_subplots(subplots)
 
@@ -3799,9 +3797,9 @@ class SnomMeasurement(FileHandler):
                             location, loc, pad, border_pad, sep, frameon, color, box_color, box_alpha, scale_loc,
                             label_loc, font_properties, label_formatter, scale_formatter, fixed_value, fixed_units, animated, rotation]
             if (channel in channels) or (len(channels)==0):
-                self.scalebar.append([channel, scalebar_var])                
+                self.scalebar_channels.append([channel, scalebar_var])                
             else:
-                self.scalebar.append([channel, None])                
+                self.scalebar_channels.append([channel, None])                
             count += 1
 
     def rotate_90_deg(self, orientation:str = 'right'):
@@ -4982,7 +4980,6 @@ class ApproachCurve(FileHandler):
         # scale xdata:
         self.all_data[self.x_channel] = np.multiply(self.all_data[self.x_channel], x_scaling)
 
-
     def set_min_to_zero(self) -> None:
         # set the min of the xdata array to zero
         min_x = np.nanmin(self.all_data[self.x_channel]) # for some reason at least the first value seems to be nan 
@@ -5007,7 +5004,7 @@ class ApproachCurve(FileHandler):
         if Plot_Definitions.show_plot:
             plt.show()
     
-    def display_channels_V2(self, y_channels=None):
+    def display_channels_v2(self, y_channels=None):
         x_channel = 'Z'
         if y_channels == None:
             y_channels = self.channels
@@ -5108,7 +5105,7 @@ class Scan3D(FileHandler):
         self.all_data = {} # (key, value) = (channelname, 3d matrix, shape:(xres, yres, zres)) 
         # load the data per channel and add to all_data
         for channel in self.channels:
-            index = Find_Index(self.header, datafile, channel) # find the index of the channels
+            index = find_index(self.header, datafile, channel) # find the index of the channels
             file = open(datafile, 'r')
             self.all_data[channel] = np.genfromtxt(file ,skip_header=self.header+1, usecols=(index), delimiter='\t', invalid_raise = False)
             file.close()
@@ -5164,7 +5161,7 @@ class Scan3D(FileHandler):
         plt.colorbar(img)
         plt.show()
 
-    def display_cutplane_V2(self, axis:str='x', line:int=0, channel:str=None, align='auto'):
+    def display_cutplane_v2(self, axis:str='x', line:int=0, channel:str=None, align='auto'):
         if channel == None:
             channel = self.channels[0]
         cutplane_data = self.get_cutplane_data(axis=axis, line=line, channel=channel)
@@ -5252,7 +5249,7 @@ class Scan3D(FileHandler):
         # plt.colorbar(img)
         plt.show()
 
-    def display_cutplane_V3(self, axis:str='x', line:int=0, channel:str=None, align='auto'):
+    def display_cutplane_v3(self, axis:str='x', line:int=0, channel:str=None, align='auto'):
         if channel == None:
             channel = self.channels[0]
         cutplane_data = self.all_cutplane_data[channel]

@@ -3,7 +3,7 @@
 
 
 
-def Horizontal_Profile(array):
+def horizontal_profile(array):
     xres = len(array[0])
     yres = len(array)
     print(f'xres: {xres}')

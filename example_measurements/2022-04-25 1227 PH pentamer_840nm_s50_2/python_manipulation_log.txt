@@ -903,3 +903,18 @@ set_min_to_zero = True
 height_leveling_coordinates = [[15, 43], [44, 32], [30, 3]]
 height_masking_threshold = 0.5
 cut = autocut
+08/01/2025 16:15:17
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+set_min_to_zero = True
+height_leveling_coordinates = [[42, 36], [9, 43], [29, 3]]
+height_masking_threshold = 0.5
+cut = autocut
+08/01/2025 16:15:32
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+08/01/2025 16:18:35
+filename = 2022-04-25 1227 PH pentamer_840nm_s50_2
+quadratic_pixels = True
+scaling = 4
+gaussian_filter_complex_sigma = 2

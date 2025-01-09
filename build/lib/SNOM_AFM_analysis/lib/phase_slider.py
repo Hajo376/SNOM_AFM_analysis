@@ -6,7 +6,7 @@ from SNOM_AFM_analysis.lib.snom_colormaps import *
 
 
 
-def Get_Phase_Offset(preview_data):
+def get_phase_offset(preview_data):
     phase_shift = Phase_Slider(preview_data)
     return phase_shift.phase_shift
 
