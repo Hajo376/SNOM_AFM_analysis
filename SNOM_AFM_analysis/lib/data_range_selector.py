@@ -3,6 +3,8 @@ import numpy as np
 from PIL import Image, ImageTk
 # import cv2 # not needed anymore, and very big package
 
+#testing
+import matplotlib.pyplot as plt
 from SNOM_AFM_analysis.lib.snom_colormaps import SNOM_amplitude, SNOM_phase, SNOM_height
 
 
@@ -23,9 +25,10 @@ class ArraySelector:
         self.root = root
         self.array = data
         self.original_array = self.array.copy()
+        self.array = ((self.array - np.min(self.array)) / (np.max(self.array) - np.min(self.array)) * 255).astype(np.uint8)
         self.channel = channel
         self.height, self.width = data.shape
-        self.original_height, self.original_width = data.shape
+        self.original_height, self.original_width = self.original_array.shape
 
         # additional parameters
         self.highlighted_image = None
@@ -217,20 +220,36 @@ class ArraySelector:
     def fill_canvas(self):#
         # self.array = cv2.resize(self.original_array, (int(self.scaling_factor*self.original_width), int(self.scaling_factor*self.original_height)),interpolation=cv2.INTER_NEAREST)
         # same using pillows image to get rid of cv2
-        self.array = Image.resize((int(self.scaling_factor*self.original_width), int(self.scaling_factor*self.original_height)), Image.NEAREST)
+        # self.array = Image.resize((int(self.scaling_factor*self.original_width), int(self.scaling_factor*self.original_height)), Image.NEAREST)
         # Normalize array to 0-255 for display
-        self.array = ((self.array - np.min(self.array)) / (np.max(self.array) - np.min(self.array)) * 255).astype(np.uint8)
+        # self.array = ((self.array - np.min(self.array)) / (np.max(self.array) - np.min(self.array)) * 255).astype(np.uint8)
 
-        self.height, self.width = self.array.shape
+        # self.height, self.width = self.array.shape
         # delete and redraw the image if already existing
         try:
             self.canvas.delete("all")
         except:
             pass
+        # Normalize array to 0-255 for display
+        # self.array = ((self.array - np.min(self.array)) / (np.max(self.array) - np.min(self.array)) * 255).astype(np.uint8)
+        # self.image = Image.fromarray(np.uint8(self.cmap(self.original_array)*255))
         self.image = Image.fromarray(np.uint8(self.cmap(self.array)*255))
+        # plt.imshow(self.image)
+        # plt.show()
+        # resize the image
+        self.width = int(self.scaling_factor*self.original_width)
+        # print(f'width: {self.width}')
+        self.height = int(self.scaling_factor*self.original_height)
+        # print(f'height: {self.height}')
+        # print('resizing image')
+        # print(f'scaling factor: {self.scaling_factor}')
+        self.image = self.image.resize((self.width, self.height), Image.Resampling.LANCZOS)
+        # plt.imshow(self.image)
+        # plt.show()
         self.tk_image = ImageTk.PhotoImage(self.image)
-        self.canvas.create_image(self.width/2, self.height/2, image=self.tk_image)
-        self.highlight_selection()
+        # self.canvas.create_image(self.width/2, self.height/2, image=self.tk_image)
+        self.canvas.create_image(0, 0, anchor=tk.NW, image=self.tk_image)
+        # self.highlight_selection()
 
     def on_windowsize_changed(self, event):
         # if the canvas size becomse so large that the image scaled by an integer factor is smaller than the canvas size, then we need to rescale the image by that factor
@@ -238,7 +257,8 @@ class ArraySelector:
         canvas_width = self.canvas.winfo_width()
         canvas_height = self.canvas.winfo_height()
         # get the current size of the data
-        height, width = self.array.shape
+        # height, width = self.array.shape
+        height, width = self.image.size
         # if the current scaling factor is 0.5 we need to increment it by 0.5 not 1 
         # if the current scaling factor is 1 we need to increment it by 0.5 not 1
         if self.scaling_factor == 0.5 or self.scaling_factor == 1:
@@ -263,7 +283,8 @@ class ArraySelector:
 
         # Create an image for the highlighting based on inverted state
         # highlighted_img = np.zeros_like(self.array)
-        highlighted_img = np.ones_like(self.array).astype(np.uint8)*255
+        # highlighted_img = np.ones_like(self.array).astype(np.uint8)*255
+        highlighted_img = np.ones((self.height, self.width)).astype(np.uint8)*255
         # highlighted_img = self.array.copy()
         if self.inverted:
             highlighted_img[:, :] = 128  # Copy original array
@@ -277,6 +298,8 @@ class ArraySelector:
             elif not self.is_horizontal and self.start is not None and self.end is not None:
                 highlighted_img[self.start:self.end, :] = 128#self.array[self.start:self.end, :]  # Highlight selected area
         mask = Image.fromarray(highlighted_img)
+        # print(f'mask size: {mask.size}')
+        # print(f'original image size: {self.image.size}')
         # create an overlay in red with 30% opacity of the highlighted area with the original image
         overlay = Image.new('RGBA', self.image.size, (255, 0, 0, 0))  # Red with 30% opacity
         combined = Image.composite(self.image.convert('RGBA'), overlay, mask)

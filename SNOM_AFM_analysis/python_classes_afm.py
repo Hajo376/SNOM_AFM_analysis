@@ -1,3 +1,4 @@
+'''This is an older version of the script ment for afm users.'''
 ##########################################################################
 # This code was created by Hans-Joachim Schill, University of Bonn, 2022 #
 ##########################################################################

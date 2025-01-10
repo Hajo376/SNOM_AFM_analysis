@@ -375,7 +375,8 @@ def test_amplitude_drift_correction():
     measurement.display_channels()
 
 def test_height_drift_correction():
-    directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-23 113254 PH single_wv-on-wg_long'
+    # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-23 113254 PH single_wv-on-wg_long'
+    directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-10-23 113133 PH wg_wv_long_refl_15slits_No3_fine'
     # directory = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-05-23-ssh-reflection')
     channels = ['Z C']
     # channels = ['O2A']
@@ -383,7 +384,8 @@ def test_height_drift_correction():
     Plot_Definitions.amp_cbar_range = False
     measurement.display_channels()
     # measurement.correct_amplitude_drift_nonlinear(channels=['O2A'], reference_area=[0, 50])
-    measurement.correct_height_drift_nonlinear(channels=['Z C'], reference_area=[20, 40])
+    # measurement.correct_height_drift_nonlinear(channels=['Z C'], reference_area=[20, 40])
+    measurement.level_data_columnwise(channel_list=channels)
     measurement.display_channels()
 
 def test_channel_substraction():
@@ -538,7 +540,7 @@ def main():
     # test_scalebar()
     # test_phaseshift()
     # compare_measurements()
-    test_rectangle_selector()
+    # test_rectangle_selector()
     # correct_phase_drift()
     # synccorrection()
     # complete_example_1()
@@ -552,7 +554,7 @@ def main():
     # average_3d_scan()
     # test_phase_drift_correction()
     # test_amplitude_drift_correction()
-    # test_height_drift_correction()
+    test_height_drift_correction()
     # test_channel_substraction()
     # simple_afm_example()
     # test_data_range_selector()

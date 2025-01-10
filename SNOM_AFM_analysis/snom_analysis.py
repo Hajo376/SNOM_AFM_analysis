@@ -1,3 +1,5 @@
+'''This module contains the basic classes and functions for the snom analysis.'''
+
 ##########################################################################
 # This code was created by Hans-Joachim Schill, University of Bonn, 2022 #
 ##########################################################################
@@ -2474,7 +2476,7 @@ class SnomMeasurement(FileHandler):
         else: 
             # if channel is in memory it has to have a channel dict, where all necessary infos are stored
             XReal, YReal = self._get_channel_tag_dict_value(channel, Channel_Tags.SCANAREA)
-            rotation = self._get_channel_tag_dict_value(channel, Channel_Tags.ROTATION)
+            rotation = self._get_channel_tag_dict_value(channel, Channel_Tags.ROTATION)[0]
             XOffset, YOffset = self._get_channel_tag_dict_value(channel, Channel_Tags.SCANNERCENTERPOSITION)
         XRes = len(data[0])
         YRes  = len(data)
@@ -4864,11 +4866,15 @@ class SnomMeasurement(FileHandler):
                 mean_phase = np.mean(leveled_data)
                 shift = np.pi - mean_phase
                 self._shift_phase_data(leveled_data, shift=shift)
-            # save the leveled data
+            '''# save the leveled data, add the leveled data to memory and keep old data
             self.channels.append(channel + '_leveled')
             self.all_data.append(leveled_data)
             self.channel_tag_dict.append(self.channel_tag_dict[self.channels.index(channel)])
-            self.channels_label.append(channel + '_leveled')
+            self.channels_label.append(channel + '_leveled')'''
+            # save the leveled data and replace old data
+            # keep original channel name, but change the data and the channels_label
+            self.all_data[self.channels.index(channel)] = leveled_data
+            self.channels_label[self.channels.index(channel)] = channel + '_leveled'
 
     def create_new_channel(self, data, channel_name:str, channel_tag_dict:dict, channel_label:str=None) -> None:
         if channel_label is None:
