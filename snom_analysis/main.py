@@ -45,7 +45,7 @@ class Definitions(Enum):
     vertical = auto()
     horizontal = auto()
 
-class Measurement_Tags(Enum):
+class MeasurementTags(Enum):
     """This class keeps track of the implemented measurement tags. 
     These are tags wich are measurement specific.
     Only tags which are listed here can be used.
@@ -77,7 +77,7 @@ class Measurement_Tags(Enum):
     QFACTOR = auto()   
     VERSION = auto()   
 
-class Channel_Tags(Enum):
+class ChannelTags(Enum):
     """This class keeps track of the implemented channel tags.
     These are tags which are channel specific.
     So multiple channels might have varying channel tag values but
@@ -106,7 +106,7 @@ class Channel_Tags(Enum):
     
     
 
-class Plot_Definitions:
+class PlotDefinitions:
     hide_ticks = True
     figsizex = 10
     figsizey = 5
@@ -147,7 +147,7 @@ class Plot_Definitions:
     autodelete_all_subplots = True # if true old subplots will be deleted on creation of new measurement
     
 # new version is based on filehandler to do basic stuff and then a class for each different measurement type like snom/afm, approach curves, spectra etc.
-class FileHandler(Plot_Definitions):
+class FileHandler(PlotDefinitions):
     """This class handles the filetype and parameter type and all toplevel functionality."""
     def __init__(self, directory_name:str, title:str=None) -> None:
         self.directory_name = Path(directory_name)
@@ -283,7 +283,7 @@ class FileHandler(Plot_Definitions):
             'rounding_decimal_height_custom': 2, # when in nm
             'height_scaling_default': 10**9, # data is in m convert to nm
             'height_scaling_custom': 10**9, # data is in m convert to nm
-            'measurement_tags': {
+            'MeasurementTags': {
                 # carful the keys will be used to reference enums, so they should be unique and uppercase, they also must be identical for all filetypes
                 # the values are the tags in the parameter file so they should match the file format
                 'SCAN': 'Scan', # scan type, afm, snom, approach curve, 2d/3d, PsHet...
@@ -313,7 +313,7 @@ class FileHandler(Plot_Definitions):
                 'Q-FACTOR': 'Q-Factor',
                 'VERSION': 'Version',
             },
-            'channel_tags': {
+            'ChannelTags': {
                 'PIXELAREA': ['XRes', 'YRes'],
                 'YINCOMPLETE': 'YResIncomplete',
                 'ROTATION': 'Neaspec_Angle',
@@ -368,7 +368,7 @@ class FileHandler(Plot_Definitions):
             'rounding_decimal_height_custom': 2, # when in nm
             'height_scaling_default': 10**9, # data is in m convert to nm
             'height_scaling_custom': 10**9, # data is in m convert to nm
-            'measurement_tags': {
+            'MeasurementTags': {
                 # carful the keys will be used to create enums, so they should be unique and uppercase, they also must be identical for all filetypes
                 # the values are the tags in the file so they should match the file format
                 # 'SCAN': 'Scan', # scan type, afm, snom, approach curve, 2d/3d, PsHet...
@@ -398,7 +398,7 @@ class FileHandler(Plot_Definitions):
                 # 'Q-FACTOR': 'Q-Factor',
                 'VERSION': 'Version',
             },
-            'channel_tags': {
+            'ChannelTags': {
                 'PIXELAREA': ['XRes', 'YRes'],
                 'YINCOMPLETE': 'YResIncomplete',
                 # 'ROTATION': 'Neaspec_Angle',
@@ -455,7 +455,7 @@ class FileHandler(Plot_Definitions):
             'rounding_decimal_height_custom': 2, # when in nm
             'height_scaling_default': 10**9, # data is in m convert to nm
             'height_scaling_custom': 10**9, # data is in m convert to nm
-            'measurement_tags': {
+            'MeasurementTags': {
                 # carful the keys will be used to create enums, so they should be unique and uppercase, they also must be identical for all filetypes
                 # the values are the tags in the file so they should match the file format
                 'SCANAREA': ['scan_size_f (um)', 'scan_size_s (um)', 'scan_size_v (um)'],
@@ -519,7 +519,7 @@ class FileHandler(Plot_Definitions):
             'rounding_decimal_height_custom': 2, # when in nm
             'height_scaling_default': 10**9, # data is in m convert to nm
             'height_scaling_custom': 10**9, # data is in m convert to nm
-            'measurement_tags': {
+            'MeasurementTags': {
                 # carful the keys will be used to create enums, so they should be unique and uppercase, they also must be identical for all filetypes
                 # the values are the tags in the file so they should match the file format
                 'SCANAREA': ['scan_size_f (um)', 'scan_size_s (um)', 'scan_size_v (um)'],
@@ -581,7 +581,7 @@ class FileHandler(Plot_Definitions):
             'rounding_decimal_height_custom': 2, # when in nm
             'height_scaling_default': 10**9, # data is in m convert to nm
             'height_scaling_custom': 10**9, # data is in m convert to nm
-            'measurement_tags': {
+            'MeasurementTags': {
                 # carful the keys will be used to create enums, so they should be unique and uppercase, they also must be identical for all filetypes
                 # the values are the tags in the file so they should match the file format
                 # 'SCAN': 'Scan', # scan type, afm, snom, approach curve, 2d/3d, PsHet...
@@ -611,7 +611,7 @@ class FileHandler(Plot_Definitions):
                 # 'Q-FACTOR': 'Q-Factor',
                 'VERSION': 'Version',
             },
-            'channel_tags': {
+            'ChannelTags': {
                 'PIXELAREA': ['XRes', 'YRes'],
                 # 'YINCOMPLETE': 'YResIncomplete',
                 # 'ROTATION': 'Neaspec_Angle',
@@ -669,7 +669,7 @@ class FileHandler(Plot_Definitions):
             'rounding_decimal_height_custom': 2, # when in nm
             'height_scaling_default': 10**9, # data is in m convert to nm
             'height_scaling_custom': 10**9, # data is in m convert to nm
-            'measurement_tags': {
+            'MeasurementTags': {
                 # carful the keys will be used to create enums, so they should be unique and uppercase, they also must be identical for all filetypes
                 # the values are the tags in the file so they should match the file format
                 # 'SCAN': 'Scan', # scan type, afm, snom, approach curve, 2d/3d, PsHet...
@@ -699,7 +699,7 @@ class FileHandler(Plot_Definitions):
                 # 'Q-FACTOR': 'Q-Factor',
                 'VERSION': 'Version',
             },
-            'channel_tags': {
+            'ChannelTags': {
                 'PIXELAREA': ['XRes', 'YRes'],
                 # 'YINCOMPLETE': 'YResIncomplete',
                 # 'ROTATION': 'Neaspec_Angle',
@@ -784,11 +784,11 @@ class FileHandler(Plot_Definitions):
 
             return value
 
-    def _print_measurement_tags(self):
+    def _print_MeasurementTags(self):
         """This function prints the measurement tags.
         """
         # print the content of the measurement tags class
-        print('All measurement tags: ', list(Measurement_Tags))
+        print('All measurement tags: ', list(MeasurementTags))
 
     def _find_filetype(self) -> bool:
         filetypes = self._get_from_config(section='FILETYPES')
@@ -835,8 +835,8 @@ class FileHandler(Plot_Definitions):
             return False
         separator = self._get_from_config('parameters_separator', filetype)
         header_indicator = self._get_from_config('parameters_header_indicator', filetype)
-        measurement_tags = self._get_from_config('measurement_tags', filetype)
-        tags_list = list(measurement_tags.values())
+        MeasurementTags = self._get_from_config('MeasurementTags', filetype)
+        tags_list = list(MeasurementTags.values())
         # if tags contains a list of values flatten the list
         if any(isinstance(i, list) for i in tags_list):
             tags_list = [item for sublist in tags_list for item in sublist]
@@ -891,133 +891,133 @@ class FileHandler(Plot_Definitions):
                 else: is_unit = False
             if value == '':
                 continue
-            if key in measurement_tags.values():
-                tag_key = list(measurement_tags.keys())[list(measurement_tags.values()).index(key)]
+            if key in MeasurementTags.values():
+                tag_key = list(MeasurementTags.keys())[list(MeasurementTags.values()).index(key)]
             else:
                 continue
             if tag_key == 'SCAN':
-                self.measurement_tag_dict[Measurement_Tags.SCAN] = value
+                self.measurement_tag_dict[MeasurementTags.SCAN] = value
             elif tag_key == 'PROJECT':
-                self.measurement_tag_dict[Measurement_Tags.PROJECT] = value
+                self.measurement_tag_dict[MeasurementTags.PROJECT] = value
             elif tag_key == 'DESCRIPTION':
-                self.measurement_tag_dict[Measurement_Tags.DESCRIPTION] = value
+                self.measurement_tag_dict[MeasurementTags.DESCRIPTION] = value
             elif tag_key == 'DATE':
-                self.measurement_tag_dict[Measurement_Tags.DATE] = value
+                self.measurement_tag_dict[MeasurementTags.DATE] = value
             elif tag_key == 'SCANNERCENTERPOSITION': # is_unit, x, y
                 if is_unit:
-                    try: self.measurement_tag_dict[Measurement_Tags.SCANNERCENTERPOSITION] = [value[0], float(value[1]), float(value[2])]
-                    except: self.measurement_tag_dict[Measurement_Tags.SCANNERCENTERPOSITION] = [float(value[0]), float(value[1])]
+                    try: self.measurement_tag_dict[MeasurementTags.SCANNERCENTERPOSITION] = [value[0], float(value[1]), float(value[2])]
+                    except: self.measurement_tag_dict[MeasurementTags.SCANNERCENTERPOSITION] = [float(value[0]), float(value[1])]
                 else:
-                    self.measurement_tag_dict[Measurement_Tags.SCANNERCENTERPOSITION] = [float(value[0]), float(value[1])]
+                    self.measurement_tag_dict[MeasurementTags.SCANNERCENTERPOSITION] = [float(value[0]), float(value[1])]
             elif tag_key == 'ROTATION': # is_unit, angle
-                if is_unit: self.measurement_tag_dict[Measurement_Tags.ROTATION] = [value[0], float(value[1])]
-                else: self.measurement_tag_dict[Measurement_Tags.ROTATION] = float(value)
+                if is_unit: self.measurement_tag_dict[MeasurementTags.ROTATION] = [value[0], float(value[1])]
+                else: self.measurement_tag_dict[MeasurementTags.ROTATION] = float(value)
             elif tag_key == 'SCANAREA': # is_unit, x, y, z
                 # some files have only 2 values for the scan area with or without is_unit
                 # check if first value is a is_unit
                 if is_unit:
-                    try: self.measurement_tag_dict[Measurement_Tags.SCANAREA] = [value[0], float(value[1]), float(value[2]), float(value[3])]
-                    except: self.measurement_tag_dict[Measurement_Tags.SCANAREA] = [value[0], float(value[1]), float(value[2])]
+                    try: self.measurement_tag_dict[MeasurementTags.SCANAREA] = [value[0], float(value[1]), float(value[2]), float(value[3])]
+                    except: self.measurement_tag_dict[MeasurementTags.SCANAREA] = [value[0], float(value[1]), float(value[2])]
                 else:
-                    try: self.measurement_tag_dict[Measurement_Tags.SCANAREA] = [float(value[0]), float(value[1]), float(value[2])]
-                    except: self.measurement_tag_dict[Measurement_Tags.SCANAREA] = [float(value[0]), float(value[1])]
+                    try: self.measurement_tag_dict[MeasurementTags.SCANAREA] = [float(value[0]), float(value[1]), float(value[2])]
+                    except: self.measurement_tag_dict[MeasurementTags.SCANAREA] = [float(value[0]), float(value[1])]
             elif tag_key == 'PIXELAREA': # is_unit, x, y, z
                 # print('PixelArea value: ', value)
                 if is_unit:
-                    try: self.measurement_tag_dict[Measurement_Tags.PIXELAREA] = [value[0], int(value[1]), int(value[2]), int(value[3])]
-                    except: self.measurement_tag_dict[Measurement_Tags.PIXELAREA] = [int(value[0]), int(value[1]), int(value[2])]
+                    try: self.measurement_tag_dict[MeasurementTags.PIXELAREA] = [value[0], int(value[1]), int(value[2]), int(value[3])]
+                    except: self.measurement_tag_dict[MeasurementTags.PIXELAREA] = [int(value[0]), int(value[1]), int(value[2])]
                 else:
-                    try: self.measurement_tag_dict[Measurement_Tags.PIXELAREA] = [int(value[0]), int(value[1]), int(value[2])]
-                    except: self.measurement_tag_dict[Measurement_Tags.PIXELAREA] = [int(value[0]), int(value[1])]
+                    try: self.measurement_tag_dict[MeasurementTags.PIXELAREA] = [int(value[0]), int(value[1]), int(value[2])]
+                    except: self.measurement_tag_dict[MeasurementTags.PIXELAREA] = [int(value[0]), int(value[1])]
             elif tag_key == 'AVERAGING':
-                self.measurement_tag_dict[Measurement_Tags.AVERAGING] = int(value)  
+                self.measurement_tag_dict[MeasurementTags.AVERAGING] = int(value)  
             elif tag_key == 'INTEGRATIONTIME':
                 if is_list:
-                    self.measurement_tag_dict[Measurement_Tags.INTEGRATIONTIME] = [value[0], float(value[1])]
+                    self.measurement_tag_dict[MeasurementTags.INTEGRATIONTIME] = [value[0], float(value[1])]
                 else:
-                    if is_unit: self.measurement_tag_dict[Measurement_Tags.INTEGRATIONTIME] = value
-                    else: self.measurement_tag_dict[Measurement_Tags.INTEGRATIONTIME] = float(value)
+                    if is_unit: self.measurement_tag_dict[MeasurementTags.INTEGRATIONTIME] = value
+                    else: self.measurement_tag_dict[MeasurementTags.INTEGRATIONTIME] = float(value)
             elif tag_key == 'LASERSOURCE':
-                self.measurement_tag_dict[Measurement_Tags.LASERSOURCE] = value
+                self.measurement_tag_dict[MeasurementTags.LASERSOURCE] = value
             elif tag_key == 'DETECTOR':
-                self.measurement_tag_dict[Measurement_Tags.DETECTOR] = value
+                self.measurement_tag_dict[MeasurementTags.DETECTOR] = value
             elif tag_key == 'TARGETWAVELENGTH': # wavelength is usually not given...
                 if is_list:
-                    self.measurement_tag_dict[Measurement_Tags.TARGETWAVELENGTH] = [value[0], float(value[1])]
+                    self.measurement_tag_dict[MeasurementTags.TARGETWAVELENGTH] = [value[0], float(value[1])]
                 else:
-                    if is_unit: self.measurement_tag_dict[Measurement_Tags.TARGETWAVELENGTH] = value
-                    else: self.measurement_tag_dict[Measurement_Tags.TARGETWAVELENGTH] = float(value)
+                    if is_unit: self.measurement_tag_dict[MeasurementTags.TARGETWAVELENGTH] = value
+                    else: self.measurement_tag_dict[MeasurementTags.TARGETWAVELENGTH] = float(value)
             elif tag_key == 'DEMODULATIONMODE':
-                self.measurement_tag_dict[Measurement_Tags.DEMODULATIONMODE] = value
+                self.measurement_tag_dict[MeasurementTags.DEMODULATIONMODE] = value
             elif tag_key == 'TIPFREQUENCY':
                 if is_list:
-                    self.measurement_tag_dict[Measurement_Tags.TIPFREQUENCY] = [value[0], float(value[1])]
+                    self.measurement_tag_dict[MeasurementTags.TIPFREQUENCY] = [value[0], float(value[1])]
                 else:
-                    if is_unit: self.measurement_tag_dict[Measurement_Tags.TIPFREQUENCY] = value
-                    else: self.measurement_tag_dict[Measurement_Tags.TIPFREQUENCY] = float(value)
+                    if is_unit: self.measurement_tag_dict[MeasurementTags.TIPFREQUENCY] = value
+                    else: self.measurement_tag_dict[MeasurementTags.TIPFREQUENCY] = float(value)
             elif tag_key == 'TIPAMPLITUTDE':
                 if is_list:
-                    self.measurement_tag_dict[Measurement_Tags.TIPAMPLITUTDE] = [value[0], float(value[1])]
+                    self.measurement_tag_dict[MeasurementTags.TIPAMPLITUTDE] = [value[0], float(value[1])]
                 else:
-                    if is_unit: self.measurement_tag_dict[Measurement_Tags.TIPAMPLITUTDE] = value
-                    else: self.measurement_tag_dict[Measurement_Tags.TIPAMPLITUTDE] = float(value)
+                    if is_unit: self.measurement_tag_dict[MeasurementTags.TIPAMPLITUTDE] = value
+                    else: self.measurement_tag_dict[MeasurementTags.TIPAMPLITUTDE] = float(value)
             elif tag_key == 'TAPPINGAMPLITUDE':
                 if is_list:
-                    self.measurement_tag_dict[Measurement_Tags.TAPPINGAMPLITUDE] = [value[0], float(value[1])]
+                    self.measurement_tag_dict[MeasurementTags.TAPPINGAMPLITUDE] = [value[0], float(value[1])]
                 else:
-                    if is_unit: self.measurement_tag_dict[Measurement_Tags.TAPPINGAMPLITUDE] = value
-                    else: self.measurement_tag_dict[Measurement_Tags.TAPPINGAMPLITUDE] = float(value)
+                    if is_unit: self.measurement_tag_dict[MeasurementTags.TAPPINGAMPLITUDE] = value
+                    else: self.measurement_tag_dict[MeasurementTags.TAPPINGAMPLITUDE] = float(value)
             elif tag_key == 'MODULATIONFREQUENCY':
                 if is_list:
-                    self.measurement_tag_dict[Measurement_Tags.MODULATIONFREQUENCY] = [value[0], float(value[1])]
+                    self.measurement_tag_dict[MeasurementTags.MODULATIONFREQUENCY] = [value[0], float(value[1])]
                 else:
-                    if is_unit: self.measurement_tag_dict[Measurement_Tags.MODULATIONFREQUENCY] = value
-                    else: self.measurement_tag_dict[Measurement_Tags.MODULATIONFREQUENCY] = float(value)
+                    if is_unit: self.measurement_tag_dict[MeasurementTags.MODULATIONFREQUENCY] = value
+                    else: self.measurement_tag_dict[MeasurementTags.MODULATIONFREQUENCY] = float(value)
             elif tag_key == 'MODULATIONAMPLITUDE':
                 if is_list:
-                    self.measurement_tag_dict[Measurement_Tags.MODULATIONAMPLITUDE] = [value[0], float(value[1])]
+                    self.measurement_tag_dict[MeasurementTags.MODULATIONAMPLITUDE] = [value[0], float(value[1])]
                 else:
-                    if is_unit: self.measurement_tag_dict[Measurement_Tags.MODULATIONAMPLITUDE] = value
-                    else: self.measurement_tag_dict[Measurement_Tags.MODULATIONAMPLITUDE] = float(value)
+                    if is_unit: self.measurement_tag_dict[MeasurementTags.MODULATIONAMPLITUDE] = value
+                    else: self.measurement_tag_dict[MeasurementTags.MODULATIONAMPLITUDE] = float(value)
             elif tag_key == 'MODULATIONOFFSET':
                 if is_list:
-                    self.measurement_tag_dict[Measurement_Tags.MODULATIONOFFSET] = [value[0], float(value[1])]
+                    self.measurement_tag_dict[MeasurementTags.MODULATIONOFFSET] = [value[0], float(value[1])]
                 else:
-                    if is_unit: self.measurement_tag_dict[Measurement_Tags.MODULATIONOFFSET] = value
-                    else: self.measurement_tag_dict[Measurement_Tags.MODULATIONOFFSET] = float(value)
+                    if is_unit: self.measurement_tag_dict[MeasurementTags.MODULATIONOFFSET] = value
+                    else: self.measurement_tag_dict[MeasurementTags.MODULATIONOFFSET] = float(value)
             elif tag_key == 'SETPOINT':
                 if is_list:
-                    self.measurement_tag_dict[Measurement_Tags.SETPOINT] = [value[0], float(value[1])]
+                    self.measurement_tag_dict[MeasurementTags.SETPOINT] = [value[0], float(value[1])]
                 else:
-                    if is_unit: self.measurement_tag_dict[Measurement_Tags.SETPOINT] = value
-                    else: self.measurement_tag_dict[Measurement_Tags.SETPOINT] = float(value)
+                    if is_unit: self.measurement_tag_dict[MeasurementTags.SETPOINT] = value
+                    else: self.measurement_tag_dict[MeasurementTags.SETPOINT] = float(value)
             elif tag_key == 'REGULATOR':
                 if is_list:
-                    self.measurement_tag_dict[Measurement_Tags.REGULATOR] = [value[0], float(value[1])]
+                    self.measurement_tag_dict[MeasurementTags.REGULATOR] = [value[0], float(value[1])]
                 else:
-                    if is_unit: self.measurement_tag_dict[Measurement_Tags.REGULATOR] = value
-                    else: self.measurement_tag_dict[Measurement_Tags.REGULATOR] = float(value)
+                    if is_unit: self.measurement_tag_dict[MeasurementTags.REGULATOR] = value
+                    else: self.measurement_tag_dict[MeasurementTags.REGULATOR] = float(value)
             elif tag_key == 'TIPPOTENTIAL':
                 if is_list:
-                    self.measurement_tag_dict[Measurement_Tags.TIPPOTENTIAL] = [value[0], float(value[1])]
+                    self.measurement_tag_dict[MeasurementTags.TIPPOTENTIAL] = [value[0], float(value[1])]
                 else:
-                    if is_unit: self.measurement_tag_dict[Measurement_Tags.TIPPOTENTIAL] = value
-                    else: self.measurement_tag_dict[Measurement_Tags.TIPPOTENTIAL] = float(value)
+                    if is_unit: self.measurement_tag_dict[MeasurementTags.TIPPOTENTIAL] = value
+                    else: self.measurement_tag_dict[MeasurementTags.TIPPOTENTIAL] = float(value)
             elif tag_key == 'M1ASCALING':
                 if is_list:
-                    self.measurement_tag_dict[Measurement_Tags.M1ASCALING] = [value[0], float(value[1])]
+                    self.measurement_tag_dict[MeasurementTags.M1ASCALING] = [value[0], float(value[1])]
                 else:
-                    if is_unit: self.measurement_tag_dict[Measurement_Tags.M1ASCALING] = value
-                    else: self.measurement_tag_dict[Measurement_Tags.M1ASCALING] = float(value)
+                    if is_unit: self.measurement_tag_dict[MeasurementTags.M1ASCALING] = value
+                    else: self.measurement_tag_dict[MeasurementTags.M1ASCALING] = float(value)
             elif tag_key == 'QFACTOR':
-                self.measurement_tag_dict[Measurement_Tags.QFACTOR] = float(value)
+                self.measurement_tag_dict[MeasurementTags.QFACTOR] = float(value)
             elif tag_key == 'VERSION':
-                self.measurement_tag_dict[Measurement_Tags.VERSION] = value
+                self.measurement_tag_dict[MeasurementTags.VERSION] = value
 
         # only used by synccorrection, every other function should use the channels tag dict version, as pixel resolution could vary
-        pixelarea = self._get_measurement_tag_dict_value(Measurement_Tags.PIXELAREA)
-        # scanarea = self.measurement_tag_dict[Measurement_Tags.SCANAREA]
-        scanarea = self._get_measurement_tag_dict_value(Measurement_Tags.SCANAREA)
+        pixelarea = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
+        # scanarea = self.measurement_tag_dict[MeasurementTags.SCANAREA]
+        scanarea = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
         if len(pixelarea) >= 3 and isinstance(pixelarea[0], str):
             self.XRes, self.YRes = pixelarea[1], pixelarea[2] # [unit, x, y, (z)]
             self.XReal, self.YReal = scanarea[1], scanarea[2]
@@ -1123,12 +1123,12 @@ class FileHandler(Plot_Definitions):
         with open(self.plotting_parameters_path, 'w') as file:
             json.dump(dictionary, file, indent=4)
    
-    def _get_channel_tag_dict_value(self, channel:str, tag:Channel_Tags) -> list:
+    def _get_channel_tag_dict_value(self, channel:str, tag:ChannelTags) -> list:
         """This function returns the value of the specified tag for the specified channel. If the tag is not found, it will return None.
 
         Args:
             channel (str): channel name
-            tag (Channel_Tags): tag name
+            tag (ChannelTags): tag name
 
         Returns:
             list: tag value or values as a list
@@ -1148,12 +1148,12 @@ class FileHandler(Plot_Definitions):
             else:
                 return [value]
 
-    def _get_measurement_tag_dict_value(self, tag:Measurement_Tags) -> list:
+    def _get_measurement_tag_dict_value(self, tag:MeasurementTags) -> list:
         """This function returns the value of the specified tag for the current measurement. If the tag is not found, it will return None.
 
         Args:
             channel (str): channel name
-            tag (Measurement_Tags): tag name
+            tag (MeasurementTags): tag name
 
         Returns:
             list: tag value or values as a list
@@ -1173,12 +1173,12 @@ class FileHandler(Plot_Definitions):
             else:
                 return [value]
 
-    def _get_channel_tag_dict_unit(self, channel:str, tag:Channel_Tags) -> str:
+    def _get_channel_tag_dict_unit(self, channel:str, tag:ChannelTags) -> str:
         """This function returns the value of the specified tag for the specified channel. If the tag is not found, it will return None.
 
         Args:
             channel (str): channel name
-            tag (Channel_Tags): tag name
+            tag (ChannelTags): tag name
 
         Returns:
             float: tag unit if there is one
@@ -1198,12 +1198,12 @@ class FileHandler(Plot_Definitions):
             else:
                 return None
 
-    def _get_measurement_tag_dict_unit(self, tag:Measurement_Tags) -> str:
+    def _get_measurement_tag_dict_unit(self, tag:MeasurementTags) -> str:
         """This function returns the value of the specified tag for the current measurement. If the tag is not found, it will return None.
 
         Args:
             channel (str): channel name
-            tag (Measurement_Tags): tag name
+            tag (MeasurementTags): tag name
 
         Returns:
             float: tag unit if there is one
@@ -1223,13 +1223,13 @@ class FileHandler(Plot_Definitions):
             else:
                 return None
 
-    def _set_channel_tag_dict_value(self, channel:str, tag:Channel_Tags, value) -> None:
+    def _set_channel_tag_dict_value(self, channel:str, tag:ChannelTags, value) -> None:
         """This function sets the value of the specified tag for the specified channel.
         It automatically tries to keep the unit of the value if there is one. 
 
         Args:
             channel (str): channel name
-            tag (Channel_Tags): tag name
+            tag (ChannelTags): tag name
             value (list): tag values as a list, or single value
         """
         # ckeck if value is a list
@@ -1257,12 +1257,12 @@ class FileHandler(Plot_Definitions):
                 # set new value
                 self.channel_tag_dict[self.channels.index(channel)][tag] = value
 
-    def _set_measurement_tag_dict_value(self, tag:Measurement_Tags, value) -> None:
+    def _set_measurement_tag_dict_value(self, tag:MeasurementTags, value) -> None:
         """This function sets the value of the specified tag for the current measurement.
         It automatically tries to keep the unit of the value if there is one. 
 
         Args:
-            tag (Measurement_Tags): tag name
+            tag (MeasurementTags): tag name
             value (list): tag values as a list, or single value
         """
         # ckeck if value is a list
@@ -1290,12 +1290,12 @@ class FileHandler(Plot_Definitions):
                 # set new value
                 self.measurement_tag_dict[tag] = value
 
-    def _set_channel_tag_dict_unit(self, channel:str, tag:Channel_Tags, value:str) -> None:
+    def _set_channel_tag_dict_unit(self, channel:str, tag:ChannelTags, value:str) -> None:
         """This function sets the unit of the specified tag for the specified channel.
 
         Args:
             channel (str): channel name
-            tag (Channel_Tags): tag name
+            tag (ChannelTags): tag name
             value (str): unit of the specified tag
         """
         # check if old unit exists
@@ -1312,11 +1312,11 @@ class FileHandler(Plot_Definitions):
         else:
             self.channel_tag_dict[self.channels.index(channel)][tag][0] = value
 
-    def _set_measurement_tag_dict_unit(self, tag:Measurement_Tags, value:str) -> None:
+    def _set_measurement_tag_dict_unit(self, tag:MeasurementTags, value:str) -> None:
         """This function sets the unit of the specified tag for the current measurement.
 
         Args:
-            tag (Measurement_Tags): tag name
+            tag (MeasurementTags): tag name
             value (str): unit of the specified tag
         """
         # check if old unit exists
@@ -1553,8 +1553,8 @@ class FileHandler(Plot_Definitions):
                 content=f.read()
 
 
-            channel_tags = self._get_from_config('channel_tags')
-            for key, tag in channel_tags.items():
+            ChannelTags = self._get_from_config('ChannelTags')
+            for key, tag in ChannelTags.items():
                 is_list = False
                 is_unit = False
                 tag_value_found = False
@@ -1585,26 +1585,26 @@ class FileHandler(Plot_Definitions):
                     print(f'Could not find the tag value for {tag} in channel {channel}. You should probably check the config file.')
                     continue
                 if key == 'PIXELAREA':
-                    try: channel_dict[Channel_Tags.PIXELAREA] = [int(values[0]), int(values[1]), int(values[2])]
-                    except: channel_dict[Channel_Tags.PIXELAREA] = [int(values[0]), int(values[1])]
+                    try: channel_dict[ChannelTags.PIXELAREA] = [int(values[0]), int(values[1]), int(values[2])]
+                    except: channel_dict[ChannelTags.PIXELAREA] = [int(values[0]), int(values[1])]
                 elif key == 'YINCOMPLETE':
-                    channel_dict[Channel_Tags.YINCOMPLETE] = int(value)
+                    channel_dict[ChannelTags.YINCOMPLETE] = int(value)
                 elif key == 'SCANNERCENTERPOSITION':
-                    try: channel_dict[Channel_Tags.SCANNERCENTERPOSITION] = [float(values[0]), float(values[1]), float(values[2])]
-                    except: channel_dict[Channel_Tags.SCANNERCENTERPOSITION] = [float(values[0]), float(values[1])]
+                    try: channel_dict[ChannelTags.SCANNERCENTERPOSITION] = [float(values[0]), float(values[1]), float(values[2])]
+                    except: channel_dict[ChannelTags.SCANNERCENTERPOSITION] = [float(values[0]), float(values[1])]
                 elif key == 'ROTATION':
-                    channel_dict[Channel_Tags.ROTATION] = float(value)
+                    channel_dict[ChannelTags.ROTATION] = float(value)
                 elif key == 'SCANAREA':
-                    try: channel_dict[Channel_Tags.SCANAREA] = [float(values[0]), float(values[1]), float(values[2])]
-                    except: channel_dict[Channel_Tags.SCANAREA] = [float(values[0]), float(values[1])]
+                    try: channel_dict[ChannelTags.SCANAREA] = [float(values[0]), float(values[1]), float(values[2])]
+                    except: channel_dict[ChannelTags.SCANAREA] = [float(values[0]), float(values[1])]
                 elif key == 'XYUNIT':
-                    channel_dict[Channel_Tags.XYUNIT] = value
+                    channel_dict[ChannelTags.XYUNIT] = value
                 elif key == 'ZUNIT':
-                    channel_dict[Channel_Tags.ZUNIT] = value
+                    channel_dict[ChannelTags.ZUNIT] = value
                 elif key == 'WAVENUMBERSCALING':
-                    channel_dict[Channel_Tags.WAVENUMBERSCALING] = float(value)
+                    channel_dict[ChannelTags.WAVENUMBERSCALING] = float(value)
             # add pixel scaling to the channel dict, initially this is always 1
-            channel_dict[Channel_Tags.PIXELSCALING] = 1
+            channel_dict[ChannelTags.PIXELSCALING] = 1
                     
             self.channel_tag_dict.append(channel_dict)
 
@@ -1620,7 +1620,7 @@ class SnomMeasurement(FileHandler):
         self.channels = channels.copy() # make sure to copy the list to avoid changing the original list     
         self.autoscale = autoscale
         self._initialize_data(self.channels)
-        if Plot_Definitions.autodelete_all_subplots: self._delete_all_subplots() # automatically delete old subplots
+        if PlotDefinitions.autodelete_all_subplots: self._delete_all_subplots() # automatically delete old subplots
     
     def _initialize_data(self, channels=None) -> None:
         """This function initializes the data in memory. If no channels are specified the already existing data is used,
@@ -1727,9 +1727,9 @@ class SnomMeasurement(FileHandler):
         for channel in channels:
             if channel in self.channels:
                 self.all_data[self.channels.index(channel)] = self._scale_array(self.all_data[self.channels.index(channel)], scaling)
-                XReal, YReal = self._get_channel_tag_dict_value(channel, Channel_Tags.PIXELAREA)
-                self._set_channel_tag_dict_value(channel, Channel_Tags.PIXELAREA, [XReal*scaling, YReal*scaling])
-                self._set_channel_tag_dict_value(channel, Channel_Tags.PIXELSCALING, scaling)
+                XReal, YReal = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+                self._set_channel_tag_dict_value(channel, ChannelTags.PIXELAREA, [XReal*scaling, YReal*scaling])
+                self._set_channel_tag_dict_value(channel, ChannelTags.PIXELSCALING, scaling)
             else:
                 print(f'Channel {channel} is not in memory! Please initiate the channels you want to use first!')
 
@@ -1777,7 +1777,7 @@ class SnomMeasurement(FileHandler):
                 datalist = np.array(datalist[:-1], dtype=float)#, dtype=np.float convert list to np.array and strings to float
             
             # get the resolution of the channel 
-            XRes, YRes = self._get_channel_tag_dict_value(channel, Channel_Tags.PIXELAREA)
+            XRes, YRes = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
             datasize=int(XRes*YRes*4)
             channel_data = np.zeros((YRes, XRes))
             # we knwo the resolution of the data from the header or parameter file
@@ -2045,43 +2045,43 @@ class SnomMeasurement(FileHandler):
                         if self.file_type == 'FILETYPE6':
                             data = Set_nan_to_zero(data) #comsol data can contain nan values which are problematic for min and max
                         data_limit = Get_Largest_Abs(min_data, max_data)
-                        if Plot_Definitions.vlimit_real is None: Plot_Definitions.vlimit_real = data_limit
-                        if Plot_Definitions.real_cbar_range is True:
-                            if Plot_Definitions.vlimit_real < data_limit: Plot_Definitions.vlimit_real = data_limit
-                            img = axis.pcolormesh(data, cmap=cmap, vmin=-Plot_Definitions.vlimit_real, vmax=Plot_Definitions.vlimit_real)
+                        if PlotDefinitions.vlimit_real is None: PlotDefinitions.vlimit_real = data_limit
+                        if PlotDefinitions.real_cbar_range is True:
+                            if PlotDefinitions.vlimit_real < data_limit: PlotDefinitions.vlimit_real = data_limit
+                            img = axis.pcolormesh(data, cmap=cmap, vmin=-PlotDefinitions.vlimit_real, vmax=PlotDefinitions.vlimit_real)
                         else:
                             img = axis.pcolormesh(data, cmap=cmap, vmin=-data_limit, vmax=data_limit)
                     else:
-                        if cmap == SNOM_phase and Plot_Definitions.full_phase_range is True: # for phase data
+                        if cmap == SNOM_phase and PlotDefinitions.full_phase_range is True: # for phase data
                             vmin = 0
                             vmax = 2*np.pi
                             img = axis.pcolormesh(data, cmap=cmap, vmin=vmin, vmax=vmax)
-                        elif cmap == SNOM_phase and Plot_Definitions.full_phase_range is False:
-                            if Plot_Definitions.vmin_phase is None: Plot_Definitions.vmin_phase = min_data
-                            if Plot_Definitions.vmax_phase is None: Plot_Definitions.vmax_phase = max_data
-                            if Plot_Definitions.shared_phase_range is True:
-                                if Plot_Definitions.vmin_phase > min_data: Plot_Definitions.vmin_phase = min_data
-                                if Plot_Definitions.vmax_phase < max_data: Plot_Definitions.vmax_phase = max_data
+                        elif cmap == SNOM_phase and PlotDefinitions.full_phase_range is False:
+                            if PlotDefinitions.vmin_phase is None: PlotDefinitions.vmin_phase = min_data
+                            if PlotDefinitions.vmax_phase is None: PlotDefinitions.vmax_phase = max_data
+                            if PlotDefinitions.shared_phase_range is True:
+                                if PlotDefinitions.vmin_phase > min_data: PlotDefinitions.vmin_phase = min_data
+                                if PlotDefinitions.vmax_phase < max_data: PlotDefinitions.vmax_phase = max_data
                             else:
-                                Plot_Definitions.vmin_phase = min_data
-                                Plot_Definitions.vmax_phase = max_data
-                            img = axis.pcolormesh(data, cmap=cmap, vmin=Plot_Definitions.vmin_phase, vmax=Plot_Definitions.vmax_phase)
+                                PlotDefinitions.vmin_phase = min_data
+                                PlotDefinitions.vmax_phase = max_data
+                            img = axis.pcolormesh(data, cmap=cmap, vmin=PlotDefinitions.vmin_phase, vmax=PlotDefinitions.vmax_phase)
                             
-                        elif cmap == SNOM_amplitude and Plot_Definitions.amp_cbar_range is True:
-                            if Plot_Definitions.vmin_amp is None: Plot_Definitions.vmin_amp = min_data
-                            if Plot_Definitions.vmax_amp is None: Plot_Definitions.vmax_amp = max_data
-                            if min_data < Plot_Definitions.vmin_amp: Plot_Definitions.vmin_amp = min_data # update the min and max values in Plot_Definitions if new values are outside of range
-                            if max_data > Plot_Definitions.vmax_amp: Plot_Definitions.vmax_amp = max_data
-                            vmin = Plot_Definitions.vmin_amp
-                            vmax = Plot_Definitions.vmax_amp
+                        elif cmap == SNOM_amplitude and PlotDefinitions.amp_cbar_range is True:
+                            if PlotDefinitions.vmin_amp is None: PlotDefinitions.vmin_amp = min_data
+                            if PlotDefinitions.vmax_amp is None: PlotDefinitions.vmax_amp = max_data
+                            if min_data < PlotDefinitions.vmin_amp: PlotDefinitions.vmin_amp = min_data # update the min and max values in PlotDefinitions if new values are outside of range
+                            if max_data > PlotDefinitions.vmax_amp: PlotDefinitions.vmax_amp = max_data
+                            vmin = PlotDefinitions.vmin_amp
+                            vmax = PlotDefinitions.vmax_amp
                             img = axis.pcolormesh(data, cmap=cmap, vmin=vmin, vmax=vmax)
-                        elif cmap == SNOM_height and Plot_Definitions.height_cbar_range is True:
-                            if Plot_Definitions.vmin_height is None: Plot_Definitions.vmin_height = min_data # initialize for the first time
-                            if Plot_Definitions.vmax_height is None: Plot_Definitions.vmax_height = max_data
-                            if min_data < Plot_Definitions.vmin_height: Plot_Definitions.vmin_height = min_data # update the min and max values in Plot_Definitions if new values are outside of range
-                            if max_data > Plot_Definitions.vmax_height: Plot_Definitions.vmax_height = max_data
-                            vmin = Plot_Definitions.vmin_height
-                            vmax = Plot_Definitions.vmax_height
+                        elif cmap == SNOM_height and PlotDefinitions.height_cbar_range is True:
+                            if PlotDefinitions.vmin_height is None: PlotDefinitions.vmin_height = min_data # initialize for the first time
+                            if PlotDefinitions.vmax_height is None: PlotDefinitions.vmax_height = max_data
+                            if min_data < PlotDefinitions.vmin_height: PlotDefinitions.vmin_height = min_data # update the min and max values in PlotDefinitions if new values are outside of range
+                            if max_data > PlotDefinitions.vmax_height: PlotDefinitions.vmax_height = max_data
+                            vmin = PlotDefinitions.vmin_height
+                            vmax = PlotDefinitions.vmax_height
                             img = axis.pcolormesh(data, cmap=cmap, vmin=vmin, vmax=vmax)
                         else:
                             # print('not plotting full range phase')
@@ -2145,10 +2145,10 @@ class SnomMeasurement(FileHandler):
                     axis.axis('off')
                 counter += 1
 
-        plt.subplots_adjust(hspace=Plot_Definitions.hspace)
+        plt.subplots_adjust(hspace=PlotDefinitions.hspace)
         if self.tight_layout is True:
             plt.tight_layout()
-        if Plot_Definitions.show_plot is True:
+        if PlotDefinitions.show_plot is True:
             plt.show()
         gc.collect()
     
@@ -2281,9 +2281,9 @@ class SnomMeasurement(FileHandler):
             if channel in self.channels:
                 channel_index = self.channels.index(channel)
                 # check pixel scaling from channel tag dict for each channel
-                pixel_scaling = self._get_channel_tag_dict_value(channel, Channel_Tags.PIXELSCALING)
+                pixel_scaling = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELSCALING)
                 if pixel_scaling == 1:
-                    if Plot_Definitions.show_plot:
+                    if PlotDefinitions.show_plot:
                         print(f'The data in channel {channel} is not yet scaled! Do you want to scale the data?')
                         user_input = self._user_input_bool()
                         if user_input == True:
@@ -2360,15 +2360,15 @@ class SnomMeasurement(FileHandler):
         
         # check if the data is scaled, if not scale it
         for i in range(len(channel_pairs)):
-            if self._get_channel_tag_dict_value(self.channels[channel_pairs[i][0]], Channel_Tags.PIXELSCALING) == 1:
+            if self._get_channel_tag_dict_value(self.channels[channel_pairs[i][0]], ChannelTags.PIXELSCALING) == 1:
                 # scale the data
                 self.scale_channels([self.channels[channel_pairs[i][0]]], scaling)
-            if self._get_channel_tag_dict_value(self.channels[channel_pairs[i][1]], Channel_Tags.PIXELSCALING) == 1:
+            if self._get_channel_tag_dict_value(self.channels[channel_pairs[i][1]], ChannelTags.PIXELSCALING) == 1:
                 # scale the data
                 self.scale_channels([self.channels[channel_pairs[i][1]]], scaling)
         
         for i in range(len(remaining_channels)):
-            if self._get_channel_tag_dict_value(self.channels[remaining_channels[i]], Channel_Tags.PIXELSCALING) == 1:
+            if self._get_channel_tag_dict_value(self.channels[remaining_channels[i]], ChannelTags.PIXELSCALING) == 1:
                 # scale the data
                 self.scale_channels([self.channels[remaining_channels[i]]], scaling)
 
@@ -2469,15 +2469,15 @@ class SnomMeasurement(FileHandler):
         if data is None:
             # channel is not in memory, so the standard values will be used
             data = self._load_data([channel])[0][0]
-            try: XReal, YReal = self._get_measurement_tag_dict_value(Measurement_Tags.SCANAREA)
-            except: XReal, YReal, ZReal = self._get_measurement_tag_dict_value(Measurement_Tags.SCANAREA)
-            rotation = self._get_measurement_tag_dict_value(Measurement_Tags.ROTATION)[0]
-            XOffset, YOffset = self._get_measurement_tag_dict_value(Measurement_Tags.SCANNERCENTERPOSITION)
+            try: XReal, YReal = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
+            except: XReal, YReal, ZReal = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
+            rotation = self._get_measurement_tag_dict_value(MeasurementTags.ROTATION)[0]
+            XOffset, YOffset = self._get_measurement_tag_dict_value(MeasurementTags.SCANNERCENTERPOSITION)
         else: 
             # if channel is in memory it has to have a channel dict, where all necessary infos are stored
-            XReal, YReal = self._get_channel_tag_dict_value(channel, Channel_Tags.SCANAREA)
-            rotation = self._get_channel_tag_dict_value(channel, Channel_Tags.ROTATION)[0]
-            XOffset, YOffset = self._get_channel_tag_dict_value(channel, Channel_Tags.SCANNERCENTERPOSITION)
+            XReal, YReal = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
+            rotation = self._get_channel_tag_dict_value(channel, ChannelTags.ROTATION)[0]
+            XOffset, YOffset = self._get_channel_tag_dict_value(channel, ChannelTags.SCANNERCENTERPOSITION)
         XRes = len(data[0])
         YRes  = len(data)
         if filetype=='gsf':
@@ -2605,7 +2605,7 @@ class SnomMeasurement(FileHandler):
         Wavelength must be given in µm.
         Scanangle is the rotation angle of the scan in radians.
         """
-        scanangle = self._get_measurement_tag_dict_value(Measurement_Tags.ROTATION)[0]*np.pi/180
+        scanangle = self._get_measurement_tag_dict_value(MeasurementTags.ROTATION)[0]*np.pi/180
         phasedir_positive = 1
         phasedir_negative = -1
         phase_data = self.all_data[self.channels.index(channel)]
@@ -2662,7 +2662,7 @@ class SnomMeasurement(FileHandler):
         # load new channels for synccorrection
         all_channels = self.phase_channels + self.amp_channels
         self._initialize_data(all_channels)
-        scanangle = self._get_measurement_tag_dict_value(Measurement_Tags.ROTATION)[0]*np.pi/180
+        scanangle = self._get_measurement_tag_dict_value(MeasurementTags.ROTATION)[0]*np.pi/180
         if phasedir == None:
             phasedir = self._create_synccorr_preview(self.preview_phasechannel, wavelength)
         self._write_to_logfile('synccorrection_wavelength', wavelength)
@@ -2897,7 +2897,7 @@ class SnomMeasurement(FileHandler):
         ax.axis('scaled')
         ax.invert_yaxis()
         plt.title('Please click on the pixel you want to get the coordinates from.')
-        if Plot_Definitions.show_plot:
+        if PlotDefinitions.show_plot:
             plt.show()
         klicker_coords = klicker.get_positions()['event'] #klicker returns a dictionary for the events
         coordinates = [[round(element[0]), round(element[1])] for element in klicker_coords]
@@ -2909,7 +2909,7 @@ class SnomMeasurement(FileHandler):
         ax.axis('scaled')
         ax.invert_yaxis()
         plt.title('You clicked on the following pixel.')
-        if Plot_Definitions.show_plot:
+        if PlotDefinitions.show_plot:
             plt.show()
         return coordinates
 
@@ -2944,7 +2944,7 @@ class SnomMeasurement(FileHandler):
         ax.legend()
         ax.axis('scaled')
         plt.title('3 Point leveling: please click on three points\nto specify the underground plane.')
-        if Plot_Definitions.show_plot:
+        if PlotDefinitions.show_plot:
             plt.show()
         klicker_coords = klicker.get_positions()['event'] #klicker returns a dictionary for the events
         klick_coordinates = [[round(element[0]), round(element[1])] for element in klicker_coords]
@@ -3722,16 +3722,16 @@ class SnomMeasurement(FileHandler):
         for channel in channels:
             index = self.channels.index(channel)
             # get the old size of the data
-            xres, yres = self._get_channel_tag_dict_value(channel, Channel_Tags.PIXELAREA)
-            xreal, yreal = self._get_channel_tag_dict_value(channel, Channel_Tags.SCANAREA)
+            xres, yres = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+            xreal, yreal = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
             self.all_data[index] = self._auto_cut_data(self.all_data[index])
             xres_new = len(self.all_data[index][0])
             yres_new = len(self.all_data[index])
             xreal_new = xreal*xres_new/xres
             yreal_new = yreal*yres_new/yres
             # save new resolution and scan area in channel tag dict:
-            self._set_channel_tag_dict_value(channel, Channel_Tags.PIXELAREA, [xres_new, yres_new])
-            self._set_channel_tag_dict_value(channel, Channel_Tags.SCANAREA, [xreal_new, yreal_new])
+            self._set_channel_tag_dict_value(channel, ChannelTags.PIXELAREA, [xres_new, yres_new])
+            self._set_channel_tag_dict_value(channel, ChannelTags.SCANAREA, [xreal_new, yreal_new])
             # add new appendix to channel
             self.channels_label[index] += '_reduced'
         self._write_to_logfile('cut', 'autocut')
@@ -3791,9 +3791,9 @@ class SnomMeasurement(FileHandler):
         
         count = 0
         for channel in self.channels:
-            XRes, YRes = self._get_channel_tag_dict_value(channel, Channel_Tags.PIXELAREA)
-            XReal, YReal = self._get_channel_tag_dict_value(channel, Channel_Tags.SCANAREA)
-            pixel_scaling = self._get_channel_tag_dict_value(channel, Channel_Tags.PIXELSCALING)
+            XRes, YRes = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+            XReal, YReal = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
+            pixel_scaling = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELSCALING)
             dx = XReal/(XRes)
             scalebar_var = [dx, units, dimension, label, length_fraction, height_fraction, width_fraction,
                             location, loc, pad, border_pad, sep, frameon, color, box_color, box_alpha, scale_loc,
@@ -3822,10 +3822,10 @@ class SnomMeasurement(FileHandler):
         self.all_data = []
         for channel in self.channels:
             # flip pixelarea and scanarea as well
-            XReal, YReal = self._get_channel_tag_dict_value(channel, Channel_Tags.SCANAREA)
-            self._set_channel_tag_dict_value(channel, Channel_Tags.SCANAREA, [YReal, XReal])
-            XRes, YRes = self._get_channel_tag_dict_value(channel, Channel_Tags.PIXELAREA)
-            self._set_channel_tag_dict_value(channel, Channel_Tags.PIXELAREA, [YRes, XRes])
+            XReal, YReal = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
+            self._set_channel_tag_dict_value(channel, ChannelTags.SCANAREA, [YReal, XReal])
+            XRes, YRes = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+            self._set_channel_tag_dict_value(channel, ChannelTags.PIXELAREA, [YRes, XRes])
             self.all_data.append(np.rot90(all_data[self.channels.index(channel)], axes=axes))
 
     def _get_positions_from_plot(self, channel, data, coordinates:list=None, orientation=None) -> list:
@@ -3939,9 +3939,9 @@ class SnomMeasurement(FileHandler):
 
         difference_profile = phase_analysis.get_profile_difference(profiles[0], profiles[1])
         # difference_profile = get_profile_difference(flattened_profiles[0], flattened_profiles[1])
-        xres, yres = self._get_channel_tag_dict_value(self.channels.index(profile_channel), Channel_Tags.PIXELAREA)
-        xreal, yreal = self._get_channel_tag_dict_value(self.channels.index(profile_channel), Channel_Tags.SCANAREA)
-        pixel_scaling = self._get_channel_tag_dict_value(self.channels.index(profile_channel), Channel_Tags.PIXELSCALING)
+        xres, yres = self._get_channel_tag_dict_value(self.channels.index(profile_channel), ChannelTags.PIXELAREA)
+        xreal, yreal = self._get_channel_tag_dict_value(self.channels.index(profile_channel), ChannelTags.SCANAREA)
+        pixel_scaling = self._get_channel_tag_dict_value(self.channels.index(profile_channel), ChannelTags.PIXELSCALING)
         xvalues = [i*yreal/yres/pixel_scaling for i in range(yres*pixel_scaling)]
         plt.plot(xvalues, difference_profile)
         plt.xlabel('Y [µm]')
@@ -4103,17 +4103,17 @@ class SnomMeasurement(FileHandler):
         
     def _display_profile(self, profiles, ylabel=None, labels=None, linestyle='x', title=None):
         if self.profile_orientation == Definitions.horizontal:
-            xrange, yrange = self._get_channel_tag_dict_value(self.channels.index(self.profile_channel), Channel_Tags.SCANAREA)
-            x_center_pos, y_center_pos = self._get_channel_tag_dict_value(self.channels.index(self.profile_channel), Channel_Tags.SCANNERCENTERPOSITION)
-            xres, yres = self._get_channel_tag_dict_value(self.channels.index(self.profile_channel), Channel_Tags.PIXELAREA)
+            xrange, yrange = self._get_channel_tag_dict_value(self.channels.index(self.profile_channel), ChannelTags.SCANAREA)
+            x_center_pos, y_center_pos = self._get_channel_tag_dict_value(self.channels.index(self.profile_channel), ChannelTags.SCANNERCENTERPOSITION)
+            xres, yres = self._get_channel_tag_dict_value(self.channels.index(self.profile_channel), ChannelTags.PIXELAREA)
             xvalues = [x_center_pos - xrange/2 + x*(xrange/xres) for x in range(xres)]
             xlabel = 'X [µm]'
             if title == None:
                 title = 'Horizontal profiles of channel ' + self.profile_channel
         elif self.profile_orientation == Definitions.vertical:
-            xrange, yrange = self._get_channel_tag_dict_value(self.channels.index(self.profile_channel), Channel_Tags.SCANAREA)
-            x_center_pos, y_center_pos = self._get_channel_tag_dict_value(self.channels.index(self.profile_channel), Channel_Tags.SCANNERCENTERPOSITION)
-            xres, yres = self._get_channel_tag_dict_value(self.channels.index(self.profile_channel), Channel_Tags.PIXELAREA)
+            xrange, yrange = self._get_channel_tag_dict_value(self.channels.index(self.profile_channel), ChannelTags.SCANAREA)
+            x_center_pos, y_center_pos = self._get_channel_tag_dict_value(self.channels.index(self.profile_channel), ChannelTags.SCANNERCENTERPOSITION)
+            xres, yres = self._get_channel_tag_dict_value(self.channels.index(self.profile_channel), ChannelTags.PIXELAREA)
             xvalues = [y_center_pos - yrange/2 + y*(yrange/yres) for y in range(yres)]
             xlabel = 'Y [µm]'
             if title == None:
@@ -4198,8 +4198,8 @@ class SnomMeasurement(FileHandler):
             channels = self.channels
         for channel in channels:
             if channel in self.channels:
-                XRes, YRes = self._get_channel_tag_dict_value(channel, Channel_Tags.PIXELAREA)
-                XReal, YReal = self._get_channel_tag_dict_value(channel, Channel_Tags.SCANAREA)
+                XRes, YRes = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+                XReal, YReal = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
                 pixel_size_x = round(XReal/XRes *1000000000) # pixel size in nm
                 pixel_size_y = round(YReal/YRes *1000000000)
                 scale_x = 1
@@ -4211,7 +4211,7 @@ class SnomMeasurement(FileHandler):
                 if pixel_size_x/scale_x != pixel_size_y/scale_y:
                     print('The pixel size does not fit perfectly, you probably chose weired resolution values. You should probably not use this function then...')
                 self.all_data[self.channels.index(channel)] = self._scale_data_xy(self.all_data[self.channels.index(channel)], scale_x, scale_y)
-                self._set_channel_tag_dict_value(channel, Channel_Tags.PIXELAREA, [XRes*scale_x, YRes*scale_y])
+                self._set_channel_tag_dict_value(channel, ChannelTags.PIXELAREA, [XRes*scale_x, YRes*scale_y])
 
     def overlay_forward_and_backward_channels(self, height_channel_forward:str, height_channel_backward:str, channels:list=None):
         """This function is ment to overlay the backwards and forwards version of the specified channels.
@@ -4258,7 +4258,7 @@ class SnomMeasurement(FileHandler):
         '''
 
         # try to optimize by shifting second array and minimizing mean deviation
-        pixel_scaling = self._get_channel_tag_dict_value(self.channels[0], Channel_Tags.PIXELSCALING)
+        pixel_scaling = self._get_channel_tag_dict_value(self.channels[0], ChannelTags.PIXELSCALING)
         N = 5*pixel_scaling #maximum iterations, scaled if pixelnumber was increased
 
         # realign.minimize_deviation_1d(array_1, array_2, n_tries=N)
@@ -4275,8 +4275,8 @@ class SnomMeasurement(FileHandler):
                 #test:
                 if self.height_indicator in channel:
                     # get current res and size and add the additional res and size due to addition of zeros while shifting
-                    XRes, YRes = self._get_channel_tag_dict_value(channel, Channel_Tags.PIXELAREA)
-                    XReal, YReal = self._get_channel_tag_dict_value(channel, Channel_Tags.SCANAREA)
+                    XRes, YRes = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+                    XReal, YReal = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
                     XRes_new = XRes + abs(index)# absolute value? index can be negative, but resolution can only increase, same for real dimensions
                     XReal_new = XReal + XReal/XRes*abs(index)
                     
@@ -4289,8 +4289,8 @@ class SnomMeasurement(FileHandler):
                     # add new channel to channels
                     self.channels.append(channel + '_overlain')
 
-                    self._set_channel_tag_dict_value(channel + '_overlain', Channel_Tags.PIXELAREA, [XRes_new, YRes])
-                    self._set_channel_tag_dict_value(channel + '_overlain', Channel_Tags.SCANAREA, [XReal_new, YReal])
+                    self._set_channel_tag_dict_value(channel + '_overlain', ChannelTags.PIXELAREA, [XRes_new, YRes])
+                    self._set_channel_tag_dict_value(channel + '_overlain', ChannelTags.SCANAREA, [XReal_new, YReal])
 
                     #test realign (per scan) based on minimization of differences 
                     #not usable right now, drift compensation might lead to differently sized data
@@ -4305,8 +4305,8 @@ class SnomMeasurement(FileHandler):
                     self.all_data.append(realign.Create_Mean_Array(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index(self.backwards_indicator+ channel)]))
                 else:
                     # get current res and size and add the additional res and size due to addition of zeros while shifting
-                    XRes, YRes = self._get_channel_tag_dict_value(channel, Channel_Tags.PIXELAREA)
-                    XReal, YReal = self._get_channel_tag_dict_value(channel, Channel_Tags.SCANAREA)
+                    XRes, YRes = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+                    XReal, YReal = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
                     XRes_new = XRes + abs(index)# absolute value? index can be negative, but resolution can only increase, same for real dimensions
                     XReal_new = XReal + XReal/XRes*abs(index)
                     
@@ -4319,8 +4319,8 @@ class SnomMeasurement(FileHandler):
                     # add new channel to channels
                     self.channels.append(channel + '_overlain')
                     
-                    self._set_channel_tag_dict_value(channel + '_overlain', Channel_Tags.PIXELAREA, [XRes_new, YRes])
-                    self._set_channel_tag_dict_value(channel + '_overlain', Channel_Tags.SCANAREA, [XReal_new, YReal])
+                    self._set_channel_tag_dict_value(channel + '_overlain', ChannelTags.PIXELAREA, [XRes_new, YRes])
+                    self._set_channel_tag_dict_value(channel + '_overlain', ChannelTags.SCANAREA, [XReal_new, YReal])
 
                     #test realign (per scan) based on minimization of differences 
                     # self.all_data[self.channels.index(channel)] = realign.Minimize_Drift(self.all_data[self.channels.index(channel)], display=False)
@@ -4369,7 +4369,7 @@ class SnomMeasurement(FileHandler):
         height_channel_backward_blurr = self._gauss_blurr_data(height_data_backward, 2)
 
         # try to optimize by shifting second array and minimizing mean deviation
-        pixel_scaling = self._get_channel_tag_dict_value(self.channels[0], Channel_Tags.PIXELSCALING)
+        pixel_scaling = self._get_channel_tag_dict_value(self.channels[0], ChannelTags.PIXELSCALING)
         N = 5*pixel_scaling #maximum iterations, scaled if pixelnumber was increased
 
         # get the index which minimized the deviation of the height channels
@@ -4436,8 +4436,8 @@ class SnomMeasurement(FileHandler):
             phase_data = self.all_data[self.channels.index(phase_channel)]
             phase_dict = self.channel_tag_dict[self.channels.index(phase_channel)]
         # check if size is identical:
-        xres_amp, yres_amp = amp_dict[Channel_Tags.PIXELAREA]
-        xres_phase, yres_phase = phase_dict[Channel_Tags.PIXELAREA]
+        xres_amp, yres_amp = amp_dict[ChannelTags.PIXELAREA]
+        xres_phase, yres_phase = phase_dict[ChannelTags.PIXELAREA]
         if xres_amp != xres_phase or yres_amp != yres_phase:
             print('The data of the specified channels has different resolution!')
             exit()
@@ -4507,8 +4507,8 @@ class SnomMeasurement(FileHandler):
         amp_dict = self.channel_tag_dict[self.channels.index(amp_channel)]
         phase_data = self.all_data[self.channels.index(phase_channel)]
         phase_dict = self.channel_tag_dict[self.channels.index(phase_channel)]
-        xres_amp, yres_amp = amp_dict[Channel_Tags.PIXELAREA]
-        xres_phase, yres_phase = phase_dict[Channel_Tags.PIXELAREA]
+        xres_amp, yres_amp = amp_dict[ChannelTags.PIXELAREA]
+        xres_phase, yres_phase = phase_dict[ChannelTags.PIXELAREA]
         if xres_amp != xres_phase or yres_amp != yres_phase:
             print('The data of the specified channels has different resolution!')
             exit()
@@ -4573,8 +4573,8 @@ class SnomMeasurement(FileHandler):
         amp_dict = self.channel_tag_dict[self.channels.index(amp_channel)]
         phase_data = self.all_data[self.channels.index(phase_channel)]
         phase_dict = self.channel_tag_dict[self.channels.index(phase_channel)]
-        xres_amp, yres_amp = amp_dict[Channel_Tags.PIXELAREA]
-        xres_phase, yres_phase = phase_dict[Channel_Tags.PIXELAREA]
+        xres_amp, yres_amp = amp_dict[ChannelTags.PIXELAREA]
+        xres_phase, yres_phase = phase_dict[ChannelTags.PIXELAREA]
         if xres_amp != xres_phase or yres_amp != yres_phase:
             print('The data of the specified channels has different resolution!')
             exit()
@@ -4600,7 +4600,7 @@ class SnomMeasurement(FileHandler):
         frames[0].save(gif_path, format='GIF', append_images=frames[1:], save_all=True,duration=Duration, loop=0, dpi=dpi)
         # plt.show()
         # plt.close(fig)
-        if Plot_Definitions.show_plot:
+        if PlotDefinitions.show_plot:
             self._display_gif(gif_path, fps=fps)
         return gif_path
 
@@ -4647,8 +4647,8 @@ class SnomMeasurement(FileHandler):
         amp_dict = self.channel_tag_dict[self.channels.index(amp_channel)]
         phase_data = self.all_data[self.channels.index(phase_channel)]
         phase_dict = self.channel_tag_dict[self.channels.index(phase_channel)]
-        xres_amp, yres_amp = amp_dict[Channel_Tags.PIXELAREA]
-        xres_phase, yres_phase = phase_dict[Channel_Tags.PIXELAREA]
+        xres_amp, yres_amp = amp_dict[ChannelTags.PIXELAREA]
+        xres_phase, yres_phase = phase_dict[ChannelTags.PIXELAREA]
         if xres_amp != xres_phase or yres_amp != yres_phase:
             print('The data of the specified channels has different resolution!')
             exit()
@@ -4972,7 +4972,7 @@ class ApproachCurve(FileHandler):
                 self.all_data[channel] = y_data
         # scale the x data to nm
         x_scaling = 1
-        x_unit = self._get_measurement_tag_dict_unit(Measurement_Tags.SCANAREA)
+        x_unit = self._get_measurement_tag_dict_unit(MeasurementTags.SCANAREA)
 
         # we want to convert the xaxis to nm
         if x_unit == '[µm]':
@@ -5004,10 +5004,10 @@ class ApproachCurve(FileHandler):
         if len(self.channels) == 1:
             plt.ylabel(self.channels[0])
         plt.legend()
-        if Plot_Definitions.tight_layout:
+        if PlotDefinitions.tight_layout:
             plt.tight_layout()
         
-        if Plot_Definitions.show_plot:
+        if PlotDefinitions.show_plot:
             plt.show()
     
     def display_channels_v2(self, y_channels=None):
@@ -5046,9 +5046,9 @@ class ApproachCurve(FileHandler):
         # labels for axes:
         ax1.set_xlabel(f'Z [nm]')
         ax1.set_ylabel(y_channels[0])
-        if Plot_Definitions.tight_layout:
+        if PlotDefinitions.tight_layout:
             plt.tight_layout()
-        if Plot_Definitions.show_plot:
+        if PlotDefinitions.show_plot:
             plt.show()
         gc.collect()
 
@@ -5115,12 +5115,12 @@ class Scan3D(FileHandler):
             file = open(datafile, 'r')
             self.all_data[channel] = np.genfromtxt(file ,skip_header=self.header+1, usecols=(index), delimiter='\t', invalid_raise = False)
             file.close()
-            x,y,z = self._get_measurement_tag_dict_value(Measurement_Tags.PIXELAREA)
+            x,y,z = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
             self.all_data[channel] = np.reshape(self.all_data[channel], (y,x,z))
         # scale the x data to nm
         x_scaling = 1
-        # try: x_unit = self.measurement_tag_dict[Measurement_Tags.SCANAREA][0]
-        x_unit = self._get_measurement_tag_dict_unit(Measurement_Tags.SCANAREA)
+        # try: x_unit = self.measurement_tag_dict[MeasurementTags.SCANAREA][0]
+        x_unit = self._get_measurement_tag_dict_unit(MeasurementTags.SCANAREA)
         # except: x_unit = None
         # else:
         # we want to convert the xaxis to nm
@@ -5143,7 +5143,7 @@ class Scan3D(FileHandler):
     def get_cutplane_data(self, axis:str='x', line:int=0, channel:str=None):
         if channel == None:
             channel = self.channels[0]
-        x,y,z = self._get_measurement_tag_dict_value(Measurement_Tags.PIXELAREA)
+        x,y,z = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
         data = self.all_data[channel].copy()
         if axis == 'x':
             cutplane_data = np.zeros((z,x)) 
@@ -5171,7 +5171,7 @@ class Scan3D(FileHandler):
         if channel == None:
             channel = self.channels[0]
         cutplane_data = self.get_cutplane_data(axis=axis, line=line, channel=channel)
-        x,y,z = self._get_measurement_tag_dict_value(Measurement_Tags.PIXELAREA)
+        x,y,z = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
         # todo: shift each y column by offset value depending on average z position, to correct for varying starting position, due to non flat substrates
         z_shifts = np.zeros(x)
         # idea: get all the lowest points of the approach curves and shift them to the same z position, herefore we shift them only upwards relative to the lowest point
@@ -5191,12 +5191,12 @@ class Scan3D(FileHandler):
             z_shifts = z_shifts - z_min
         # now we need to shift each approach curve by the corresponding z_shift
         # therefore we need to create a new data array which can encorporate the shifted data
-        XRes, YRes, ZRes = self._get_measurement_tag_dict_value(Measurement_Tags.PIXELAREA)
+        XRes, YRes, ZRes = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
         print('ZR: ', ZRes)
-        # XRange, YRange, ZRange = self.measurement_tag_dict[Measurement_Tags.SCANAREA]
-        XRange, YRange, ZRange = self._get_measurement_tag_dict_value(Measurement_Tags.SCANAREA)
+        # XRange, YRange, ZRange = self.measurement_tag_dict[MeasurementTags.SCANAREA]
+        XRange, YRange, ZRange = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
         # XYZUnit = self.parameters_dict['Scan Area (X, Y, Z)'][-1]
-        XYZUnit = self._get_measurement_tag_dict_unit(Measurement_Tags.SCANAREA)
+        XYZUnit = self._get_measurement_tag_dict_unit(MeasurementTags.SCANAREA)
         # convert Range to nm
         if XYZUnit == '[µm]':
             XRange = XRange*1e3
@@ -5260,13 +5260,13 @@ class Scan3D(FileHandler):
             channel = self.channels[0]
         cutplane_data = self.all_cutplane_data[channel]
         # sadly the data definitions for this filytype are off, eg. missing 'raw' suffix for 3D scan, also the channel headers are incomplete, z res is false
-        # XRes, YRes, ZRes = self._get_channel_tag_dict_value(channel, Channel_Tags.PIXELAREA)
+        # XRes, YRes, ZRes = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
         # therefore we use the measurement tag dict
-        XRes, YRes, ZRes = self._get_measurement_tag_dict_value(Measurement_Tags.PIXELAREA)
+        XRes, YRes, ZRes = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
 
         # YRes, XRes = cutplane_data.shape # cutplane data might have been
-        XRange, YRange, ZRange = self._get_measurement_tag_dict_value(Measurement_Tags.SCANAREA)
-        XYZUnit = self._get_measurement_tag_dict_unit(Measurement_Tags.SCANAREA)
+        XRange, YRange, ZRange = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
+        XYZUnit = self._get_measurement_tag_dict_unit(MeasurementTags.SCANAREA)
         # convert Range to nm
         if XYZUnit == '[µm]':
             XRange = XRange*1e3
@@ -5339,7 +5339,7 @@ class Scan3D(FileHandler):
         # plt.colorbar(img)
         if self.tight_layout is True:
             plt.tight_layout()
-        if Plot_Definitions.show_plot is True:
+        if PlotDefinitions.show_plot is True:
             plt.show()
         gc.collect()
     
@@ -5347,7 +5347,7 @@ class Scan3D(FileHandler):
         
         amp_channel = f'O{demodulation}A'
         phase_channel = f'O{demodulation}P'
-        x,y,z = self._get_measurement_tag_dict_value(Measurement_Tags.PIXELAREA)
+        x,y,z = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
         amp_data = self.all_data[amp_channel].copy()
         phase_data = self.all_data[phase_channel].copy()
         if axis == 'x':
@@ -5375,10 +5375,10 @@ class Scan3D(FileHandler):
             z_shifts = z_shifts - z_min
         # now we need to shift each approach curve by the corresponding z_shift
         # therefore we need to create a new data array which can encorporate the shifted data
-        XRes, YRes, ZRes = self._get_measurement_tag_dict_value(Measurement_Tags.PIXELAREA)
+        XRes, YRes, ZRes = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
         print('ZR: ', ZRes)
-        XRange, YRange, ZRange = self._get_measurement_tag_dict_value(Measurement_Tags.SCANAREA)
-        XYZUnit = self._get_measurement_tag_dict_unit(Measurement_Tags.SCANAREA)
+        XRange, YRange, ZRange = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
+        XYZUnit = self._get_measurement_tag_dict_unit(MeasurementTags.SCANAREA)
         # convert Range to nm
         if XYZUnit == '[µm]':
             XRange = XRange*1e3
@@ -5456,9 +5456,9 @@ class Scan3D(FileHandler):
         # create real part cutplane data
         self.all_cutplane_data[real_channel] = np.multiply(self.all_cutplane_data[f'O{demodulation}A'], np.cos(self.all_cutplane_data[f'O{demodulation}P']))
         cutplane_data = self.all_cutplane_data[real_channel]
-        XRes, YRes, ZRes = self._get_measurement_tag_dict_value(Measurement_Tags.PIXELAREA)
-        XRange, YRange, ZRange = self._get_measurement_tag_dict_value(Measurement_Tags.SCANAREA)
-        XYZUnit = self._get_measurement_tag_dict_unit(Measurement_Tags.SCANAREA)
+        XRes, YRes, ZRes = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
+        XRange, YRange, ZRange = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
+        XYZUnit = self._get_measurement_tag_dict_unit(MeasurementTags.SCANAREA)
         # convert Range to nm
         if XYZUnit == '[µm]':
             XRange = XRange*1e3
@@ -5538,7 +5538,7 @@ class Scan3D(FileHandler):
             ax.set_yticks([])
         if self.tight_layout is True:
             plt.tight_layout()
-        if Plot_Definitions.show_plot is True:
+        if PlotDefinitions.show_plot is True:
             plt.show()
         gc.collect()
 
@@ -5603,10 +5603,10 @@ class Scan3D(FileHandler):
         # if len(self.channels) == 1:
         #     plt.ylabel(self.channels[0])
         # plt.legend()
-        if Plot_Definitions.tight_layout:
+        if PlotDefinitions.tight_layout:
             plt.tight_layout()
         
-        if Plot_Definitions.show_plot:
+        if PlotDefinitions.show_plot:
             plt.show()
         gc.collect()
 
@@ -5806,7 +5806,7 @@ class Scan3D(FileHandler):
             indices.append(index)
         # make a new data array with the shifted data
         # apply the shift to all channels
-        XRes, YRes, ZRes = self._get_measurement_tag_dict_value(Measurement_Tags.PIXELAREA)
+        XRes, YRes, ZRes = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
         # ac_zeros = np.zeros(ZRes)
         # idea: create a new data array where each approach curve is shifted by the corresponding index
         # get the biggest differnce in indices
@@ -5819,8 +5819,8 @@ class Scan3D(FileHandler):
                 for x in range(XRes):
                     new_data[y][x+shift] = self.all_data[channel][y][x]
             self.all_data[channel] = new_data
-        # self.measurement_tag_dict[Measurement_Tags.PIXELAREA] = (XRes+max_shift, YRes, ZRes)
-        self._set_measurement_tag_dict_value(Measurement_Tags.PIXELAREA, [XRes+max_shift, YRes, ZRes])
+        # self.measurement_tag_dict[MeasurementTags.PIXELAREA] = (XRes+max_shift, YRes, ZRes)
+        self._set_measurement_tag_dict_value(MeasurementTags.PIXELAREA, [XRes+max_shift, YRes, ZRes])
 
 
 

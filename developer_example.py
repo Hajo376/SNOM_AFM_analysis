@@ -6,55 +6,61 @@ from tkinter import filedialog
 import pathlib
 this_files_path = pathlib.Path(__file__).parent.absolute()
 
-from src.snom_analysis.main import*
+from snom_analysis.main import*
 
 '''
-This is an example script of how to access an use the snom_pyhton_classes.
-Before you open a measurement you should specify the filetype and parameter type you are using.
-The standard is that all data are saved in .gsf files and the parameters are extracted from a .html file.
-If your data is stored in an .ascii file you can try setting the file type to that:
-    File_Definitions.file_type = File_Type.aachen_ascii
+This is an example script of how to use this package to display and manipulate example data.
+The package supports SNOM and AFM data. Sofar the main functionality is for the 2D Scans.
+Ther is also limited support for approach/deproach curves and 3D scans. Spectra are not supported yet.
+However, the package is designed to be easily extendable, and spectra support could be added in the future.
+The measurement class you decide to use will automatically try to figure out the file type and the parameters type.
+If your filetype is not covered by the package defaults (based on my experience with the software) you can set the file type yourself.
+The package will create a folder in the users home directory with a config.ini. This file will store the default file types and definitions.
+You can add more file types and definitions to this file. The package will then use these definitions. But keep the same format.
+Also these are not permanent changes, if the package does not find the config it will recreate it, so keep a copy of your definitions.
 
-If that does not work you must specify the file type yourself.
+To load a measurement you can the use the corresponding class from the main file. This will only require a directory path.
+I tend to use the tkinter filedialog to select the directory. This will open a file dialog and you can select the directory.
+The measurement instance of the measurement class should be stored in a variable.
+The class will automatically load data on initialisation. The class will try to find out the default channels to use if you don't specify any.
+You can reload the data anytime by calling the >>initialize_channels<< function on the instance.
+Once the data is loaded you can display the data by calling the >>display_channels<< function on the instance.
+Similarly you can apply manipulations to the data by calling the corresponding functions on the instance.
+If you want to review changes you made we got you covered. You can display all subplots from memory by calling >>display_all_subplots<< on the instance.
+Everytime you call the >>display_channels<< function the data will be added to the memory. You can then display all subplots from memory.
+You can delete the plot memory by calling >>remove_all_subplots<< on the instance.
+Alternatively everytime you create a new measurement instance the plot memory will be cleared if the PlotDefinitions.autodelete_all_subplots is set to True, which is the default.
+If you want to compare multiple measurements you might want to set this to False by calling PlotDefinitions.autodelete_all_subplots=False before the first measurement.
+You can give a measurement title, which will then be displayed in the plots.
 
-If your parameters are stored in an .parameters.txt file you can try setting the file type to that:
-    File_Definitions.parmeters_type = File_Type.txt
 
-If that does not work you must specify the parameters type yourself.
 
-After that you can open a measurement. This will create a measurement instance.
-For the measurement you must specify the measurement folder. You can additionally specify a list of channels you want to display and manipulate.
-If you don't specify channels a set of standard channels will be used instead.
-Furthermore you can give a measurement title, which will then be displayed in the plots.
+
 
 You can then access functions on the instance to manipulate data or to plot the data.
-The usable functions are:
+Common functions are:
     display_channels() # Display all specified channels or the ones in memory, plot data will be added to all subplots and can be replotted via display_all_subplots()
     scale_channels() # Scale channels by a factor, each pixel will then consist of factor*factor identical subpixels, should be applied before the blurring
     gauss_filter_channels_complex() # will blurr the complex values of the specified channels, if optical and height channels
-    gauss_filter_channels() # not ideal, will just blurr all channels independently
+    gauss_filter_channels() # not ideal, will just blurr all channels independently, good for amplitude channels or height channels
     correct_phase_drift() # Correct linear phase drift along slow axis and apply correction to all phase channels
     shift_phase() # Shift the phase with a slider and apply the shift to all phase channels
     heigth_mask_channels() # Create a height mask fromt the height channel and applies it to all channels in memory
-    fourier_filter_channels() # Applies simple fourier filter to all channels, need amplitude and phase
     cut_channels() # Cut all specified channels, either manually or auto. The height channel should be in the Measurement istance for this to make sense.
-    set_min_to_zero(['MT-F-abs']) # Sets the minimum value of the specified channels to zero
-    level_height_channels() # Levels the data for all height channels
-    scalebar(['MT-F-abs']) # creates a scalebar in the subplot for the specified channels
-    remove_subplots([1]) # Remove subplots from memory, takes a list of the indices of the subplots to delete
-    remove_last_subplots(2) # Remove the last subplot from memory n-times
-    switch_supplots(2, 3) # Switch positions of two subplots
+    set_min_to_zero() # Sets the minimum value of the specified channels to zero
+    heigth_level_3point() # Levels the data for all height channels
+    level_data_columnwise() # new function appliable to all channels, levels the data columnwise and nonlinearly, also takes dift on the x-axis into account
+    scalebar() # creates a scalebar in the subplot for the specified channels
+    remove_subplots() # Remove subplots from memory, takes a list of the indices of the subplots to delete
+    remove_last_subplots() # Remove the last subplot from memory n-times
+    switch_supplots() # Switch positions of two subplots
     display_all_subplots() # Display all subplots from memory
+    create_new_channel() # Create your own channel with arbitrary data, it can then be handeled like the other channels, but it will require the channel name, the data, the channel tag dict and a chnnel label used for plotting
     save_to_gsf() # save specified channels to .gsf files, with or without manipulations
 
-Double underscore functions are only for class internal use.
-The functions are mostly self explanatory but here are some useful tips:
-Most functions will accept a channels list. You don't need to specify that, but if you do, all data in the instance memory will be overwritten with the specified channels.
+Underscore functions are only for class internal use, but if you know what you are doing feel free to also use the other functions.
 Before you gauss blurr your data you should always scale the data first.
 Further functions can be added as long as they don't interfere with the other functions.
-
-Futhter improvement could include a gui and the creation of a .txt file to save all the values from the manipulations,
-such that a manipulated dataset could be reproduced exactly. Also a function to open or convert .dump datafiles could be handy.
 ...
 
 Have fun.
@@ -113,8 +119,8 @@ def test_phaseshift():
     directory_name = 'C:/Users/Hajo/sciebo/Phd/Paper/Dielectric_Waveguides/raw_data/reflection_mode/2024-05-23 161457 PH single_wv-on-wg_-45deg_thicc'
     
     # channels = ['O2P', 'O3P', 'O2A', 'Z C']
-    # Plot_Definitions.full_phase_range = False
-    Plot_Definitions.shared_phase_range = False
+    # PlotDefinitions.full_phase_range = False
+    PlotDefinitions.shared_phase_range = False
     channels = ['O2P_manipulated', 'O3P_manipulated', 'O2A', 'Z C']
     # Measurement = SnomMeasurement(directory_name, channels)
     Measurement = SnomMeasurement(directory_name, channels)
@@ -130,7 +136,7 @@ def test_phaseshift():
 def compare_measurements():
     channels = ['O2A', 'O2P', 'Z C']
     measurement_titles = ['measurment1: ', 'measurement2: '] # the measurment title just precedes the generic subplot titles
-    Plot_Definitions.autodelete_all_subplots = False # keep subplots from previous measurement in memory!
+    PlotDefinitions.autodelete_all_subplots = False # keep subplots from previous measurement in memory!
     N = 2
     for i in range(N):
         # directory_name = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2022_07_27')
@@ -190,7 +196,7 @@ def complete_example_1():
     Measurement = SnomMeasurement(directory_name, channels)
     # Measurement.set_min_to_zero(['Z C'])
     # Measurement.display_channels()
-    Measurement.scale_channels()
+    # Measurement.scale_channels()
     Measurement.gauss_filter_channels_complex()
     # Measurement.shift_phase()
     # Measurement.heigth_mask_channels()
@@ -211,7 +217,7 @@ def test_aachen_files():
     directory_name = 'example_measurements/2018-09-10_16-44-27_scan'
 
     Measurement = SnomMeasurement(directory_name, channels)
-    Plot_Definitions.full_phase_range = False
+    PlotDefinitions.full_phase_range = False
     # Measurement.display_channels()
     # Measurement.set_min_to_zero()
     # Measurement.scale_channels()
@@ -289,7 +295,7 @@ def test_3d_scan():
     measurement.set_min_to_zero()
     # measurement.display_approach_curve(20, 0, 'Z', ['Z', 'O2A', 'O3A']) 
     # measurement.display_cutplane(axis='x', line=0, channel='O3A')
-    Plot_Definitions.colorbar_width = 3
+    PlotDefinitions.colorbar_width = 3
     # measurement.display_cutplane_V2(axis='x', line=0, channel='O2A')
     # measurement.display_cutplane_V2(axis='x', line=0, channel='O2P')
     # measurement.display_cutplane_V2_Realpart(axis='x', line=0, demodulation=2)
@@ -312,7 +318,7 @@ def phase_correction_3d_scan():
     # channels = ['Z']
     measurement = Scan3D(directory, channels)
     measurement.set_min_to_zero()
-    Plot_Definitions.colorbar_width = 3
+    PlotDefinitions.colorbar_width = 3
     measurement.generate_all_cutplane_data()
     measurement.match_phase_offset(channels=['O2P', 'O3P'], reference_channel='O2P', reference_area='manual', manual_width=3)
     measurement.display_cutplane_v3(axis='x', line=0, channel='O2P')
@@ -329,7 +335,7 @@ def average_3d_scan():
     # channels = ['Z']
     measurement = Scan3D(directory, channels)
     measurement.set_min_to_zero()
-    Plot_Definitions.colorbar_width = 3
+    PlotDefinitions.colorbar_width = 3
     # measurement.generate_all_cutplane_data()
     # measurement.display_cutplane_V3(axis='x', line=0, channel='O2A')
     # measurement.display_cutplane_V3(axis='x', line=0, channel='O2P')
@@ -368,7 +374,7 @@ def test_amplitude_drift_correction():
     directory = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-05-23-ssh-reflection')
     channels = ['O2A', 'O3A', 'O4A']
     measurement = SnomMeasurement(directory, channels)
-    Plot_Definitions.amp_cbar_range = False
+    PlotDefinitions.amp_cbar_range = False
     measurement.display_channels()
     # measurement.correct_amplitude_drift_nonlinear(channels=['O2A'], reference_area=[0, 50])
     measurement.correct_amplitude_drift_nonlinear(channels=['O2A', 'O3A', 'O4A'], reference_area=[140, 160])
@@ -381,7 +387,7 @@ def test_height_drift_correction():
     channels = ['Z C']
     # channels = ['O2A']
     measurement = SnomMeasurement(directory, channels)
-    Plot_Definitions.amp_cbar_range = False
+    PlotDefinitions.amp_cbar_range = False
     measurement.display_channels()
     # measurement.correct_amplitude_drift_nonlinear(channels=['O2A'], reference_area=[0, 50])
     # measurement.correct_height_drift_nonlinear(channels=['Z C'], reference_area=[20, 40])
@@ -392,8 +398,8 @@ def test_channel_substraction():
     initialdir = 'C:/Users/Hajo/sciebo/Phd/Paper/Dielectric_Waveguides/raw_data/reflection_mode/24-07-10/970nm'
     directory = filedialog.askdirectory(initialdir=initialdir)
     channels = ['O3P', 'O4P']
-    Plot_Definitions.amp_cbar_range = False
-    Plot_Definitions.colorbar_width = 3
+    PlotDefinitions.amp_cbar_range = False
+    PlotDefinitions.colorbar_width = 3
     measurement = SnomMeasurement(directory, channels)
     measurement.display_channels()
     measurement.substract_channels('O3P', 'O4P')
@@ -434,7 +440,7 @@ def test_level_columnwise():
     channels = ['Z C']
     # channels = ['O2A']
     # channels = ['O2P']
-    # Plot_Definitions.height_cbar_range = False
+    # PlotDefinitions.height_cbar_range = False
     measurement = SnomMeasurement(directory, channels)
     measurement.level_data_columnwise(channel_list=channels)
     measurement.level_data_columnwise(channel_list=channels)

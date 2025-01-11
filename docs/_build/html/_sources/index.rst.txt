@@ -16,5 +16,6 @@ documentation for details.
    :caption: Contents:
 
    readme
+   how_to
    snom_analysis
 

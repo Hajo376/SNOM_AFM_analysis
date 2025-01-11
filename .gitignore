@@ -1,10 +1,6 @@
-SNOM_AFM_analysis.zip
-example_measurements.zip
 /.venv
-/example_measurements
-/dist
+/usage_example
 /build
-/tests
 snom_afm_analysis.egg-info
 check_licenses.xlsx
 /old_backups

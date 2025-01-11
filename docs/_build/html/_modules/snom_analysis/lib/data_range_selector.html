@@ -1,0 +1,480 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>snom_analysis.lib.data_range_selector &mdash; SNOM Analysis 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            SNOM Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html">Readme</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snom_analysis.html">snom_analysis package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SNOM Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">snom_analysis.lib.data_range_selector</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for snom_analysis.lib.data_range_selector</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">tkinter</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tk</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">ImageTk</span>
+<span class="c1"># import cv2 # not needed anymore, and very big package</span>
+
+<span class="c1">#testing</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.snom_colormaps</span><span class="w"> </span><span class="kn">import</span> <span class="n">SNOM_amplitude</span><span class="p">,</span> <span class="n">SNOM_phase</span><span class="p">,</span> <span class="n">SNOM_height</span>
+
+
+<div class="viewcode-block" id="select_data_range">
+<a class="viewcode-back" href="../../../snom_analysis.lib.html#snom_analysis.lib.data_range_selector.select_data_range">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">select_data_range</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">channel</span><span class="p">):</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Tk</span><span class="p">()</span>
+    <span class="n">selector</span> <span class="o">=</span> <span class="n">ArraySelector</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">channel</span><span class="p">)</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">mainloop</span><span class="p">()</span>
+
+    <span class="c1"># selection = selector.selection</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">selector</span><span class="o">.</span><span class="n">start</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">selector</span><span class="o">.</span><span class="n">end</span>
+    <span class="n">is_horizontal</span> <span class="o">=</span> <span class="n">selector</span><span class="o">.</span><span class="n">is_horizontal</span>
+    <span class="n">inverted</span> <span class="o">=</span> <span class="n">selector</span><span class="o">.</span><span class="n">inverted</span>
+    <span class="k">return</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">is_horizontal</span><span class="p">,</span> <span class="n">inverted</span></div>
+
+
+<div class="viewcode-block" id="ArraySelector">
+<a class="viewcode-back" href="../../../snom_analysis.lib.html#snom_analysis.lib.data_range_selector.ArraySelector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ArraySelector</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">channel</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">root</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">original_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="p">))</span> <span class="o">*</span> <span class="mi">255</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">channel</span> <span class="o">=</span> <span class="n">channel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">original_height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_array</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="c1"># additional parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">highlighted_image</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rect</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dragging</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resizing</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># &#39;left&#39;, &#39;right&#39;, or None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inverted</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Track if the selection is inverted</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_horizontal</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># Track selection mode</span>
+        
+        <span class="c1"># scale the data to a size usable for the canvas, min should be 300x300 pixels</span>
+        <span class="c1"># if both axes are smaller than 300 pixels then scale the data such that the bigger axis has at least 300 pixels</span>
+        <span class="n">min_size</span> <span class="o">=</span> <span class="mi">400</span>
+        <span class="n">max_size</span> <span class="o">=</span> <span class="mi">800</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="c1"># first check if the data is already larger than the minimum size in at least one axis</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">&gt;</span> <span class="n">min_size</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">&gt;</span> <span class="n">min_size</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="c1"># if both axes are smaller than the minimum size then scale the data such that the bigger axis has at least min_size pixels</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">&lt;</span> <span class="n">min_size</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">&lt;</span> <span class="n">min_size</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span> <span class="o">=</span> <span class="n">min_size</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span> <span class="o">=</span> <span class="n">min_size</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">&lt;</span> <span class="n">min_size</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span> <span class="o">=</span> <span class="n">min_size</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">&lt;</span> <span class="n">min_size</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span> <span class="o">=</span> <span class="n">min_size</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span>
+        <span class="c1"># check if one of the axes is larger than the maximum size</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">&gt;</span> <span class="n">max_size</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">&gt;</span> <span class="n">max_size</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span> <span class="o">=</span> <span class="n">max_size</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span> <span class="o">=</span> <span class="n">max_size</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">&gt;</span> <span class="n">max_size</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span> <span class="o">=</span> <span class="n">max_size</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">&gt;</span> <span class="n">max_size</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span> <span class="o">=</span> <span class="n">max_size</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_scaling_factor</span><span class="p">()</span>
+
+        <span class="c1"># change colormap depending on the channel</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;Z&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;MT&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cmap</span> <span class="o">=</span> <span class="n">SNOM_height</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="s1">&#39;P&#39;</span> <span class="ow">or</span> <span class="s1">&#39;arg&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cmap</span> <span class="o">=</span> <span class="n">SNOM_phase</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="s1">&#39;A&#39;</span> <span class="ow">or</span> <span class="s1">&#39;abs&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cmap</span> <span class="o">=</span> <span class="n">SNOM_amplitude</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="s1">&#39;H&#39;</span> <span class="ow">or</span> <span class="s1">&#39;height&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cmap</span> <span class="o">=</span> <span class="n">SNOM_height</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cmap</span> <span class="o">=</span> <span class="s1">&#39;gray&#39;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Unknown channel, could not find the proper colormap!&#39;</span><span class="p">)</span>
+
+        <span class="n">canvas_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span>
+        <span class="n">canvas_height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Canvas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">canvas_width</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">canvas_height</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;nsew&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fill_canvas</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;&lt;ButtonPress-1&gt;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_button_press</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;&lt;B1-Motion&gt;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_mouse_drag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;&lt;ButtonRelease-1&gt;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_button_release</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;&lt;Motion&gt;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_mouse_move</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;&lt;Configure&gt;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_windowsize_changed</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">toggle_button</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Toggle Selection Mode&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_selection_mode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toggle_button</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">invert_button</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Invert Selection&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">invert_selection</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">invert_button</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">select_button</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Get Coordinates&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_coordinates</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">select_button</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        
+        <span class="c1"># Center the window</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;tk::PlaceWindow </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">)</span><span class="si">}</span><span class="s1"> center&#39;</span><span class="p">)</span>
+
+        <span class="c1"># configure canvas to scale with window</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">grid_rowconfigure</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">grid_columnconfigure</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ArraySelector.update_scaling_factor">
+<a class="viewcode-back" href="../../../snom_analysis.lib.html#snom_analysis.lib.data_range_selector.ArraySelector.update_scaling_factor">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_scaling_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span><span class="p">)</span> <span class="c1"># allow for scaling up to an arbitrary integer of the original size</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="c1"># allow for scaling down to half the size</span></div>
+
+
+<div class="viewcode-block" id="ArraySelector.on_button_press">
+<a class="viewcode-back" href="../../../snom_analysis.lib.html#snom_analysis.lib.data_range_selector.ArraySelector.on_button_press">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_button_press</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">resizing</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dragging</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">return</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_horizontal</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">x</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">x</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">create_rectangle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">winfo_height</span><span class="p">(),</span> <span class="n">outline</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">y</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">y</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">create_rectangle</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">winfo_width</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">outline</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ArraySelector.on_mouse_drag">
+<a class="viewcode-back" href="../../../snom_analysis.lib.html#snom_analysis.lib.data_range_selector.ArraySelector.on_mouse_drag">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_mouse_drag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dragging</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">resizing</span> <span class="o">==</span> <span class="s1">&#39;left&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_horizontal</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">resizing</span> <span class="o">==</span> <span class="s1">&#39;right&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_horizontal</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_horizontal</span><span class="p">:</span>
+                <span class="c1"># self.end = event.x</span>
+                <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">x</span>
+            <span class="c1"># else:</span>
+            <span class="c1">#     self.end = event.y</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">y</span>
+                <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">y</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">y</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span>
+
+        <span class="c1"># Prevent overlapping</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_horizontal</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">coords</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">winfo_height</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">coords</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">winfo_width</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">)</span>
+
+        <span class="c1">#print start and end</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Start: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="si">}</span><span class="s2">, End: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">highlight_selection</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ArraySelector.on_button_release">
+<a class="viewcode-back" href="../../../snom_analysis.lib.html#snom_analysis.lib.data_range_selector.ArraySelector.on_button_release">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_button_release</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dragging</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resizing</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="ArraySelector.on_mouse_move">
+<a class="viewcode-back" href="../../../snom_analysis.lib.html#snom_analysis.lib.data_range_selector.ArraySelector.on_mouse_move">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_mouse_move</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_horizontal</span><span class="p">:</span>
+                <span class="n">left_border</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span>
+                <span class="n">right_border</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span>
+                <span class="n">border_width</span> <span class="o">=</span> <span class="mi">5</span>
+                
+                <span class="k">if</span> <span class="n">left_border</span> <span class="o">-</span> <span class="n">border_width</span> <span class="o">&lt;</span> <span class="n">event</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">left_border</span> <span class="o">+</span> <span class="n">border_width</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">cursor</span><span class="o">=</span><span class="s2">&quot;sb_h_double_arrow&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">resizing</span> <span class="o">=</span> <span class="s1">&#39;left&#39;</span>
+                <span class="k">elif</span> <span class="n">right_border</span> <span class="o">-</span> <span class="n">border_width</span> <span class="o">&lt;</span> <span class="n">event</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">right_border</span> <span class="o">+</span> <span class="n">border_width</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">cursor</span><span class="o">=</span><span class="s2">&quot;sb_h_double_arrow&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">resizing</span> <span class="o">=</span> <span class="s1">&#39;right&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">cursor</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">resizing</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">top_border</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span>
+                <span class="n">bottom_border</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span>
+                <span class="n">border_width</span> <span class="o">=</span> <span class="mi">5</span>
+
+                <span class="k">if</span> <span class="n">top_border</span> <span class="o">-</span> <span class="n">border_width</span> <span class="o">&lt;</span> <span class="n">event</span><span class="o">.</span><span class="n">y</span> <span class="o">&lt;</span> <span class="n">top_border</span> <span class="o">+</span> <span class="n">border_width</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">cursor</span><span class="o">=</span><span class="s2">&quot;sb_v_double_arrow&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">resizing</span> <span class="o">=</span> <span class="s1">&#39;left&#39;</span>
+                <span class="k">elif</span> <span class="n">bottom_border</span> <span class="o">-</span> <span class="n">border_width</span> <span class="o">&lt;</span> <span class="n">event</span><span class="o">.</span><span class="n">y</span> <span class="o">&lt;</span> <span class="n">bottom_border</span> <span class="o">+</span> <span class="n">border_width</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">cursor</span><span class="o">=</span><span class="s2">&quot;sb_v_double_arrow&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">resizing</span> <span class="o">=</span> <span class="s1">&#39;right&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">cursor</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">resizing</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="ArraySelector.fill_canvas">
+<a class="viewcode-back" href="../../../snom_analysis.lib.html#snom_analysis.lib.data_range_selector.ArraySelector.fill_canvas">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fill_canvas</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="c1">#</span>
+        <span class="c1"># self.array = cv2.resize(self.original_array, (int(self.scaling_factor*self.original_width), int(self.scaling_factor*self.original_height)),interpolation=cv2.INTER_NEAREST)</span>
+        <span class="c1"># same using pillows image to get rid of cv2</span>
+        <span class="c1"># self.array = Image.resize((int(self.scaling_factor*self.original_width), int(self.scaling_factor*self.original_height)), Image.NEAREST)</span>
+        <span class="c1"># Normalize array to 0-255 for display</span>
+        <span class="c1"># self.array = ((self.array - np.min(self.array)) / (np.max(self.array) - np.min(self.array)) * 255).astype(np.uint8)</span>
+
+        <span class="c1"># self.height, self.width = self.array.shape</span>
+        <span class="c1"># delete and redraw the image if already existing</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="c1"># Normalize array to 0-255 for display</span>
+        <span class="c1"># self.array = ((self.array - np.min(self.array)) / (np.max(self.array) - np.min(self.array)) * 255).astype(np.uint8)</span>
+        <span class="c1"># self.image = Image.fromarray(np.uint8(self.cmap(self.original_array)*255))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="p">)</span><span class="o">*</span><span class="mi">255</span><span class="p">))</span>
+        <span class="c1"># plt.imshow(self.image)</span>
+        <span class="c1"># plt.show()</span>
+        <span class="c1"># resize the image</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">original_width</span><span class="p">)</span>
+        <span class="c1"># print(f&#39;width: {self.width}&#39;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">original_height</span><span class="p">)</span>
+        <span class="c1"># print(f&#39;height: {self.height}&#39;)</span>
+        <span class="c1"># print(&#39;resizing image&#39;)</span>
+        <span class="c1"># print(f&#39;scaling factor: {self.scaling_factor}&#39;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">resize</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">),</span> <span class="n">Image</span><span class="o">.</span><span class="n">Resampling</span><span class="o">.</span><span class="n">LANCZOS</span><span class="p">)</span>
+        <span class="c1"># plt.imshow(self.image)</span>
+        <span class="c1"># plt.show()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tk_image</span> <span class="o">=</span> <span class="n">ImageTk</span><span class="o">.</span><span class="n">PhotoImage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="p">)</span>
+        <span class="c1"># self.canvas.create_image(self.width/2, self.height/2, image=self.tk_image)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">create_image</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">NW</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tk_image</span><span class="p">)</span></div>
+
+        <span class="c1"># self.highlight_selection()</span>
+
+<div class="viewcode-block" id="ArraySelector.on_windowsize_changed">
+<a class="viewcode-back" href="../../../snom_analysis.lib.html#snom_analysis.lib.data_range_selector.ArraySelector.on_windowsize_changed">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_windowsize_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="c1"># if the canvas size becomse so large that the image scaled by an integer factor is smaller than the canvas size, then we need to rescale the image by that factor</span>
+        <span class="c1"># get the current size of the canvas</span>
+        <span class="n">canvas_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">winfo_width</span><span class="p">()</span>
+        <span class="n">canvas_height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">winfo_height</span><span class="p">()</span>
+        <span class="c1"># get the current size of the data</span>
+        <span class="c1"># height, width = self.array.shape</span>
+        <span class="n">height</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">size</span>
+        <span class="c1"># if the current scaling factor is 0.5 we need to increment it by 0.5 not 1 </span>
+        <span class="c1"># if the current scaling factor is 1 we need to increment it by 0.5 not 1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span> <span class="o">==</span> <span class="mf">0.5</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">scaling_increment</span> <span class="o">=</span> <span class="mf">0.5</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">scaling_increment</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="c1"># resize the image to the canvas size if the canvas size is larger than the image times the scaling factor, where the scaling factor is an integer</span>
+        <span class="k">if</span> <span class="n">canvas_width</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_width</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span><span class="o">+</span><span class="n">scaling_increment</span><span class="p">)</span> <span class="ow">and</span> <span class="n">canvas_height</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_height</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span><span class="o">+</span><span class="n">scaling_increment</span><span class="p">):</span>
+            <span class="c1"># increment the scaling factor</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span> <span class="o">+=</span> <span class="n">scaling_increment</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_scaling_factor</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fill_canvas</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">canvas_width</span> <span class="o">&lt;</span> <span class="n">width</span> <span class="ow">or</span> <span class="n">canvas_height</span> <span class="o">&lt;</span> <span class="n">height</span><span class="p">:</span>
+            <span class="c1"># decrement the scaling factor</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span> <span class="o">-=</span> <span class="n">scaling_increment</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_scaling_factor</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fill_canvas</span><span class="p">()</span>        </div>
+
+
+<div class="viewcode-block" id="ArraySelector.highlight_selection">
+<a class="viewcode-back" href="../../../snom_analysis.lib.html#snom_analysis.lib.data_range_selector.ArraySelector.highlight_selection">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">highlight_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">highlighted_image</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">highlighted_image</span><span class="p">)</span>
+
+        <span class="c1"># Create an image for the highlighting based on inverted state</span>
+        <span class="c1"># highlighted_img = np.zeros_like(self.array)</span>
+        <span class="c1"># highlighted_img = np.ones_like(self.array).astype(np.uint8)*255</span>
+        <span class="n">highlighted_img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span><span class="o">*</span><span class="mi">255</span>
+        <span class="c1"># highlighted_img = self.array.copy()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverted</span><span class="p">:</span>
+            <span class="n">highlighted_img</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">128</span>  <span class="c1"># Copy original array</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_horizontal</span><span class="p">:</span>
+                <span class="n">highlighted_img</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="mi">255</span>  <span class="c1"># Set selected area to black</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">highlighted_img</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">255</span>  <span class="c1"># Set selected area to black</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_horizontal</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">highlighted_img</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="mi">128</span><span class="c1">#self.array[:, self.start:self.end]  # Highlight selected area</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_horizontal</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">highlighted_img</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">128</span><span class="c1">#self.array[self.start:self.end, :]  # Highlight selected area</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="n">highlighted_img</span><span class="p">)</span>
+        <span class="c1"># print(f&#39;mask size: {mask.size}&#39;)</span>
+        <span class="c1"># print(f&#39;original image size: {self.image.size}&#39;)</span>
+        <span class="c1"># create an overlay in red with 30% opacity of the highlighted area with the original image</span>
+        <span class="n">overlay</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGBA&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>  <span class="c1"># Red with 30% opacity</span>
+        <span class="n">combined</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">composite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s1">&#39;RGBA&#39;</span><span class="p">),</span> <span class="n">overlay</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+        <span class="c1"># convert to rgb</span>
+        <span class="c1"># combined = combined.convert(&#39;RGB&#39;)</span>
+        <span class="c1"># now update the image</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tk_image</span> <span class="o">=</span> <span class="n">ImageTk</span><span class="o">.</span><span class="n">PhotoImage</span><span class="p">(</span><span class="n">combined</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">create_image</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">NW</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tk_image</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ArraySelector.invert_selection">
+<a class="viewcode-back" href="../../../snom_analysis.lib.html#snom_analysis.lib.data_range_selector.ArraySelector.invert_selection">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">invert_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inverted</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverted</span>  <span class="c1"># Toggle inverted state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">highlight_selection</span><span class="p">()</span>  <span class="c1"># Update highlighting</span></div>
+
+
+<div class="viewcode-block" id="ArraySelector.toggle_selection_mode">
+<a class="viewcode-back" href="../../../snom_analysis.lib.html#snom_analysis.lib.data_range_selector.ArraySelector.toggle_selection_mode">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">toggle_selection_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Clear current selection</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rect</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_horizontal</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_horizontal</span>  <span class="c1"># Toggle selection mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">highlight_selection</span><span class="p">()</span>  <span class="c1"># Update highlighting for the new mode</span></div>
+
+
+<div class="viewcode-block" id="ArraySelector.get_coordinates">
+<a class="viewcode-back" href="../../../snom_analysis.lib.html#snom_analysis.lib.data_range_selector.ArraySelector.get_coordinates">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># reduze the coordinates to the original size</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span> <span class="c1"># &#39;-1&#39; due to conversion between pixel in image and array index</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_horizontal</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Selected horizontal coordinates: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Selected vertical coordinates: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># close the window</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Hans-Joachim Schill.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

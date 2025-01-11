@@ -2,15 +2,13 @@ from setuptools import setup
 
 setup(
     name="snom_analysis",
-    version="0.0.175",
+    version="0.1.0",
     description="Package for displaying and manipulating SNOM and AFM data.",
-    # package_dir={},
-    packages=["src/snom_analysis", "src/snom_analysis/lib"],
+    packages=["snom_analysis", "snom_analysis/lib"],
     url="#",
     author="Hans-Joachim Schill",
     author_email="hajo.schill@acetovit.de",
-    license="",
-    install_requires=[], # these ones cause errors? :, "pathlib", "tkinter", "enum", "datetime", "struct", "os" 
+    license="LICENSE",
     python_requires=">=3.12",
     zip_safe=False,
     include_package_data=True
