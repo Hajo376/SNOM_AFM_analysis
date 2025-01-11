@@ -1,4 +1,6 @@
-# This package is a toolset to load, view and manipulate SNOM or AFM data. #
+This package is a toolset to load, view and manipulate SNOM or AFM data.
+========================================================================
+
 Currently SNOM/AFM data and approach curves are supported, although the focus so far was on the standard SNOM measurements created by a standard Neaspec (Attocube) s-SNOM.
 The specific class will load one measurement and allows to handle multiple channels at once.
 Such a measurement instance will contain the raw measurement data as numpy arrays, the channel names, and also a dictionary containing information about the measurement and one for each channel.
@@ -17,7 +19,9 @@ I created this package during my PhD for various data analysis purposes. I want 
 I am not a professional programmer, please keep that in mind if you encounter problems or bugs, which you most probably will.
 I encourage you to use and extend the functionality of this script to turn it into something useful which can be used by the SNOM/AFM community.
 
-## Key areas to improve: ##
+Key areas to improve:
+---------------------
+
 Documentation is missing.
 Some sort of Unittesting or Integration testing.
 More universal data loading. (Similar to gwyddion)
@@ -28,6 +32,8 @@ Allow for custom colormaps.
 Speed improvements.
 Maybe switch to imshow instead of pcolormesh.
 
-## Documentation will follow soon. ##
+Documentation will follow soon.
+-------------------------------
 
-## Still need to implement testing. ##
+Still need to implement testing.
+--------------------------------
