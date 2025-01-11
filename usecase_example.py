@@ -6,7 +6,7 @@ from tkinter import filedialog
 import pathlib
 this_files_path = pathlib.Path(__file__).parent.absolute()
 
-from SNOM_AFM_analysis.snom_analysis import*
+from src.snom_analysis.main import*
 
 '''
 This is an example script of how to access an use the snom_pyhton_classes.
@@ -273,11 +273,11 @@ def gif():
     channels = ['O2A', 'O2P_corrected', 'Z C']
     Measurement = SnomMeasurement(directory_name, channels)
     # Measurement.display_channels()
-    Measurement.Rotate_90_deg(orientation='left')
+    Measurement.rotate_90_deg(orientation='left')
     # Measurement.gauss_filter_channels_complex()
-    Measurement.Create_gif('O2A', 'O2P_corrected', frames=20, fps=10, dpi=100)
-    # Measurement.Create_gif_V2('O2A', 'O2P_corrected', 20, 10)
-    # Measurement.Create_gif_Old('O2A', 'O2P_corrected', 20, 10)
+    Measurement.create_gif('O2A', 'O2P_corrected', frames=20, fps=10, dpi=100)
+    # Measurement.create_gif_V2('O2A', 'O2P_corrected', 20, 10)
+    # Measurement.create_gif_Old('O2A', 'O2P_corrected', 20, 10)
 
 def test_3d_scan():
     # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 144100 PH 3D single_wg_20mu_3d'
@@ -298,11 +298,11 @@ def test_3d_scan():
     # measurement.display_cutplane_V2_Realpart(axis='x', line=0, demodulation=3)
     measurement.generate_all_cutplane_data()
     measurement.match_phase_offset(channels=['O2P', 'O3P'], reference_channel='O2P', reference_area='manual', manual_width=3)
-    measurement.display_cutplane_V3(axis='x', line=0, channel='O2P')
-    measurement.display_cutplane_V3(axis='x', line=0, channel='O3P')
+    measurement.display_cutplane_v3(axis='x', line=0, channel='O2P')
+    measurement.display_cutplane_v3(axis='x', line=0, channel='O3P')
     measurement.shift_phase()
-    measurement.display_cutplane_V3(axis='x', line=0, channel='O2P')
-    measurement.display_cutplane_V3(axis='x', line=0, channel='O3P')
+    measurement.display_cutplane_v3(axis='x', line=0, channel='O2P')
+    measurement.display_cutplane_v3(axis='x', line=0, channel='O3P')
     measurement.display_cutplane_v3_realpart(axis='x', line=0, demodulation=2)
     measurement.display_cutplane_v3_realpart(axis='x', line=0, demodulation=3)
 
@@ -315,11 +315,11 @@ def phase_correction_3d_scan():
     Plot_Definitions.colorbar_width = 3
     measurement.generate_all_cutplane_data()
     measurement.match_phase_offset(channels=['O2P', 'O3P'], reference_channel='O2P', reference_area='manual', manual_width=3)
-    measurement.display_cutplane_V3(axis='x', line=0, channel='O2P')
-    measurement.display_cutplane_V3(axis='x', line=0, channel='O3P')
+    measurement.display_cutplane_v3(axis='x', line=0, channel='O2P')
+    measurement.display_cutplane_v3(axis='x', line=0, channel='O3P')
     measurement.shift_phase()
-    measurement.display_cutplane_V3(axis='x', line=0, channel='O2P')
-    measurement.display_cutplane_V3(axis='x', line=0, channel='O3P')
+    measurement.display_cutplane_v3(axis='x', line=0, channel='O2P')
+    measurement.display_cutplane_v3(axis='x', line=0, channel='O3P')
     measurement.display_cutplane_v3_realpart(axis='x', line=0, demodulation=2)
     measurement.display_cutplane_v3_realpart(axis='x', line=0, demodulation=3)
 
@@ -342,11 +342,11 @@ def average_3d_scan():
     # measurement.display_cutplane_V3(axis='x', line=0, channel='O3P')
 
     measurement.match_phase_offset(channels=['O2P', 'O3P'], reference_channel='O2P', reference_area='manual', manual_width=3)
-    measurement.display_cutplane_V3(axis='x', line=0, channel='O2P')
-    measurement.display_cutplane_V3(axis='x', line=0, channel='O3P')
+    measurement.display_cutplane_v3(axis='x', line=0, channel='O2P')
+    measurement.display_cutplane_v3(axis='x', line=0, channel='O3P')
     measurement.shift_phase()
-    measurement.display_cutplane_V3(axis='x', line=0, channel='O2P')
-    measurement.display_cutplane_V3(axis='x', line=0, channel='O3P')
+    measurement.display_cutplane_v3(axis='x', line=0, channel='O2P')
+    measurement.display_cutplane_v3(axis='x', line=0, channel='O3P')
     measurement.display_cutplane_v3_realpart(axis='x', line=0, demodulation=2)
     measurement.display_cutplane_v3_realpart(axis='x', line=0, demodulation=3)
 
@@ -376,8 +376,8 @@ def test_amplitude_drift_correction():
 
 def test_height_drift_correction():
     # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-23 113254 PH single_wv-on-wg_long'
-    directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-10-23 113133 PH wg_wv_long_refl_15slits_No3_fine'
-    # directory = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-05-23-ssh-reflection')
+    # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-10-23 113133 PH wg_wv_long_refl_15slits_No3_fine'
+    directory = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-05-23-ssh-reflection')
     channels = ['Z C']
     # channels = ['O2A']
     measurement = SnomMeasurement(directory, channels)

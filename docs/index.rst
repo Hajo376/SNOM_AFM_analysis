@@ -1,10 +1,10 @@
-.. SNOM/AFM Analysis documentation master file, created by
-   sphinx-quickstart on Fri Jan 10 14:32:35 2025.
+.. SNOM Analysis documentation master file, created by
+   sphinx-quickstart on Sat Jan 11 12:51:57 2025.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-SNOM/AFM Analysis documentation
-===============================
+SNOM Analysis documentation
+===========================
 
 Add your content using ``reStructuredText`` syntax. See the
 `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
@@ -15,5 +15,6 @@ documentation for details.
    :maxdepth: 2
    :caption: Contents:
 
-   SNOM_AFM_analysis
+   snom_analysis
+   readme
 

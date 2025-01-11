@@ -1,7 +1,7 @@
-SNOM_AFM_analysis
-=================
+snom_analysis
+=============
 
 .. toctree::
    :maxdepth: 4
 
-   SNOM_AFM_analysis
+   snom_analysis

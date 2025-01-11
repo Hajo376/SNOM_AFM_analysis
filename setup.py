@@ -5,7 +5,7 @@ setup(
     version="0.0.175",
     description="Package for displaying and manipulating SNOM and AFM data.",
     # package_dir={},
-    packages=["SNOM_AFM_analysis", "SNOM_AFM_analysis/lib"],
+    packages=["src/snom_analysis", "src/snom_analysis/lib"],
     url="#",
     author="Hans-Joachim Schill",
     author_email="hajo.schill@acetovit.de",
