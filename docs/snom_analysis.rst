@@ -1,17 +1,6 @@
 snom\_analysis package
 ======================
 
-Module contents
----------------
-
-.. automodule:: snom_analysis
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-
-Submodules
-----------
 
 snom\_analysis.chiralcouplers module
 ------------------------------------

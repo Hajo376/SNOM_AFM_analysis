@@ -1,16 +1,6 @@
 snom\_analysis package
 ======================
 
-Subpackages
------------
-
-.. toctree::
-   :maxdepth: 4
-
-   snom_analysis.lib
-
-Submodules
-----------
 
 snom\_analysis.chiralcouplers module
 ------------------------------------
@@ -44,10 +34,11 @@ snom\_analysis.python\_classes\_afm\_old module
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
 
-.. automodule:: snom_analysis
-   :members:
-   :undoc-members:
-   :show-inheritance:
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   snom_analysis.lib

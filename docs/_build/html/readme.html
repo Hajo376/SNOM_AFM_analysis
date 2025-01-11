@@ -19,7 +19,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="snom_analysis.lib package" href="snom_analysis.lib.html" /> 
+    <link rel="next" title="snom_analysis package" href="snom_analysis.html" />
+    <link rel="prev" title="SNOM Analysis documentation" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -43,8 +44,13 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Readme</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#key-areas-to-improve">Key areas to improve:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#documentation">Documentation:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#still-need-to-implement-testing">Still need to implement testing:</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="snom_analysis.html">snom_analysis package</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Readme</a></li>
 </ul>
 
         </div>
@@ -73,8 +79,8 @@
              
   <section id="readme">
 <h1>Readme<a class="headerlink" href="#readme" title="Link to this heading"></a></h1>
-<p># This package is a toolset to load, view and manipulate SNOM or AFM data. #
-Currently SNOM/AFM data and approach curves are supported, although the focus so far was on the standard SNOM measurements created by a standard Neaspec (Attocube) s-SNOM.
+<p>This package is a toolset to load, view and manipulate SNOM or AFM data.</p>
+<p>Currently SNOM/AFM data and approach curves are supported, although the focus so far was on the standard SNOM measurements created by a standard Neaspec (Attocube) s-SNOM.
 The specific class will load one measurement and allows to handle multiple channels at once.
 Such a measurement instance will contain the raw measurement data as numpy arrays, the channel names, and also a dictionary containing information about the measurement and one for each channel.
 The dictionaries are created automatically from the measurement parameter ‘.txt’ file and the individual header section in each ‘.gsf’ file.
@@ -89,8 +95,9 @@ This memory can of course be deleted at will, which is by default every time a n
 <p>I created this package during my PhD for various data analysis purposes. I want to make it available for the general public and have no commercial interests.
 I am not a professional programmer, please keep that in mind if you encounter problems or bugs, which you most probably will.
 I encourage you to use and extend the functionality of this script to turn it into something useful which can be used by the SNOM/AFM community.</p>
-<p>## Key areas to improve: ##
-Documentation is missing.
+<section id="key-areas-to-improve">
+<h2>Key areas to improve:<a class="headerlink" href="#key-areas-to-improve" title="Link to this heading"></a></h2>
+<p>Documentation is missing.
 Some sort of Unittesting or Integration testing.
 More universal data loading. (Similar to gwyddion)
 Support for spectra and interferogramms. Maybe incorporate pysnom by Quasars.
@@ -99,15 +106,25 @@ Better and adjustable plotting, (adaptable layout, custom fonts, sizes…)
 Allow for custom colormaps.
 Speed improvements.
 Maybe switch to imshow instead of pcolormesh.</p>
-<p>## Documentation will follow soon. ##</p>
-<p>## Still need to implement testing. ##</p>
+</section>
+<section id="documentation">
+<h2>Documentation:<a class="headerlink" href="#documentation" title="Link to this heading"></a></h2>
+<p>Base documentation done with sphinx. More detailed descriptions of the functions and classes are in progress.
+Also a detailed example of how to use the package is in progress.</p>
+</section>
+<section id="still-need-to-implement-testing">
+<h2>Still need to implement testing:<a class="headerlink" href="#still-need-to-implement-testing" title="Link to this heading"></a></h2>
+<p>Some sort of intefration testing would be nice to make shure all functions the user applies to measurements are working as intended.
+Also some unittesting would be nice to make sure the functions are working as intended.</p>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="snom_analysis.lib.html" class="btn btn-neutral float-left" title="snom_analysis.lib package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="SNOM Analysis documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="snom_analysis.html" class="btn btn-neutral float-right" title="snom_analysis package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

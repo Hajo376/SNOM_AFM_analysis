@@ -1,5 +1,4 @@
 This package is a toolset to load, view and manipulate SNOM or AFM data.
-========================================================================
 
 Currently SNOM/AFM data and approach curves are supported, although the focus so far was on the standard SNOM measurements created by a standard Neaspec (Attocube) s-SNOM.
 The specific class will load one measurement and allows to handle multiple channels at once.
@@ -32,8 +31,13 @@ Allow for custom colormaps.
 Speed improvements.
 Maybe switch to imshow instead of pcolormesh.
 
-Documentation will follow soon.
--------------------------------
+Documentation:
+--------------
 
-Still need to implement testing.
+Base documentation done with sphinx. More detailed descriptions of the functions and classes are in progress.
+Also a detailed example of how to use the package is in progress.
+
+Still need to implement testing:
 --------------------------------
+Some sort of intefration testing would be nice to make shure all functions the user applies to measurements are working as intended.
+Also some unittesting would be nice to make sure the functions are working as intended.

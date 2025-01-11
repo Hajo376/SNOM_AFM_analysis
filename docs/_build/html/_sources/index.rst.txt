@@ -15,6 +15,6 @@ documentation for details.
    :maxdepth: 2
    :caption: Contents:
 
-   snom_analysis
    readme
+   snom_analysis
 
