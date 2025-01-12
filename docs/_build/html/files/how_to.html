@@ -9,6 +9,7 @@
   <title>How to use: &mdash; SNOM Analysis 1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
@@ -43,7 +44,7 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">Readme</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../how_to.html">How to:</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how_to.html">How to</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../snom_analysis.html">snom_analysis package</a></li>
 </ul>
 
@@ -71,9 +72,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <p>Here we will discuss how to use the package and how to get started with it.
-We will lateron also discuss additional features ant tricks to get the most out of the package.</p>
-<section id="how-to-use">
+  <section id="how-to-use">
 <h1>How to use:<a class="headerlink" href="#how-to-use" title="Link to this heading"></a></h1>
 <p>First of all install the package either from PyPi or by using a wheel from the dist folder.
 You can also clone the repository and use it as is or create your own wheel by running pyhton setup.py bdist_wheel.
@@ -87,6 +86,18 @@ Anyways, here is a short example of how to use the package:</p>
 <section id="more-advanced-usage-example-using-the-snommeasurement-class">
 <h2>More advanced usage example using the SnomMeasurement class:<a class="headerlink" href="#more-advanced-usage-example-using-the-snommeasurement-class" title="Link to this heading"></a></h2>
 <p>This is an example using the tkinter filedialog and some more advanced fuctions.</p>
+</section>
+<section id="simple-usage-example-using-the-approachcurve-class">
+<h2>Simple usage example using the ApproachCurve class:<a class="headerlink" href="#simple-usage-example-using-the-approachcurve-class" title="Link to this heading"></a></h2>
+<p>This is a very simple example using just some base functions without any extra parameters.</p>
+</section>
+<section id="simple-usage-example-using-the-scan3d-class">
+<h2>Simple usage example using the Scan3D class:<a class="headerlink" href="#simple-usage-example-using-the-scan3d-class" title="Link to this heading"></a></h2>
+<p>This is a very simple example using just some base functions to display x-z-cutplanes from the 3D scans.</p>
+</section>
+<section id="simple-usage-example-using-the-scan3d-class-and-averaging-the-data">
+<h2>Simple usage example using the Scan3D class and averaging the data:<a class="headerlink" href="#simple-usage-example-using-the-scan3d-class-and-averaging-the-data" title="Link to this heading"></a></h2>
+<p>This is an example using just some base functions and using the multiple y lines to average each x-z-cutplane.</p>
 </section>
 </section>
 

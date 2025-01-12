@@ -3,9 +3,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Overview: module code &mdash; SNOM Analysis 1.0.0 documentation</title>
+  <title>&lt;no title&gt; &mdash; SNOM Analysis 1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
@@ -61,8 +62,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Overview: module code</li>
+      <li class="breadcrumb-item active">&lt;no title&gt;</li>
       <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/files/code_example_approachcurve_1.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -70,21 +72,32 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>All modules for which code is available</h1>
-<ul><li><a href="snom_analysis/chiralcouplers.html">snom_analysis.chiralcouplers</a></li>
-<li><a href="snom_analysis/lib/data_range_selector.html">snom_analysis.lib.data_range_selector</a></li>
-<li><a href="snom_analysis/lib/edge_detection.html">snom_analysis.lib.edge_detection</a></li>
-<li><a href="snom_analysis/lib/file_handling.html">snom_analysis.lib.file_handling</a></li>
-<li><a href="snom_analysis/lib/get_directionality.html">snom_analysis.lib.get_directionality</a></li>
-<li><a href="snom_analysis/lib/phase_analysis.html">snom_analysis.lib.phase_analysis</a></li>
-<li><a href="snom_analysis/lib/phase_slider.html">snom_analysis.lib.phase_slider</a></li>
-<li><a href="snom_analysis/lib/profile.html">snom_analysis.lib.profile</a></li>
-<li><a href="snom_analysis/lib/profile_selector.html">snom_analysis.lib.profile_selector</a></li>
-<li><a href="snom_analysis/lib/realign.html">snom_analysis.lib.realign</a></li>
-<li><a href="snom_analysis/lib/rectangle_selector.html">snom_analysis.lib.rectangle_selector</a></li>
-<li><a href="snom_analysis/lib/test_profile_selector.html">snom_analysis.lib.test_profile_selector</a></li>
-<li><a href="snom_analysis/main.html">snom_analysis.main</a></li>
-</ul>
+  <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># Import filedialog to open a file dialog to select the measurement folder.</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">tkinter</span><span class="w"> </span><span class="kn">import</span> <span class="n">filedialog</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="c1"># Load the main functionality from the package, in this case the SnomMeasurement class.</span>
+<span class="linenos"> 5</span><span class="kn">from</span><span class="w"> </span><span class="nn">snom_analysis.main</span><span class="w"> </span><span class="kn">import</span> <span class="n">ApproachCurve</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="c1"># Open a file dialog to select the measurement folder.</span>
+<span class="linenos"> 8</span><span class="n">directory</span> <span class="o">=</span> <span class="n">filedialog</span><span class="o">.</span><span class="n">askdirectory</span><span class="p">()</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="c1"># It is always a good idea to select the channels you want to use before loading the data.</span>
+<span class="linenos">11</span><span class="n">channels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;M1A&#39;</span><span class="p">,</span> <span class="s1">&#39;O2P&#39;</span><span class="p">,</span> <span class="s1">&#39;O2A&#39;</span><span class="p">]</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="c1"># Create an instance of the ApproachCurve class by providing the path to the measurement folder.</span>
+<span class="linenos">14</span><span class="n">measurement</span> <span class="o">=</span> <span class="n">ApproachCurve</span><span class="p">(</span><span class="n">directory_name</span><span class="p">,</span> <span class="n">channels</span><span class="p">)</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="c1"># Set the minimum value of the data to zero.</span>
+<span class="linenos">17</span><span class="n">measurement</span><span class="o">.</span><span class="n">set_min_to_zero</span><span class="p">()</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span><span class="c1"># Display the channels in a plot. And scale each data set to the whole image size.</span>
+<span class="linenos">20</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels_v2</span><span class="p">()</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span><span class="c1"># Alternatively you can use the display_channels() function, which will display the channels in a plot without rescaling.</span>
+<span class="linenos">23</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
+</pre></div>
+</div>
+
 
            </div>
           </div>

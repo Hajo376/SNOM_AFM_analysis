@@ -538,6 +538,12 @@ def test_config():
     # Measurement._print_measurement_tags()
     # Measurement._print_config()
 
+def test_approach_curve():
+    directory_name = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo')
+    channels = ['M1A', 'O2P', 'O2A']
+    measurement = ApproachCurve(directory_name, channels)
+    measurement.set_min_to_zero()
+    measurement.display_channels_v2()
 
 def main():
      
@@ -560,7 +566,7 @@ def main():
     # average_3d_scan()
     # test_phase_drift_correction()
     # test_amplitude_drift_correction()
-    test_height_drift_correction()
+    # test_height_drift_correction()
     # test_channel_substraction()
     # simple_afm_example()
     # test_data_range_selector()
@@ -571,6 +577,7 @@ def main():
     # test_comsol_data()
     # test_comsol_height_data()
     # test_config()
+    test_approach_curve()
 
 
 if __name__ == '__main__':

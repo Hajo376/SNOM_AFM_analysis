@@ -6,9 +6,10 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>How to: &mdash; SNOM Analysis 1.0.0 documentation</title>
+  <title>How to &mdash; SNOM Analysis 1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
@@ -45,10 +46,14 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="readme.html">Readme</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">How to:</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">How to</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation:</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#how-to-use">How to use:</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#simple-usage-example-using-the-snommeasurement-class">Simple usage example using the SnomMeasurement class:</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#more-advanced-usage-example-using-the-snommeasurement-class">More advanced usage example using the SnomMeasurement class:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simple-usage-example-using-the-approachcurve-class">Simple usage example using the ApproachCurve class:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simple-usage-example-using-the-scan3d-class">Simple usage example using the Scan3D class:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simple-usage-example-using-the-scan3d-class-and-averaging-the-data">Simple usage example using the Scan3D class and averaging the data:</a></li>
 </ul>
 </li>
 </ul>
@@ -70,7 +75,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">How to:</li>
+      <li class="breadcrumb-item active">How to</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/how_to.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -81,9 +86,12 @@
            <div itemprop="articleBody">
              
   <section id="how-to">
-<h1>How to:<a class="headerlink" href="#how-to" title="Link to this heading"></a></h1>
+<h1>How to<a class="headerlink" href="#how-to" title="Link to this heading"></a></h1>
 <p>Here we will discuss how to use the package and how to get started with it.
 We will lateron also discuss additional features ant tricks to get the most out of the package.</p>
+<section id="installation">
+<h2>Installation:<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
+</section>
 <section id="how-to-use">
 <h2>How to use:<a class="headerlink" href="#how-to-use" title="Link to this heading"></a></h2>
 <p>First of all install the package either from PyPi or by using a wheel from the dist folder.
@@ -168,6 +176,120 @@ Anyways, here is a short example of how to use the package:</p>
 <span class="linenos">35</span>
 <span class="linenos">36</span><span class="c1"># Now you can plot the data.</span>
 <span class="linenos">37</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="simple-usage-example-using-the-approachcurve-class">
+<h3>Simple usage example using the ApproachCurve class:<a class="headerlink" href="#simple-usage-example-using-the-approachcurve-class" title="Link to this heading"></a></h3>
+<p>This is a very simple example using just some base functions without any extra parameters.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># Import filedialog to open a file dialog to select the measurement folder.</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">tkinter</span><span class="w"> </span><span class="kn">import</span> <span class="n">filedialog</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="c1"># Load the main functionality from the package, in this case the SnomMeasurement class.</span>
+<span class="linenos"> 5</span><span class="kn">from</span><span class="w"> </span><span class="nn">snom_analysis.main</span><span class="w"> </span><span class="kn">import</span> <span class="n">ApproachCurve</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="c1"># Open a file dialog to select the measurement folder.</span>
+<span class="linenos"> 8</span><span class="n">directory</span> <span class="o">=</span> <span class="n">filedialog</span><span class="o">.</span><span class="n">askdirectory</span><span class="p">()</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="c1"># It is always a good idea to select the channels you want to use before loading the data.</span>
+<span class="linenos">11</span><span class="n">channels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;M1A&#39;</span><span class="p">,</span> <span class="s1">&#39;O2P&#39;</span><span class="p">,</span> <span class="s1">&#39;O2A&#39;</span><span class="p">]</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="c1"># Create an instance of the ApproachCurve class by providing the path to the measurement folder.</span>
+<span class="linenos">14</span><span class="n">measurement</span> <span class="o">=</span> <span class="n">ApproachCurve</span><span class="p">(</span><span class="n">directory_name</span><span class="p">,</span> <span class="n">channels</span><span class="p">)</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="c1"># Set the minimum value of the data to zero.</span>
+<span class="linenos">17</span><span class="n">measurement</span><span class="o">.</span><span class="n">set_min_to_zero</span><span class="p">()</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span><span class="c1"># Display the channels in a plot. And scale each data set to the whole image size.</span>
+<span class="linenos">20</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels_v2</span><span class="p">()</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span><span class="c1"># Alternatively you can use the display_channels() function, which will display the channels in a plot without rescaling.</span>
+<span class="linenos">23</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="simple-usage-example-using-the-scan3d-class">
+<h3>Simple usage example using the Scan3D class:<a class="headerlink" href="#simple-usage-example-using-the-scan3d-class" title="Link to this heading"></a></h3>
+<p>This is a very simple example using just some base functions to display x-z-cutplanes from the 3D scans.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># Import filedialog to open a file dialog to select the measurement folder.</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">tkinter</span><span class="w"> </span><span class="kn">import</span> <span class="n">filedialog</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="c1"># Load the main functionality from the package, in this case the SnomMeasurement class.</span>
+<span class="linenos"> 5</span><span class="kn">from</span><span class="w"> </span><span class="nn">snom_analysis.main</span><span class="w"> </span><span class="kn">import</span> <span class="n">Scan3D</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="c1"># Open a file dialog to select the measurement folder.</span>
+<span class="linenos"> 8</span><span class="n">directory</span> <span class="o">=</span> <span class="n">filedialog</span><span class="o">.</span><span class="n">askdirectory</span><span class="p">()</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="c1"># It is always a good idea to select the channels you want to use before loading the data.</span>
+<span class="linenos">11</span><span class="n">channels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;O2A&#39;</span><span class="p">,</span> <span class="s1">&#39;O2P&#39;</span><span class="p">,</span> <span class="s1">&#39;O3A&#39;</span><span class="p">,</span> <span class="s1">&#39;O3P&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">]</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="c1"># Create an instance of the Scan3D class by providing the path to the measurement folder.</span>
+<span class="linenos">14</span><span class="n">measurement</span> <span class="o">=</span> <span class="n">Scan3D</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">channels</span><span class="p">)</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="c1"># Set the minimum value of the data to zero.</span>
+<span class="linenos">17</span><span class="n">measurement</span><span class="o">.</span><span class="n">set_min_to_zero</span><span class="p">()</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span><span class="c1"># Change the colorbar width to 3 on the fly will apply to all following plots.</span>
+<span class="linenos">20</span><span class="n">PlotDefinitions</span><span class="o">.</span><span class="n">colorbar_width</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span><span class="c1"># Generate all cutplane data for the channels.</span>
+<span class="linenos">23</span><span class="n">measurement</span><span class="o">.</span><span class="n">generate_all_cutplane_data</span><span class="p">()</span>
+<span class="linenos">24</span>
+<span class="linenos">25</span><span class="c1"># Match the phase offset of the channels O2P and O3P to the reference channel O2P.</span>
+<span class="linenos">26</span><span class="n">measurement</span><span class="o">.</span><span class="n">match_phase_offset</span><span class="p">(</span><span class="n">channels</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;O2P&#39;</span><span class="p">,</span> <span class="s1">&#39;O3P&#39;</span><span class="p">],</span> <span class="n">reference_channel</span><span class="o">=</span><span class="s1">&#39;O2P&#39;</span><span class="p">,</span> <span class="n">reference_area</span><span class="o">=</span><span class="s1">&#39;manual&#39;</span><span class="p">,</span> <span class="n">manual_width</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="linenos">27</span>
+<span class="linenos">28</span><span class="c1"># For example display just the first cutplane of the O2P channel. Then display the first cutplane of the O3P channel.</span>
+<span class="linenos">29</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_cutplane_v3</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="s1">&#39;O2P&#39;</span><span class="p">)</span>
+<span class="linenos">30</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_cutplane_v3</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="s1">&#39;O3P&#39;</span><span class="p">)</span>
+<span class="linenos">31</span>
+<span class="linenos">32</span><span class="c1"># Shift the phase of the channels O2P and O3P by an arbitrary amount to make it visually clearer what you want to see.</span>
+<span class="linenos">33</span><span class="n">measurement</span><span class="o">.</span><span class="n">shift_phase</span><span class="p">()</span>
+<span class="linenos">34</span>
+<span class="linenos">35</span><span class="c1"># Display the first cutplane again with all the changes applied.</span>
+<span class="linenos">36</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_cutplane_v3</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="s1">&#39;O2P&#39;</span><span class="p">)</span>
+<span class="linenos">37</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_cutplane_v3</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="s1">&#39;O3P&#39;</span><span class="p">)</span>
+<span class="linenos">38</span>
+<span class="linenos">39</span><span class="c1"># Display the real part of the first cutplane of the O2 channel and the O3 channel.</span>
+<span class="linenos">40</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_cutplane_v3_realpart</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">demodulation</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="linenos">41</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_cutplane_v3_realpart</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">demodulation</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="simple-usage-example-using-the-scan3d-class-and-averaging-the-data">
+<h3>Simple usage example using the Scan3D class and averaging the data:<a class="headerlink" href="#simple-usage-example-using-the-scan3d-class-and-averaging-the-data" title="Link to this heading"></a></h3>
+<p>This is an example using just some base functions and using the multiple y lines to average each x-z-cutplane.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># Import filedialog to open a file dialog to select the measurement folder.</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">tkinter</span><span class="w"> </span><span class="kn">import</span> <span class="n">filedialog</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="c1"># Load the main functionality from the package, in this case the SnomMeasurement class.</span>
+<span class="linenos"> 5</span><span class="kn">from</span><span class="w"> </span><span class="nn">snom_analysis.main</span><span class="w"> </span><span class="kn">import</span> <span class="n">Scan3D</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="c1"># Open a file dialog to select the measurement folder.</span>
+<span class="linenos"> 8</span><span class="n">directory</span> <span class="o">=</span> <span class="n">filedialog</span><span class="o">.</span><span class="n">askdirectory</span><span class="p">()</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="c1"># It is always a good idea to select the channels you want to use before loading the data.</span>
+<span class="linenos">11</span><span class="n">channels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;O2A&#39;</span><span class="p">,</span> <span class="s1">&#39;O2P&#39;</span><span class="p">,</span> <span class="s1">&#39;O3A&#39;</span><span class="p">,</span> <span class="s1">&#39;O3P&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">]</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="c1"># Create an instance of the Scan3D class by providing the path to the measurement folder.</span>
+<span class="linenos">14</span><span class="n">measurement</span> <span class="o">=</span> <span class="n">Scan3D</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">channels</span><span class="p">)</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="c1"># Set the minimum value of the data to zero.</span>
+<span class="linenos">17</span><span class="n">measurement</span><span class="o">.</span><span class="n">set_min_to_zero</span><span class="p">()</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span><span class="c1"># Change the colorbar width to 3 on the fly will apply to all following plots.</span>
+<span class="linenos">20</span><span class="n">PlotDefinitions</span><span class="o">.</span><span class="n">colorbar_width</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span><span class="c1"># Average all individual cutplanes of the channels O2P and O3P.</span>
+<span class="linenos">23</span><span class="c1"># This is an alternative approach to generating individual cutplanes.</span>
+<span class="linenos">24</span><span class="c1"># All other functions will work with the averaged data, just make shure to use the &#39;line=0&#39; parameter.</span>
+<span class="linenos">25</span><span class="n">measurement</span><span class="o">.</span><span class="n">average_data</span><span class="p">()</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span><span class="c1"># Match the phase offset of the channels O2P and O3P to the reference channel O2P.</span>
+<span class="linenos">28</span><span class="n">measurement</span><span class="o">.</span><span class="n">match_phase_offset</span><span class="p">(</span><span class="n">channels</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;O2P&#39;</span><span class="p">,</span> <span class="s1">&#39;O3P&#39;</span><span class="p">],</span> <span class="n">reference_channel</span><span class="o">=</span><span class="s1">&#39;O2P&#39;</span><span class="p">,</span> <span class="n">reference_area</span><span class="o">=</span><span class="s1">&#39;manual&#39;</span><span class="p">,</span> <span class="n">manual_width</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="linenos">29</span>
+<span class="linenos">30</span><span class="c1"># For example display just the first cutplane of the O2P channel. Then display the first cutplane of the O3P channel.</span>
+<span class="linenos">31</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_cutplane_v3</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="s1">&#39;O2P&#39;</span><span class="p">)</span>
+<span class="linenos">32</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_cutplane_v3</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="s1">&#39;O3P&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>

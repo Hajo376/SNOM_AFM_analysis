@@ -8,6 +8,7 @@
   <title>snom_analysis.main &mdash; SNOM Analysis 1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
 
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
@@ -42,6 +43,7 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../readme.html">Readme</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how_to.html">How to</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../snom_analysis.html">snom_analysis package</a></li>
 </ul>
 
@@ -116,6 +118,7 @@
 <div class="viewcode-block" id="Definitions">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.Definitions">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Definitions</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class keeps track of the implemented definitions.&quot;&quot;&quot;</span>
     <span class="n">vertical</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
     <span class="n">horizontal</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span></div>
 
@@ -184,12 +187,11 @@
     <span class="c1"># MODULATIONOFFSET = auto()</span>
     <span class="c1"># SETPOINT = auto()</span>
     
-    
-    
-
 <div class="viewcode-block" id="PlotDefinitions">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.PlotDefinitions">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PlotDefinitions</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class contains all the definitions for the plotting parameters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">hide_ticks</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">figsizex</span> <span class="o">=</span> <span class="mi">10</span>
     <span class="n">figsizey</span> <span class="o">=</span> <span class="mi">5</span>
@@ -234,7 +236,14 @@
 <div class="viewcode-block" id="FileHandler">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.FileHandler">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">FileHandler</span><span class="p">(</span><span class="n">PlotDefinitions</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class handles the filetype and parameter type and all toplevel functionality.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class handles the filetype and parameter type and all toplevel functionality.</span>
+<span class="sd">    When creating a new instance of this class the config file will be loaded and the filetype will be determined.</span>
+<span class="sd">    Also the measurement tag dictionary will be created.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        directory_name (str): The path of the directory where the measurement files are stored.</span>
+<span class="sd">        title (str, optional): The title of the measurement. Defaults to None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory_name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">directory_name</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">directory_name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">PurePath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">directory_name</span><span class="p">)</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
@@ -265,8 +274,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">all_subplots_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_folder</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;all_subplots.p&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">plotting_parameters_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_folder</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;plotting_parameters.json&#39;</span><span class="p">)</span> <span class="c1"># probably not a good idea to use the same folder as the snom plotter app</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_folder</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;config.ini&#39;</span><span class="p">)</span>
-
-        
+     
     <span class="k">def</span><span class="w"> </span><span class="nf">_initialize_file_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># try to find the filetype automatically</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_find_filetype</span><span class="p">()</span> 
@@ -299,6 +307,7 @@
             <span class="s1">&#39;filetype5&#39;</span><span class="p">:</span> <span class="s1">&#39;&lt;FILETYPE5&gt;&#39;</span><span class="p">,</span> <span class="c1"># version 1.6.3359.1</span>
             <span class="s1">&#39;filetype6&#39;</span><span class="p">:</span> <span class="s1">&#39;&lt;FILETYPE6&gt;&#39;</span><span class="p">,</span> <span class="c1"># comsol</span>
         <span class="p">}</span>
+        <span class="c1"># old not needed anymore</span>
         <span class="n">config</span><span class="p">[</span><span class="s1">&#39;PARAMETERTYPES&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;PARAMETERTYPE1&#39;</span><span class="p">:</span> <span class="s1">&#39;html&#39;</span><span class="p">,</span>
             <span class="s1">&#39;PARAMETERTYPE2&#39;</span><span class="p">:</span> <span class="s1">&#39;txt&#39;</span><span class="p">,</span>
@@ -306,24 +315,6 @@
             <span class="s1">&#39;PARAMETERTYPE4&#39;</span><span class="p">:</span> <span class="s1">&#39;html_neaspec_version_1_6_3359_1&#39;</span><span class="p">,</span>
             <span class="s1">&#39;PARAMETERTYPE5&#39;</span><span class="p">:</span> <span class="s1">&#39;comsol_txt&#39;</span><span class="p">,</span>
             <span class="s1">&#39;PARAMETERTYPE6&#39;</span><span class="p">:</span> <span class="s1">&#39;new_parameters_txt&#39;</span><span class="p">,</span>
-        <span class="p">}</span>
-        <span class="n">config</span><span class="p">[</span><span class="s1">&#39;TEST&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;channels&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;phase_channels&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;O1P&#39;</span><span class="p">,</span><span class="s1">&#39;O2P&#39;</span><span class="p">,</span><span class="s1">&#39;O3P&#39;</span><span class="p">,</span><span class="s1">&#39;O4P&#39;</span><span class="p">,</span><span class="s1">&#39;O5P&#39;</span><span class="p">,</span> <span class="s1">&#39;R-O1P&#39;</span><span class="p">,</span><span class="s1">&#39;R-O2P&#39;</span><span class="p">,</span><span class="s1">&#39;R-O3P&#39;</span><span class="p">,</span><span class="s1">&#39;R-O4P&#39;</span><span class="p">,</span><span class="s1">&#39;R-O5P&#39;</span><span class="p">],</span>
-                <span class="s1">&#39;amp_channels&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;O1A&#39;</span><span class="p">,</span><span class="s1">&#39;O2A&#39;</span><span class="p">,</span><span class="s1">&#39;O3A&#39;</span><span class="p">,</span><span class="s1">&#39;O4A&#39;</span><span class="p">,</span><span class="s1">&#39;O5A&#39;</span><span class="p">,</span> <span class="s1">&#39;R-O1A&#39;</span><span class="p">,</span><span class="s1">&#39;R-O2A&#39;</span><span class="p">,</span><span class="s1">&#39;R-O3A&#39;</span><span class="p">,</span><span class="s1">&#39;R-O4A&#39;</span><span class="p">,</span><span class="s1">&#39;R-O5A&#39;</span><span class="p">],</span>
-                <span class="s1">&#39;real_channels&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;O1Re&#39;</span><span class="p">,</span> <span class="s1">&#39;O2Re&#39;</span><span class="p">,</span> <span class="s1">&#39;O3Re&#39;</span><span class="p">,</span> <span class="s1">&#39;O4Re&#39;</span><span class="p">,</span> <span class="s1">&#39;R-O5Re&#39;</span><span class="p">,</span> <span class="s1">&#39;R-O1Re&#39;</span><span class="p">,</span> <span class="s1">&#39;R-O2Re&#39;</span><span class="p">,</span> <span class="s1">&#39;R-O3Re&#39;</span><span class="p">,</span> <span class="s1">&#39;R-O4Re&#39;</span><span class="p">,</span> <span class="s1">&#39;R-O5Re&#39;</span><span class="p">],</span>
-                <span class="s1">&#39;imag_channels&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;O1Im&#39;</span><span class="p">,</span> <span class="s1">&#39;O2Im&#39;</span><span class="p">,</span> <span class="s1">&#39;O3Im&#39;</span><span class="p">,</span> <span class="s1">&#39;O4Im&#39;</span><span class="p">,</span> <span class="s1">&#39;R-O5Im&#39;</span><span class="p">,</span> <span class="s1">&#39;R-O1Im&#39;</span><span class="p">,</span> <span class="s1">&#39;R-O2Im&#39;</span><span class="p">,</span> <span class="s1">&#39;R-O3Im&#39;</span><span class="p">,</span> <span class="s1">&#39;R-O4Im&#39;</span><span class="p">,</span> <span class="s1">&#39;R-O5Im&#39;</span><span class="p">],</span>
-                <span class="s1">&#39;height_channel&#39;</span><span class="p">:</span> <span class="s1">&#39;Z C&#39;</span><span class="p">,</span>
-                <span class="p">},</span>
-            <span class="s1">&#39;parameterfile_definitions&#39;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s1">&#39;splitter&#39;</span><span class="p">:</span> <span class="s1">&#39;:&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;header_indicator&#39;</span><span class="p">:</span> <span class="s1">&#39;#&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;tags&#39;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s1">&#39;scan_area&#39;</span><span class="p">:</span> <span class="s1">&#39;Scan Area&#39;</span><span class="p">,</span>
-                    <span class="s1">&#39;center_pos&#39;</span><span class="p">:</span> <span class="s1">&#39;Center Pos&#39;</span><span class="p">,</span>
-                    <span class="s1">&#39;pixel_area&#39;</span><span class="p">:</span> <span class="s1">&#39;Pixel Area&#39;</span><span class="p">,</span>
-                    <span class="s1">&#39;pixel_scaling&#39;</span><span class="p">:</span> <span class="s1">&#39;Pixel Scaling&#39;</span><span class="p">,</span>
-                <span class="p">}</span>
-            <span class="p">},</span>
         <span class="p">}</span>
         <span class="n">config</span><span class="p">[</span><span class="s1">&#39;FILETYPE1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;filetype&#39;</span><span class="p">:</span> <span class="s1">&#39;&lt;standard_new&gt;&#39;</span><span class="p">,</span>
@@ -369,7 +360,7 @@
             <span class="s1">&#39;rounding_decimal_height_custom&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="c1"># when in nm</span>
             <span class="s1">&#39;height_scaling_default&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">,</span> <span class="c1"># data is in m convert to nm</span>
             <span class="s1">&#39;height_scaling_custom&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">,</span> <span class="c1"># data is in m convert to nm</span>
-            <span class="s1">&#39;MeasurementTags&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;measurement_tags&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="c1"># carful the keys will be used to reference enums, so they should be unique and uppercase, they also must be identical for all filetypes</span>
                 <span class="c1"># the values are the tags in the parameter file so they should match the file format</span>
                 <span class="s1">&#39;SCAN&#39;</span><span class="p">:</span> <span class="s1">&#39;Scan&#39;</span><span class="p">,</span> <span class="c1"># scan type, afm, snom, approach curve, 2d/3d, PsHet...</span>
@@ -454,7 +445,7 @@
             <span class="s1">&#39;rounding_decimal_height_custom&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="c1"># when in nm</span>
             <span class="s1">&#39;height_scaling_default&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">,</span> <span class="c1"># data is in m convert to nm</span>
             <span class="s1">&#39;height_scaling_custom&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">,</span> <span class="c1"># data is in m convert to nm</span>
-            <span class="s1">&#39;MeasurementTags&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;measurement_tags&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="c1"># carful the keys will be used to create enums, so they should be unique and uppercase, they also must be identical for all filetypes</span>
                 <span class="c1"># the values are the tags in the file so they should match the file format</span>
                 <span class="c1"># &#39;SCAN&#39;: &#39;Scan&#39;, # scan type, afm, snom, approach curve, 2d/3d, PsHet...</span>
@@ -541,7 +532,7 @@
             <span class="s1">&#39;rounding_decimal_height_custom&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="c1"># when in nm</span>
             <span class="s1">&#39;height_scaling_default&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">,</span> <span class="c1"># data is in m convert to nm</span>
             <span class="s1">&#39;height_scaling_custom&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">,</span> <span class="c1"># data is in m convert to nm</span>
-            <span class="s1">&#39;MeasurementTags&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;measurement_tags&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="c1"># carful the keys will be used to create enums, so they should be unique and uppercase, they also must be identical for all filetypes</span>
                 <span class="c1"># the values are the tags in the file so they should match the file format</span>
                 <span class="s1">&#39;SCANAREA&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;scan_size_f (um)&#39;</span><span class="p">,</span> <span class="s1">&#39;scan_size_s (um)&#39;</span><span class="p">,</span> <span class="s1">&#39;scan_size_v (um)&#39;</span><span class="p">],</span>
@@ -605,7 +596,7 @@
             <span class="s1">&#39;rounding_decimal_height_custom&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="c1"># when in nm</span>
             <span class="s1">&#39;height_scaling_default&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">,</span> <span class="c1"># data is in m convert to nm</span>
             <span class="s1">&#39;height_scaling_custom&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">,</span> <span class="c1"># data is in m convert to nm</span>
-            <span class="s1">&#39;MeasurementTags&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;measurement_tags&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="c1"># carful the keys will be used to create enums, so they should be unique and uppercase, they also must be identical for all filetypes</span>
                 <span class="c1"># the values are the tags in the file so they should match the file format</span>
                 <span class="s1">&#39;SCANAREA&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;scan_size_f (um)&#39;</span><span class="p">,</span> <span class="s1">&#39;scan_size_s (um)&#39;</span><span class="p">,</span> <span class="s1">&#39;scan_size_v (um)&#39;</span><span class="p">],</span>
@@ -667,7 +658,7 @@
             <span class="s1">&#39;rounding_decimal_height_custom&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="c1"># when in nm</span>
             <span class="s1">&#39;height_scaling_default&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">,</span> <span class="c1"># data is in m convert to nm</span>
             <span class="s1">&#39;height_scaling_custom&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">,</span> <span class="c1"># data is in m convert to nm</span>
-            <span class="s1">&#39;MeasurementTags&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;measurement_tags&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="c1"># carful the keys will be used to create enums, so they should be unique and uppercase, they also must be identical for all filetypes</span>
                 <span class="c1"># the values are the tags in the file so they should match the file format</span>
                 <span class="c1"># &#39;SCAN&#39;: &#39;Scan&#39;, # scan type, afm, snom, approach curve, 2d/3d, PsHet...</span>
@@ -755,7 +746,7 @@
             <span class="s1">&#39;rounding_decimal_height_custom&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="c1"># when in nm</span>
             <span class="s1">&#39;height_scaling_default&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">,</span> <span class="c1"># data is in m convert to nm</span>
             <span class="s1">&#39;height_scaling_custom&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">,</span> <span class="c1"># data is in m convert to nm</span>
-            <span class="s1">&#39;MeasurementTags&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;measurement_tags&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="c1"># carful the keys will be used to create enums, so they should be unique and uppercase, they also must be identical for all filetypes</span>
                 <span class="c1"># the values are the tags in the file so they should match the file format</span>
                 <span class="c1"># &#39;SCAN&#39;: &#39;Scan&#39;, # scan type, afm, snom, approach curve, 2d/3d, PsHet...</span>
@@ -801,7 +792,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_load_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function loads the config file and returns the config object.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function loads the config file and makes the config available throu self.config.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">()</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -817,6 +808,11 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_change_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function changes the config file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            section (str): The section in the config file. Corresponds to the filetype, e.g. &#39;FILETYPE1&#39;.</span>
+<span class="sd">            option (str): The option in the section, e.g. amplitude_channels.</span>
+<span class="sd">            value: The value to change, could be a string, int, float, list, dict, bool.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># if value is a string add quotes</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -870,13 +866,17 @@
 
             <span class="k">return</span> <span class="n">value</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_print_MeasurementTags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_print_measurement_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function prints the measurement tags.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># print the content of the measurement tags class</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;All measurement tags: &#39;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">MeasurementTags</span><span class="p">))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_find_filetype</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function tries to find the correct filetype for the given file.</span>
+<span class="sd">        It will iterate through all filetypes in the config file and try to create the measurement tag dict.</span>
+<span class="sd">        If the filetype is found the function returns True otherwise False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">filetypes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_from_config</span><span class="p">(</span><span class="n">section</span><span class="o">=</span><span class="s1">&#39;FILETYPES&#39;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">filetypes</span><span class="p">:</span>
             <span class="n">filetype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_from_config</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;FILETYPES&#39;</span><span class="p">)</span>
@@ -912,6 +912,10 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_measurement_tag_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters_path</span><span class="p">:</span><span class="n">Path</span><span class="p">,</span> <span class="n">filetype</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function creates a dictionary containing the measurement tags. The tags are extracted from the parameters file.</span>
 <span class="sd">        If the tag dict cannot be created the function will return False otherwise True.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            parameters_path (Path): The path to the parameters file.</span>
+<span class="sd">            filetype (str): The filetype to use.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># first check if the file exists</span>
         <span class="k">try</span><span class="p">:</span>
@@ -921,8 +925,8 @@
             <span class="k">return</span> <span class="kc">False</span>
         <span class="n">separator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_from_config</span><span class="p">(</span><span class="s1">&#39;parameters_separator&#39;</span><span class="p">,</span> <span class="n">filetype</span><span class="p">)</span>
         <span class="n">header_indicator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_from_config</span><span class="p">(</span><span class="s1">&#39;parameters_header_indicator&#39;</span><span class="p">,</span> <span class="n">filetype</span><span class="p">)</span>
-        <span class="n">MeasurementTags</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_from_config</span><span class="p">(</span><span class="s1">&#39;MeasurementTags&#39;</span><span class="p">,</span> <span class="n">filetype</span><span class="p">)</span>
-        <span class="n">tags_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">MeasurementTags</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="n">measurement_tags</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_from_config</span><span class="p">(</span><span class="s1">&#39;measurement_tags&#39;</span><span class="p">,</span> <span class="n">filetype</span><span class="p">)</span>
+        <span class="n">tags_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">measurement_tags</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
         <span class="c1"># if tags contains a list of values flatten the list</span>
         <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tags_list</span><span class="p">):</span>
             <span class="n">tags_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">tags_list</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">]</span>
@@ -977,8 +981,8 @@
                 <span class="k">else</span><span class="p">:</span> <span class="n">is_unit</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
                 <span class="k">continue</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">MeasurementTags</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-                <span class="n">tag_key</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">MeasurementTags</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="nb">list</span><span class="p">(</span><span class="n">MeasurementTags</span><span class="o">.</span><span class="n">values</span><span class="p">())</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">measurement_tags</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">tag_key</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">measurement_tags</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="nb">list</span><span class="p">(</span><span class="n">measurement_tags</span><span class="o">.</span><span class="n">values</span><span class="p">())</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="k">if</span> <span class="n">tag_key</span> <span class="o">==</span> <span class="s1">&#39;SCAN&#39;</span><span class="p">:</span>
@@ -1541,7 +1545,9 @@
         <span class="k">return</span> <span class="n">demodulation_num</span>
     
     <span class="k">def</span><span class="w"> </span><span class="nf">_initialize_measurement_channel_indicators</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># in the future these indicators should be read from external prameters file to make it easier for the user to add new filetypes with different indicators</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function initializes the channel indicators for the measurement channels.</span>
+<span class="sd">        More precisely it loades all the parameters from the config file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># the cannel prefix and suffix are characters surrounding the channel name in the filename, they will be used when loading and saving the data</span>
         <span class="c1"># filename = directory_name + channel_prefix + channel + channel_suffix + appendix + &#39;.gsf&#39; (or &#39;.txt&#39;) </span>
         <span class="c1"># appendix is just a standard appendix when saving to not overwrite the original files, can be changed by the user default is &#39;_manipulated&#39;</span>
@@ -1642,7 +1648,6 @@
             <span class="n">ChannelTags</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_from_config</span><span class="p">(</span><span class="s1">&#39;ChannelTags&#39;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="n">is_list</span> <span class="o">=</span> <span class="kc">False</span>
-                <span class="n">is_unit</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">tag_value_found</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
@@ -1665,7 +1670,7 @@
                     <span class="k">else</span><span class="p">:</span> <span class="n">tag_value_found</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="c1"># try to find out if the value is a number or a unit</span>
                     <span class="k">try</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-                    <span class="k">except</span><span class="p">:</span> <span class="n">is_unit</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">except</span><span class="p">:</span> <span class="k">pass</span>
                 <span class="c1"># check if tag value was found</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">tag_value_found</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Could not find the tag value for </span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s1"> in channel </span><span class="si">{</span><span class="n">channel</span><span class="si">}</span><span class="s1">. You should probably check the config file.&#39;</span><span class="p">)</span>
@@ -1695,12 +1700,18 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">channel_tag_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">channel_dict</span><span class="p">)</span></div>
 
 
-
 <div class="viewcode-block" id="SnomMeasurement">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SnomMeasurement</span><span class="p">(</span><span class="n">FileHandler</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class opens a snom measurement and handels all the snom related functions.&quot;&quot;&quot;</span>
-    <span class="n">all_subplots</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class opens a snom measurement and handels all the snom related functions.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        directory_name (str): path to the directory containing the measurement</span>
+<span class="sd">        channels (list, optional): list of channels to load. Defaults to None.</span>
+<span class="sd">        title (str, optional): title of the measurement. Defaults to None.</span>
+<span class="sd">        autoscale (bool, optional): if True the data will be scaled to quadratic pixels. Defaults to True.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">all_subplots</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># list containing all subplots</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory_name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">autoscale</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">directory_name</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_measurement_channel_indicators</span><span class="p">()</span>
@@ -1833,7 +1844,11 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Loads all binary data of the specified channels and returns them in a list plus the dictionary with the channel information.</span>
-<span class="sd">        Height data is automatically converted to nm. &quot;&quot;&quot;</span>
+<span class="sd">        Height data is automatically converted to nm. </span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            channels (list): list of channels to load</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">data_dict</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">all_data</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1927,8 +1942,12 @@
         <span class="c1"># but self.channels will always contain the original channel name as this is used for internal referencing</span>
         <span class="k">return</span> <span class="n">all_data</span><span class="p">,</span> <span class="n">data_dict</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_load_data_binary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Loads all binary data of the specified channels and returns them in a list plus the dictionary for access&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_data_binary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Loads all binary data of the specified channels and returns them in a list plus the dictionary for access.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            channels (list): list of channels to load</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#create a list containing all the lists of the individual channels</span>
         <span class="n">all_binary_data</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1">#safe the information about which channel is which list in a dictionary</span>
@@ -1967,7 +1986,12 @@
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;At least one of the specified channels is not in memory! You probably should initialize the channels first.&#39;</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_get_plotting_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_plotting_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function returns the colormap, the colormap label and the title for the specified channel.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            channel (str): channel name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># import plotting_parameters.json, here the user can tweek some options for the plotting, like automatic titles and colormap choices</span>
         <span class="n">plotting_parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_plotting_parameters</span><span class="p">()</span>
 
@@ -2021,10 +2045,19 @@
             <span class="n">exit</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">title</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_add_subplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">scalebar</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_add_subplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">scalebar</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function adds the specified data to the list of subplots. The list of subplots contains the data, the colormap,</span>
 <span class="sd">        the colormap label and a title, which are generated from the channel information. The same array is also returned,</span>
-<span class="sd">        so it can also be iterated by an other function to only plot the data of interest.&quot;&quot;&quot;</span>
+<span class="sd">        so it can also be iterated by an other function to only plot the data of interest.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            data (np.array): data to plot</span>
+<span class="sd">            channel (str): channel name</span>
+<span class="sd">            scalebar (list, optional): list of scalebar parameters. Defaults to None.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            list: [data, cmap, label, title, scalebar]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">cmap</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_plotting_values</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
         <span class="c1"># subplots.append([data, cmap, label, title])</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurement_title</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
@@ -2075,9 +2108,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_export_all_subplots</span><span class="p">()</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_plot_subplots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subplots</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function plots the subplots. The plots are created in a grid, by default the grid is optimized for 3 by 3. The layout changes dependent on the number of subplots</span>
-<span class="sd">        of subplots and also the dimensions. Wider subplots are prefferably created vertically, otherwise they are plotted horizontally. Probably subject to future changes...&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_plot_subplots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subplots</span><span class="p">:</span><span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function plots the subplots. The plots are created in a grid, by default the grid is optimized for 3 by 3.</span>
+<span class="sd">        The layout changes dependent on the number of subplots of subplots and also the dimensions.</span>
+<span class="sd">        Wider subplots are prefferably created vertically, otherwise they are plotted horizontally. Probably subject to future changes...</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            subplots (list): list of subplots to plot</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">number_of_axis</span> <span class="o">=</span> <span class="mi">9</span>
         <span class="n">number_of_subplots</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">subplots</span><span class="p">)</span>
         <span class="c1"># print(&#39;Number of subplots: {}&#39;.format(number_of_subplots))</span>
@@ -2295,6 +2333,10 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add all data contained in dataset as subplots to one figure.</span>
 <span class="sd">        The data has to be shaped beforehand!</span>
 <span class="sd">        channels should contain the information which channel is stored at which position in the dataset.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dataset (list): list of data to plot</span>
+<span class="sd">            channels (list): list of channel names</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">subplots</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)):</span>
@@ -2319,7 +2361,7 @@
 
 <div class="viewcode-block" id="SnomMeasurement.display_channels">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.display_channels">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">display_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="c1">#, show_plot:bool=True</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">display_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> 
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function displays the channels in memory or the specified ones.</span>
 <span class="sd">                </span>
 <span class="sd">        Args:</span>
@@ -2348,6 +2390,11 @@
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.display_overlay">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">display_overlay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel1</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">channel2</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function displays an overlay of two channels. The first channel is displayed in full color, the second channel is displayed width a specified alpha.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            channel1 (str): channel name of the first channel</span>
+<span class="sd">            channel2 (str): channel name of the second channel</span>
+<span class="sd">            alpha (float, optional): alpha value of the second channel. Defaults to 0.5.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># get the colormaps</span>
         <span class="n">cmap1</span><span class="p">,</span> <span class="n">label1</span><span class="p">,</span> <span class="n">title1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_plotting_values</span><span class="p">(</span><span class="n">channel1</span><span class="p">)</span>
@@ -2388,6 +2435,7 @@
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.gauss_filter_channels">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">gauss_filter_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will gauss filter the specified channels. If no channels are specified, the ones in memory will be used.</span>
+<span class="sd">        Only for amplitude and height data, phase data will be ignored. Works fine, but the gauss_filter_channels_complex() function is more versatile.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            channels (list, optional): List of channels to blurr, if not specified all channels will be blurred. Should not be used for phase. Defaults to None.</span>
@@ -2449,7 +2497,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">gauss_filter_channels_complex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scaling</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">sigma</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This fucton gauss filters the specified channels. If no channels are specified, all channels in memory will be used.</span>
 <span class="sd">        The function is designed to work with complex data, where amplitude and phase are stored in separate channels.</span>
-<span class="sd">        It will also blur heiht, real part and imaginary part channels and amplitude channels without phase partner and phase channels without amplitude partner if you want to.</span>
+<span class="sd">        It will also blurr height, real part and imaginary part channels and amplitude channels without phase partner and phase channels without amplitude partner if you want to.</span>
 <span class="sd">        If the data is not scaled already the function will do it automatically, the default scaling factor is 4, works good with sigma=2.</span>
 <span class="sd">                </span>
 <span class="sd">        Args:</span>
@@ -2504,7 +2552,6 @@
             <span class="n">real</span> <span class="o">=</span> <span class="n">amp</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span>
             <span class="n">imag</span> <span class="o">=</span> <span class="n">amp</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span>
 
-            <span class="c1"># compl_blurred = self._gauss_blurr_data(compl, sigma)</span>
             <span class="n">real_blurred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gauss_blurr_data</span><span class="p">(</span><span class="n">real</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
             <span class="n">imag_blurred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gauss_blurr_data</span><span class="p">(</span><span class="n">imag</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
             <span class="n">compl_blurred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">real_blurred</span><span class="p">,</span> <span class="mi">1</span><span class="n">J</span><span class="o">*</span><span class="n">imag_blurred</span><span class="p">)</span>
@@ -2528,7 +2575,11 @@
 
                    
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_compl_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">compl_number_array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function returns the angles of a clomplex number array.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function returns the angles of a clomplex number array.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            compl_number_array (np.array): complex number array</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">YRes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">compl_number_array</span><span class="p">)</span>
         <span class="n">XRes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">compl_number_array</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="n">realpart</span> <span class="o">=</span> <span class="n">compl_number_array</span><span class="o">.</span><span class="n">real</span>
@@ -2543,7 +2594,10 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_fourier_filter_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">complex_array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Takes a complex array and returns the fourier transformed complex array</span>
+<span class="sd">        Takes a complex array and returns the fourier transformed complex array.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            complex_array (np.array): complex array to fourier transform</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">FS_compl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftn</span><span class="p">(</span><span class="n">complex_array</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">FS_compl</span>
@@ -2551,7 +2605,7 @@
 <div class="viewcode-block" id="SnomMeasurement.fourier_filter_channels">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.fourier_filter_channels">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">fourier_filter_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function applies the Fourier filter to all data in memory or specified channels</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function applies the Fourier filter to all data in memory or specified channels.</span>
 <span class="sd">                </span>
 <span class="sd">        Args:</span>
 <span class="sd">            channels [list]: list of channels, will override the already existing channels</span>
@@ -2597,6 +2651,13 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filetype</span><span class="o">=</span><span class="s1">&#39;gsf&#39;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function creates the header for the gsf file. The header contains all necessary information for the gsf file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            channel (str): channel name</span>
+<span class="sd">            data (np.array, optional): the data to save, if not specified the data will be loaded from the file. Defaults to None.</span>
+<span class="sd">            filetype (str, optional): the filetype to save the data. Defaults to &#39;gsf&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># channel is not in memory, so the standard values will be used</span>
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_data</span><span class="p">([</span><span class="n">channel</span><span class="p">])[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
@@ -2615,6 +2676,8 @@
             <span class="n">header</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Gwyddion Simple Field 1.0</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="k">elif</span> <span class="n">filetype</span><span class="o">==</span><span class="s1">&#39;txt&#39;</span><span class="p">:</span>
             <span class="n">header</span> <span class="o">=</span> <span class="s1">&#39;Simple Textfile, floats seperated by spaces</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
         <span class="c1"># round everything to nm</span>
         <span class="n">header</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;XRes=</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">XRes</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s1">YRes=</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">YRes</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="n">header</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;XReal=</span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">XReal</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s1">YReal=</span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">YReal</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
@@ -2640,9 +2703,10 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function is ment to save all specified channels to external .gsf files.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
-<span class="sd">            channels [list]:    list of the channels to be saved, if not specified, all channels in memory are saved</span>
+<span class="sd">            channels (list, optional):    list of the channels to be saved, if not specified, all channels in memory are saved.</span>
 <span class="sd">                                Careful! The data will be saved as it is right now, so with all the manipulations.</span>
 <span class="sd">                                Therefor the data will have an &#39;_manipulated&#39; appendix in the filename.</span>
+<span class="sd">            appendix (str, optional):     appendix to add to the filename, default is the default specified in the config of the current filetype.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">appendix</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span><span class="p">:</span>
             <span class="n">appendix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel_suffix_manipulated</span>
@@ -2693,9 +2757,10 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function is ment to save all specified channels to external .txt files.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
-<span class="sd">            channels [list]:    list of the channels to be saved, if not specified, all channels in memory are saved</span>
+<span class="sd">            channels (list, optional):    list of the channels to be saved, if not specified, all channels in memory are saved</span>
 <span class="sd">                                Careful! The data will be saved as it is right now, so with all the manipulations.</span>
 <span class="sd">                                Therefor the data will have an &#39;_manipulated&#39; appendix in the filename.</span>
+<span class="sd">            appendix (str, optional):     appendix to add to the filename, default is the default specified in the config of the current filetype.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">appendix</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span><span class="p">:</span>
             <span class="n">appendix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel_suffix_manipulated</span>
@@ -2741,6 +2806,11 @@
 <span class="sd">        channel specifies which channel should be used for the preview.</span>
 <span class="sd">        Wavelength must be given in µm.</span>
 <span class="sd">        Scanangle is the rotation angle of the scan in radians.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            channel (str): channel name</span>
+<span class="sd">            wavelength (float): wavelength in µm</span>
+<span class="sd">            nouserinput (bool, optional): if True, the function will not ask for user input. Defaults to False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">scanangle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_measurement_tag_dict_value</span><span class="p">(</span><span class="n">MeasurementTags</span><span class="o">.</span><span class="n">ROTATION</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
         <span class="n">phasedir_positive</span> <span class="o">=</span> <span class="mi">1</span>
@@ -2775,10 +2845,8 @@
 <div class="viewcode-block" id="SnomMeasurement.synccorrection">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.synccorrection">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">synccorrection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">phasedir</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function corrects all the phase channels for the linear phase gradient</span>
-<span class="sd">        which stems from the synchronized measurement mode.</span>
-<span class="sd">        The wavelength must be given in µm.</span>
-<span class="sd">        The phasedir is either 1 or -1. If you are unshure about the direction just leave the parameter out.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function corrects all the phase channels for the linear phase gradient which stems from the synchronized measurement mode.</span>
+<span class="sd">        The wavelength must be given in µm. The phasedir is either 1 or -1. If you are unshure about the direction just leave the parameter out.</span>
 <span class="sd">        You will be shown a preview for both directions and then you must choose the correct one.</span>
 <span class="sd">        The synccorrection will then be applied to all phase channels in memory.</span>
 <span class="sd">        The corrected channels will then be saved as new files with the synccorrection appendix specified in the config.ini file.</span>
@@ -2786,7 +2854,7 @@
 <span class="sd">                </span>
 <span class="sd">        Args:</span>
 <span class="sd">            wavelenght (float): please enter the wavelength in µm.</span>
-<span class="sd">            phasedir (int): the phase direction, leave out if not known and you will be prompted with a preview and can select the appropriate direction.</span>
+<span class="sd">            phasedir (int, optional): the phase direction, leave out if not known and you will be prompted with a preview and can select the appropriate direction.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoscale</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
@@ -2852,13 +2920,21 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_gen_from_input_phasedir</span><span class="p">()</span>
     
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_channel_scaling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel_id</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function checks if an instance channel is scaled and returns the scaling factor.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function checks if an instance channel is scaled and returns the scaling factor.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            channel_id (int): the channel index</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">channel_yres</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="n">channel_id</span><span class="p">])</span>
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">channel_yres</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">YRes</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_height_mask_preview</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function creates a preview of the height masking.</span>
-<span class="sd">        The preview is based on all channels in the instance&quot;&quot;&quot;</span>
+<span class="sd">        The preview is based on all channels in the instance</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            mask_array (np.array): the mask array to preview</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span>
         <span class="n">subplots</span> <span class="o">=</span> <span class="p">[]</span>
@@ -2886,8 +2962,15 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">input</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_create_mask_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height_data</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_mask_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height_data</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function takes the height data and a threshold value to create a mask array containing 0 and 1 values.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            height_data (np.array): the height data</span>
+<span class="sd">            threshold (float): the threshold value</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            np.array: the mask array</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">height_flattened</span> <span class="o">=</span> <span class="n">height_data</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
         <span class="n">height_threshold</span> <span class="o">=</span> <span class="n">threshold</span><span class="o">*</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">height_flattened</span><span class="p">)</span><span class="o">-</span><span class="nb">min</span><span class="p">(</span><span class="n">height_flattened</span><span class="p">))</span><span class="o">+</span><span class="nb">min</span><span class="p">(</span><span class="n">height_flattened</span><span class="p">)</span>
@@ -2904,8 +2987,18 @@
                 <span class="n">mask_array</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">return</span> <span class="n">mask_array</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_get_height_treshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height_data</span><span class="p">,</span> <span class="n">mask_array</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function returns the height threshold value dependent on the user input&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_height_treshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height_data</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">mask_array</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function returns the height threshold value dependent on the user input.</span>
+<span class="sd">        The user can change the threshold value and see a preview of the mask array.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            height_data (np.array): the height data</span>
+<span class="sd">            mask_array (np.array): the mask array</span>
+<span class="sd">            threshold (float): the threshold value</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            float: the new threshold</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_create_height_mask_preview</span><span class="p">(</span><span class="n">mask_array</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Do you want to use these parameters to mask the data?&#39;</span><span class="p">)</span>
         <span class="n">mask_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_input_bool</span><span class="p">()</span>
@@ -2937,6 +3030,7 @@
 <span class="sd">                </span>
 <span class="sd">        Args:</span>
 <span class="sd">            channels [list]: list of channels, will override the already existing channels</span>
+<span class="sd">            mask_channel [str]: the channel to use for the height mask, if not specified the height channel will be used</span>
 <span class="sd">            threshold [float]: threshold value to create the height mask from</span>
 <span class="sd">            mask_data [bool]: if you want to apply the mask directly with the specified threshold change to &#39;True&#39;,</span>
 <span class="sd">                            otherwise you will be prompted with a preview and can then change the threshold iteratively</span>
@@ -2994,18 +3088,37 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">channels_label</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels_label</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_masked&#39;</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_check_pixel_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xres</span><span class="p">,</span> <span class="n">yres</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function checks if the pixel position is within the bounds&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_pixel_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xres</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">yres</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span><span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function checks if the pixel position is within the bounds.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            xres (int): x resolution</span>
+<span class="sd">            yres (int): y resolution</span>
+<span class="sd">            x (int): x coordinate</span>
+<span class="sd">            y (int): y coordinate</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if the pixel position is within the bounds, False otherwise</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">xres</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">elif</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">y</span> <span class="o">&gt;</span> <span class="n">yres</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span> <span class="k">return</span> <span class="kc">True</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_get_mean_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">x_coord</span><span class="p">,</span> <span class="n">y_coord</span><span class="p">,</span> <span class="n">zone</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_mean_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">x_coord</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">y_coord</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">zone</span><span class="p">:</span><span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function returns the mean value of the pixel and its nearest neighbors.</span>
 <span class="sd">        The zone specifies the number of neighbors. 1 means the pixel and the 8 nearest pixels.</span>
 <span class="sd">        2 means zone 1 plus the next 16, so a total of 25 with the pixel in the middle. </span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data (np.array): the data</span>
+<span class="sd">            x_coord (int): x coordinate</span>
+<span class="sd">            y_coord (int): y coordinate</span>
+<span class="sd">            zone (int): the number of neighbors</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: the mean value</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">xres</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="n">yres</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -3024,7 +3137,14 @@
 <div class="viewcode-block" id="SnomMeasurement.get_pixel_coordinates">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.get_pixel_coordinates">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_pixel_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function returns the pixel coordinates of the clicked pixel.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function returns the pixel coordinates of the clicked pixel.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            channel (str): the channel to display</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            list: the pixel coordinates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)]</span>
         <span class="c1"># identify the colormap</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">height_indicator</span> <span class="ow">in</span> <span class="n">channel</span><span class="p">:</span>
@@ -3061,11 +3181,20 @@
 
 <div class="viewcode-block" id="SnomMeasurement.get_pixel_value">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.get_pixel_value">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_pixel_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zone</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_pixel_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zone</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function returns the pixel value of a channel at the specified coordinates.</span>
 <span class="sd">        The zone specifies the number of neighbors. 0 means only the pixel itself. 1 means the pixel and the 8 nearest pixels.</span>
 <span class="sd">        2 means zone 1 plus the next 16, so a total of 25 with the pixel in the middle.</span>
-<span class="sd">        If the channel is scaled the zone will be scaled as well.&quot;&quot;&quot;</span>
+<span class="sd">        If the channel is scaled the zone will be scaled as well.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            channel (str): the channel to display</span>
+<span class="sd">            coordinates (list, optional): the pixel coordinates. Defaults to None.</span>
+<span class="sd">            zone (int, optional): the number of neighbors. Defaults to 1.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            float: the pixel value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># adjust the zone if the data is scaled</span>
         <span class="n">zone</span> <span class="o">=</span> <span class="n">zone</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_channel_scaling</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">))</span>
         <span class="c1"># display the channel</span>
@@ -3086,7 +3215,18 @@
         <span class="k">return</span> <span class="n">pixel_value</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_height_levelling_3point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height_data</span><span class="p">,</span> <span class="n">zone</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_height_levelling_3point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height_data</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">zone</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function levels the height data with a 3 point leveling.</span>
+<span class="sd">        The user has to click on three points to specify the underground plane.</span>
+<span class="sd">        The function returns the leveled height data.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            height_data (np.array): the height data</span>
+<span class="sd">            zone (int, optional): the number of neighbors. Defaults to 1.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.array: the leveled height data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">height_data</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">SNOM_height</span><span class="p">)</span>
         <span class="n">klicker</span> <span class="o">=</span> <span class="n">clicker</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;event&quot;</span><span class="p">],</span> <span class="n">markers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">])</span>
@@ -3126,7 +3266,20 @@
         
         <span class="k">return</span> <span class="n">leveled_height_data</span>
     
-    <span class="k">def</span><span class="w"> </span><span class="nf">_level_height_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height_data</span><span class="p">,</span> <span class="n">klick_coordinates</span><span class="p">,</span> <span class="n">zone</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_level_height_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height_data</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">klick_coordinates</span><span class="p">:</span><span class="nb">list</span><span class="p">,</span> <span class="n">zone</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function levels the height data with a 3 point leveling.</span>
+<span class="sd">        The user has to click on three points to specify the underground plane.</span>
+<span class="sd">        The function returns the leveled height data. This version is just for the gui.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            height_data (np.array): the height data</span>
+<span class="sd">            klick_coordinates (list): the pixel coordinates</span>
+<span class="sd">            zone (int): the number of neighbors</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.array: the leveled height data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">mean_values</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_mean_value</span><span class="p">(</span><span class="n">height_data</span><span class="p">,</span> <span class="n">klick_coordinates</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">klick_coordinates</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">zone</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">klick_coordinates</span><span class="p">))]</span>
         <span class="n">matrix</span> <span class="o">=</span> <span class="p">[[</span><span class="n">klick_coordinates</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">klick_coordinates</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">mean_values</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
         <span class="n">A</span> <span class="o">=</span> <span class="n">matrix</span>
@@ -3147,20 +3300,27 @@
         
         <span class="k">return</span> <span class="n">leveled_height_data</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_get_klicker_coordinates</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">cmap</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_klicker_coordinates</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function returns the pixel coordinates of the clicked pixel.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data (np.array): the data</span>
+<span class="sd">            cmap (str): the colormap</span>
+<span class="sd">            message (str): the message to display as the title</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">)</span>
         <span class="n">klicker</span> <span class="o">=</span> <span class="n">clicker</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;event&quot;</span><span class="p">],</span> <span class="n">markers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">])</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;scaled&#39;</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;3 Point leveling: please click on three points</span><span class="se">\n</span><span class="s1">to specify the underground plane.&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
         <span class="n">klicker_coords</span> <span class="o">=</span> <span class="n">klicker</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()[</span><span class="s1">&#39;event&#39;</span><span class="p">]</span> <span class="c1">#klicker returns a dictionary for the events</span>
         <span class="n">klick_coordinates</span> <span class="o">=</span> <span class="p">[[</span><span class="nb">round</span><span class="p">(</span><span class="n">element</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">round</span><span class="p">(</span><span class="n">element</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">klicker_coords</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">klick_coordinates</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_height_levelling_3point_forGui</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height_data</span><span class="p">,</span> <span class="n">zone</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
-        <span class="n">klick_coordinates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_klicker_coordinates</span><span class="p">(</span><span class="n">height_data</span><span class="p">,</span> <span class="n">SNOM_height</span><span class="p">)</span>
+        <span class="n">klick_coordinates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_klicker_coordinates</span><span class="p">(</span><span class="n">height_data</span><span class="p">,</span> <span class="n">SNOM_height</span><span class="p">,</span> <span class="s1">&#39;3 Point leveling: please click on three points</span><span class="se">\n</span><span class="s1">to specify the underground plane.&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">klick_coordinates</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;You need to specify 3 point coordinates! Data was not leveled!&#39;</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">height_data</span>
@@ -3168,8 +3328,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_write_to_logfile</span><span class="p">(</span><span class="s1">&#39;height_leveling_coordinates&#39;</span><span class="p">,</span> <span class="n">klick_coordinates</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_level_height_data</span><span class="p">(</span><span class="n">klick_coordinates</span><span class="p">,</span> <span class="n">zone</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_level_phase_slope</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">slope</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_level_phase_slope</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">slope</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function substracts a linear phase gradient in y direction from the specified phase data.</span>
+<span class="sd">        The data is then also shifted by 0 to ensure that the phase data is still in the range of 0 to 2pi.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data (np.array): the phase data</span>
+<span class="sd">            slope (float): the slope</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.array: the leveled phase data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">yres</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="n">xres</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -3180,17 +3348,17 @@
 
 <div class="viewcode-block" id="SnomMeasurement.correct_phase_drift">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.correct_phase_drift">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">correct_phase_drift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">export</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">phase_slope</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zone</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">correct_phase_drift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">export</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">phase_slope</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zone</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function asks the user to click on two points which should have the same phase value.</span>
 <span class="sd">        Only the slow drift in y-direction will be compensated. Could in future be extended to include a percentual drift compensation along the x-direction.</span>
 <span class="sd">        But should usually not be necessary.</span>
 <span class="sd">                </span>
 <span class="sd">        Args:</span>
-<span class="sd">            channels [list]: list of channels, will override the already existing channels</span>
-<span class="sd">            export [bool]: do you want to aply the correction to all phase channels and export them?</span>
-<span class="sd">            phase_slope [float]: if you already now the phase slope you can enter it, otherwise leave it out</span>
+<span class="sd">            channels (list, optional): list of channels, will override the already existing channels</span>
+<span class="sd">            export (bool, optional): do you want to aply the correction to all phase channels and export them?</span>
+<span class="sd">            phase_slope (float, optional): if you already now the phase slope you can enter it, otherwise leave it out</span>
 <span class="sd">                                and it will prompt you with a preview to select two points to calculate the slope from</span>
-<span class="sd">            zone [int]: defines the area which is used to calculate the mean around the click position in the preview,</span>
+<span class="sd">            zone (int, optional): defines the area which is used to calculate the mean around the click position in the preview,</span>
 <span class="sd">                        0 means only the click position, 1 means the nearest 9 ...</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_data</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span>
@@ -3285,6 +3453,7 @@
 <span class="sd">        This value is then substracted from the phase data to level the phase.</span>
 <span class="sd">        The reference area is specified by two coordinates, the left and right border. If no area is specified the whole image will be used.</span>
 <span class="sd">        Make shure not to rotate the image prior to this function, since the reference area is defined in y-direction.</span>
+<span class="sd">        This function is somewhat redundant to the level_data_columnwise function, which works for all channels (amplitude, height and phase).</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            channels (list, optional): list of channels, will override the already existing channels</span>
@@ -3359,15 +3528,15 @@
 
 <div class="viewcode-block" id="SnomMeasurement.match_phase_offset">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.match_phase_offset">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">match_phase_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reference_channel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reference_area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">manual_width</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">match_phase_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reference_channel</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reference_area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">manual_width</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function matches the phase offset of all phase channels in memory to the reference channel.</span>
 <span class="sd">        The reference channel is the first phase channel in memory if not specified.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            channels (list, optional): list of channels, will override the already existing channels</span>
-<span class="sd">            reference_channel ([type], optional): The reference channel to which all other phase channels will be matched.</span>
+<span class="sd">            reference_channel (str, optional): The reference channel to which all other phase channels will be matched.</span>
 <span class="sd">                If not specified the first phase channel in memory will be used. Defaults to None.</span>
-<span class="sd">            reference_area ([type], optional): The area in the reference channel which will be used to calculate the phase offset. If not specified the whole image will be used.</span>
+<span class="sd">            reference_area (list or str, optional): The area in the reference channel which will be used to calculate the phase offset. If not specified the whole image will be used.</span>
 <span class="sd">                You can also specify &#39;manual&#39; then you will be asked to click on a point in the image. The area around that pixel will then be used as reference. Defaults to None.</span>
 <span class="sd">            manual_width (int, optional): The width of the manual reference area. Only applies if reference_area=&#39;manual&#39;. Defaults to 5.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -3443,6 +3612,7 @@
 <span class="sd">        This value is then divided from the amplitude data to level the amplitude.</span>
 <span class="sd">        The reference area is specified by two coordinates, the left and right border. If no area is specified the whole image will be used.</span>
 <span class="sd">        Make shure not to rotate the image prior to this function, since the reference area is defined in y-direction.</span>
+<span class="sd">        This function is somewhat redundant to the level_data_columnwise function, which works for all channels (amplitude, height and phase).</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            channels (list, optional): list of channels, will override the already existing channels</span>
@@ -3532,6 +3702,7 @@
 <span class="sd">        This value is then divided from the height data to level the height.</span>
 <span class="sd">        The reference area is specified by two coordinates, the left and right border. If no area is specified the whole image will be used.</span>
 <span class="sd">        Make shure not to rotate the image prior to this function, since the reference area is defined in y-direction.</span>
+<span class="sd">        This function is somewhat redundant to the level_data_columnwise function, which works for all channels (amplitude, height and phase).</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            channels (list, optional): list of channels, will override the already existing channels</span>
@@ -3627,7 +3798,7 @@
         <span class="k">if</span> <span class="n">channels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span>
         <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">channels</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">height_indicator</span> <span class="ow">in</span> <span class="n">channel</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">channel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">height_indicator</span> <span class="ow">in</span> <span class="n">channel</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_height_levelling_3point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)])</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">channels_label</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)]</span> <span class="o">+=</span> <span class="s1">&#39;_leveled&#39;</span> 
         <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span></div>
@@ -3751,11 +3922,12 @@
 
 <div class="viewcode-block" id="SnomMeasurement.realign">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.realign">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">realign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">realign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span> <span class="c1"># ToDo</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function corrects the drift of the piezo motor. As of now it needs to be fitted to a region of the sample which is assumed to be straight.</span>
 <span class="sd">        In the future this could be implemented with a general map containing the distortion created by the piezo motor, if it turns out to be constant...</span>
 <span class="sd">        Anyways, you will be prompted with a preview of the height data, please select an area of the scan with only one &#39;straight&#39; waveguide. </span>
 <span class="sd">        The bounds for the fitting routine are based on the lower and upper limit of this selection.</span>
+<span class="sd">        This function is quite special to my needs and will probably not make it into the final version of the software.</span>
 
 <span class="sd">        Careful! Will not yet affect the scan size, so the pixelsize will be altered... ToDo</span>
 <span class="sd">        </span>
@@ -3890,6 +4062,9 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_auto_cut_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function automatically cuts away all rows and lines which are only filled with zeros.</span>
 <span class="sd">        This function applies to all channels in memory.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            channels (list, optional): List of channels to apply the cut to. If not specified all channels in memory will be used. Defaults to None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">channels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span>
@@ -4014,6 +4189,7 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_positions_from_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="c1"># Todo redundant to the get clicker corrdinates function?!</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase_indicator</span> <span class="ow">in</span> <span class="n">channel</span><span class="p">:</span>
             <span class="n">cmap</span> <span class="o">=</span> <span class="n">SNOM_phase</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">amp_indicator</span> <span class="ow">in</span> <span class="n">channel</span><span class="p">:</span>
@@ -4067,7 +4243,9 @@
 <div class="viewcode-block" id="SnomMeasurement.select_profile">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.select_profile">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">select_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">profile_channel</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">preview_channel</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">orientation</span><span class="p">:</span><span class="n">Definitions</span><span class="o">=</span><span class="n">Definitions</span><span class="o">.</span><span class="n">vertical</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">phase_orientation</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># Todo</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function lets the user select a profile with given width in pixels and displays the data.</span>
+<span class="sd">        This is quite unfinished and only allows for profiles which extend over the whole image in the x-direction or y-direction.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            profile_channel (str): channel to use for profile data extraction</span>
@@ -4197,7 +4375,9 @@
 <div class="viewcode-block" id="SnomMeasurement.select_profiles">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.select_profiles">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">select_profiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">profile_channel</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">preview_channel</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">orientation</span><span class="p">:</span><span class="n">Definitions</span><span class="o">=</span><span class="n">Definitions</span><span class="o">.</span><span class="n">vertical</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function lets the user select a profile with given width in pixels and displays the data.</span>
+        <span class="c1"># Todo</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function lets the user select multiple profiles with given width in pixels and displays the data.</span>
+<span class="sd">        Also unfinished, but allows for the selection of multiple profiles.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            profile_channel (str): channel to use for profile data extraction</span>
@@ -4231,9 +4411,11 @@
 <div class="viewcode-block" id="SnomMeasurement.select_profiles_SSH">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.select_profiles_SSH">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">select_profiles_SSH</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">profile_channel_amp</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">profile_channel_phase</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">preview_channel</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">orientation</span><span class="p">:</span><span class="n">Definitions</span><span class="o">=</span><span class="n">Definitions</span><span class="o">.</span><span class="n">vertical</span><span class="p">,</span> <span class="n">width_amp</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">width_phase</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># Todo</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function lets the user select a profile with given width in pixels and displays the data.</span>
 <span class="sd">        Specific function for ssh model measurements. This will create a plot of field per waveguide index for the topological array.</span>
 <span class="sd">        The field is calculated from the amplitude profiles times the cosine of the phasedifference to the central waveguide. </span>
+<span class="sd">        Also a very specific function for me, will probably not make it into the final version of the software.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            profile_channel_amp (str): amplitude channel for profile data</span>
@@ -4378,7 +4560,7 @@
         <span class="n">mean_differences</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span> <span class="k">for</span> <span class="n">diff</span> <span class="ow">in</span> <span class="n">difference_profiles</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">mean_differences</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_scale_data_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">scale_x</span><span class="p">,</span> <span class="n">scale_y</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_scale_data_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">scale_x</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">scale_y</span><span class="p">:</span><span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
         <span class="n">XRes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="n">YRes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="n">new_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">YRes</span><span class="o">*</span><span class="n">scale_y</span><span class="p">,</span> <span class="n">XRes</span><span class="o">*</span><span class="n">scale_x</span><span class="p">))</span>
@@ -4394,6 +4576,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">quadratic_pixels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function scales the data such that each pixel is quadratic, eg. the physical dimensions are equal.</span>
 <span class="sd">        This is important because the pixels will be set to quadratic in the plotting function.</span>
+<span class="sd">        However make shure that the pixel scaling x relative to y is an integer, otherwise the scaling will not work properly.</span>
+<span class="sd">        This function will be applied to all channels in memory automatically when creating a measurement instance if autoscale is set to True.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
 <span class="sd">            channels [list]: list of channels the scaling should be applied to. If not specified the scaling will be applied to all channels</span>
@@ -4423,8 +4607,15 @@
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.overlay_forward_and_backward_channels">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">overlay_forward_and_backward_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height_channel_forward</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">height_channel_backward</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function is ment to overlay the backwards and forwards version of the specified channels.</span>
-<span class="sd">        You should only specify the forward version of the channels you want to overlay. The function will create a mean version</span>
-<span class="sd">        which can then be displayed and saved. Note that the new version will be larger then the previous ones.</span>
+<span class="sd">        The function will create a mean version which can then be displayed and saved. Note that the new version will be larger then the previous ones.</span>
+<span class="sd">        Also make shure to use leveled data if you want to apply to height data.</span>
+<span class="sd">        The overlain data will be larger, because the programm automatically tries to shift the data to match the best.</span>
+<span class="sd">        The data will also be gauss blurred for better overlap.</span>
+<span class="sd">        This function is still quite experimental and might not work properly in all cases. </span>
+<span class="sd">        But if it does you can basically double the integration time of your measurement.</span>
+<span class="sd">        Works best for amplitude data, height data is also ok, to monitor the quality of the overlay.</span>
+<span class="sd">        Phase channels don&#39;t work well, because the phase is not continuous and the mean phase is not meaningful because there are typically some slight shifts</span>
+<span class="sd">        between forward and backward channel.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            height_channel_forward (str): usual corrected height channel</span>
@@ -4474,7 +4665,7 @@
 
         <span class="c1"># get the index which minimized the deviation of the height channels</span>
         <span class="c1"># index = realign.Minimize_Deviation_2D(height_data_forward, height_data_backward, N, False)</span>
-        <span class="n">index</span> <span class="o">=</span> <span class="n">realign</span><span class="o">.</span><span class="n">Minimize_Deviation_2D</span><span class="p">(</span><span class="n">height_channel_forward_blurr</span><span class="p">,</span> <span class="n">height_channel_backward_blurr</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">realign</span><span class="o">.</span><span class="n">minimize_deviation_2d</span><span class="p">(</span><span class="n">height_channel_forward_blurr</span><span class="p">,</span> <span class="n">height_channel_backward_blurr</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="c1"># self.all_data[self.channels.index(height_channel_forward)], self.all_data[self.channels.index(height_channel_backward)] = realign.Shift_Array_2D_by_Index(height_data_forward, height_data_backward, index)</span>
 
 
@@ -4538,7 +4729,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)],</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backwards_indicator</span><span class="o">+</span> <span class="n">channel</span><span class="p">)]</span> <span class="o">=</span> <span class="n">realign</span><span class="o">.</span><span class="n">Shift_Array_2D_by_Index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)],</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backwards_indicator</span><span class="o">+</span> <span class="n">channel</span><span class="p">)],</span> <span class="n">index</span><span class="p">)</span>
 
                     <span class="c1"># create mean data and append to all_data</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">realign</span><span class="o">.</span><span class="n">Create_Mean_Array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)],</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backwards_indicator</span><span class="o">+</span> <span class="n">channel</span><span class="p">)]))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">realign</span><span class="o">.</span><span class="n">create_mean_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)],</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backwards_indicator</span><span class="o">+</span> <span class="n">channel</span><span class="p">)]))</span>
 
         <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span></div>
 
@@ -4584,7 +4775,7 @@
         <span class="n">N</span> <span class="o">=</span> <span class="mi">5</span><span class="o">*</span><span class="n">pixel_scaling</span> <span class="c1">#maximum iterations, scaled if pixelnumber was increased</span>
 
         <span class="c1"># get the index which minimized the deviation of the height channels</span>
-        <span class="n">index</span> <span class="o">=</span> <span class="n">realign</span><span class="o">.</span><span class="n">Minimize_Deviation_2D</span><span class="p">(</span><span class="n">height_channel_forward_blurr</span><span class="p">,</span> <span class="n">height_channel_backward_blurr</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">realign</span><span class="o">.</span><span class="n">minimize_deviation_2d</span><span class="p">(</span><span class="n">height_channel_forward_blurr</span><span class="p">,</span> <span class="n">height_channel_backward_blurr</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">channels</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">backwards_indicator</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">channel</span><span class="p">:</span>
@@ -4599,7 +4790,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">channel</span> <span class="o">+</span> <span class="s1">&#39;_overlain&#39;</span><span class="p">)</span>
         
                     <span class="c1"># create mean data and append to all_data</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">realign</span><span class="o">.</span><span class="n">Create_Mean_Array_V2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)],</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backwards_indicator</span><span class="o">+</span> <span class="n">channel</span><span class="p">)],</span> <span class="n">index</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">realign</span><span class="o">.</span><span class="n">create_mean_array_v2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)],</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backwards_indicator</span><span class="o">+</span> <span class="n">channel</span><span class="p">)],</span> <span class="n">index</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># create channel_dict for new mean data </span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">channel_tag_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel_tag_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)])</span>
@@ -4611,7 +4802,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">channel</span> <span class="o">+</span> <span class="s1">&#39;_overlain&#39;</span><span class="p">)</span>
                     
                     <span class="c1"># create mean data and append to all_data</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">realign</span><span class="o">.</span><span class="n">Create_Mean_Array_V2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)],</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backwards_indicator</span><span class="o">+</span> <span class="n">channel</span><span class="p">)],</span> <span class="n">index</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">realign</span><span class="o">.</span><span class="n">create_mean_array_v2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)],</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backwards_indicator</span><span class="o">+</span> <span class="n">channel</span><span class="p">)],</span> <span class="n">index</span><span class="p">))</span>
         <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span></div>
 
 
@@ -4696,6 +4887,7 @@
 <div class="viewcode-block" id="SnomMeasurement.create_gif_old">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.create_gif_old">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">create_gif_old</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amp_channel</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">phase_channel</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">frames</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">fps</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Todo</span>
         <span class="n">framenumbers</span><span class="o">=</span><span class="n">frames</span>
         <span class="n">Duration</span><span class="o">=</span><span class="mi">1000</span><span class="o">/</span><span class="n">fps</span> <span class="c1"># in ms</span>
 
@@ -4760,6 +4952,19 @@
 <div class="viewcode-block" id="SnomMeasurement.create_gif">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.create_gif">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">create_gif</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amp_channel</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">phase_channel</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">frames</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">fps</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will create a gif from the amplitude and phase channel you specify. The gif will show the animated realpart by repeatedly adding a phase shift.</span>
+<span class="sd">        The gif will be saved in the same directory as the measurement file and displayed afterwards.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            amp_channel (str): Amplitude channel.</span>
+<span class="sd">            phase_channel (str): Phase channel.</span>
+<span class="sd">            frames (int, optional): Number of frames the gif should have. Defaults to 20.</span>
+<span class="sd">            fps (int, optional): Frames per second. Defaults to 10.</span>
+<span class="sd">            dpi (int, optional): Dots per inch. Defaults to 100.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Path: Path to the saved gif.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">framenumbers</span><span class="o">=</span><span class="n">frames</span>
         <span class="n">Duration</span><span class="o">=</span><span class="mi">1000</span><span class="o">/</span><span class="n">fps</span> <span class="c1"># in ms</span>
 
@@ -4851,6 +5056,16 @@
 <div class="viewcode-block" id="SnomMeasurement.create_gif_v2">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.create_gif_v2">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">create_gif_v2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amp_channel</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">phase_channel</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">frames</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">fps</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Todo i dont even remember which version is best^^</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will create a gif from the amplitude and phase channel you specify. The gif will show the animated realpart by repeatedly adding a phase shift.</span>
+<span class="sd">        The gif will be saved in the same directory as the measurement file and displayed afterwards.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            amp_channel (str): Amplitude channel.</span>
+<span class="sd">            phase_channel (str): Phase channel.</span>
+<span class="sd">            frames (int, optional): Number of frames the gif should have. Defaults to 20.</span>
+<span class="sd">            fps (int, optional): Frames per second. Defaults to 10.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">frame_numer</span> <span class="o">=</span> <span class="n">frames</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">amp_indicator</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">amp_channel</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase_indicator</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">phase_channel</span><span class="p">:</span>
@@ -4955,6 +5170,13 @@
 <div class="viewcode-block" id="SnomMeasurement.substract_channels">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.substract_channels">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">substract_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel1</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">channel2</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will substract the data of channel2 from channel1 and save the result in a new channel.</span>
+<span class="sd">        The new channel will be named channel1-channel2.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            channel1 (str): Channel from which the data will be substracted.</span>
+<span class="sd">            channel2 (str): Channel which will be substracted from channel1.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">channel1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span> <span class="ow">or</span> <span class="n">channel2</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The specified channels are not in memory, they will be loaded automatically.&#39;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_data</span><span class="p">([</span><span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">])</span>
@@ -4970,14 +5192,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">channels_label</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">channel1</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="n">channel2</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_select_data_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_memory</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_select_data_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_memory</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will use the data range selector to select a range of data. If use_memory is True the function will use the data from memory for the specified channel.</span>
 <span class="sd">        In that case it will ignore the data argument. If use_memory is False the function will use the data argument and ignore the channel argument. The channel argument is only</span>
 <span class="sd">        used to get the correct colormap. The function will return the selected data.</span>
 <span class="sd">        Either one or two arrays will be returned depending on the selection.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            data (np.ndarray): Data array to select the range from. Defaults to None.</span>
+<span class="sd">            data (np.array): Data array to select the range from. Defaults to None.</span>
 <span class="sd">            channel (str): Channel name to get the data from memory or/and colormap from. Defaults to None.</span>
 <span class="sd">            use_memory (bool, optional): If True the function will use the data from memory for the specified channel. Defaults to True.</span>
 
@@ -4994,7 +5216,7 @@
         <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">is_horizontal</span><span class="p">,</span> <span class="n">inverted</span> <span class="o">=</span> <span class="n">select_data_range</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">channel</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">is_horizontal</span><span class="p">,</span> <span class="n">inverted</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_get_data_from_selected_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">is_horizontal</span><span class="p">:</span><span class="nb">bool</span><span class="p">,</span> <span class="n">inverted</span><span class="p">:</span><span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_data_from_selected_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">is_horizontal</span><span class="p">:</span><span class="nb">bool</span><span class="p">,</span> <span class="n">inverted</span><span class="p">:</span><span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will return one or two arrays from the data using the coordinates of the range selection.</span>
 
 <span class="sd">        Args:</span>
@@ -5032,7 +5254,9 @@
 <div class="viewcode-block" id="SnomMeasurement.level_data_columnwise">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.level_data_columnwise">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">level_data_columnwise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel_list</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">display_channel</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will level the data of the specified channels columnwise. The function will use the data from the display channel to select the range for leveling.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will level the data of the specified channels columnwise.</span>
+<span class="sd">        The function will use the data from the display channel to select the range for leveling.</span>
+<span class="sd">        If no channels are specified all channels in memory will be leveled. If no display channel is specified the first channel in memory will be used.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            channels (list, optional): Channels from memory which should be leveled. Defaults to None.</span>
@@ -5109,6 +5333,14 @@
 <div class="viewcode-block" id="SnomMeasurement.create_new_channel">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.create_new_channel">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">create_new_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">channel_name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">channel_tag_dict</span><span class="p">:</span><span class="nb">dict</span><span class="p">,</span> <span class="n">channel_label</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will create a new channel from the specified data and add it to memory.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data (np.array): Data array to create the new channel from.</span>
+<span class="sd">            channel_name (str): Name of the new channel.</span>
+<span class="sd">            channel_tag_dict (dict): Channel tag dictionary for the new channel.</span>
+<span class="sd">            channel_label (str, optional): Label for the new channel. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">channel_label</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">channel_label</span> <span class="o">=</span> <span class="n">channel_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">channel_name</span><span class="p">)</span>
@@ -5151,7 +5383,13 @@
 <div class="viewcode-block" id="ApproachCurve">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.ApproachCurve">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ApproachCurve</span><span class="p">(</span><span class="n">FileHandler</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class opens an approach curve measurement and handels all the approach curve related functions.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class opens an approach curve measurement and handels all the approach curve related functions.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        directory_name (str): Directory path of the measurement.</span>
+<span class="sd">        channels (list, optional): List of channels to load. Defaults to None.</span>
+<span class="sd">        title (str, optional): Title of the measurement. Defaults to None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory_name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">channels</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">channels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;M1A&#39;</span><span class="p">]</span>
@@ -5228,6 +5466,7 @@
 <div class="viewcode-block" id="ApproachCurve.set_min_to_zero">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.ApproachCurve.set_min_to_zero">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_min_to_zero</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will set the minimum of the xdata array to zero.&quot;&quot;&quot;</span>
         <span class="c1"># set the min of the xdata array to zero</span>
         <span class="n">min_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_channel</span><span class="p">])</span> <span class="c1"># for some reason at least the first value seems to be nan </span>
         <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_channel</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_channel</span><span class="p">]</span> <span class="o">-</span> <span class="n">min_x</span></div>
@@ -5235,7 +5474,14 @@
 
 <div class="viewcode-block" id="ApproachCurve.display_channels">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.ApproachCurve.display_channels">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">display_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_channels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">display_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will display the specified channels in a plot. The x channel is always &#39;Z&#39;.</span>
+<span class="sd">        If no y channels are specified all channels in memory will be displayed.</span>
+<span class="sd">        All channels will share one axis.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            y_channels (list, optional): List of channels to display. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">y_channels</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">y_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span>
         <span class="n">x_channel</span> <span class="o">=</span> <span class="s1">&#39;Z&#39;</span>
@@ -5257,7 +5503,15 @@
     
 <div class="viewcode-block" id="ApproachCurve.display_channels_v2">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.ApproachCurve.display_channels_v2">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">display_channels_v2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_channels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">display_channels_v2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will display the specified channels in a plot. The x channel is always &#39;Z&#39;.</span>
+<span class="sd">        If no y channels are specified all channels in memory will be displayed.</span>
+<span class="sd">        Each channel will have its own axis. And if you specify two channels it will make use of the left and right axis.</span>
+<span class="sd">        For more channels only the left axis will be used for the first channel.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            y_channels (list, optional): List of channels to display. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">x_channel</span> <span class="o">=</span> <span class="s1">&#39;Z&#39;</span>
         <span class="k">if</span> <span class="n">y_channels</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">y_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span>
@@ -5304,6 +5558,12 @@
 <div class="viewcode-block" id="ApproachCurve.find_index">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.ApproachCurve.find_index">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">find_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">channel</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will find the index of the specified channel in the datafile.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            filepath (str): Path to the datafile.</span>
+<span class="sd">            channel (str): Channel to find the index for.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
                 <span class="n">line</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
@@ -5319,10 +5579,9 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A 3D scan is a measurement where one approach curve is saved per pixel. This class is ment to handle such measurements.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        FileHandler (_type_): _description_</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        _type_: _description_</span>
+<span class="sd">        directory_name (str): Directory path of the measurement.</span>
+<span class="sd">        channels (list, optional): List of channels to load. Defaults to None.</span>
+<span class="sd">        title (str, optional): Title of the measurement. Defaults to None.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># set channelname if none is given</span>
@@ -5392,6 +5651,7 @@
 <div class="viewcode-block" id="Scan3D.set_min_to_zero">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.Scan3D.set_min_to_zero">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_min_to_zero</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will set the minimum of the xdata array to zero.&quot;&quot;&quot;</span>
         <span class="c1"># set the min of the xdata array to zero</span>
         <span class="n">min_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_channel</span><span class="p">])</span> <span class="c1"># for some reason at least the first value seems to be nan </span>
         <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_channel</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_channel</span><span class="p">]</span> <span class="o">-</span> <span class="n">min_x</span></div>
@@ -5399,7 +5659,17 @@
 
 <div class="viewcode-block" id="Scan3D.get_cutplane_data">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.Scan3D.get_cutplane_data">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_cutplane_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_cutplane_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will return the data of a cutplane of the 3D scan. The cutplane is defined by the axis and the line.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            axis (str, optional): Axis of the cutplane. Defaults to &#39;x&#39;.</span>
+<span class="sd">            line (int, optional): Line of the cutplane. Defaults to 0.</span>
+<span class="sd">            channel (str, optional): Channel to get the data from. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.array: Data of the cutplane.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">channel</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">channel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_measurement_tag_dict_value</span><span class="p">(</span><span class="n">MeasurementTags</span><span class="o">.</span><span class="n">PIXELAREA</span><span class="p">)</span>
@@ -5415,6 +5685,12 @@
 <div class="viewcode-block" id="Scan3D.generate_all_cutplane_data">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.Scan3D.generate_all_cutplane_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">generate_all_cutplane_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will generate the data of all cutplanes for all channels and store them in a dictionary.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            axis (str, optional): Axis of the cutplane. Defaults to &#39;x&#39;.</span>
+<span class="sd">            line (int, optional): Line of the cutplane. Defaults to 0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">all_cutplane_data</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">all_cutplane_data</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cutplane_data</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="n">line</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="n">channel</span><span class="p">)</span></div>
@@ -5423,6 +5699,13 @@
 <div class="viewcode-block" id="Scan3D.display_cutplane">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.Scan3D.display_cutplane">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">display_cutplane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will display the cutplane of the specified channel.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            axis (str, optional): Axis of the cutplane. Defaults to &#39;x&#39;.</span>
+<span class="sd">            line (int, optional): Line of the cutplane. Defaults to 0.</span>
+<span class="sd">            channel (str, optional): Channel to display. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># todo: shift each y column by offset value depending on average z position, to correct for varying starting position, due to non flat substrates</span>
         <span class="k">if</span> <span class="n">channel</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">channel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -5436,6 +5719,14 @@
 <div class="viewcode-block" id="Scan3D.display_cutplane_v2">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.Scan3D.display_cutplane_v2">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">display_cutplane_v2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will display the cutplane of the specified channel. The data will be shifted to align the approach curves.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            axis (str, optional): Axis of the cutplane. Defaults to &#39;x&#39;.</span>
+<span class="sd">            line (int, optional): Line of the cutplane. Defaults to 0.</span>
+<span class="sd">            channel (str, optional): Channel to display. Defaults to None.</span>
+<span class="sd">            align (str, optional): Alignment of the approach curves. Defaults to &#39;auto&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">channel</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">channel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">cutplane_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cutplane_data</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="n">line</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="n">channel</span><span class="p">)</span>
@@ -5527,6 +5818,14 @@
 <div class="viewcode-block" id="Scan3D.display_cutplane_v3">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.Scan3D.display_cutplane_v3">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">display_cutplane_v3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will display the cutplane of the specified channel. The data will be shifted to align the approach curves.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            axis (str, optional): Axis of the cutplane. Defaults to &#39;x&#39;.</span>
+<span class="sd">            line (int, optional): Line of the cutplane. Defaults to 0.</span>
+<span class="sd">            channel (str, optional): Channel to display. Defaults to None.</span>
+<span class="sd">            align (str, optional): Alignment of the approach curves. Defaults to &#39;auto&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">channel</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">channel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">cutplane_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_cutplane_data</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span>
@@ -5618,7 +5917,15 @@
 <div class="viewcode-block" id="Scan3D.display_cutplane_v2_realpart">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.Scan3D.display_cutplane_v2_realpart">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">display_cutplane_v2_realpart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">demodulation</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
-        
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will display the cutplane of the realpart data of the channels of the specified demodulation order.</span>
+<span class="sd">        The data will be shifted to align the approach curves.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            axis (str, optional): Axis of the cutplane. Defaults to &#39;x&#39;.</span>
+<span class="sd">            line (int, optional): Line of the cutplane. Defaults to 0.</span>
+<span class="sd">            demodulation (int, optional): Demodulation order of the data. Defaults to 2.</span>
+<span class="sd">            align (str, optional): Alignment of the approach curves. Defaults to &#39;auto&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">amp_channel</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;O</span><span class="si">{</span><span class="n">demodulation</span><span class="si">}</span><span class="s1">A&#39;</span>
         <span class="n">phase_channel</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;O</span><span class="si">{</span><span class="n">demodulation</span><span class="si">}</span><span class="s1">P&#39;</span>
         <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_measurement_tag_dict_value</span><span class="p">(</span><span class="n">MeasurementTags</span><span class="o">.</span><span class="n">PIXELAREA</span><span class="p">)</span>
@@ -5722,7 +6029,15 @@
 <div class="viewcode-block" id="Scan3D.display_cutplane_v3_realpart">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.Scan3D.display_cutplane_v3_realpart">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">display_cutplane_v3_realpart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">demodulation</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
-        
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will display the cutplane of the realpart data of the channels of the specified demodulation order.</span>
+<span class="sd">        The data will be shifted to align the approach curves.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            axis (str, optional): Axis of the cutplane. Defaults to &#39;x&#39;.</span>
+<span class="sd">            line (int, optional): Line of the cutplane. Defaults to 0.</span>
+<span class="sd">            demodulation (int, optional): Demodulation order of the data. Defaults to 2.</span>
+<span class="sd">            align (str, optional): Alignment of the approach curves. Defaults to &#39;auto&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">amp_channel</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;O</span><span class="si">{</span><span class="n">demodulation</span><span class="si">}</span><span class="s1">A&#39;</span>
         <span class="n">phase_channel</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;O</span><span class="si">{</span><span class="n">demodulation</span><span class="si">}</span><span class="s1">P&#39;</span>
         <span class="n">real_channel</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;O</span><span class="si">{</span><span class="n">demodulation</span><span class="si">}</span><span class="s1">Re&#39;</span>

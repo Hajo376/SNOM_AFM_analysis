@@ -96,7 +96,7 @@ def create_mean_array(array_1, array_2):
                 new_array[y][x] = (array_1[y][x] + array_2[y][x])/2
         return new_array
 
-def create_mean_array_V2(array_1, array_2, index):
+def create_mean_array_v2(array_1, array_2, index):
     """This variant is meant to keep the size of the original array!
 
     Args:

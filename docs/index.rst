@@ -6,9 +6,7 @@
 SNOM Analysis documentation
 ===========================
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
+This is a work in progress documentation for the SNOM Analysis package.
 
 
 .. toctree::
@@ -18,4 +16,5 @@ documentation for details.
    readme
    how_to
    snom_analysis
+
 

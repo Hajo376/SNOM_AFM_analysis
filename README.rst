@@ -28,7 +28,8 @@ The main measurement class is the 'SnomMeasurement' class, which is the main cla
 There are also the 'ApproachCurve' and 'Scan3D' class which are for the other types of measurements.
 Spectra are not yet implemented.
 There is also a PlotDefinitions class which contains the plot definitions for the plotting functions.
-This can also be changed by the user to adapt the plotting to his needs.
+This can also be changed by the user to adapt the plotting to his needs. This will also be saved as a json file in the users home directory.
+Changes made here will become the default settings for the plotting functions.
 The other classes contain enums and are only for internal referencing.
 Addtional functionality is in the 'lib' folder to keep the main file as small as possible.
 
