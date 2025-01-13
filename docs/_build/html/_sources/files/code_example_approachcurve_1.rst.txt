@@ -9,7 +9,7 @@
     from snom_analysis.main import ApproachCurve 
 
     # Open a file dialog to select the measurement folder.
-    directory = filedialog.askdirectory()
+    directory_name = filedialog.askdirectory()
 
     # It is always a good idea to select the channels you want to use before loading the data.
     channels = ['M1A', 'O2P', 'O2A']

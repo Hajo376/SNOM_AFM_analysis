@@ -43,7 +43,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples:</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">Readme</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../how_to.html">How to</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../snom_analysis.html">snom_analysis package</a></li>
@@ -81,29 +81,39 @@
 <span class="linenos"> 6</span>
 <span class="linenos"> 7</span><span class="c1"># Now you can access the data and the functions of the measurement instance.</span>
 <span class="linenos"> 8</span><span class="c1"># For example you can plot the data by calling the plot function.</span>
-<span class="linenos"> 9</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span> <span class="c1"># if you don&#39;t specify any arguments all channels will be plotted.</span>
-<span class="linenos">10</span>
-<span class="linenos">11</span><span class="c1"># You can also apply some modifications to the data, for example you can crop the data.</span>
-<span class="linenos">12</span><span class="c1"># If you don&#39;t specify any arguments you will be asked to provide the cropping range using</span>
-<span class="linenos">13</span><span class="c1"># some default channel and the crop will be applied to all channels.</span>
-<span class="linenos">14</span><span class="n">measurement</span><span class="o">.</span><span class="n">cut_channels</span><span class="p">()</span>
-<span class="linenos">15</span>
-<span class="linenos">16</span><span class="c1"># You can also blurr the data using a gaussian filter.</span>
-<span class="linenos">17</span><span class="c1"># If you want to blurr phase data you will need to have</span>
-<span class="linenos">18</span><span class="c1"># the phase and amplitude channels of the same demodulation in memory.</span>
-<span class="linenos">19</span><span class="n">measurement</span><span class="o">.</span><span class="n">gauss_filter_channels_complex</span><span class="p">()</span>
-<span class="linenos">20</span>
-<span class="linenos">21</span><span class="c1"># Now you can plot the data again to see the modifications.</span>
-<span class="linenos">22</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
-<span class="linenos">23</span>
-<span class="linenos">24</span><span class="c1"># You can also compare the data before and after the modifications.</span>
-<span class="linenos">25</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_all_subplots</span><span class="p">()</span>
+<span class="linenos"> 9</span><span class="c1"># If you don&#39;t specify any arguments all channels will be plotted.</span>
+<span class="linenos">10</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
+<span class="linenos">11</span>
+<span class="linenos">12</span><span class="c1"># You can also apply some modifications to the data, for example you can crop the data.</span>
+<span class="linenos">13</span><span class="c1"># If you don&#39;t specify any arguments you will be asked to provide the cropping range using</span>
+<span class="linenos">14</span><span class="c1"># some default channel and the crop will be applied to all channels.</span>
+<span class="linenos">15</span><span class="n">measurement</span><span class="o">.</span><span class="n">cut_channels</span><span class="p">()</span>
+<span class="linenos">16</span>
+<span class="linenos">17</span><span class="c1"># You can also blurr the data using a gaussian filter.</span>
+<span class="linenos">18</span><span class="c1"># If you want to blurr phase data you will need to have</span>
+<span class="linenos">19</span><span class="c1"># the phase and amplitude channels of the same demodulation in memory.</span>
+<span class="linenos">20</span><span class="n">measurement</span><span class="o">.</span><span class="n">gauss_filter_channels_complex</span><span class="p">()</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span><span class="c1"># You can use a simple 3 point correction to level the height data.</span>
+<span class="linenos">23</span><span class="c1"># For better leveling you can always use some other software</span>
+<span class="linenos">24</span><span class="c1"># like Gwyddion and import already leveled data.</span>
+<span class="linenos">25</span><span class="n">measurement</span><span class="o">.</span><span class="n">level_height_channels</span><span class="p">()</span>
 <span class="linenos">26</span>
-<span class="linenos">27</span><span class="c1"># If you are happy with the modifications you can save the data.</span>
-<span class="linenos">28</span><span class="c1"># This will save the data to a new .gsf file in the measurement folder.</span>
-<span class="linenos">29</span><span class="n">measurement</span><span class="o">.</span><span class="n">save_to_gsf</span><span class="p">()</span>
-<span class="linenos">30</span><span class="c1"># Per default the &#39;_manipulated&#39; suffix will be added to the filename,</span>
-<span class="linenos">31</span><span class="c1"># to ensure you don&#39;t overwrite the original data.</span>
+<span class="linenos">27</span><span class="c1"># I always like to set the minimum of the height channel to zero.</span>
+<span class="linenos">28</span><span class="c1"># This should be applied after the leveling. Otherwise the leveling will also change the minimum.</span>
+<span class="linenos">29</span><span class="n">measurement</span><span class="o">.</span><span class="n">set_min_to_zero</span><span class="p">([</span><span class="s1">&#39;Z C&#39;</span><span class="p">])</span>
+<span class="linenos">30</span>
+<span class="linenos">31</span><span class="c1"># Now you can plot the data again to see the modifications.</span>
+<span class="linenos">32</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
+<span class="linenos">33</span>
+<span class="linenos">34</span><span class="c1"># You can also compare the data before and after the modifications.</span>
+<span class="linenos">35</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_all_subplots</span><span class="p">()</span>
+<span class="linenos">36</span>
+<span class="linenos">37</span><span class="c1"># If you are happy with the modifications you can save the data.</span>
+<span class="linenos">38</span><span class="c1"># This will save the data to a new .gsf file in the measurement folder.</span>
+<span class="linenos">39</span><span class="n">measurement</span><span class="o">.</span><span class="n">save_to_gsf</span><span class="p">()</span>
+<span class="linenos">40</span><span class="c1"># Per default the &#39;_manipulated&#39; suffix will be added to the filename,</span>
+<span class="linenos">41</span><span class="c1"># to ensure you don&#39;t overwrite the original data.</span>
 </pre></div>
 </div>
 

@@ -43,7 +43,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples:</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">Readme</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../how_to.html">How to</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../snom_analysis.html">snom_analysis package</a></li>
@@ -88,28 +88,40 @@
 <span class="linenos">13</span><span class="c1"># Create an instance of the SnomMeasurement class by providing the path to the measurement folder.</span>
 <span class="linenos">14</span><span class="n">measurement</span> <span class="o">=</span> <span class="n">SnomMeasurement</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">channels</span><span class="p">)</span>
 <span class="linenos">15</span>
-<span class="linenos">16</span><span class="c1"># I always like to set the minimum of the height channel to zero.</span>
-<span class="linenos">17</span><span class="c1"># But be aware that most functions accept a list of channels as argument, even if it is just one.</span>
-<span class="linenos">18</span><span class="n">measurement</span><span class="o">.</span><span class="n">set_min_to_zero</span><span class="p">([</span><span class="s1">&#39;Z C&#39;</span><span class="p">])</span>
-<span class="linenos">19</span>
-<span class="linenos">20</span><span class="c1"># You can also add a scalebar, which will be saved to the plot memory.</span>
-<span class="linenos">21</span><span class="n">measurement</span><span class="o">.</span><span class="n">scalebar</span><span class="p">([</span><span class="s1">&#39;Z C&#39;</span><span class="p">])</span>
-<span class="linenos">22</span>
-<span class="linenos">23</span><span class="c1"># You can shift the phase-offset of the phase channel.</span>
-<span class="linenos">24</span><span class="c1"># Some functions will take additional parameters, if given they will apply directly.</span>
-<span class="linenos">25</span><span class="c1"># If not they will promt the user with a popup window to select the parameters manually.</span>
-<span class="linenos">26</span><span class="n">measurement</span><span class="o">.</span><span class="n">shift_phase</span><span class="p">()</span>
-<span class="linenos">27</span><span class="c1"># or you can specify the shift directly.</span>
-<span class="linenos">28</span><span class="n">measurement</span><span class="o">.</span><span class="n">shift_phase</span><span class="p">(</span><span class="n">shift</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
-<span class="linenos">29</span>
-<span class="linenos">30</span><span class="c1"># You can also aplly corrections such as a linear 2 point based y-phase drift correction.</span>
-<span class="linenos">31</span><span class="n">measurement</span><span class="o">.</span><span class="n">correct_phase_drift</span><span class="p">()</span>
-<span class="linenos">32</span><span class="c1"># or a nonlinear dift correction, wich takes into account each line and also applies</span>
-<span class="linenos">33</span><span class="c1"># a linear correction in x-direction if both sides are specified</span>
-<span class="linenos">34</span><span class="n">measurement</span><span class="o">.</span><span class="n">level_data_columnwise</span><span class="p">()</span>
-<span class="linenos">35</span>
-<span class="linenos">36</span><span class="c1"># Now you can plot the data.</span>
-<span class="linenos">37</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
+<span class="linenos">16</span><span class="c1"># Plot the data without any modifications.</span>
+<span class="linenos">17</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span><span class="c1"># You can also add a scalebar, which will be saved to the plot memory.</span>
+<span class="linenos">20</span><span class="n">measurement</span><span class="o">.</span><span class="n">scalebar</span><span class="p">([</span><span class="s1">&#39;Z C&#39;</span><span class="p">])</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span><span class="c1"># for phase data the level_data_columnwise function is not yet working properly,</span>
+<span class="linenos">23</span><span class="c1"># if the phase data is not in the range of 0 to 2pi (drifts more than 2pi)</span>
+<span class="linenos">24</span><span class="c1"># but we can correct a linear drift in the phase data before.</span>
+<span class="linenos">25</span><span class="n">measurement</span><span class="o">.</span><span class="n">correct_phase_drift_nonlinear</span><span class="p">()</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span><span class="c1"># You can also aplly corrections such as a linear 2 point based y-phase drift correction.</span>
+<span class="linenos">28</span><span class="c1"># measurement.correct_phase_drift()</span>
+<span class="linenos">29</span><span class="c1"># or a nonlinear dift correction, wich takes into account each line and also applies</span>
+<span class="linenos">30</span><span class="c1"># a linear correction in x-direction if both sides are specified</span>
+<span class="linenos">31</span><span class="n">measurement</span><span class="o">.</span><span class="n">level_data_columnwise</span><span class="p">()</span>
+<span class="linenos">32</span>
+<span class="linenos">33</span><span class="c1"># I always like to set the minimum of the height channel to zero.</span>
+<span class="linenos">34</span><span class="c1"># This should be applied after the drift correction.</span>
+<span class="linenos">35</span><span class="c1"># Otherwise the drift correction will also change the minimum.</span>
+<span class="linenos">36</span><span class="n">measurement</span><span class="o">.</span><span class="n">set_min_to_zero</span><span class="p">([</span><span class="s1">&#39;Z C&#39;</span><span class="p">])</span>
+<span class="linenos">37</span>
+<span class="linenos">38</span><span class="c1"># You can shift the phase-offset of the phase channel.</span>
+<span class="linenos">39</span><span class="c1"># Some functions will take additional parameters, if given they will apply directly.</span>
+<span class="linenos">40</span><span class="c1"># If not they will promt the user with a popup window to select the parameters manually.</span>
+<span class="linenos">41</span><span class="n">measurement</span><span class="o">.</span><span class="n">shift_phase</span><span class="p">()</span>
+<span class="linenos">42</span><span class="c1"># or you can specify the shift directly.</span>
+<span class="linenos">43</span><span class="c1"># measurement.shift_phase(shift=0.3)</span>
+<span class="linenos">44</span>
+<span class="linenos">45</span><span class="c1"># Now you can plot the data.</span>
+<span class="linenos">46</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
+<span class="linenos">47</span>
+<span class="linenos">48</span><span class="c1"># You can also compare the data before and after the modifications.</span>
+<span class="linenos">49</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_all_subplots</span><span class="p">()</span>
 </pre></div>
 </div>
 

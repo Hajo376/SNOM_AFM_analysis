@@ -288,7 +288,9 @@ def gif():
 def test_3d_scan():
     # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 144100 PH 3D single_wg_20mu_3d'
     # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
-    directory = 'C:/Users/hajos/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
+    # directory = 'C:/Users/hajos/git_projects/SNOM_AFM_analysis/tests/testdata/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
+    # directory = 'C:/Users/hajos/git_projects/SNOM_AFM_analysis/tests/testdata/2024-05-08 163342 PH 3D single_wg_20mu_3d_5ypx'
+    directory = filedialog.askdirectory(initialdir='C:/Users/hajos/git_projects/SNOM_AFM_analysis/tests/testdata')
     channels = ['O2A', 'O2P', 'O3A', 'O3P', 'Z']
     # channels = ['Z']
     measurement = Scan3D(directory, channels)
@@ -330,7 +332,8 @@ def phase_correction_3d_scan():
     measurement.display_cutplane_v3_realpart(axis='x', line=0, demodulation=3)
 
 def average_3d_scan():
-    directory = 'C:/Users/hajos/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
+    # directory = 'C:/Users/hajos/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
+    directory = filedialog.askdirectory()
     channels = ['O2A', 'O2P', 'O3A', 'O3P', 'Z']
     # channels = ['Z']
     measurement = Scan3D(directory, channels)
@@ -545,6 +548,258 @@ def test_approach_curve():
     measurement.set_min_to_zero()
     measurement.display_channels_v2()
 
+#########################################
+#### Examples used in documentation: ####
+#########################################
+
+# example data links:
+# pentamer:
+data_path_1 = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
+
+# pmma wedge with amp drift:
+data_path_2 = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
+
+# transmission measurement with lower parabolo in syncronized mode:
+data_path_3 = 'tests/testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
+
+# approach curve:
+data_path_4 = 'tests/testdata/2024-04-03 133202 PH AC topol_20mufromcoupler_right_interf_peak'
+
+# 3d scan:
+data_path_5 = 'tests/testdata/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
+
+
+def example_snommeasurement_1():
+    """This is an example of how to use the SnomMeasurement class to load, modify and save data.
+    """
+    # Load the main functionality from the package, in this case the SnomMeasurement class.
+    from snom_analysis.main import SnomMeasurement
+
+    # Create an instance of the SnomMeasurement class by providing the path to the measurement folder.
+    # measurement = SnomMeasurement('path/to/your/measurement/folder') # for documentation purposes we will use a placeholder
+    measurement = SnomMeasurement(data_path_1)
+
+    # Now you can access the data and the functions of the measurement instance.
+    # For example you can plot the data by calling the plot function.
+    measurement.display_channels() # if you don't specify any arguments all channels will be plotted.
+
+    # You can also apply some modifications to the data, for example you can crop the data.
+    # If you don't specify any arguments you will be asked to provide the cropping range using
+    # some default channel and the crop will be applied to all channels.
+    measurement.cut_channels()
+
+    # You can also blurr the data using a gaussian filter.
+    # If you want to blurr phase data you will need to have
+    # the phase and amplitude channels of the same demodulation in memory.
+    measurement.gauss_filter_channels_complex()
+
+    # You can use a simple 3 point correction to level the height data.
+    # For better leveling you can always use some other software like Gwyddion and import already leveled data.
+    measurement.level_height_channels()
+
+    # I always like to set the minimum of the height channel to zero.
+    # This should be applied after the leveling. Otherwise the leveling will also change the minimum.
+    measurement.set_min_to_zero(['Z C'])
+
+    # Now you can plot the data again to see the modifications.
+    measurement.display_channels()
+
+    # You can also compare the data before and after the modifications.
+    measurement.display_all_subplots()
+
+    # If you are happy with the modifications you can save the data.
+    # This will save the data to a new .gsf file in the measurement folder.
+    measurement.save_to_gsf()
+    # Per default the '_manipulated' suffix will be added to the filename,
+    # to ensure you don't overwrite the original data.
+
+def example_snommeasurement_2():
+    """This is an example of how to correct a nonlinear drift in the measurements.
+    """
+    # Import filedialog to open a file dialog to select the measurement folder.
+    # from tkinter import filedialog # for documentation purposes
+
+    # Load the main functionality from the package, in this case the SnomMeasurement class.
+    from snom_analysis.main import SnomMeasurement
+
+    # Open a file dialog to select the measurement folder.
+    # directory = filedialog.askdirectory() # for documentation purposes
+    directory = data_path_2
+
+    # It is always a good idea to select the channels you want to use before loading the data.
+    channels = ['O2P', 'O2A', 'Z C']
+
+    # Create an instance of the SnomMeasurement class by providing the path to the measurement folder.
+    measurement = SnomMeasurement(directory, channels)
+
+    # Plot the data without any modifications.
+    measurement.display_channels()
+
+    # You can also add a scalebar, which will be saved to the plot memory.
+    measurement.scalebar(['Z C'])
+
+    # for phase data the level_data_columnwise function is not yet working properly if the phase data is not in the range of 0 to 2pi (drifts more than 2pi)
+    # but we can correct a linear drift in the phase data before.
+    measurement.correct_phase_drift_nonlinear()
+
+    # You can also aplly corrections such as a linear 2 point based y-phase drift correction.
+    # measurement.correct_phase_drift()
+    # or a nonlinear dift correction, wich takes into account each line and also applies
+    # a linear correction in x-direction if both sides are specified
+    measurement.level_data_columnwise()
+
+    # I always like to set the minimum of the height channel to zero.
+    # This should be applied after the drift correction. Otherwise the drift correction will also change the minimum.
+    measurement.set_min_to_zero(['Z C'])
+
+    # You can shift the phase-offset of the phase channel.
+    # Some functions will take additional parameters, if given they will apply directly.
+    # If not they will promt the user with a popup window to select the parameters manually.
+    measurement.shift_phase()
+    # or you can specify the shift directly.
+    # measurement.shift_phase(shift=0.3)
+
+    # Now you can plot the data.
+    measurement.display_channels()
+
+    # You can also compare the data before and after the modifications.
+    measurement.display_all_subplots()
+
+def example_snommeasurement_3():
+    """This is an example of how to use the synccorrection for transmission measurements with the lower parabolo in syncronized mode.
+    """
+    # Load the main functionality from the package, in this case the SnomMeasurement class.
+    from snom_analysis.main import SnomMeasurement, PlotDefinitions
+    PlotDefinitions.colorbar_width = 2 # colorbar width for long thin measurements looks too big
+
+    # Open a file dialog to select the measurement folder.
+    # directory = filedialog.askdirectory() # for documentation purposes
+    directory = data_path_3
+
+    # It is always a good idea to select the channels you want to use before loading the data.
+    channels = ['O2P']
+
+    # Create an instance of the SnomMeasurement class by providing the path to the measurement folder.
+    # If we want to apply the synccorrection we need to set autoscale to False.
+    measurement = SnomMeasurement(directory, channels, autoscale=False)
+
+    # Plot the data without any modifications.
+    measurement.display_channels()
+
+    # Apply the synccorrection to the data. But we don't know the direction yet. The interferometer sometimes goes in the wron direction.
+    # This will create corrected channels and save them as .gsf with the appendix '_corrected'.
+    measurement.synccorrection(1.6)
+
+    # We want to display the corrected channels, so we reinitialize the channels with the corrected channels.
+    measurement.initialize_channels(['O2P_corrected'])
+
+    # Plot the corrected data.
+    measurement.display_channels()
+
+    # You can also compare the data before and after the modifications.
+    measurement.display_all_subplots()
+
+def example_approachcurve_1():
+    # Import filedialog to open a file dialog to select the measurement folder.
+    from tkinter import filedialog
+
+    # Load the main functionality from the package, in this case the SnomMeasurement class.
+    from snom_analysis.main import ApproachCurve
+
+    # Open a file dialog to select the measurement folder.
+    # directory_name = filedialog.askdirectory()
+
+    # It is always a good idea to select the channels you want to use before loading the data.
+    channels = ['M1A', 'O2A']
+
+    # Create an instance of the ApproachCurve class by providing the path to the measurement folder.
+    # measurement = ApproachCurve(directory_name, channels)
+    measurement = ApproachCurve(data_path_4, channels)
+
+    # Set the minimum value of the data to zero.
+    measurement.set_min_to_zero()
+
+    # Display the channels in a plot. And scale each data set to the whole image size.
+    measurement.display_channels_v2()
+
+    # Alternatively you can use the display_channels() function, which will display the channels in a plot without rescaling.
+    # measurement.display_channels()
+
+def example_scan3d_1():
+    # Import filedialog to open a file dialog to select the measurement folder.
+    from tkinter import filedialog
+
+    # Load the main functionality from the package, in this case the SnomMeasurement class.
+    from snom_analysis.main import Scan3D
+
+    # Open a file dialog to select the measurement folder.
+    # directory = filedialog.askdirectory()
+
+    # It is always a good idea to select the channels you want to use before loading the data.
+    channels = ['O2A', 'O2P', 'Z', 'O3A', 'O3P']
+
+    # Create an instance of the Scan3D class by providing the path to the measurement folder.
+    # measurement = Scan3D(directory, channels)
+    measurement = Scan3D(data_path_5, channels)
+
+    # Set the minimum value of the data to zero.
+    measurement.set_min_to_zero()
+
+    # Change the colorbar width to 3 on the fly will apply to all following plots.
+    PlotDefinitions.colorbar_width = 3
+
+    # Generate all cutplane data for the channels.
+    measurement.generate_all_cutplane_data()
+
+    # For example display just the first cutplane of the O2P channel. Then display the first cutplane of the O3P channel.
+    measurement.display_cutplanes(axis='x', line=0, channels=['O2A', 'O2P'])
+    measurement.display_cutplanes(axis='x', line=0, channels=['O2A', 'O2P'], auto_align=True)
+
+def example_scan3d_2():
+    # Import filedialog to open a file dialog to select the measurement folder.
+    from tkinter import filedialog
+
+    # Load the main functionality from the package, in this case the SnomMeasurement class.
+    from snom_analysis.main import Scan3D
+
+    # Open a file dialog to select the measurement folder.
+    # directory = filedialog.askdirectory()
+
+    # It is always a good idea to select the channels you want to use before loading the data.
+    channels = ['O2A', 'O2P', 'Z']
+
+    # Create an instance of the Scan3D class by providing the path to the measurement folder.
+    # measurement = Scan3D(directory, channels)
+    measurement = Scan3D(data_path_5, channels)
+
+    # Set the minimum value of the data to zero.
+    measurement.set_min_to_zero()
+
+    # Change the colorbar width to 3 on the fly will apply to all following plots.
+    PlotDefinitions.colorbar_width = 3
+
+    # Generate all cutplane data for the channels.
+    measurement.generate_all_cutplane_data()
+
+    # Match the phase offset of the channels O2P and O3P to the reference channel O2P.
+    measurement.match_phase_offset(channels=['O2P', 'O3P'], reference_channel='O2P', reference_area='manual', manual_width=3)
+
+    # For example display just the first cutplane of the O2P channel. Then display the first cutplane of the O3P channel.
+    measurement.display_cutplane_v3(axis='x', line=0, channel='O2P')
+    measurement.display_cutplane_v3(axis='x', line=0, channel='O3P')
+
+    # Shift the phase of the channels O2P and O3P by an arbitrary amount to make it visually clearer what you want to see.
+    measurement.shift_phase()
+
+    # Display the first cutplane again with all the changes applied.
+    measurement.display_cutplane_v3(axis='x', line=0, channel='O2P')
+    measurement.display_cutplane_v3(axis='x', line=0, channel='O3P')
+
+    # Display the real part of the first cutplane of the O2 channel and the O3 channel.
+    measurement.display_cutplane_v3_realpart(axis='x', line=0, demodulation=2)
+    measurement.display_cutplane_v3_realpart(axis='x', line=0, demodulation=3)
+
+
 def main():
      
     # realign()
@@ -577,7 +832,15 @@ def main():
     # test_comsol_data()
     # test_comsol_height_data()
     # test_config()
-    test_approach_curve()
+    # test_approach_curve()
+
+    # examples for documentation
+    # example_snommeasurement_1()
+    # example_snommeasurement_2()
+    example_snommeasurement_3()
+    # example_approachcurve_1()
+    # example_scan3d_1()
+    # example_scan3d_2()
 
 
 if __name__ == '__main__':

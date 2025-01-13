@@ -42,7 +42,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples:</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../readme.html">Readme</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../how_to.html">How to</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../snom_analysis.html">snom_analysis package</a></li>
@@ -391,7 +391,7 @@
                 <span class="s1">&#39;Q-FACTOR&#39;</span><span class="p">:</span> <span class="s1">&#39;Q-Factor&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;VERSION&#39;</span><span class="p">:</span> <span class="s1">&#39;Version&#39;</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="s1">&#39;ChannelTags&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;channel_tags&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s1">&#39;PIXELAREA&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;XRes&#39;</span><span class="p">,</span> <span class="s1">&#39;YRes&#39;</span><span class="p">],</span>
                 <span class="s1">&#39;YINCOMPLETE&#39;</span><span class="p">:</span> <span class="s1">&#39;YResIncomplete&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;ROTATION&#39;</span><span class="p">:</span> <span class="s1">&#39;Neaspec_Angle&#39;</span><span class="p">,</span>
@@ -476,7 +476,7 @@
                 <span class="c1"># &#39;Q-FACTOR&#39;: &#39;Q-Factor&#39;,</span>
                 <span class="s1">&#39;VERSION&#39;</span><span class="p">:</span> <span class="s1">&#39;Version&#39;</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="s1">&#39;ChannelTags&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;channel_tags&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s1">&#39;PIXELAREA&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;XRes&#39;</span><span class="p">,</span> <span class="s1">&#39;YRes&#39;</span><span class="p">],</span>
                 <span class="s1">&#39;YINCOMPLETE&#39;</span><span class="p">:</span> <span class="s1">&#39;YResIncomplete&#39;</span><span class="p">,</span>
                 <span class="c1"># &#39;ROTATION&#39;: &#39;Neaspec_Angle&#39;,</span>
@@ -689,7 +689,7 @@
                 <span class="c1"># &#39;Q-FACTOR&#39;: &#39;Q-Factor&#39;,</span>
                 <span class="s1">&#39;VERSION&#39;</span><span class="p">:</span> <span class="s1">&#39;Version&#39;</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="s1">&#39;ChannelTags&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;channel_tags&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s1">&#39;PIXELAREA&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;XRes&#39;</span><span class="p">,</span> <span class="s1">&#39;YRes&#39;</span><span class="p">],</span>
                 <span class="c1"># &#39;YINCOMPLETE&#39;: &#39;YResIncomplete&#39;,</span>
                 <span class="c1"># &#39;ROTATION&#39;: &#39;Neaspec_Angle&#39;,</span>
@@ -777,7 +777,7 @@
                 <span class="c1"># &#39;Q-FACTOR&#39;: &#39;Q-Factor&#39;,</span>
                 <span class="s1">&#39;VERSION&#39;</span><span class="p">:</span> <span class="s1">&#39;Version&#39;</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="s1">&#39;ChannelTags&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;channel_tags&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s1">&#39;PIXELAREA&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;XRes&#39;</span><span class="p">,</span> <span class="s1">&#39;YRes&#39;</span><span class="p">],</span>
                 <span class="c1"># &#39;YINCOMPLETE&#39;: &#39;YResIncomplete&#39;,</span>
                 <span class="c1"># &#39;ROTATION&#39;: &#39;Neaspec_Angle&#39;,</span>
@@ -1224,6 +1224,9 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            list: tag value or values as a list</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># check if the tag is in the channel tag dict</span>
+        <span class="k">if</span> <span class="n">tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel_tag_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)]:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
         <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel_tag_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)][</span><span class="n">tag</span><span class="p">]</span>
         <span class="c1"># check if a unit is part of the value</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -1235,7 +1238,7 @@
                     <span class="k">return</span> <span class="n">value</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="k">return</span> <span class="kc">None</span>
+                <span class="k">return</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>
 
@@ -1249,6 +1252,9 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            list: tag value or values as a list</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># check if the tag is in the measurement tag dict</span>
+        <span class="k">if</span> <span class="n">tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurement_tag_dict</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
         <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurement_tag_dict</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span>
         <span class="c1"># check if a unit is part of the value</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -1260,7 +1266,7 @@
                     <span class="k">return</span> <span class="n">value</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="k">return</span> <span class="kc">None</span>
+                <span class="k">return</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>
 
@@ -1274,6 +1280,9 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            float: tag unit if there is one</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># check if the tag is in the channel tag dict</span>
+        <span class="k">if</span> <span class="n">tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel_tag_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)]:</span> 
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel_tag_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)][</span><span class="n">tag</span><span class="p">]</span>
         <span class="c1"># check if a unit is part of the value</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -1299,6 +1308,9 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            float: tag unit if there is one</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># check if the tag is in the measurement tag dict</span>
+        <span class="k">if</span> <span class="n">tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurement_tag_dict</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurement_tag_dict</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span>
         <span class="c1"># check if a unit is part of the value</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -1646,8 +1658,8 @@
                 <span class="n">content</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 
 
-            <span class="n">ChannelTags</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_from_config</span><span class="p">(</span><span class="s1">&#39;ChannelTags&#39;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">channel_tags</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_from_config</span><span class="p">(</span><span class="s1">&#39;channel_tags&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">channel_tags</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="n">is_list</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">tag_value_found</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
@@ -2451,7 +2463,7 @@
             <span class="k">if</span> <span class="n">channel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">:</span>
                 <span class="n">channel_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
                 <span class="c1"># check pixel scaling from channel tag dict for each channel</span>
-                <span class="n">pixel_scaling</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_channel_tag_dict_value</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">PIXELSCALING</span><span class="p">)</span>
+                <span class="n">pixel_scaling</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_channel_tag_dict_value</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">PIXELSCALING</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">pixel_scaling</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">PlotDefinitions</span><span class="o">.</span><span class="n">show_plot</span><span class="p">:</span>
                         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The data in channel </span><span class="si">{</span><span class="n">channel</span><span class="si">}</span><span class="s1"> is not yet scaled! Do you want to scale the data?&#39;</span><span class="p">)</span>
@@ -2533,15 +2545,15 @@
         
         <span class="c1"># check if the data is scaled, if not scale it</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">channel_pairs</span><span class="p">)):</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_channel_tag_dict_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="n">channel_pairs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]],</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">PIXELSCALING</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_channel_tag_dict_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="n">channel_pairs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]],</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">PIXELSCALING</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="c1"># scale the data</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">scale_channels</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="n">channel_pairs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]]],</span> <span class="n">scaling</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_channel_tag_dict_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="n">channel_pairs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]],</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">PIXELSCALING</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_channel_tag_dict_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="n">channel_pairs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]],</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">PIXELSCALING</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="c1"># scale the data</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">scale_channels</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="n">channel_pairs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]]],</span> <span class="n">scaling</span><span class="p">)</span>
         
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">remaining_channels</span><span class="p">)):</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_channel_tag_dict_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="n">remaining_channels</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">PIXELSCALING</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_channel_tag_dict_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="n">remaining_channels</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">PIXELSCALING</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="c1"># scale the data</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">scale_channels</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="n">remaining_channels</span><span class="p">[</span><span class="n">i</span><span class="p">]]],</span> <span class="n">scaling</span><span class="p">)</span>
 
@@ -2659,6 +2671,7 @@
 <span class="sd">            data (np.array, optional): the data to save, if not specified the data will be loaded from the file. Defaults to None.</span>
 <span class="sd">            filetype (str, optional): the filetype to save the data. Defaults to &#39;gsf&#39;.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># todo XOffset, YOffset dont work properly, also if the measurement is rotated or cut this is not considered so far</span>
         <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># channel is not in memory, so the standard values will be used</span>
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_data</span><span class="p">([</span><span class="n">channel</span><span class="p">])[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
@@ -2671,6 +2684,10 @@
             <span class="n">XReal</span><span class="p">,</span> <span class="n">YReal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_channel_tag_dict_value</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">SCANAREA</span><span class="p">)</span>
             <span class="n">rotation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_channel_tag_dict_value</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">ROTATION</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">XOffset</span><span class="p">,</span> <span class="n">YOffset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_channel_tag_dict_value</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">SCANNERCENTERPOSITION</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rotation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># try to get the rotation from the measurement tags</span>
+            <span class="n">rotation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_measurement_tag_dict_value</span><span class="p">(</span><span class="n">MeasurementTags</span><span class="o">.</span><span class="n">ROTATION</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">rotation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">rotation</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
         <span class="n">XRes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="n">YRes</span>  <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">filetype</span><span class="o">==</span><span class="s1">&#39;gsf&#39;</span><span class="p">:</span>
@@ -3519,7 +3536,7 @@
             <span class="c1"># do the leveling for all channels but use always the same reference data, channels should only differ in phase offset</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">)):</span>
                 <span class="k">if</span> <span class="s1">&#39;P&#39;</span> <span class="ow">in</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">])]</span> <span class="o">=</span> <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">])][</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">reference_values_flattened</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">%</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reference_values_flattened</span><span class="p">))]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">])]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">])][</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">reference_values_flattened</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">%</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reference_values_flattened</span><span class="p">))])</span>
                     <span class="c1"># also apply a phase shift to ensure that the phase is between 0 and 2pi</span>
                     <span class="c1"># for now take the average phase an shift it to pi/2 should be white on the colormap</span>
                     <span class="n">phase_shift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">])])</span>
@@ -4005,7 +4022,7 @@
 
 <div class="viewcode-block" id="SnomMeasurement.cut_channels">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.cut_channels">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">cut_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">preview_channel</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">autocut</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reset_mask</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cut_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">preview_channel</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">autocut</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reset_mask</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function cuts the specified channels to the specified region. If no coordinates are specified you will be prompted with a window to select an area.</span>
 <span class="sd">        If you created a mask previously for this instance the old mask will be reused! Otherwise you should manually change the reset_mask parameter to True.</span>
 
@@ -4658,7 +4675,7 @@
 <span class="sd">        &#39;&#39;&#39;</span>
 
         <span class="c1"># try to optimize by shifting second array and minimizing mean deviation</span>
-        <span class="n">pixel_scaling</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_channel_tag_dict_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">PIXELSCALING</span><span class="p">)</span>
+        <span class="n">pixel_scaling</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_channel_tag_dict_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">PIXELSCALING</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">N</span> <span class="o">=</span> <span class="mi">5</span><span class="o">*</span><span class="n">pixel_scaling</span> <span class="c1">#maximum iterations, scaled if pixelnumber was increased</span>
 
         <span class="c1"># realign.minimize_deviation_1d(array_1, array_2, n_tries=N)</span>
@@ -4772,7 +4789,7 @@
         <span class="n">height_channel_backward_blurr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gauss_blurr_data</span><span class="p">(</span><span class="n">height_data_backward</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
         <span class="c1"># try to optimize by shifting second array and minimizing mean deviation</span>
-        <span class="n">pixel_scaling</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_channel_tag_dict_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">PIXELSCALING</span><span class="p">)</span>
+        <span class="n">pixel_scaling</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_channel_tag_dict_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">PIXELSCALING</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">N</span> <span class="o">=</span> <span class="mi">5</span><span class="o">*</span><span class="n">pixel_scaling</span> <span class="c1">#maximum iterations, scaled if pixelnumber was increased</span>
 
         <span class="c1"># get the index which minimized the deviation of the height channels</span>
@@ -5232,6 +5249,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># start, end, is_horizontal, inverted = self._select_data_range(channel, data, use_memory)</span>
         <span class="c1"># create one or two arrays from the data using the coordinates</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;start: &lt;</span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s1">&gt;, end: &lt;</span><span class="si">{</span><span class="n">end</span><span class="si">}</span><span class="s1">&gt;, is_horizontal: &lt;</span><span class="si">{</span><span class="n">is_horizontal</span><span class="si">}</span><span class="s1">&gt;, inverted: &lt;</span><span class="si">{</span><span class="n">inverted</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;start type: &lt;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">start</span><span class="p">)</span><span class="si">}</span><span class="s1">&gt;, end type: &lt;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">end</span><span class="p">)</span><span class="si">}</span><span class="s1">&gt;, is_horizontal type: &lt;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">is_horizontal</span><span class="p">)</span><span class="si">}</span><span class="s1">&gt;, inverted type: &lt;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">inverted</span><span class="p">)</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;data shape: </span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;data type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">reduced_data</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">is_horizontal</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">inverted</span><span class="p">:</span>
@@ -5265,11 +5286,18 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># todo sofar only for the horizontal selection (slow drifts), maybe problematic if the data was rotated...</span>
         <span class="c1"># todo does not work yet for phase and amplitude channels</span>
+        <span class="c1"># almost works but for phase channels phase jumps are an issue</span>
         <span class="k">if</span> <span class="n">channel_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No channels specified, using all channels in memory.&#39;</span><span class="p">)</span>
             <span class="n">channel_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="c1"># make sure to use a copy for the iteration, because the list will be modified</span>
         <span class="k">if</span> <span class="n">display_channel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">display_channel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># preferably use a height channel:</span>
+            <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">height_indicator</span> <span class="ow">in</span> <span class="n">channel</span><span class="p">:</span>
+                    <span class="n">display_channel</span> <span class="o">=</span> <span class="n">channel</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="n">display_channel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">display_channel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="c1"># get the selection from the display channel</span>
         <span class="n">selection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_select_data_range</span><span class="p">(</span><span class="n">display_channel</span><span class="p">)</span>
         <span class="c1"># now use the selection to level all channels</span>
@@ -5697,136 +5725,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">all_cutplane_data</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cutplane_data</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="n">line</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="n">channel</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Scan3D.display_cutplane">
-<a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.Scan3D.display_cutplane">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">display_cutplane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will display the cutplane of the specified channel.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            axis (str, optional): Axis of the cutplane. Defaults to &#39;x&#39;.</span>
-<span class="sd">            line (int, optional): Line of the cutplane. Defaults to 0.</span>
-<span class="sd">            channel (str, optional): Channel to display. Defaults to None.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># todo: shift each y column by offset value depending on average z position, to correct for varying starting position, due to non flat substrates</span>
-        <span class="k">if</span> <span class="n">channel</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">channel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">cutplane_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cutplane_data</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="n">line</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="n">channel</span><span class="p">)</span>
-
-        <span class="n">img</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">cutplane_data</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
-
-
-<div class="viewcode-block" id="Scan3D.display_cutplane_v2">
-<a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.Scan3D.display_cutplane_v2">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">display_cutplane_v2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will display the cutplane of the specified channel. The data will be shifted to align the approach curves.</span>
-<span class="sd">        </span>
-<span class="sd">        Args:</span>
-<span class="sd">            axis (str, optional): Axis of the cutplane. Defaults to &#39;x&#39;.</span>
-<span class="sd">            line (int, optional): Line of the cutplane. Defaults to 0.</span>
-<span class="sd">            channel (str, optional): Channel to display. Defaults to None.</span>
-<span class="sd">            align (str, optional): Alignment of the approach curves. Defaults to &#39;auto&#39;.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">channel</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">channel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">cutplane_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cutplane_data</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="n">line</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="n">channel</span><span class="p">)</span>
-        <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_measurement_tag_dict_value</span><span class="p">(</span><span class="n">MeasurementTags</span><span class="o">.</span><span class="n">PIXELAREA</span><span class="p">)</span>
-        <span class="c1"># todo: shift each y column by offset value depending on average z position, to correct for varying starting position, due to non flat substrates</span>
-        <span class="n">z_shifts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="c1"># idea: get all the lowest points of the approach curves and shift them to the same z position, herefore we shift them only upwards relative to the lowest point</span>
-        <span class="n">z_data_raw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_channel</span><span class="p">]</span>
-        <span class="c1"># reshape the data to the correct shape</span>
-        <span class="k">if</span> <span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span>
-            <span class="n">z_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">z</span><span class="p">,</span><span class="n">x</span><span class="p">))</span> 
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
-                    <span class="n">z_data</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">z_data_raw</span><span class="p">[</span><span class="n">line</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-            <span class="n">z_shifts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_z_shift_</span><span class="p">(</span><span class="n">z_data</span><span class="p">[:,</span><span class="n">i</span><span class="p">])</span>
-        <span class="c1"># z_data is in nm</span>
-        <span class="n">z_shifts</span> <span class="o">=</span> <span class="n">z_shifts</span>
-        <span class="k">if</span> <span class="n">align</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
-            <span class="n">z_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">z_shifts</span><span class="p">)</span>
-            <span class="n">z_shifts</span> <span class="o">=</span> <span class="n">z_shifts</span> <span class="o">-</span> <span class="n">z_min</span>
-        <span class="c1"># now we need to shift each approach curve by the corresponding z_shift</span>
-        <span class="c1"># therefore we need to create a new data array which can encorporate the shifted data</span>
-        <span class="n">XRes</span><span class="p">,</span> <span class="n">YRes</span><span class="p">,</span> <span class="n">ZRes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_measurement_tag_dict_value</span><span class="p">(</span><span class="n">MeasurementTags</span><span class="o">.</span><span class="n">PIXELAREA</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ZR: &#39;</span><span class="p">,</span> <span class="n">ZRes</span><span class="p">)</span>
-        <span class="c1"># XRange, YRange, ZRange = self.measurement_tag_dict[MeasurementTags.SCANAREA]</span>
-        <span class="n">XRange</span><span class="p">,</span> <span class="n">YRange</span><span class="p">,</span> <span class="n">ZRange</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_measurement_tag_dict_value</span><span class="p">(</span><span class="n">MeasurementTags</span><span class="o">.</span><span class="n">SCANAREA</span><span class="p">)</span>
-        <span class="c1"># XYZUnit = self.parameters_dict[&#39;Scan Area (X, Y, Z)&#39;][-1]</span>
-        <span class="n">XYZUnit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_measurement_tag_dict_unit</span><span class="p">(</span><span class="n">MeasurementTags</span><span class="o">.</span><span class="n">SCANAREA</span><span class="p">)</span>
-        <span class="c1"># convert Range to nm</span>
-        <span class="k">if</span> <span class="n">XYZUnit</span> <span class="o">==</span> <span class="s1">&#39;[µm]&#39;</span><span class="p">:</span>
-            <span class="n">XRange</span> <span class="o">=</span> <span class="n">XRange</span><span class="o">*</span><span class="mf">1e3</span>
-            <span class="n">YRange</span> <span class="o">=</span> <span class="n">YRange</span><span class="o">*</span><span class="mf">1e3</span>
-            <span class="n">ZRange</span> <span class="o">=</span> <span class="n">ZRange</span><span class="o">*</span><span class="mf">1e3</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error! The unit of the scan area is not supported yet!&#39;</span><span class="p">)</span>
-        <span class="n">z_pixelsize</span> <span class="o">=</span> <span class="n">ZRange</span><span class="o">/</span><span class="n">ZRes</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;z_shifts: &#39;</span><span class="p">,</span> <span class="n">z_shifts</span><span class="p">)</span>
-        <span class="c1"># calculate the new z range</span>
-        <span class="n">ZRange_new</span> <span class="o">=</span> <span class="n">ZRange</span> <span class="o">+</span> <span class="n">z_shifts</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-        <span class="n">ZRes_new</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ZRange_new</span><span class="o">/</span><span class="n">z_pixelsize</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ZRes_new: &#39;</span><span class="p">,</span> <span class="n">ZRes_new</span><span class="p">)</span>
-        <span class="c1"># create the new data array</span>
-        <span class="n">cutplane_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">ZRes_new</span><span class="p">,</span> <span class="n">XRes</span><span class="p">))</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">XRes</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ZRes</span><span class="p">):</span>
-                <span class="n">cutplane_data</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="nb">int</span><span class="p">(</span><span class="n">z_shifts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="n">z_pixelsize</span><span class="p">)][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">line</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
-<span class="w">        </span><span class="sd">&#39;&#39;&#39;This shifting is not optimal, since a slow drift or a tilt of the sample would lead to a wrong alignment of the approach curves, although they start at the bottom.</span>
-<span class="sd">        Maybe try to use a 2d scan of the same region to align the approach curves.&#39;&#39;&#39;</span>
-        
-        <span class="c1"># import plotting_parameters.json, here the user can tweek some options for the plotting, like automatic titles and colormap choices</span>
-        <span class="n">plotting_parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_plotting_parameters</span><span class="p">()</span>
-
-        <span class="c1"># update the placeholders in the dictionary</span>
-        <span class="c1"># the dictionary contains certain placeholders, which are now being replaced with the actual values</span>
-        <span class="c1"># until now only the channel placeholder is used but more could be added</span>
-        <span class="c1"># placeholders are indicated by the &#39;&lt;&#39; and &#39;&gt;&#39; characters</span>
-        <span class="c1"># this step insures, that for example the title contains the correct channel name</span>
-        <span class="n">placeholders</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;&lt;channel&gt;&#39;</span><span class="p">:</span> <span class="n">channel</span><span class="p">}</span>
-        <span class="n">plotting_parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_replace_plotting_parameter_placeholders</span><span class="p">(</span><span class="n">plotting_parameters</span><span class="p">,</span> <span class="n">placeholders</span><span class="p">)</span>
-
-        <span class="c1"># set colormap depending on channel</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">amp_indicator</span> <span class="ow">in</span> <span class="n">channel</span><span class="p">:</span>
-            <span class="n">cmap</span> <span class="o">=</span> <span class="n">plotting_parameters</span><span class="p">[</span><span class="s2">&quot;amplitude_cmap&quot;</span><span class="p">]</span>
-            <span class="n">label</span> <span class="o">=</span> <span class="n">plotting_parameters</span><span class="p">[</span><span class="s2">&quot;amplitude_cbar_label&quot;</span><span class="p">]</span>
-            <span class="n">title</span> <span class="o">=</span> <span class="n">plotting_parameters</span><span class="p">[</span><span class="s2">&quot;amplitude_title&quot;</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase_indicator</span> <span class="ow">in</span> <span class="n">channel</span><span class="p">:</span>
-            <span class="n">cmap</span> <span class="o">=</span> <span class="n">plotting_parameters</span><span class="p">[</span><span class="s2">&quot;phase_cmap&quot;</span><span class="p">]</span>
-            <span class="n">label</span> <span class="o">=</span> <span class="n">plotting_parameters</span><span class="p">[</span><span class="s2">&quot;phase_cbar_label&quot;</span><span class="p">]</span>
-            <span class="n">title</span> <span class="o">=</span> <span class="n">plotting_parameters</span><span class="p">[</span><span class="s2">&quot;phase_title&quot;</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">cmap</span> <span class="o">=</span> <span class="s1">&#39;viridis&#39;</span>
-        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
-        <span class="n">img</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">cutplane_data</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">)</span>
-        <span class="n">divider</span> <span class="o">=</span> <span class="n">make_axes_locatable</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
-        <span class="n">cax</span> <span class="o">=</span> <span class="n">divider</span><span class="o">.</span><span class="n">append_axes</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">colorbar_width</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span> <span class="c1"># size is the size of colorbar relative to original axis, 100% means same size, 10% means 10% of original</span>
-        <span class="n">cbar</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cax</span><span class="o">=</span><span class="n">cax</span><span class="p">)</span>
-        <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">get_yaxis</span><span class="p">()</span><span class="o">.</span><span class="n">labelpad</span> <span class="o">=</span> <span class="mi">15</span>
-        <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">270</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hide_ticks</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="c1"># remove ticks on x and y axis, they only show pixelnumber anyways, better to add a scalebar</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
-        <span class="c1"># plt.colorbar(img)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
-
-
-<div class="viewcode-block" id="Scan3D.display_cutplane_v3">
-<a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.Scan3D.display_cutplane_v3">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">display_cutplane_v3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will display the cutplane of the specified channel. The data will be shifted to align the approach curves.</span>
-<span class="sd">        </span>
-<span class="sd">        Args:</span>
-<span class="sd">            axis (str, optional): Axis of the cutplane. Defaults to &#39;x&#39;.</span>
-<span class="sd">            line (int, optional): Line of the cutplane. Defaults to 0.</span>
-<span class="sd">            channel (str, optional): Channel to display. Defaults to None.</span>
-<span class="sd">            align (str, optional): Alignment of the approach curves. Defaults to &#39;auto&#39;.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_subplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">auto_align</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">channel</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">channel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">cutplane_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_cutplane_data</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span>
@@ -5849,7 +5748,7 @@
 
         <span class="c1"># now we can try to shift each approach curve by the corresponding z_shift</span>
         <span class="c1"># easiest way is to use the z start position of each approach curve</span>
-        <span class="k">if</span> <span class="n">align</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">auto_align</span><span class="p">:</span>
             <span class="n">z_shifts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">XRes</span><span class="p">)</span>
             <span class="c1"># idea: get all the lowest points of the approach curves and shift them to the same z position, herefore we shift them only upwards relative to the lowest point</span>
             <span class="n">z_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_cutplane_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_channel</span><span class="p">]</span>
@@ -5896,25 +5795,87 @@
             <span class="n">title</span> <span class="o">=</span> <span class="n">plotting_parameters</span><span class="p">[</span><span class="s2">&quot;phase_title&quot;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">cmap</span> <span class="o">=</span> <span class="s1">&#39;viridis&#39;</span>
-        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
-        <span class="n">img</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">cutplane_data</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">)</span>
-        <span class="n">divider</span> <span class="o">=</span> <span class="n">make_axes_locatable</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
-        <span class="n">cax</span> <span class="o">=</span> <span class="n">divider</span><span class="o">.</span><span class="n">append_axes</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">colorbar_width</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span> <span class="c1"># size is the size of colorbar relative to original axis, 100% means same size, 10% means 10% of original</span>
-        <span class="n">cbar</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cax</span><span class="o">=</span><span class="n">cax</span><span class="p">)</span>
-        <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">get_yaxis</span><span class="p">()</span><span class="o">.</span><span class="n">labelpad</span> <span class="o">=</span> <span class="mi">15</span>
-        <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">270</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hide_ticks</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="c1"># remove ticks on x and y axis, they only show pixelnumber anyways, better to add a scalebar</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
-        <span class="c1"># plt.colorbar(img)</span>
+        <span class="k">return</span> <span class="n">cutplane_data</span><span class="p">,</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">title</span>
+    
+<div class="viewcode-block" id="Scan3D.display_cutplanes">
+<a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.Scan3D.display_cutplanes">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">display_cutplanes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">auto_align</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will display the cutplanes of the specified channels.</span>
+<span class="sd">        You can also autoalign the data which will apply a shift to align the approach curves, more physically correct but not perfect.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            axis (str, optional): Axis of the cutplane. Defaults to &#39;x&#39;.</span>
+<span class="sd">            line (int, optional): Line of the cutplane. Defaults to 0.</span>
+<span class="sd">            channels (list, optional): Channel to display, if you don&#39;t specify some all channels in memory will be used. Defaults to None.</span>
+<span class="sd">            align (bool, optional): Alignment of the approach curves.</span>
+<span class="sd">            If set to True the individual approach curves will be shifted such that they start at the same Z corrdinate. Defaults to False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">channels</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span>
+        <span class="n">number_of_channels</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">number_of_channels</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">cols</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">number_of_channels</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="n">cols</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cols</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">number_of_channels</span><span class="o">//</span><span class="n">cols</span>
+        <span class="k">if</span> <span class="n">number_of_channels</span><span class="o">%</span><span class="n">cols</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">rows</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;rows: &#39;</span><span class="p">,</span> <span class="n">rows</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;cols: &#39;</span><span class="p">,</span> <span class="n">cols</span><span class="p">)</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">PlotDefinitions</span><span class="o">.</span><span class="n">figsizex</span><span class="p">,</span> <span class="n">PlotDefinitions</span><span class="o">.</span><span class="n">figsizey</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">channels</span><span class="p">:</span>
+            <span class="c1"># get column and row index</span>
+            <span class="k">if</span> <span class="n">number_of_channels</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>
+                <span class="n">col</span> <span class="o">=</span> <span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span><span class="o">%</span><span class="mi">2</span>
+                <span class="n">row</span> <span class="o">=</span> <span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">col</span> <span class="o">=</span> <span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span><span class="o">%</span><span class="mi">3</span>
+                <span class="n">row</span> <span class="o">=</span> <span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span><span class="o">//</span><span class="mi">3</span>
+            <span class="k">if</span> <span class="n">rows</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">cols</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">axs</span>
+            <span class="k">elif</span> <span class="n">rows</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">channel</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The channel &lt;</span><span class="si">{</span><span class="n">channel</span><span class="si">}</span><span class="s1">&gt; is not in memory!&#39;</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">cutplane_data</span><span class="p">,</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_subplot</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="n">line</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="n">channel</span><span class="p">,</span> <span class="n">auto_align</span><span class="o">=</span><span class="n">auto_align</span><span class="p">)</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">cutplane_data</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">)</span>
+            <span class="n">divider</span> <span class="o">=</span> <span class="n">make_axes_locatable</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+            <span class="n">cax</span> <span class="o">=</span> <span class="n">divider</span><span class="o">.</span><span class="n">append_axes</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">colorbar_width</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span> <span class="c1"># size is the size of colorbar relative to original axis, 100% means same size, 10% means 10% of original</span>
+            <span class="n">cbar</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cax</span><span class="o">=</span><span class="n">cax</span><span class="p">)</span>
+            <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">get_yaxis</span><span class="p">()</span><span class="o">.</span><span class="n">label</span>
+            <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;scaled&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hide_ticks</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="c1"># remove ticks on x and y axis, they only show pixelnumber anyways, better to add a scalebar</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_titles</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+        <span class="c1">#turn off all unneeded axes</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rows</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cols</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">rows</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">cols</span> <span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">ax</span> <span class="o">=</span> <span class="n">axs</span>
+                <span class="k">elif</span> <span class="n">rows</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">ax</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ax</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">counter</span> <span class="o">&gt;=</span> <span class="n">number_of_channels</span><span class="p">:</span> 
+                    <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+                <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tight_layout</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">PlotDefinitions</span><span class="o">.</span><span class="n">show_plot</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
         <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span></div>
 
-    
+
 <div class="viewcode-block" id="Scan3D.display_cutplane_v2_realpart">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.Scan3D.display_cutplane_v2_realpart">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">display_cutplane_v2_realpart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">demodulation</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
@@ -6027,9 +5988,9 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
 
     
-<div class="viewcode-block" id="Scan3D.display_cutplane_v3_realpart">
-<a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.Scan3D.display_cutplane_v3_realpart">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">display_cutplane_v3_realpart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">demodulation</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="Scan3D.display_cutplane_realpart">
+<a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.Scan3D.display_cutplane_realpart">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">display_cutplane_realpart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">demodulation</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will display the cutplane of the realpart data of the channels of the specified demodulation order.</span>
 <span class="sd">        The data will be shifted to align the approach curves.</span>
 <span class="sd">        </span>

@@ -41,7 +41,6 @@ class Rectangle_Selector():
         cbar.ax.set_ylabel(label, rotation=270)
         axis.set_title(title)
         axis.axis('scaled')
-        print("\n      click  -->  release")
 
         def line_select_callback(eclick, erelease):
             #eclick and erelease are the press and release events
@@ -72,7 +71,7 @@ class Rectangle_Selector():
         plt.show()
 
     def accept(self, value):
-        print('value:', value)
+        # print('value:', value)
         self.fig.canvas.mpl_disconnect(self.cid)
         plt.close()
     

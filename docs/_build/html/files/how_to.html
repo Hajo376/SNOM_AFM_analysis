@@ -43,7 +43,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples:</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">Readme</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../how_to.html">How to</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../snom_analysis.html">snom_analysis package</a></li>
@@ -79,13 +79,23 @@
 You can also clone the repository and use it as is or create your own wheel by running pyhton setup.py bdist_wheel.
 I would always recommend to use a virtual environment to install the package and use the wheel.</p>
 <p>Then try out the example script which should be somewhere in the repository. (#todo)
-Anyways, here is a short example of how to use the package:</p>
+You can also just use the script as a loader and do whatever you want in between.
+The data is just stored as a list of np.array in the instance.all_data variable, the channel names are in a correlated list instance.channels.
+Additional information is in the two dictionaries instance.measurement_tag_dict and instance.channels_tag_dict.
+These are just dictionaries containing the parameters from the parameters.txt file (measurement_tag_dict)
+and the individual headers from the .gsf files (channels_tag_dict). Note that the channels_tag_dict is also a list correlated with instance.channels.
+This gives you a lot of freedome to implement your own functionality.</p>
+<p>Anyways, here is a short example of how to use the package:</p>
 <section id="simple-usage-example-using-the-snommeasurement-class">
 <h2>Simple usage example using the SnomMeasurement class:<a class="headerlink" href="#simple-usage-example-using-the-snommeasurement-class" title="Link to this heading"></a></h2>
 <p>This is a very simple example using just some base functions without any extra parameters.</p>
 </section>
 <section id="more-advanced-usage-example-using-the-snommeasurement-class">
 <h2>More advanced usage example using the SnomMeasurement class:<a class="headerlink" href="#more-advanced-usage-example-using-the-snommeasurement-class" title="Link to this heading"></a></h2>
+<p>This is an example using the tkinter filedialog and some more advanced fuctions.</p>
+</section>
+<section id="example-showing-how-to-do-a-synccorrection-of-transmission-mode-measurements">
+<h2>Example showing how to do a synccorrection of transmission mode measurements:<a class="headerlink" href="#example-showing-how-to-do-a-synccorrection-of-transmission-mode-measurements" title="Link to this heading"></a></h2>
 <p>This is an example using the tkinter filedialog and some more advanced fuctions.</p>
 </section>
 <section id="simple-usage-example-using-the-approachcurve-class">

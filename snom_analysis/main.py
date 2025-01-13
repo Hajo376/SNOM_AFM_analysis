@@ -302,7 +302,7 @@ class FileHandler(PlotDefinitions):
                 'Q-FACTOR': 'Q-Factor',
                 'VERSION': 'Version',
             },
-            'ChannelTags': {
+            'channel_tags': {
                 'PIXELAREA': ['XRes', 'YRes'],
                 'YINCOMPLETE': 'YResIncomplete',
                 'ROTATION': 'Neaspec_Angle',
@@ -387,7 +387,7 @@ class FileHandler(PlotDefinitions):
                 # 'Q-FACTOR': 'Q-Factor',
                 'VERSION': 'Version',
             },
-            'ChannelTags': {
+            'channel_tags': {
                 'PIXELAREA': ['XRes', 'YRes'],
                 'YINCOMPLETE': 'YResIncomplete',
                 # 'ROTATION': 'Neaspec_Angle',
@@ -600,7 +600,7 @@ class FileHandler(PlotDefinitions):
                 # 'Q-FACTOR': 'Q-Factor',
                 'VERSION': 'Version',
             },
-            'ChannelTags': {
+            'channel_tags': {
                 'PIXELAREA': ['XRes', 'YRes'],
                 # 'YINCOMPLETE': 'YResIncomplete',
                 # 'ROTATION': 'Neaspec_Angle',
@@ -688,7 +688,7 @@ class FileHandler(PlotDefinitions):
                 # 'Q-FACTOR': 'Q-Factor',
                 'VERSION': 'Version',
             },
-            'ChannelTags': {
+            'channel_tags': {
                 'PIXELAREA': ['XRes', 'YRes'],
                 # 'YINCOMPLETE': 'YResIncomplete',
                 # 'ROTATION': 'Neaspec_Angle',
@@ -1135,6 +1135,9 @@ class FileHandler(PlotDefinitions):
         Returns:
             list: tag value or values as a list
         """
+        # check if the tag is in the channel tag dict
+        if tag not in self.channel_tag_dict[self.channels.index(channel)]:
+            return [None]
         value = self.channel_tag_dict[self.channels.index(channel)][tag]
         # check if a unit is part of the value
         if isinstance(value, list):
@@ -1146,7 +1149,7 @@ class FileHandler(PlotDefinitions):
                     return value
         else:
             if isinstance(value, str):
-                return None
+                return [None]
             else:
                 return [value]
 
@@ -1160,6 +1163,9 @@ class FileHandler(PlotDefinitions):
         Returns:
             list: tag value or values as a list
         """
+        # check if the tag is in the measurement tag dict
+        if tag not in self.measurement_tag_dict:
+            return [None]
         value = self.measurement_tag_dict[tag]
         # check if a unit is part of the value
         if isinstance(value, list):
@@ -1171,7 +1177,7 @@ class FileHandler(PlotDefinitions):
                     return value
         else:
             if isinstance(value, str):
-                return None
+                return [None]
             else:
                 return [value]
 
@@ -1185,6 +1191,9 @@ class FileHandler(PlotDefinitions):
         Returns:
             float: tag unit if there is one
         """
+        # check if the tag is in the channel tag dict
+        if tag not in self.channel_tag_dict[self.channels.index(channel)]: 
+            return None
         value = self.channel_tag_dict[self.channels.index(channel)][tag]
         # check if a unit is part of the value
         if isinstance(value, list):
@@ -1210,6 +1219,9 @@ class FileHandler(PlotDefinitions):
         Returns:
             float: tag unit if there is one
         """
+        # check if the tag is in the measurement tag dict
+        if tag not in self.measurement_tag_dict:
+            return None
         value = self.measurement_tag_dict[tag]
         # check if a unit is part of the value
         if isinstance(value, list):
@@ -1557,8 +1569,8 @@ class FileHandler(PlotDefinitions):
                 content=f.read()
 
 
-            ChannelTags = self._get_from_config('ChannelTags')
-            for key, tag in ChannelTags.items():
+            channel_tags = self._get_from_config('channel_tags')
+            for key, tag in channel_tags.items():
                 is_list = False
                 tag_value_found = False
                 value = None
@@ -2327,7 +2339,7 @@ class SnomMeasurement(FileHandler):
             if channel in self.channels:
                 channel_index = self.channels.index(channel)
                 # check pixel scaling from channel tag dict for each channel
-                pixel_scaling = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELSCALING)
+                pixel_scaling = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELSCALING)[0]
                 if pixel_scaling == 1:
                     if PlotDefinitions.show_plot:
                         print(f'The data in channel {channel} is not yet scaled! Do you want to scale the data?')
@@ -2406,15 +2418,15 @@ class SnomMeasurement(FileHandler):
         
         # check if the data is scaled, if not scale it
         for i in range(len(channel_pairs)):
-            if self._get_channel_tag_dict_value(self.channels[channel_pairs[i][0]], ChannelTags.PIXELSCALING) == 1:
+            if self._get_channel_tag_dict_value(self.channels[channel_pairs[i][0]], ChannelTags.PIXELSCALING)[0] == 1:
                 # scale the data
                 self.scale_channels([self.channels[channel_pairs[i][0]]], scaling)
-            if self._get_channel_tag_dict_value(self.channels[channel_pairs[i][1]], ChannelTags.PIXELSCALING) == 1:
+            if self._get_channel_tag_dict_value(self.channels[channel_pairs[i][1]], ChannelTags.PIXELSCALING)[0] == 1:
                 # scale the data
                 self.scale_channels([self.channels[channel_pairs[i][1]]], scaling)
         
         for i in range(len(remaining_channels)):
-            if self._get_channel_tag_dict_value(self.channels[remaining_channels[i]], ChannelTags.PIXELSCALING) == 1:
+            if self._get_channel_tag_dict_value(self.channels[remaining_channels[i]], ChannelTags.PIXELSCALING)[0] == 1:
                 # scale the data
                 self.scale_channels([self.channels[remaining_channels[i]]], scaling)
 
@@ -2525,6 +2537,7 @@ class SnomMeasurement(FileHandler):
             data (np.array, optional): the data to save, if not specified the data will be loaded from the file. Defaults to None.
             filetype (str, optional): the filetype to save the data. Defaults to 'gsf'.
         """
+        # todo XOffset, YOffset dont work properly, also if the measurement is rotated or cut this is not considered so far
         if data is None:
             # channel is not in memory, so the standard values will be used
             data = self._load_data([channel])[0][0]
@@ -2537,6 +2550,10 @@ class SnomMeasurement(FileHandler):
             XReal, YReal = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
             rotation = self._get_channel_tag_dict_value(channel, ChannelTags.ROTATION)[0]
             XOffset, YOffset = self._get_channel_tag_dict_value(channel, ChannelTags.SCANNERCENTERPOSITION)
+        if rotation is None:
+            # try to get the rotation from the measurement tags
+            rotation = self._get_measurement_tag_dict_value(MeasurementTags.ROTATION)[0]
+            if rotation is None: rotation = ''
         XRes = len(data[0])
         YRes  = len(data)
         if filetype=='gsf':
@@ -3362,7 +3379,7 @@ class SnomMeasurement(FileHandler):
             # do the leveling for all channels but use always the same reference data, channels should only differ in phase offset
             for i in range(len(channels)):
                 if 'P' in channels[i]:
-                    self.all_data[self.channels.index(channels[i])] = [(self.all_data[self.channels.index(channels[i])][j] - reference_values_flattened[j] + np.pi) %(2*np.pi) for j in range(len(reference_values_flattened))]
+                    self.all_data[self.channels.index(channels[i])] = np.array([(self.all_data[self.channels.index(channels[i])][j] - reference_values_flattened[j] + np.pi) %(2*np.pi) for j in range(len(reference_values_flattened))])
                     # also apply a phase shift to ensure that the phase is between 0 and 2pi
                     # for now take the average phase an shift it to pi/2 should be white on the colormap
                     phase_shift = np.pi/2 - np.mean(self.all_data[self.channels.index(channels[i])])
@@ -3824,7 +3841,7 @@ class SnomMeasurement(FileHandler):
             self.channels_label[i] += '_shifted'
         gc.collect()
 
-    def cut_channels(self, channels:list=None, preview_channel:str=None, autocut:bool=False, coords:list=None, reset_mask:bool=False) -> None:
+    def cut_channels(self, channels:list=None, preview_channel:str=None, autocut:bool=False, coords:list=None, reset_mask:bool=True) -> None:
         """This function cuts the specified channels to the specified region. If no coordinates are specified you will be prompted with a window to select an area.
         If you created a mask previously for this instance the old mask will be reused! Otherwise you should manually change the reset_mask parameter to True.
 
@@ -4447,7 +4464,7 @@ class SnomMeasurement(FileHandler):
         '''
 
         # try to optimize by shifting second array and minimizing mean deviation
-        pixel_scaling = self._get_channel_tag_dict_value(self.channels[0], ChannelTags.PIXELSCALING)
+        pixel_scaling = self._get_channel_tag_dict_value(self.channels[0], ChannelTags.PIXELSCALING)[0]
         N = 5*pixel_scaling #maximum iterations, scaled if pixelnumber was increased
 
         # realign.minimize_deviation_1d(array_1, array_2, n_tries=N)
@@ -4558,7 +4575,7 @@ class SnomMeasurement(FileHandler):
         height_channel_backward_blurr = self._gauss_blurr_data(height_data_backward, 2)
 
         # try to optimize by shifting second array and minimizing mean deviation
-        pixel_scaling = self._get_channel_tag_dict_value(self.channels[0], ChannelTags.PIXELSCALING)
+        pixel_scaling = self._get_channel_tag_dict_value(self.channels[0], ChannelTags.PIXELSCALING)[0]
         N = 5*pixel_scaling #maximum iterations, scaled if pixelnumber was increased
 
         # get the index which minimized the deviation of the height channels
@@ -5002,6 +5019,10 @@ class SnomMeasurement(FileHandler):
         """
         # start, end, is_horizontal, inverted = self._select_data_range(channel, data, use_memory)
         # create one or two arrays from the data using the coordinates
+        print(f'start: <{start}>, end: <{end}>, is_horizontal: <{is_horizontal}>, inverted: <{inverted}>')
+        print(f'start type: <{type(start)}>, end type: <{type(end)}>, is_horizontal type: <{type(is_horizontal)}>, inverted type: <{type(inverted)}>')
+        print(f'data shape: {data.shape}')
+        print(f'data type: {type(data)}')
         reduced_data = []
         if is_horizontal:
             if inverted:
@@ -5033,11 +5054,18 @@ class SnomMeasurement(FileHandler):
         """
         # todo sofar only for the horizontal selection (slow drifts), maybe problematic if the data was rotated...
         # todo does not work yet for phase and amplitude channels
+        # almost works but for phase channels phase jumps are an issue
         if channel_list is None:
             print('No channels specified, using all channels in memory.')
             channel_list = self.channels.copy() # make sure to use a copy for the iteration, because the list will be modified
         if display_channel is None:
-            display_channel = self.channels[0]
+            # preferably use a height channel:
+            for channel in self.channels:
+                if self.height_indicator in channel:
+                    display_channel = channel
+                    break
+            if display_channel is None:
+                display_channel = self.channels[0]
         # get the selection from the display channel
         selection = self._select_data_range(display_channel)
         # now use the selection to level all channels
@@ -5431,128 +5459,7 @@ class Scan3D(FileHandler):
         for channel in self.channels:
             self.all_cutplane_data[channel] = self.get_cutplane_data(axis=axis, line=line, channel=channel)
 
-    def display_cutplane(self, axis:str='x', line:int=0, channel:str=None):
-        """This function will display the cutplane of the specified channel.
-
-        Args:
-            axis (str, optional): Axis of the cutplane. Defaults to 'x'.
-            line (int, optional): Line of the cutplane. Defaults to 0.
-            channel (str, optional): Channel to display. Defaults to None.
-        """
-        # todo: shift each y column by offset value depending on average z position, to correct for varying starting position, due to non flat substrates
-        if channel == None:
-            channel = self.channels[0]
-        cutplane_data = self.get_cutplane_data(axis=axis, line=line, channel=channel)
-
-        img = plt.pcolormesh(cutplane_data)
-        plt.colorbar(img)
-        plt.show()
-
-    def display_cutplane_v2(self, axis:str='x', line:int=0, channel:str=None, align='auto'):
-        """This function will display the cutplane of the specified channel. The data will be shifted to align the approach curves.
-        
-        Args:
-            axis (str, optional): Axis of the cutplane. Defaults to 'x'.
-            line (int, optional): Line of the cutplane. Defaults to 0.
-            channel (str, optional): Channel to display. Defaults to None.
-            align (str, optional): Alignment of the approach curves. Defaults to 'auto'.
-        """
-        if channel == None:
-            channel = self.channels[0]
-        cutplane_data = self.get_cutplane_data(axis=axis, line=line, channel=channel)
-        x,y,z = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
-        # todo: shift each y column by offset value depending on average z position, to correct for varying starting position, due to non flat substrates
-        z_shifts = np.zeros(x)
-        # idea: get all the lowest points of the approach curves and shift them to the same z position, herefore we shift them only upwards relative to the lowest point
-        z_data_raw = self.all_data[self.x_channel]
-        # reshape the data to the correct shape
-        if axis == 'x':
-            z_data = np.zeros((z,x)) 
-            for i in range(x):
-                for j in range(z):
-                    z_data[j][i] = z_data_raw[line][i][j]
-        for i in range(x):
-            z_shifts[i] = self._get_z_shift_(z_data[:,i])
-        # z_data is in nm
-        z_shifts = z_shifts
-        if align == 'auto':
-            z_min = np.min(z_shifts)
-            z_shifts = z_shifts - z_min
-        # now we need to shift each approach curve by the corresponding z_shift
-        # therefore we need to create a new data array which can encorporate the shifted data
-        XRes, YRes, ZRes = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
-        print('ZR: ', ZRes)
-        # XRange, YRange, ZRange = self.measurement_tag_dict[MeasurementTags.SCANAREA]
-        XRange, YRange, ZRange = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
-        # XYZUnit = self.parameters_dict['Scan Area (X, Y, Z)'][-1]
-        XYZUnit = self._get_measurement_tag_dict_unit(MeasurementTags.SCANAREA)
-        # convert Range to nm
-        if XYZUnit == '[µm]':
-            XRange = XRange*1e3
-            YRange = YRange*1e3
-            ZRange = ZRange*1e3
-        else:
-            print('Error! The unit of the scan area is not supported yet!')
-        z_pixelsize = ZRange/ZRes
-        print('z_shifts: ', z_shifts)
-        # calculate the new z range
-        ZRange_new = ZRange + z_shifts.max()
-        ZRes_new = int(ZRange_new/z_pixelsize)
-        print('ZRes_new: ', ZRes_new)
-        # create the new data array
-        cutplane_data = np.zeros((ZRes_new, XRes))
-        data = self.all_data[channel].copy()
-        for i in range(XRes):
-            for j in range(ZRes):
-                cutplane_data[j+int(z_shifts[i]/z_pixelsize)][i] = data[line][i][j]
-        '''This shifting is not optimal, since a slow drift or a tilt of the sample would lead to a wrong alignment of the approach curves, although they start at the bottom.
-        Maybe try to use a 2d scan of the same region to align the approach curves.'''
-        
-        # import plotting_parameters.json, here the user can tweek some options for the plotting, like automatic titles and colormap choices
-        plotting_parameters = self._get_plotting_parameters()
-
-        # update the placeholders in the dictionary
-        # the dictionary contains certain placeholders, which are now being replaced with the actual values
-        # until now only the channel placeholder is used but more could be added
-        # placeholders are indicated by the '<' and '>' characters
-        # this step insures, that for example the title contains the correct channel name
-        placeholders = {'<channel>': channel}
-        plotting_parameters = self._replace_plotting_parameter_placeholders(plotting_parameters, placeholders)
-
-        # set colormap depending on channel
-        if self.amp_indicator in channel:
-            cmap = plotting_parameters["amplitude_cmap"]
-            label = plotting_parameters["amplitude_cbar_label"]
-            title = plotting_parameters["amplitude_title"]
-        elif self.phase_indicator in channel:
-            cmap = plotting_parameters["phase_cmap"]
-            label = plotting_parameters["phase_cbar_label"]
-            title = plotting_parameters["phase_title"]
-        else:
-            cmap = 'viridis'
-        fig, ax = plt.subplots()
-        img = plt.pcolormesh(cutplane_data, cmap=cmap)
-        divider = make_axes_locatable(ax)
-        cax = divider.append_axes("right", size=f"{self.colorbar_width}%", pad=0.05) # size is the size of colorbar relative to original axis, 100% means same size, 10% means 10% of original
-        cbar = plt.colorbar(img, aspect=1, cax=cax)
-        cbar.ax.get_yaxis().labelpad = 15
-        cbar.ax.set_ylabel(label, rotation=270)
-        if self.hide_ticks == True:
-            # remove ticks on x and y axis, they only show pixelnumber anyways, better to add a scalebar
-            ax.set_xticks([])
-            ax.set_yticks([])
-        # plt.colorbar(img)
-        plt.show()
-
-    def display_cutplane_v3(self, axis:str='x', line:int=0, channel:str=None, align='auto'):
-        """This function will display the cutplane of the specified channel. The data will be shifted to align the approach curves.
-        
-        Args:
-            axis (str, optional): Axis of the cutplane. Defaults to 'x'.
-            line (int, optional): Line of the cutplane. Defaults to 0.
-            channel (str, optional): Channel to display. Defaults to None.
-            align (str, optional): Alignment of the approach curves. Defaults to 'auto'.
-        """
+    def _create_subplot(self, axis:str='x', line:int=0, channel:str=None, auto_align:bool=False):
         if channel == None:
             channel = self.channels[0]
         cutplane_data = self.all_cutplane_data[channel]
@@ -5575,7 +5482,7 @@ class Scan3D(FileHandler):
 
         # now we can try to shift each approach curve by the corresponding z_shift
         # easiest way is to use the z start position of each approach curve
-        if align == 'auto':
+        if auto_align:
             z_shifts = np.zeros(XRes)
             # idea: get all the lowest points of the approach curves and shift them to the same z position, herefore we shift them only upwards relative to the lowest point
             z_data = self.all_cutplane_data[self.x_channel]
@@ -5622,24 +5529,84 @@ class Scan3D(FileHandler):
             title = plotting_parameters["phase_title"]
         else:
             cmap = 'viridis'
-        fig, ax = plt.subplots()
-        img = plt.pcolormesh(cutplane_data, cmap=cmap)
-        divider = make_axes_locatable(ax)
-        cax = divider.append_axes("right", size=f"{self.colorbar_width}%", pad=0.05) # size is the size of colorbar relative to original axis, 100% means same size, 10% means 10% of original
-        cbar = plt.colorbar(img, aspect=1, cax=cax)
-        cbar.ax.get_yaxis().labelpad = 15
-        cbar.ax.set_ylabel(label, rotation=270)
-        if self.hide_ticks == True:
-            # remove ticks on x and y axis, they only show pixelnumber anyways, better to add a scalebar
-            ax.set_xticks([])
-            ax.set_yticks([])
-        # plt.colorbar(img)
+        return cutplane_data, cmap, label, title
+    
+    def display_cutplanes(self, axis:str='x', line:int=0, channels:list=None, auto_align:bool=False):
+        """This function will display the cutplanes of the specified channels.
+        You can also autoalign the data which will apply a shift to align the approach curves, more physically correct but not perfect.
+        
+        Args:
+            axis (str, optional): Axis of the cutplane. Defaults to 'x'.
+            line (int, optional): Line of the cutplane. Defaults to 0.
+            channels (list, optional): Channel to display, if you don't specify some all channels in memory will be used. Defaults to None.
+            align (bool, optional): Alignment of the approach curves.
+            If set to True the individual approach curves will be shifted such that they start at the same Z corrdinate. Defaults to False.
+        """
+        if channels == None:
+            channels = self.channels
+        number_of_channels = len(channels)
+        if number_of_channels == 1:
+            cols = 1
+        elif number_of_channels < 5:
+            cols = 2
+        else:
+            cols = 3
+        rows = number_of_channels//cols
+        if number_of_channels%cols != 0:
+            rows += 1
+        print('rows: ', rows)
+        print('cols: ', cols)
+        fig, axs = plt.subplots(rows, cols, figsize=(PlotDefinitions.figsizex, PlotDefinitions.figsizey))
+        for channel in channels:
+            # get column and row index
+            if number_of_channels < 5:
+                col = channels.index(channel)%2
+                row = channels.index(channel)//2
+            else:
+                col = channels.index(channel)%3
+                row = channels.index(channel)//3
+            if rows == 1 and cols == 1:
+                ax = axs
+            elif rows == 1:
+                ax = axs[col]
+            else:
+                ax = axs[row, col]
+            if channel not in self.channels:
+                print(f'The channel <{channel}> is not in memory!')
+                continue
+            cutplane_data, cmap, label, title = self._create_subplot(axis=axis, line=line, channel=channel, auto_align=auto_align)
+            img = ax.pcolormesh(cutplane_data, cmap=cmap)
+            divider = make_axes_locatable(ax)
+            cax = divider.append_axes("right", size=f"{self.colorbar_width}%", pad=0.05) # size is the size of colorbar relative to original axis, 100% means same size, 10% means 10% of original
+            cbar = plt.colorbar(img, aspect=1, cax=cax)
+            cbar.ax.get_yaxis().label
+            cbar.ax.set_ylabel(label)
+            ax.axis('scaled')
+            if self.hide_ticks == True:
+                # remove ticks on x and y axis, they only show pixelnumber anyways, better to add a scalebar
+                ax.set_xticks([])
+                ax.set_yticks([])
+            if self.show_titles == True:
+                ax.set_title(title)
+        #turn off all unneeded axes
+        counter = 1
+        for row in range(rows):
+            for col in range(cols):
+                if rows == 1 and cols ==1:
+                    ax = axs
+                elif rows == 1:
+                    ax = axs[col]
+                else:
+                    ax = axs[row, col]
+                if counter >= number_of_channels: 
+                    ax.axis('off')
+                counter += 1
         if self.tight_layout is True:
             plt.tight_layout()
         if PlotDefinitions.show_plot is True:
             plt.show()
         gc.collect()
-    
+
     def display_cutplane_v2_realpart(self, axis:str='x', line:int=0, demodulation:int=2, align='auto'):
         """This function will display the cutplane of the realpart data of the channels of the specified demodulation order.
         The data will be shifted to align the approach curves.
@@ -5749,7 +5716,7 @@ class Scan3D(FileHandler):
         # plt.colorbar(img)
         plt.show()
     
-    def display_cutplane_v3_realpart(self, axis:str='x', line:int=0, demodulation:int=2, align='auto'):
+    def display_cutplane_realpart(self, axis:str='x', line:int=0, demodulation:int=2, align='auto'):
         """This function will display the cutplane of the realpart data of the channels of the specified demodulation order.
         The data will be shifted to align the approach curves.
         

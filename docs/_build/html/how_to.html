@@ -45,13 +45,14 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples:</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="readme.html">Readme</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">How to</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation:</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#how-to-use">How to use:</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#simple-usage-example-using-the-snommeasurement-class">Simple usage example using the SnomMeasurement class:</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#more-advanced-usage-example-using-the-snommeasurement-class">More advanced usage example using the SnomMeasurement class:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-showing-how-to-do-a-synccorrection-of-transmission-mode-measurements">Example showing how to do a synccorrection of transmission mode measurements:</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#simple-usage-example-using-the-approachcurve-class">Simple usage example using the ApproachCurve class:</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#simple-usage-example-using-the-scan3d-class">Simple usage example using the Scan3D class:</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#simple-usage-example-using-the-scan3d-class-and-averaging-the-data">Simple usage example using the Scan3D class and averaging the data:</a></li>
@@ -99,7 +100,13 @@ We will lateron also discuss additional features ant tricks to get the most out 
 You can also clone the repository and use it as is or create your own wheel by running pyhton setup.py bdist_wheel.
 I would always recommend to use a virtual environment to install the package and use the wheel.</p>
 <p>Then try out the example script which should be somewhere in the repository. (#todo)
-Anyways, here is a short example of how to use the package:</p>
+You can also just use the script as a loader and do whatever you want in between.
+The data is just stored as a list of np.array in the instance.all_data variable, the channel names are in a correlated list instance.channels.
+Additional information is in the two dictionaries instance.measurement_tag_dict and instance.channels_tag_dict.
+These are just dictionaries containing the parameters from the parameters.txt file (measurement_tag_dict)
+and the individual headers from the .gsf files (channels_tag_dict). Note that the channels_tag_dict is also a list correlated with instance.channels.
+This gives you a lot of freedome to implement your own functionality.</p>
+<p>Anyways, here is a short example of how to use the package:</p>
 <section id="simple-usage-example-using-the-snommeasurement-class">
 <h3>Simple usage example using the SnomMeasurement class:<a class="headerlink" href="#simple-usage-example-using-the-snommeasurement-class" title="Link to this heading"></a></h3>
 <p>This is a very simple example using just some base functions without any extra parameters.</p>
@@ -111,29 +118,39 @@ Anyways, here is a short example of how to use the package:</p>
 <span class="linenos"> 6</span>
 <span class="linenos"> 7</span><span class="c1"># Now you can access the data and the functions of the measurement instance.</span>
 <span class="linenos"> 8</span><span class="c1"># For example you can plot the data by calling the plot function.</span>
-<span class="linenos"> 9</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span> <span class="c1"># if you don&#39;t specify any arguments all channels will be plotted.</span>
-<span class="linenos">10</span>
-<span class="linenos">11</span><span class="c1"># You can also apply some modifications to the data, for example you can crop the data.</span>
-<span class="linenos">12</span><span class="c1"># If you don&#39;t specify any arguments you will be asked to provide the cropping range using</span>
-<span class="linenos">13</span><span class="c1"># some default channel and the crop will be applied to all channels.</span>
-<span class="linenos">14</span><span class="n">measurement</span><span class="o">.</span><span class="n">cut_channels</span><span class="p">()</span>
-<span class="linenos">15</span>
-<span class="linenos">16</span><span class="c1"># You can also blurr the data using a gaussian filter.</span>
-<span class="linenos">17</span><span class="c1"># If you want to blurr phase data you will need to have</span>
-<span class="linenos">18</span><span class="c1"># the phase and amplitude channels of the same demodulation in memory.</span>
-<span class="linenos">19</span><span class="n">measurement</span><span class="o">.</span><span class="n">gauss_filter_channels_complex</span><span class="p">()</span>
-<span class="linenos">20</span>
-<span class="linenos">21</span><span class="c1"># Now you can plot the data again to see the modifications.</span>
-<span class="linenos">22</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
-<span class="linenos">23</span>
-<span class="linenos">24</span><span class="c1"># You can also compare the data before and after the modifications.</span>
-<span class="linenos">25</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_all_subplots</span><span class="p">()</span>
+<span class="linenos"> 9</span><span class="c1"># If you don&#39;t specify any arguments all channels will be plotted.</span>
+<span class="linenos">10</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
+<span class="linenos">11</span>
+<span class="linenos">12</span><span class="c1"># You can also apply some modifications to the data, for example you can crop the data.</span>
+<span class="linenos">13</span><span class="c1"># If you don&#39;t specify any arguments you will be asked to provide the cropping range using</span>
+<span class="linenos">14</span><span class="c1"># some default channel and the crop will be applied to all channels.</span>
+<span class="linenos">15</span><span class="n">measurement</span><span class="o">.</span><span class="n">cut_channels</span><span class="p">()</span>
+<span class="linenos">16</span>
+<span class="linenos">17</span><span class="c1"># You can also blurr the data using a gaussian filter.</span>
+<span class="linenos">18</span><span class="c1"># If you want to blurr phase data you will need to have</span>
+<span class="linenos">19</span><span class="c1"># the phase and amplitude channels of the same demodulation in memory.</span>
+<span class="linenos">20</span><span class="n">measurement</span><span class="o">.</span><span class="n">gauss_filter_channels_complex</span><span class="p">()</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span><span class="c1"># You can use a simple 3 point correction to level the height data.</span>
+<span class="linenos">23</span><span class="c1"># For better leveling you can always use some other software</span>
+<span class="linenos">24</span><span class="c1"># like Gwyddion and import already leveled data.</span>
+<span class="linenos">25</span><span class="n">measurement</span><span class="o">.</span><span class="n">level_height_channels</span><span class="p">()</span>
 <span class="linenos">26</span>
-<span class="linenos">27</span><span class="c1"># If you are happy with the modifications you can save the data.</span>
-<span class="linenos">28</span><span class="c1"># This will save the data to a new .gsf file in the measurement folder.</span>
-<span class="linenos">29</span><span class="n">measurement</span><span class="o">.</span><span class="n">save_to_gsf</span><span class="p">()</span>
-<span class="linenos">30</span><span class="c1"># Per default the &#39;_manipulated&#39; suffix will be added to the filename,</span>
-<span class="linenos">31</span><span class="c1"># to ensure you don&#39;t overwrite the original data.</span>
+<span class="linenos">27</span><span class="c1"># I always like to set the minimum of the height channel to zero.</span>
+<span class="linenos">28</span><span class="c1"># This should be applied after the leveling. Otherwise the leveling will also change the minimum.</span>
+<span class="linenos">29</span><span class="n">measurement</span><span class="o">.</span><span class="n">set_min_to_zero</span><span class="p">([</span><span class="s1">&#39;Z C&#39;</span><span class="p">])</span>
+<span class="linenos">30</span>
+<span class="linenos">31</span><span class="c1"># Now you can plot the data again to see the modifications.</span>
+<span class="linenos">32</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
+<span class="linenos">33</span>
+<span class="linenos">34</span><span class="c1"># You can also compare the data before and after the modifications.</span>
+<span class="linenos">35</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_all_subplots</span><span class="p">()</span>
+<span class="linenos">36</span>
+<span class="linenos">37</span><span class="c1"># If you are happy with the modifications you can save the data.</span>
+<span class="linenos">38</span><span class="c1"># This will save the data to a new .gsf file in the measurement folder.</span>
+<span class="linenos">39</span><span class="n">measurement</span><span class="o">.</span><span class="n">save_to_gsf</span><span class="p">()</span>
+<span class="linenos">40</span><span class="c1"># Per default the &#39;_manipulated&#39; suffix will be added to the filename,</span>
+<span class="linenos">41</span><span class="c1"># to ensure you don&#39;t overwrite the original data.</span>
 </pre></div>
 </div>
 </section>
@@ -155,28 +172,79 @@ Anyways, here is a short example of how to use the package:</p>
 <span class="linenos">13</span><span class="c1"># Create an instance of the SnomMeasurement class by providing the path to the measurement folder.</span>
 <span class="linenos">14</span><span class="n">measurement</span> <span class="o">=</span> <span class="n">SnomMeasurement</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">channels</span><span class="p">)</span>
 <span class="linenos">15</span>
-<span class="linenos">16</span><span class="c1"># I always like to set the minimum of the height channel to zero.</span>
-<span class="linenos">17</span><span class="c1"># But be aware that most functions accept a list of channels as argument, even if it is just one.</span>
-<span class="linenos">18</span><span class="n">measurement</span><span class="o">.</span><span class="n">set_min_to_zero</span><span class="p">([</span><span class="s1">&#39;Z C&#39;</span><span class="p">])</span>
-<span class="linenos">19</span>
-<span class="linenos">20</span><span class="c1"># You can also add a scalebar, which will be saved to the plot memory.</span>
-<span class="linenos">21</span><span class="n">measurement</span><span class="o">.</span><span class="n">scalebar</span><span class="p">([</span><span class="s1">&#39;Z C&#39;</span><span class="p">])</span>
-<span class="linenos">22</span>
-<span class="linenos">23</span><span class="c1"># You can shift the phase-offset of the phase channel.</span>
-<span class="linenos">24</span><span class="c1"># Some functions will take additional parameters, if given they will apply directly.</span>
-<span class="linenos">25</span><span class="c1"># If not they will promt the user with a popup window to select the parameters manually.</span>
-<span class="linenos">26</span><span class="n">measurement</span><span class="o">.</span><span class="n">shift_phase</span><span class="p">()</span>
-<span class="linenos">27</span><span class="c1"># or you can specify the shift directly.</span>
-<span class="linenos">28</span><span class="n">measurement</span><span class="o">.</span><span class="n">shift_phase</span><span class="p">(</span><span class="n">shift</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
-<span class="linenos">29</span>
-<span class="linenos">30</span><span class="c1"># You can also aplly corrections such as a linear 2 point based y-phase drift correction.</span>
-<span class="linenos">31</span><span class="n">measurement</span><span class="o">.</span><span class="n">correct_phase_drift</span><span class="p">()</span>
-<span class="linenos">32</span><span class="c1"># or a nonlinear dift correction, wich takes into account each line and also applies</span>
-<span class="linenos">33</span><span class="c1"># a linear correction in x-direction if both sides are specified</span>
-<span class="linenos">34</span><span class="n">measurement</span><span class="o">.</span><span class="n">level_data_columnwise</span><span class="p">()</span>
-<span class="linenos">35</span>
-<span class="linenos">36</span><span class="c1"># Now you can plot the data.</span>
-<span class="linenos">37</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
+<span class="linenos">16</span><span class="c1"># Plot the data without any modifications.</span>
+<span class="linenos">17</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span><span class="c1"># You can also add a scalebar, which will be saved to the plot memory.</span>
+<span class="linenos">20</span><span class="n">measurement</span><span class="o">.</span><span class="n">scalebar</span><span class="p">([</span><span class="s1">&#39;Z C&#39;</span><span class="p">])</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span><span class="c1"># for phase data the level_data_columnwise function is not yet working properly,</span>
+<span class="linenos">23</span><span class="c1"># if the phase data is not in the range of 0 to 2pi (drifts more than 2pi)</span>
+<span class="linenos">24</span><span class="c1"># but we can correct a linear drift in the phase data before.</span>
+<span class="linenos">25</span><span class="n">measurement</span><span class="o">.</span><span class="n">correct_phase_drift_nonlinear</span><span class="p">()</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span><span class="c1"># You can also aplly corrections such as a linear 2 point based y-phase drift correction.</span>
+<span class="linenos">28</span><span class="c1"># measurement.correct_phase_drift()</span>
+<span class="linenos">29</span><span class="c1"># or a nonlinear dift correction, wich takes into account each line and also applies</span>
+<span class="linenos">30</span><span class="c1"># a linear correction in x-direction if both sides are specified</span>
+<span class="linenos">31</span><span class="n">measurement</span><span class="o">.</span><span class="n">level_data_columnwise</span><span class="p">()</span>
+<span class="linenos">32</span>
+<span class="linenos">33</span><span class="c1"># I always like to set the minimum of the height channel to zero.</span>
+<span class="linenos">34</span><span class="c1"># This should be applied after the drift correction.</span>
+<span class="linenos">35</span><span class="c1"># Otherwise the drift correction will also change the minimum.</span>
+<span class="linenos">36</span><span class="n">measurement</span><span class="o">.</span><span class="n">set_min_to_zero</span><span class="p">([</span><span class="s1">&#39;Z C&#39;</span><span class="p">])</span>
+<span class="linenos">37</span>
+<span class="linenos">38</span><span class="c1"># You can shift the phase-offset of the phase channel.</span>
+<span class="linenos">39</span><span class="c1"># Some functions will take additional parameters, if given they will apply directly.</span>
+<span class="linenos">40</span><span class="c1"># If not they will promt the user with a popup window to select the parameters manually.</span>
+<span class="linenos">41</span><span class="n">measurement</span><span class="o">.</span><span class="n">shift_phase</span><span class="p">()</span>
+<span class="linenos">42</span><span class="c1"># or you can specify the shift directly.</span>
+<span class="linenos">43</span><span class="c1"># measurement.shift_phase(shift=0.3)</span>
+<span class="linenos">44</span>
+<span class="linenos">45</span><span class="c1"># Now you can plot the data.</span>
+<span class="linenos">46</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
+<span class="linenos">47</span>
+<span class="linenos">48</span><span class="c1"># You can also compare the data before and after the modifications.</span>
+<span class="linenos">49</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_all_subplots</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="example-showing-how-to-do-a-synccorrection-of-transmission-mode-measurements">
+<h3>Example showing how to do a synccorrection of transmission mode measurements:<a class="headerlink" href="#example-showing-how-to-do-a-synccorrection-of-transmission-mode-measurements" title="Link to this heading"></a></h3>
+<p>This is an example using the tkinter filedialog and some more advanced fuctions.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># Import filedialog to open a file dialog to select the measurement folder.</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">tkinter</span><span class="w"> </span><span class="kn">import</span> <span class="n">filedialog</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="c1"># Load the main functionality from the package, in this case the SnomMeasurement class.</span>
+<span class="linenos"> 5</span><span class="kn">from</span><span class="w"> </span><span class="nn">snom_analysis.main</span><span class="w"> </span><span class="kn">import</span> <span class="n">SnomMeasurement</span><span class="p">,</span> <span class="n">PlotDefinitions</span>
+<span class="linenos"> 6</span><span class="n">PlotDefinitions</span><span class="o">.</span><span class="n">colorbar_width</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1"># colorbar width for long thin measurements looks too big</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="c1"># Open a file dialog to select the measurement folder.</span>
+<span class="linenos"> 9</span><span class="n">directory</span> <span class="o">=</span> <span class="n">filedialog</span><span class="o">.</span><span class="n">askdirectory</span><span class="p">()</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="c1"># It is always a good idea to select the channels you want to use before loading the data.</span>
+<span class="linenos">12</span><span class="n">channels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;O2P&#39;</span><span class="p">,</span> <span class="s1">&#39;O2A&#39;</span><span class="p">,</span> <span class="s1">&#39;Z C&#39;</span><span class="p">]</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span><span class="c1"># Create an instance of the SnomMeasurement class by providing the path to the measurement folder.</span>
+<span class="linenos">15</span><span class="c1"># If we want to apply the synccorrection we need to set autoscale to False.</span>
+<span class="linenos">16</span><span class="n">measurement</span> <span class="o">=</span> <span class="n">SnomMeasurement</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">channels</span><span class="p">,</span> <span class="n">autoscale</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span><span class="c1"># Plot the data without any modifications.</span>
+<span class="linenos">19</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span><span class="c1"># Apply the synccorrection to the data. But we don&#39;t know the direction yet.</span>
+<span class="linenos">22</span><span class="c1"># The interferometer sometimes goes in the wron direction.</span>
+<span class="linenos">23</span><span class="c1"># This will create corrected channels and save them as .gsf with the appendix &#39;_corrected&#39;.</span>
+<span class="linenos">24</span><span class="n">measurement</span><span class="o">.</span><span class="n">synccorrection</span><span class="p">(</span><span class="mf">1.6</span><span class="p">)</span>
+<span class="linenos">25</span>
+<span class="linenos">26</span><span class="c1"># We want to display the corrected channels, so we reinitialize the channels with the corrected channels.</span>
+<span class="linenos">27</span><span class="n">measurement</span><span class="o">.</span><span class="n">initialize_channels</span><span class="p">([</span><span class="s1">&#39;O2P_corrected&#39;</span><span class="p">,</span> <span class="s1">&#39;O2A&#39;</span><span class="p">,</span> <span class="s1">&#39;Z C&#39;</span><span class="p">])</span>
+<span class="linenos">28</span>
+<span class="linenos">29</span><span class="c1"># Plot the corrected data.</span>
+<span class="linenos">30</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
+<span class="linenos">31</span>
+<span class="linenos">32</span><span class="c1"># You can also compare the data before and after the modifications.</span>
+<span class="linenos">33</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_all_subplots</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
@@ -190,7 +258,7 @@ Anyways, here is a short example of how to use the package:</p>
 <span class="linenos"> 5</span><span class="kn">from</span><span class="w"> </span><span class="nn">snom_analysis.main</span><span class="w"> </span><span class="kn">import</span> <span class="n">ApproachCurve</span>
 <span class="linenos"> 6</span>
 <span class="linenos"> 7</span><span class="c1"># Open a file dialog to select the measurement folder.</span>
-<span class="linenos"> 8</span><span class="n">directory</span> <span class="o">=</span> <span class="n">filedialog</span><span class="o">.</span><span class="n">askdirectory</span><span class="p">()</span>
+<span class="linenos"> 8</span><span class="n">directory_name</span> <span class="o">=</span> <span class="n">filedialog</span><span class="o">.</span><span class="n">askdirectory</span><span class="p">()</span>
 <span class="linenos"> 9</span>
 <span class="linenos">10</span><span class="c1"># It is always a good idea to select the channels you want to use before loading the data.</span>
 <span class="linenos">11</span><span class="n">channels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;M1A&#39;</span><span class="p">,</span> <span class="s1">&#39;O2P&#39;</span><span class="p">,</span> <span class="s1">&#39;O2A&#39;</span><span class="p">]</span>

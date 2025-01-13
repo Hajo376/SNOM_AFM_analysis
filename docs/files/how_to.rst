@@ -6,6 +6,13 @@ You can also clone the repository and use it as is or create your own wheel by r
 I would always recommend to use a virtual environment to install the package and use the wheel.
 
 Then try out the example script which should be somewhere in the repository. (#todo)
+You can also just use the script as a loader and do whatever you want in between.
+The data is just stored as a list of np.array in the instance.all_data variable, the channel names are in a correlated list instance.channels.
+Additional information is in the two dictionaries instance.measurement_tag_dict and instance.channels_tag_dict.
+These are just dictionaries containing the parameters from the parameters.txt file (measurement_tag_dict)
+and the individual headers from the .gsf files (channels_tag_dict). Note that the channels_tag_dict is also a list correlated with instance.channels.
+This gives you a lot of freedome to implement your own functionality.
+
 Anyways, here is a short example of how to use the package:
 
 Simple usage example using the SnomMeasurement class:
@@ -19,6 +26,12 @@ More advanced usage example using the SnomMeasurement class:
 This is an example using the tkinter filedialog and some more advanced fuctions.
 
 .. include:: ../docs/files/code_example_snommeasurement_2.rst
+
+Example showing how to do a synccorrection of transmission mode measurements:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This is an example using the tkinter filedialog and some more advanced fuctions.
+
+.. include:: ../docs/files/code_example_snommeasurement_3.rst
 
 Simple usage example using the ApproachCurve class:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
