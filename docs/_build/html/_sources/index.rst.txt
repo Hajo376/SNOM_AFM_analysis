@@ -13,6 +13,7 @@ This is a work in progress documentation for the SNOM Analysis package.
    :maxdepth: 2
    :caption: Contents:
 
+   examples
    readme
    how_to
    snom_analysis
