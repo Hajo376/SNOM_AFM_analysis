@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>&lt;no title&gt; &mdash; SNOM Analysis 1.0.0 documentation</title>
+  <title>How to use: &mdash; SNOM Analysis 1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
@@ -64,9 +64,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">&lt;no title&gt;</li>
+      <li class="breadcrumb-item active">How to use:</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/files/code_example_approachcurve_1.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/files/getting_started.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -74,31 +74,44 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># Import filedialog to open a file dialog to select the measurement folder.</span>
-<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">tkinter</span><span class="w"> </span><span class="kn">import</span> <span class="n">filedialog</span>
-<span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="c1"># Load the main functionality from the package, in this case the SnomMeasurement class.</span>
-<span class="linenos"> 5</span><span class="kn">from</span><span class="w"> </span><span class="nn">snom_analysis.main</span><span class="w"> </span><span class="kn">import</span> <span class="n">ApproachCurve</span>
-<span class="linenos"> 6</span>
-<span class="linenos"> 7</span><span class="c1"># Open a file dialog to select the measurement folder.</span>
-<span class="linenos"> 8</span><span class="n">directory_name</span> <span class="o">=</span> <span class="n">filedialog</span><span class="o">.</span><span class="n">askdirectory</span><span class="p">()</span>
-<span class="linenos"> 9</span>
-<span class="linenos">10</span><span class="c1"># It is always a good idea to select the channels you want to use before loading the data.</span>
-<span class="linenos">11</span><span class="n">channels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;M1A&#39;</span><span class="p">,</span> <span class="s1">&#39;O2P&#39;</span><span class="p">,</span> <span class="s1">&#39;O2A&#39;</span><span class="p">]</span>
-<span class="linenos">12</span>
-<span class="linenos">13</span><span class="c1"># Create an instance of the ApproachCurve class by providing the path to the measurement folder.</span>
-<span class="linenos">14</span><span class="n">measurement</span> <span class="o">=</span> <span class="n">ApproachCurve</span><span class="p">(</span><span class="n">directory_name</span><span class="p">,</span> <span class="n">channels</span><span class="p">)</span>
-<span class="linenos">15</span>
-<span class="linenos">16</span><span class="c1"># Set the minimum value of the data to zero.</span>
-<span class="linenos">17</span><span class="n">measurement</span><span class="o">.</span><span class="n">set_min_to_zero</span><span class="p">()</span>
-<span class="linenos">18</span>
-<span class="linenos">19</span><span class="c1"># Display the channels in a plot. And scale each data set to the whole image size.</span>
-<span class="linenos">20</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels_v2</span><span class="p">()</span>
-<span class="linenos">21</span>
-<span class="linenos">22</span><span class="c1"># Alternatively you can use the display_channels() function, which will display the channels in a plot without rescaling.</span>
-<span class="linenos">23</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
-</pre></div>
-</div>
+  <section id="how-to-use">
+<h1>How to use:<a class="headerlink" href="#how-to-use" title="Link to this heading"></a></h1>
+<p>First of all install the package either from PyPi or by using a wheel from the dist folder.
+You can also clone the repository and use it as is or create your own wheel by running pyhton setup.py bdist_wheel.
+I would always recommend to use a virtual environment to install the package and use the wheel.</p>
+<p>Then try out the example script which should be somewhere in the repository. (#todo)
+You can also just use the script as a loader and do whatever you want in between.
+The data is just stored as a list of np.array in the instance.all_data variable, the channel names are in a correlated list instance.channels.
+Additional information is in the two dictionaries instance.measurement_tag_dict and instance.channels_tag_dict.
+These are just dictionaries containing the parameters from the parameters.txt file (measurement_tag_dict)
+and the individual headers from the .gsf files (channels_tag_dict). Note that the channels_tag_dict is also a list correlated with instance.channels.
+This gives you a lot of freedome to implement your own functionality.</p>
+<p>Anyways, here is a short example of how to use the package:</p>
+<section id="simple-usage-example-using-the-snommeasurement-class">
+<h2>Simple usage example using the SnomMeasurement class:<a class="headerlink" href="#simple-usage-example-using-the-snommeasurement-class" title="Link to this heading"></a></h2>
+<p>This is a very simple example using just some base functions without any extra parameters.</p>
+</section>
+<section id="more-advanced-usage-example-using-the-snommeasurement-class">
+<h2>More advanced usage example using the SnomMeasurement class:<a class="headerlink" href="#more-advanced-usage-example-using-the-snommeasurement-class" title="Link to this heading"></a></h2>
+<p>This is an example using the tkinter filedialog and some more advanced fuctions.</p>
+</section>
+<section id="example-showing-how-to-do-a-synccorrection-of-transmission-mode-measurements">
+<h2>Example showing how to do a synccorrection of transmission mode measurements:<a class="headerlink" href="#example-showing-how-to-do-a-synccorrection-of-transmission-mode-measurements" title="Link to this heading"></a></h2>
+<p>This is an example using the tkinter filedialog and some more advanced fuctions.</p>
+</section>
+<section id="simple-usage-example-using-the-approachcurve-class">
+<h2>Simple usage example using the ApproachCurve class:<a class="headerlink" href="#simple-usage-example-using-the-approachcurve-class" title="Link to this heading"></a></h2>
+<p>This is a very simple example using just some base functions without any extra parameters.</p>
+</section>
+<section id="simple-usage-example-using-the-scan3d-class">
+<h2>Simple usage example using the Scan3D class:<a class="headerlink" href="#simple-usage-example-using-the-scan3d-class" title="Link to this heading"></a></h2>
+<p>This is a very simple example using just some base functions to display x-z-cutplanes from the 3D scans.</p>
+</section>
+<section id="simple-usage-example-using-the-scan3d-class-and-averaging-the-data">
+<h2>Simple usage example using the Scan3D class and averaging the data:<a class="headerlink" href="#simple-usage-example-using-the-scan3d-class-and-averaging-the-data" title="Link to this heading"></a></h2>
+<p>This is an example using just some base functions and using the multiple y lines to average each x-z-cutplane.</p>
+</section>
+</section>
 
 
            </div>

@@ -1,7 +1,7 @@
-snom_analysis
+API Reference
 =============
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
 
    snom_analysis

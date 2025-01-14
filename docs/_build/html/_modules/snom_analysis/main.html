@@ -9,6 +9,7 @@
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=7dc6ce7e" />
 
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
@@ -42,10 +43,10 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../readme.html">Readme</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../how_to.html">How to</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../snom_analysis.html">snom_analysis package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snom_analysis.html">API Reference</a></li>
 </ul>
 
         </div>
@@ -3047,12 +3048,12 @@
 <span class="sd">        For this function to also work with scaled data the height channel has to be specified and scaled as well!</span>
 <span class="sd">                </span>
 <span class="sd">        Args:</span>
-<span class="sd">            channels [list]: list of channels, will override the already existing channels</span>
-<span class="sd">            mask_channel [str]: the channel to use for the height mask, if not specified the height channel will be used</span>
-<span class="sd">            threshold [float]: threshold value to create the height mask from</span>
-<span class="sd">            mask_data [bool]: if you want to apply the mask directly with the specified threshold change to &#39;True&#39;,</span>
+<span class="sd">            channels (list): list of channels, will override the already existing channels</span>
+<span class="sd">            mask_channel (str): the channel to use for the height mask, if not specified the height channel will be used</span>
+<span class="sd">            threshold (float): threshold value to create the height mask from</span>
+<span class="sd">            mask_data (bool): if you want to apply the mask directly with the specified threshold change to &#39;True&#39;,</span>
 <span class="sd">                            otherwise you will be prompted with a preview and can then change the threshold iteratively</span>
-<span class="sd">            export [bool]: if you want to apply the mask to all channels and export them change to &#39;True&#39;</span>
+<span class="sd">            export (bool): if you want to apply the mask to all channels and export them change to &#39;True&#39;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">export</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_channels_default</span>
@@ -3950,7 +3951,7 @@
 <span class="sd">        Careful! Will not yet affect the scan size, so the pixelsize will be altered... ToDo</span>
 <span class="sd">        </span>
 <span class="sd">        Args:  </span>
-<span class="sd">            channels [list]: list of channels, will override the already existing channels</span>
+<span class="sd">            channels (list): list of channels, will override the already existing channels</span>
 <span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_data</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span>
@@ -4765,8 +4766,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            height_channel_forward (str): Usual corrected height channel</span>
 <span class="sd">            height_channel_backward (str): Backwards height channel</span>
-<span class="sd">            channels (list, optional): List of all channels to be overlain. Only specify the forward direction. Defaults to None.</span>
-<span class="sd">            If not specified only the amp channels and the height channel will be overlaid.</span>
+<span class="sd">            channels (list, optional): List of all channels to be overlain. Only specify the forward direction. Defaults to None. If not specified only the amp channels and the height channel will be overlain.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">channels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">channels</span> <span class="o">=</span> <span class="p">[</span><span class="n">channel</span> <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">amp_channels</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">backwards_indicator</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">channel</span><span class="p">]</span>

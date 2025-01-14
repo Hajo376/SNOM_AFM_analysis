@@ -2902,12 +2902,12 @@ class SnomMeasurement(FileHandler):
         For this function to also work with scaled data the height channel has to be specified and scaled as well!
                 
         Args:
-            channels [list]: list of channels, will override the already existing channels
-            mask_channel [str]: the channel to use for the height mask, if not specified the height channel will be used
-            threshold [float]: threshold value to create the height mask from
-            mask_data [bool]: if you want to apply the mask directly with the specified threshold change to 'True',
+            channels (list): list of channels, will override the already existing channels
+            mask_channel (str): the channel to use for the height mask, if not specified the height channel will be used
+            threshold (float): threshold value to create the height mask from
+            mask_data (bool): if you want to apply the mask directly with the specified threshold change to 'True',
                             otherwise you will be prompted with a preview and can then change the threshold iteratively
-            export [bool]: if you want to apply the mask to all channels and export them change to 'True'
+            export (bool): if you want to apply the mask to all channels and export them change to 'True'
         """
         if export == True:
             channels = self.all_channels_default
@@ -3772,7 +3772,7 @@ class SnomMeasurement(FileHandler):
         Careful! Will not yet affect the scan size, so the pixelsize will be altered... ToDo
         
         Args:  
-            channels [list]: list of channels, will override the already existing channels
+            channels (list): list of channels, will override the already existing channels
         
         """
         self._initialize_data(channels)
@@ -4551,8 +4551,7 @@ class SnomMeasurement(FileHandler):
         Args:
             height_channel_forward (str): Usual corrected height channel
             height_channel_backward (str): Backwards height channel
-            channels (list, optional): List of all channels to be overlain. Only specify the forward direction. Defaults to None.
-            If not specified only the amp channels and the height channel will be overlaid.
+            channels (list, optional): List of all channels to be overlain. Only specify the forward direction. Defaults to None. If not specified only the amp channels and the height channel will be overlain.
         """
         if channels is None:
             channels = [channel for channel in self.amp_channels if self.backwards_indicator not in channel]

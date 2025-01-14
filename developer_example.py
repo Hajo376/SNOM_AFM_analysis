@@ -560,7 +560,8 @@ data_path_1 = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
 data_path_2 = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
 
 # transmission measurement with lower parabolo in syncronized mode:
-data_path_3 = 'tests/testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
+# alternative : data_path_3 = 'tests/testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
+data_path_3 = 'tests/testdata/2024-03-28 164507 PH just_incoupler_square'
 
 # approach curve:
 data_path_4 = 'tests/testdata/2024-04-03 133202 PH AC topol_20mufromcoupler_right_interf_peak'
@@ -670,14 +671,14 @@ def example_snommeasurement_3():
     """
     # Load the main functionality from the package, in this case the SnomMeasurement class.
     from snom_analysis.main import SnomMeasurement, PlotDefinitions
-    PlotDefinitions.colorbar_width = 2 # colorbar width for long thin measurements looks too big
+    PlotDefinitions.colorbar_width = 4 # colorbar width for long thin measurements looks too big
 
     # Open a file dialog to select the measurement folder.
     # directory = filedialog.askdirectory() # for documentation purposes
     directory = data_path_3
 
     # It is always a good idea to select the channels you want to use before loading the data.
-    channels = ['O2P']
+    channels = ['O3P']
 
     # Create an instance of the SnomMeasurement class by providing the path to the measurement folder.
     # If we want to apply the synccorrection we need to set autoscale to False.
@@ -688,16 +689,22 @@ def example_snommeasurement_3():
 
     # Apply the synccorrection to the data. But we don't know the direction yet. The interferometer sometimes goes in the wron direction.
     # This will create corrected channels and save them as .gsf with the appendix '_corrected'.
-    measurement.synccorrection(1.6)
+    # measurement.synccorrection(1.6) # for chiral coupler
+    measurement.synccorrection(0.97)
 
     # We want to display the corrected channels, so we reinitialize the channels with the corrected channels.
-    measurement.initialize_channels(['O2P_corrected'])
+    measurement.autoscale = True
+    measurement.initialize_channels(['Z C', 'O3A', 'O3P', 'O3P_corrected'])
+    
+    # adjust the height channel somewhat
+    measurement.level_data_columnwise(['Z C'], 'Z C')
+    measurement.set_min_to_zero(['Z C'])
 
     # Plot the corrected data.
     measurement.display_channels()
 
     # You can also compare the data before and after the modifications.
-    measurement.display_all_subplots()
+    # measurement.display_all_subplots()
 
 def example_approachcurve_1():
     # Import filedialog to open a file dialog to select the measurement folder.

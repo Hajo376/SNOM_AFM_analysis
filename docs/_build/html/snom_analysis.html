@@ -6,10 +6,11 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>snom_analysis package &mdash; SNOM Analysis 1.0.0 documentation</title>
+  <title>API Reference &mdash; SNOM Analysis 1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=7dc6ce7e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
@@ -21,7 +22,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="snom_analysis.lib package" href="snom_analysis.lib.html" />
-    <link rel="prev" title="How to" href="how_to.html" /> 
+    <link rel="prev" title="Getting Started" href="getting_started.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -45,10 +46,10 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="readme.html">Readme</a></li>
-<li class="toctree-l1"><a class="reference internal" href="how_to.html">How to</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">snom_analysis package</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-snom_analysis.chiralcouplers">snom_analysis.chiralcouplers module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#snom_analysis.chiralcouplers.ChiralCouplers"><code class="docutils literal notranslate"><span class="pre">ChiralCouplers</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#snom_analysis.chiralcouplers.ChiralCouplers.Find_Waveguides"><code class="docutils literal notranslate"><span class="pre">ChiralCouplers.Find_Waveguides()</span></code></a></li>
@@ -271,7 +272,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">snom_analysis package</li>
+      <li class="breadcrumb-item active">API Reference</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/snom_analysis.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -281,8 +282,11 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="snom-analysis-package">
-<h1>snom_analysis package<a class="headerlink" href="#snom-analysis-package" title="Link to this heading"></a></h1>
+  <section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading"></a></h1>
+<p>This is the API reference for the SNOM Analysis package. Here you can find detailed descriptions of all the functions and classes in the package.
+There are how ever much more functions hidden inide the package which are not documented here. These are internal functions and should only be used by experienced users.
+But they can help to built more functionality on top of the package. So feel free to check out the source code.</p>
 <section id="module-snom_analysis.chiralcouplers">
 <span id="snom-analysis-chiralcouplers-module"></span><h2>snom_analysis.chiralcouplers module<a class="headerlink" href="#module-snom_analysis.chiralcouplers" title="Link to this heading"></a></h2>
 <p>This module is ment for the analysis of the chiral couplers measurements. The functionality is based on the main module.</p>
@@ -1264,12 +1268,12 @@ For this function to also work with scaled data the height channel has to be spe
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>[</strong><strong>list</strong><strong>]</strong> (<em>channels</em>) – list of channels, will override the already existing channels</p></li>
-<li><p><strong>[</strong><strong>str</strong><strong>]</strong> (<em>mask_channel</em>) – the channel to use for the height mask, if not specified the height channel will be used</p></li>
-<li><p><strong>[</strong><strong>float</strong><strong>]</strong> (<em>threshold</em>) – threshold value to create the height mask from</p></li>
-<li><p><strong>[</strong><strong>bool</strong><strong>]</strong> (<em>export</em>) – if you want to apply the mask directly with the specified threshold change to ‘True’,
+<li><p><strong>channels</strong> (<em>list</em>) – list of channels, will override the already existing channels</p></li>
+<li><p><strong>mask_channel</strong> (<em>str</em>) – the channel to use for the height mask, if not specified the height channel will be used</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>) – threshold value to create the height mask from</p></li>
+<li><p><strong>mask_data</strong> (<em>bool</em>) – if you want to apply the mask directly with the specified threshold change to ‘True’,
 otherwise you will be prompted with a preview and can then change the threshold iteratively</p></li>
-<li><p><strong>[</strong><strong>bool</strong><strong>]</strong> – if you want to apply the mask to all channels and export them change to ‘True’</p></li>
+<li><p><strong>export</strong> (<em>bool</em>) – if you want to apply the mask to all channels and export them change to ‘True’</p></li>
 </ul>
 </dd>
 </dl>
@@ -1469,7 +1473,7 @@ This function is quite special to my needs and will probably not make it into th
 <p>Careful! Will not yet affect the scan size, so the pixelsize will be altered… ToDo</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>[</strong><strong>list</strong><strong>]</strong> (<em>channels</em>) – list of channels, will override the already existing channels</p>
+<dd class="field-odd"><p><strong>channels</strong> (<em>list</em>) – list of channels, will override the already existing channels</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1659,8 +1663,7 @@ which can then be displayed and saved.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>height_channel_forward</strong> (<em>str</em>) – Usual corrected height channel</p></li>
 <li><p><strong>height_channel_backward</strong> (<em>str</em>) – Backwards height channel</p></li>
-<li><p><strong>channels</strong> (<em>list</em><em>, </em><em>optional</em>) – List of all channels to be overlain. Only specify the forward direction. Defaults to None.</p></li>
-<li><p><strong>overlaid.</strong> (<em>If not specified only the amp channels and the height channel will be</em>)</p></li>
+<li><p><strong>channels</strong> (<em>list</em><em>, </em><em>optional</em>) – List of all channels to be overlain. Only specify the forward direction. Defaults to None. If not specified only the amp channels and the height channel will be overlain.</p></li>
 </ul>
 </dd>
 </dl>
@@ -2209,7 +2212,7 @@ If not specified all channels in memory will be used. Defaults to None.</p></li>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="how_to.html" class="btn btn-neutral float-left" title="How to" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="getting_started.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="snom_analysis.lib.html" class="btn btn-neutral float-right" title="snom_analysis.lib package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
