@@ -24,3 +24,16 @@ snom_analysis/lib/realign.py
 snom_analysis/lib/rectangle_selector.py
 snom_analysis/lib/snom_colormaps.py
 snom_analysis/lib/test_profile_selector.py
+snom_analysis/lib/__init__.py
+snom_analysis/lib/data_range_selector.py
+snom_analysis/lib/edge_detection.py
+snom_analysis/lib/file_handling.py
+snom_analysis/lib/get_directionality.py
+snom_analysis/lib/phase_analysis.py
+snom_analysis/lib/phase_slider.py
+snom_analysis/lib/profile.py
+snom_analysis/lib/profile_selector.py
+snom_analysis/lib/realign.py
+snom_analysis/lib/rectangle_selector.py
+snom_analysis/lib/snom_colormaps.py
+snom_analysis/lib/test_profile_selector.py

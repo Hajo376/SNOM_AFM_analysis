@@ -3716,15 +3716,15 @@ class SnomMeasurement(FileHandler):
         # could also be implemented to shift each channel individually...
         
         for channel in channels:
-            print(channel)
+            # print(channel)
             if self.phase_indicator in channel:
-                print('Before phase shift: ', channel)
-                print('Min phase value:', np.min(self.all_data[self.channels.index(channel)]))
-                print('Max phase value:', np.max(self.all_data[self.channels.index(channel)]))
+                # print('Before phase shift: ', channel)
+                # print('Min phase value:', np.min(self.all_data[self.channels.index(channel)]))
+                # print('Max phase value:', np.max(self.all_data[self.channels.index(channel)]))
                 self.all_data[self.channels.index(channel)] = self._shift_phase_data(self.all_data[self.channels.index(channel)], shift)
-                print('After phase shift: ', channel)
-                print('Min phase value:', np.min(self.all_data[self.channels.index(channel)]))
-                print('Max phase value:', np.max(self.all_data[self.channels.index(channel)]))
+                # print('After phase shift: ', channel)
+                # print('Min phase value:', np.min(self.all_data[self.channels.index(channel)]))
+                # print('Max phase value:', np.max(self.all_data[self.channels.index(channel)]))
         gc.collect()
 
     def _fit_horizontal_wg(self, data):
@@ -4540,7 +4540,7 @@ class SnomMeasurement(FileHandler):
 
         gc.collect()
 
-    def overlay_forward_and_backward_channels_V2(self, height_channel_forward:str, height_channel_backward:str, channels:list=None):
+    def overlay_forward_and_backward_channels_v2(self, height_channel_forward:str, height_channel_backward:str, channels:list=None):
         """
         Caution! This variant is ment to keep the scan size identical!
 
@@ -4558,10 +4558,11 @@ class SnomMeasurement(FileHandler):
             channels.append(self.height_channel)
         all_channels = []
         for channel in channels:
-            all_channels.extend([channel, self.backwards_indicator + channel])
+            if self.backwards_indicator not in channel:
+                all_channels.extend([channel, self.backwards_indicator + channel]) # this is not optimal, what if the indicator does not come first?
         if height_channel_forward not in channels:
             all_channels.extend([height_channel_forward, height_channel_backward])
-        self._initialize_data(all_channels)
+        self.initialize_channels(all_channels)
         self.set_min_to_zero([height_channel_forward, height_channel_backward])
         
         #scale channels for more precise overlap
@@ -4626,9 +4627,13 @@ class SnomMeasurement(FileHandler):
         if self.amp_indicator not in amp_channel or self.phase_indicator not in phase_channel:
             print('The specified channels are not specified as needed!')
             exit()
-        demodulation = self._get_demodulation_num(amp_channel)
-        if demodulation not in phase_channel:
+        demodulation_amp = self._get_demodulation_num(amp_channel)
+        demodulation_phase = self._get_demodulation_num(phase_channel)
+        if demodulation_amp != demodulation_phase:
             print('The channels you specified are not from the same demodulation order!\nProceeding anyways...')
+            savefile_demod = str(demodulation_amp + ':' + demodulation_phase)
+        else:
+            savefile_demod = str(demodulation_amp)
         # check if channels are in memory, if not load the data
         if amp_channel not in self.channels:
             amp_data, amp_dict = self._load_data(amp_channel)
@@ -4655,8 +4660,8 @@ class SnomMeasurement(FileHandler):
                 real_data[y][x] = amp_data[y][x]*np.cos(phase_data[y][x])
                 imag_data[y][x] = amp_data[y][x]*np.sin(phase_data[y][x])
         # create realpart and imaginary part channel and dict and add to memory
-        real_channel = f'O{demodulation}' + self.real_indicator
-        imag_channel = f'O{demodulation}' + self.imag_indicator
+        real_channel = f'O{savefile_demod}' + self.real_indicator
+        imag_channel = f'O{savefile_demod}' + self.imag_indicator
         real_channel_dict = amp_dict
         imag_channel_dict = amp_dict
 
@@ -4699,11 +4704,13 @@ class SnomMeasurement(FileHandler):
         if self.amp_indicator not in amp_channel or self.phase_indicator not in phase_channel:
             print('The specified channels are not specified as needed!')
             exit()
-        # demodulation = amp_channel[1:2]
-        demodulation = self._get_demodulation_num(amp_channel)
-        print('demodulation: ', demodulation)
-        if demodulation not in phase_channel:
+        demodulation_amp = self._get_demodulation_num(amp_channel)
+        demodulation_phase = self._get_demodulation_num(phase_channel)
+        if demodulation_amp != demodulation_phase:
             print('The channels you specified are not from the same demodulation order!\nProceeding anyways...')
+            savefile_demod = str(demodulation_amp + ':' + demodulation_phase)
+        else:
+            savefile_demod = str(demodulation_amp)
         # check if channels are in memory, if not load the data
         if amp_channel not in self.channels or phase_channel not in self.channels:
             print('The channels for amplitude or phase were not found in the memory, they will be loaded automatically.\nBe aware that all prior modifications will get deleted.')
@@ -4739,7 +4746,7 @@ class SnomMeasurement(FileHandler):
             #img=img.crop([int(YRes*np.sin(absangle)),int(XRes*np.sin(absangle)),int(XRes-YRes*np.sin(absangle)),int(YRes-XRes*np.sin(absangle))])
             #img.putdata(colorpixels,256,0)
             frames.append(img)
-        channel = 'O' + demodulation + 'R'
+        channel = 'O' + savefile_demod + 'R'
         # self.filename is actually a windows path element not a str filename, to get the string use: self.filename.name
         # print('savefile path: ', self.directory_name / Path(self.filename.name + f'{channel}_gif.gif'))
         frames[0].save(self.directory_name / Path(self.filename.name + f'{channel}_gif_old.gif'), format='GIF', append_images=frames[1:], save_all=True,duration=Duration, loop=0)
@@ -4778,11 +4785,13 @@ class SnomMeasurement(FileHandler):
         if self.amp_indicator not in amp_channel or self.phase_indicator not in phase_channel:
             print('The specified channels are not specified as needed!')
             exit()
-        # demodulation = amp_channel[1:2]
-        demodulation = self._get_demodulation_num(amp_channel)
-        print('demodulation: ', demodulation)
-        if demodulation not in phase_channel:
+        demodulation_amp = self._get_demodulation_num(amp_channel)
+        demodulation_phase = self._get_demodulation_num(phase_channel)
+        if demodulation_amp != demodulation_phase:
             print('The channels you specified are not from the same demodulation order!\nProceeding anyways...')
+            savefile_demod = str(demodulation_amp + ':' + demodulation_phase)
+        else:
+            savefile_demod = str(demodulation_amp)
         # check if channels are in memory, if not load the data
         if amp_channel not in self.channels or phase_channel not in self.channels:
             print('The channels for amplitude or phase were not found in the memory, they will be loaded automatically.\nBe aware that all prior modifications will get deleted.')
@@ -4812,7 +4821,7 @@ class SnomMeasurement(FileHandler):
             data = np.array(repixels).reshape(YRes, XRes)
             img = Image.fromarray(SNOM_realpart(data, bytes=True))
             frames.append(img)
-        channel = 'O' + demodulation + 'R'
+        channel = 'O' + savefile_demod + 'R'
         # self.filename is actually a windows path element not a str filename, to get the string use: self.filename.name
         # print('savefile path: ', self.directory_name / Path(self.filename.name + f'{channel}_gif.gif'))
         gif_path = self.directory_name / Path(self.filename.name + f'{channel}_gif.gif')
@@ -4862,11 +4871,13 @@ class SnomMeasurement(FileHandler):
         if self.amp_indicator not in amp_channel or self.phase_indicator not in phase_channel:
             print('The specified channels are not specified as needed!')
             exit()
-        # demodulation = amp_channel[1:2]
-        demodulation = self._get_demodulation_num(amp_channel)
-        # print('demodulation: ', demodulation)
-        if demodulation not in phase_channel:
+        demodulation_amp = self._get_demodulation_num(amp_channel)
+        demodulation_phase = self._get_demodulation_num(phase_channel)
+        if demodulation_amp != demodulation_phase:
             print('The channels you specified are not from the same demodulation order!\nProceeding anyways...')
+            savefile_demod = str(demodulation_amp + ':' + demodulation_phase)
+        else:
+            savefile_demod = str(demodulation_amp)
         # check if channels are in memory, if not load the data
         if amp_channel not in self.channels or phase_channel not in self.channels:
             print('The channels for amplitude or phase were not found in the memory, they will be loaded automatically.\nBe aware that all prior modifications will get deleted.')
@@ -4939,7 +4950,7 @@ class SnomMeasurement(FileHandler):
             frames.append(image)
 
 
-        channel = 'O' + demodulation + 'R'
+        channel = 'O' + savefile_demod + 'R'
         # Save the frames as a gif
         imageio.mimsave(self.directory_name / Path(self.filename.name + f'{channel}_gif_v2.gif'), frames, fps=fps)
         # alternative:
