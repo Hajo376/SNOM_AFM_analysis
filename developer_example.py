@@ -69,7 +69,7 @@ Hajo Schill
 '''
 
 
-def realign():
+def test_realign():
     directory_name = 'example_measurements/2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long'
     # Example to realign horizontal waveguides
     # channels = ['O3P', 'O3A', 'Z C']
@@ -88,15 +88,15 @@ def realign():
     Measurement.display_all_subplots()
  
 def cut_masked():
-    directory_name = 'example_measurements/2022-04-25 1227 PH pentamer_840nm_s50_2'
+    directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
     channels = ['O2P', 'O2A', 'Z C']
     Measurement = SnomMeasurement(directory_name, channels)
-    Measurement.set_min_to_zero(['Z C'])
+    # Measurement.set_min_to_zero(['Z C'])
     # Measurement.scale_channels()
     # Measurement.gauss_filter_channels_complex()
-    Measurement.heigth_mask_channels()
+    # Measurement.heigth_mask_channels()
     # Measurement.display_channels()
-    Measurement.cut_channels(autocut=True) # autocut will remove all empty lines and columns
+    Measurement.cut_channels(autocut=False) # autocut will remove all empty lines and columns
     Measurement.display_channels()
     # Measurement.display_all_subplots()
 
@@ -115,16 +115,16 @@ def test_scalebar():
     Measurement.display_all_subplots()
     
 def test_phaseshift():
-    # directory_name = 'example_measurements/2022-04-25 1227 PH pentamer_840nm_s50_2'
-    directory_name = 'C:/Users/Hajo/sciebo/Phd/Paper/Dielectric_Waveguides/raw_data/reflection_mode/2024-05-23 161457 PH single_wv-on-wg_-45deg_thicc'
+    # directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
+    directory_name = 'tests/testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
     
-    # channels = ['O2P', 'O3P', 'O2A', 'Z C']
+    channels = ['O2P', 'O3P', 'O2A', 'Z C']
     # PlotDefinitions.full_phase_range = False
     PlotDefinitions.shared_phase_range = False
-    channels = ['O2P_manipulated', 'O3P_manipulated', 'O2A', 'Z C']
+    # channels = ['O2P_manipulated', 'O3P_manipulated', 'O2A', 'Z C']
     # Measurement = SnomMeasurement(directory_name, channels)
     Measurement = SnomMeasurement(directory_name, channels)
-    # Measurement.scale_channels()
+    Measurement.scale_channels()
     # Measurement.gauss_filter_channels_complex()
     Measurement.display_channels()
     Measurement.shift_phase()
@@ -810,7 +810,7 @@ def example_scan3d_2():
 def main():
      
     # realign()
-    # cut_masked()
+    cut_masked()
     # test_scalebar()
     # test_phaseshift()
     # compare_measurements()
@@ -844,7 +844,7 @@ def main():
     # examples for documentation
     # example_snommeasurement_1()
     # example_snommeasurement_2()
-    example_snommeasurement_3()
+    # example_snommeasurement_3()
     # example_approachcurve_1()
     # example_scan3d_1()
     # example_scan3d_2()
