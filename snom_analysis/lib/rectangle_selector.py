@@ -4,7 +4,8 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from .snom_colormaps import SNOM_amplitude, SNOM_phase
 
-
+# This is an adaptation of the example code provided by the matplotlib documentation:
+# https://matplotlib.org/3.1.3/gallery/widgets/rectangle_selector.html
 
 
 def select_rectangle(data, channel):

@@ -43,6 +43,7 @@ from .lib.profile_selector import select_profile
 from .lib.additional_functions import set_nan_to_zero, gauss_function, get_largest_abs
 # import definitions such as measurement and channel tags
 from .lib.definitions import Definitions, MeasurementTags, ChannelTags, PlotDefinitions
+from .lib.height_masking import get_height_treshold
  
 # new version is based on filehandler to do basic stuff and then a class for each different measurement type like snom/afm, approach curves, spectra etc.
 class FileHandler(PlotDefinitions):
@@ -65,9 +66,11 @@ class FileHandler(PlotDefinitions):
         if self.config_path.exists():
             self._load_config() # load the config file
         else:
+            print('Config file not found, creating a new one.')
             self._create_default_config() # create a default config file if not existing
         
         self._initialize_file_type()
+        
 
     def _generate_savefolder(self):
         """Generate savefolder if not already existing. Careful, has to be the same one as for the snom plotter gui app.
@@ -112,8 +115,8 @@ class FileHandler(PlotDefinitions):
         config['FILETYPES'] = {
             'filetype1': '<FILETYPE1>', # 1.10.9592.0 standard_new
             'filetype2': '<FILETYPE2>', # 1.8.5017.0 standard
-            'filetype3': '<FILETYPE3>', # aachen gsf
-            'filetype4': '<FILETYPE4>', # aachen ascii
+            'filetype3': '<FILETYPE3>', # aachen ascii
+            'filetype4': '<FILETYPE4>', # aachen gsf # not supported yet
             'filetype5': '<FILETYPE5>', # version 1.6.3359.1
             'filetype6': '<FILETYPE6>', # comsol
         }
@@ -297,70 +300,6 @@ class FileHandler(PlotDefinitions):
             },
         }
         config['FILETYPE3'] = {
-            'filetype': '<aachen_dumb>',
-            'parametertype': '<new_parameters_txt>',
-            'phase_channels': ['O1-F-arg','O2-F-arg','O3-F-arg','O4-F-arg', 'O1-B-arg','O2-B-arg','O3-B-arg','O4-B-arg'],
-            'amp_channels': ['O1-F-abs','O2-F-abs','O3-F-abs','O4-F-abs', 'O1-B-abs','O2-B-abs','O3-B-abs','O4-B-abs'],
-            'real_channels': ['O1-F-Re','O2-F-Re','O3-F-Re','O4-F-Re','O1-B-Re','O2-B-Re','O3-B-Re','O4-B-Re'],
-            'imag_channels': ['O1-F-Im','O2-F-Im','O3-F-Im','O4-F-Im','O1-B-Im','O2-B-Im','O3-B-Im','O4-B-Im'],
-            'height_channel': '<MT-F-abs>',
-            'height_channels': ['MT-F-abs', 'MT-B-abs'],
-            'preview_ampchannel': '<O2-F-abs>',
-            'preview_phasechannel': '<O2-F-arg>',
-            'preview_channels': ['O2-F-abs', 'O2-F-arg', 'MT-F-abs'],
-            'height_indicator': '<MT>',
-            'amp_indicator': '<abs>',
-            'phase_indicator': '<arg>',
-            'real_indicator': '<Re>',#not used
-            'imag_indicator': '<Im>',#not used
-            'optical_indicator': '<O>',
-            'mechanical_indicator': '<M>',
-            'backwards_indicator': '<-B->',
-            'channel_prefix_default': '<_>',
-            'channel_prefix_custom': '<_>',
-            'channel_suffix_default': '<>',
-            'channel_suffix_custom': '<>',
-            'channel_suffix_synccorrected_phase': '<_synccorrected>',
-            'channel_suffix_manipulated': '<_manipulated>',
-            'channel_suffix_overlain': '<_overlain>',
-            'parameters_name': '<.parameters.txt>', # measurement_directory + parameters_name
-            'parameters_header_indicator': '<>',
-            'parameters_separator': '<:>',
-            'file_ending': '<.dumb>',
-            # definitions for data loading:
-            # todo the detector voltages should be handeled here, the following values are just placeholders
-            # also gsf file reading for the gwyddion dump format is not implemented yet but ascii somewhat works
-            'phase_offset_default': np.pi, # shift raw data to the interval [0, 2pi]
-            'phase_offset_custom': 0, # assume custom data is already in the interval [0, 2pi]
-            'rounding_decimal_amp_default': 5,
-            'rounding_decimal_amp_custom': 5,
-            'rounding_decimal_phase_default': 5,
-            'rounding_decimal_phase_custom': 5,
-            'rounding_decimal_complex_default': 5,
-            'rounding_decimal_complex_custom': 5,
-            'rounding_decimal_height_default': 2, # when in nm
-            'rounding_decimal_height_custom': 2, # when in nm
-            'height_scaling_default': 10**9, # data is in m convert to nm
-            'height_scaling_custom': 10**9, # data is in m convert to nm
-            'measurement_tags': {
-                # carful the keys will be used to create enums, so they should be unique and uppercase, they also must be identical for all filetypes
-                # the values are the tags in the file so they should match the file format
-                'SCANAREA': ['scan_size_f (um)', 'scan_size_s (um)', 'scan_size_v (um)'],
-                'PIXELAREA': ['resolution_f (pt)', 'resolution_s (pt)', 'resolution_v (pt)'],
-                'INTEGRATIONTIME': 'pixel_time (ms)',
-                'SCANNERCENTERPOSITION': ['offset_x (um)', 'offset_y (um)'],
-                'ROTATION': 'rotation_a (deg)',
-                'TIPFREQUENCY': 'probe_frequency (Hz)',
-                'MODULATIONFREQUENCY': 'modulation_frequency (Hz)',
-                'TAPPINGAMPLITUDE': 'probe_amplitude (V)',
-                'MODULATIONAMPLITUDE': 'modulation_amplitude (V)',
-                'MODULATIONOFFSET': 'modulation_offset (V)',
-                'SETPOINT': 'setpoint (V)',
-            },
-
-
-        }
-        config['FILETYPE4'] = {
             'filetype': '<aachen_ascii>',
             'parametertype': '<new_parameters_txt>',
             'phase_channels': ['O1-F-arg','O2-F-arg','O3-F-arg','O4-F-arg', 'O1-B-arg','O2-B-arg','O3-B-arg','O4-B-arg'],
@@ -369,6 +308,7 @@ class FileHandler(PlotDefinitions):
             'imag_channels': ['O1-F-Im','O2-F-Im','O3-F-Im','O4-F-Im','O1-B-Im','O2-B-Im','O3-B-Im','O4-B-Im'],
             'height_channel': '<MT-F-abs>',
             'height_channels': ['MT-F-abs', 'MT-B-abs'],
+            'mechanical_channels': ['M0-F-abs', 'M0-F-arg', 'M1-F-abs', 'M1-F-arg', 'M2-F-abs', 'M2-F-arg', 'M3-F-abs', 'M3-F-arg', 'M4-F-abs', 'M4-F-arg', 'M5-F-abs', 'M5-F-arg', 'M0-B-abs', 'M0-B-arg', 'M1-B-abs', 'M1-B-arg', 'M2-B-abs', 'M2-B-arg', 'M3-B-abs', 'M3-B-arg', 'M4-B-abs', 'M4-B-arg', 'M5-B-abs', 'M5-B-arg'],
             'preview_ampchannel': '<O2-F-abs>',
             'preview_phasechannel': '<O2-F-arg>',
             'preview_channels': ['O2-F-abs', 'O2-F-arg', 'MT-F-abs'],
@@ -389,7 +329,7 @@ class FileHandler(PlotDefinitions):
             'channel_suffix_overlain': '<_overlain>',
             'parameters_name': '<.parameters.txt>', # measurement_directory + parameters_name
             'parameters_header_indicator': '<>',
-            'parameters_separator': '<:>',
+            'parameters_separator': '<: >',
             'file_ending': '<.ascii>',
             # definitions for data loading:
             # todo the detector voltages should be handeled here, the following values are just placeholders
@@ -424,6 +364,71 @@ class FileHandler(PlotDefinitions):
 
 
         }
+        # this filetype is not supported yet
+        config['FILETYPE4'] = {
+            'filetype': '<aachen_dumb>',
+            'parametertype': '<new_parameters_txt>',
+            'phase_channels': ['O1-F-arg','O2-F-arg','O3-F-arg','O4-F-arg', 'O1-B-arg','O2-B-arg','O3-B-arg','O4-B-arg'],
+            'amp_channels': ['O1-F-abs','O2-F-abs','O3-F-abs','O4-F-abs', 'O1-B-abs','O2-B-abs','O3-B-abs','O4-B-abs'],
+            'real_channels': ['O1-F-Re','O2-F-Re','O3-F-Re','O4-F-Re','O1-B-Re','O2-B-Re','O3-B-Re','O4-B-Re'],
+            'imag_channels': ['O1-F-Im','O2-F-Im','O3-F-Im','O4-F-Im','O1-B-Im','O2-B-Im','O3-B-Im','O4-B-Im'],
+            'mechanical_channels': ['M0-F-abs', 'M0-F-arg', 'M1-F-abs', 'M1-F-arg', 'M2-F-abs', 'M2-F-arg', 'M3-F-abs', 'M3-F-arg', 'M4-F-abs', 'M4-F-arg', 'M5-F-abs', 'M5-F-arg', 'M0-B-abs', 'M0-B-arg', 'M1-B-abs', 'M1-B-arg', 'M2-B-abs', 'M2-B-arg', 'M3-B-abs', 'M3-B-arg', 'M4-B-abs', 'M4-B-arg', 'M5-B-abs', 'M5-B-arg'],
+            'height_channel': '<MT-F-abs>',
+            'height_channels': ['MT-F-abs', 'MT-B-abs'],
+            'preview_ampchannel': '<O2-F-abs>',
+            'preview_phasechannel': '<O2-F-arg>',
+            'preview_channels': ['O2-F-abs', 'O2-F-arg', 'MT-F-abs'],
+            'height_indicator': '<MT>',
+            'amp_indicator': '<abs>',
+            'phase_indicator': '<arg>',
+            'real_indicator': '<Re>',#not used
+            'imag_indicator': '<Im>',#not used
+            'optical_indicator': '<O>',
+            'mechanical_indicator': '<M>',
+            'backwards_indicator': '<-B->',
+            'channel_prefix_default': '<_>',
+            'channel_prefix_custom': '<_>',
+            'channel_suffix_default': '<>',
+            'channel_suffix_custom': '<>',
+            'channel_suffix_synccorrected_phase': '<_synccorrected>',
+            'channel_suffix_manipulated': '<_manipulated>',
+            'channel_suffix_overlain': '<_overlain>',
+            'parameters_name': '<.parameters.txt>', # measurement_directory + parameters_name
+            'parameters_header_indicator': '<>',
+            'parameters_separator': '<: >',
+            'file_ending': '<.dumb>',
+            # definitions for data loading:
+            # todo the detector voltages should be handeled here, the following values are just placeholders
+            # also gsf file reading for the gwyddion dump format is not implemented yet but ascii somewhat works
+            'phase_offset_default': np.pi, # shift raw data to the interval [0, 2pi]
+            'phase_offset_custom': 0, # assume custom data is already in the interval [0, 2pi]
+            'rounding_decimal_amp_default': 5,
+            'rounding_decimal_amp_custom': 5,
+            'rounding_decimal_phase_default': 5,
+            'rounding_decimal_phase_custom': 5,
+            'rounding_decimal_complex_default': 5,
+            'rounding_decimal_complex_custom': 5,
+            'rounding_decimal_height_default': 2, # when in nm
+            'rounding_decimal_height_custom': 2, # when in nm
+            'height_scaling_default': 10**9, # data is in m convert to nm
+            'height_scaling_custom': 10**9, # data is in m convert to nm
+            'measurement_tags': {
+                # carful the keys will be used to create enums, so they should be unique and uppercase, they also must be identical for all filetypes
+                # the values are the tags in the file so they should match the file format
+                'SCANAREA': ['scan_size_f (um)', 'scan_size_s (um)', 'scan_size_v (um)'],
+                'PIXELAREA': ['resolution_f (pt)', 'resolution_s (pt)', 'resolution_v (pt)'],
+                'INTEGRATIONTIME': 'pixel_time (ms)',
+                'SCANNERCENTERPOSITION': ['offset_x (um)', 'offset_y (um)'],
+                'ROTATION': 'rotation_a (deg)',
+                'TIPFREQUENCY': 'probe_frequency (Hz)',
+                'MODULATIONFREQUENCY': 'modulation_frequency (Hz)',
+                'TAPPINGAMPLITUDE': 'probe_amplitude (V)',
+                'MODULATIONAMPLITUDE': 'modulation_amplitude (V)',
+                'MODULATIONOFFSET': 'modulation_offset (V)',
+                'SETPOINT': 'setpoint (V)',
+            },
+        }
+        
         config['FILETYPE5'] = {
             'filetype': '<standard>',
             'parametertype': '<new_parameters_txt>',
@@ -694,12 +699,28 @@ class FileHandler(PlotDefinitions):
             parameters_path = self.directory_name / Path(self.filename.name + parameters_name)
             # try to create the measurement tag dict
             succsess = self._create_measurement_tag_dict(parameters_path, filetype)
+            # the correct creation of teh measurement tag dict is not enough to determine the filetype
+            # try to also to create the channel tag dict for one arbitrary channel
+            # self._initialize_file_type()
+            self.file_type = filetype
+            self._initialize_measurement_channel_indicators()
+            # height_channel = self._get_from_config('height_channel', filetype)
+            # try to create the channel tag dict, if it fails the filetype is not correct
+            # print('Trying to create channel tag dict')
+            # print('all_channels_default[0]: ', self.all_channels_default[0])
+            # print('filetype: ', filetype)
+            # print('succsess: ', succsess)
+            try: self._create_channel_tag_dict([self.all_channels_default[0]])
+            except: 
+                succsess = False
+            self.file_type = None
             if succsess:
                 # the correct filetype has been found
                 # print(f'Filetype found: {filetype}')
                 self.file_type = filetype
                 # print('parameter dict was created successfully')                
                 return True
+
         # if no filetype was found return False
         print('No filetype was found!')
         return False
@@ -728,6 +749,8 @@ class FileHandler(PlotDefinitions):
             filetype (str): The filetype to use.
         """
         # first check if the file exists
+        # print('trying to load parameters')
+        # print('filetype: ', filetype)
         try:
             with open(parameters_path, 'r') as file:
                 pass
@@ -737,13 +760,49 @@ class FileHandler(PlotDefinitions):
         header_indicator = self._get_from_config('parameters_header_indicator', filetype)
         measurement_tags = self._get_from_config('measurement_tags', filetype)
         tags_list = list(measurement_tags.values())
+        # print('tags_list: ', tags_list)
         # if tags contains a list of values flatten the list
-        if any(isinstance(i, list) for i in tags_list):
-            tags_list = [item for sublist in tags_list for item in sublist]
-                
-        parameters_dict = convert_header_to_dict(parameters_path, separator=separator, header_indicator=header_indicator, tags_list=tags_list)
+        flattened_tags_list = []
+        list_items = [] # keep track of list items to reverse the flattening after the creation of the parameters dict
+        for i in range(len(tags_list)):
+            tag = tags_list[i]
+            if isinstance(tag, list):
+                for item in tag:
+                    flattened_tags_list.append(item)
+            else:
+                flattened_tags_list.append(tag)
+            list_items.append(i)
+        # if any(isinstance(i, list) for i in tags_list):
+        #     tags_list = [item for sublist in tags_list for item in sublist]
+        # print('flattened tags_list: ', tags_list)
+        # print('trying to convert header to dict')  
+        # print('flattenend_tags_list: ', flattened_tags_list)
+        parameters_dict = convert_header_to_dict(parameters_path, separator=separator, header_indicator=header_indicator, tags_list=flattened_tags_list)
+        # print('parameters_dict: ', parameters_dict)
         if parameters_dict is None:
             return False
+        # reverse the flattening of the tags list and translate file tags to measurement tags
+        new_parameters_dict = {}
+        for i in range(len(tags_list)):
+            tag = tags_list[i]
+            if isinstance(tag, list):
+                val_list = []
+                count = 0
+                for item in tag:
+                    val_list.append(parameters_dict[tag[count]])
+                    count += 1
+                measurement_tag = list(measurement_tags.keys())[list(measurement_tags.values()).index(tag)]
+                new_parameters_dict[measurement_tag] = val_list
+                    # flattened_tags_list.append(item)
+            else:
+                val = parameters_dict[tag]
+                measurement_tag = list(measurement_tags.keys())[list(measurement_tags.values()).index(tag)]
+                new_parameters_dict[measurement_tag] = val
+                # flattened_tags_list.append(tag)
+            # list_items.append(i)
+
+        # print('parameters_dict: ', parameters_dict)
+        # print('new_parameters_dict: ', new_parameters_dict)
         # now create the measurement tag dict
         self.measurement_tag_dict = {}
 
@@ -775,7 +834,7 @@ class FileHandler(PlotDefinitions):
         # QFACTOR = auto()   
         # VERSION = auto()
         # '''
-        for key, value in parameters_dict.items():
+        for key, value in new_parameters_dict.items():
             is_unit = False
             is_list = False
             if isinstance(value, list):
@@ -791,10 +850,13 @@ class FileHandler(PlotDefinitions):
                 else: is_unit = False
             if value == '':
                 continue
-            if key in measurement_tags.values():
-                tag_key = list(measurement_tags.keys())[list(measurement_tags.values()).index(key)]
-            else:
-                continue
+            # if key in measurement_tags.values():
+                # tag_key = list(measurement_tags.keys())[list(measurement_tags.values()).index(key)]
+            # else:
+            #     continue
+            tag_key = key
+            # print(f'tag_key: <{tag_key}>, value: <{value}>')
+            # print(f'is_unit: {is_unit}, is_list: {is_list}')
             if tag_key == 'SCAN':
                 self.measurement_tag_dict[MeasurementTags.SCAN] = value
             elif tag_key == 'PROJECT':
@@ -922,6 +984,7 @@ class FileHandler(PlotDefinitions):
             self.XRes, self.YRes = pixelarea[1], pixelarea[2] # [unit, x, y, (z)]
             self.XReal, self.YReal = scanarea[1], scanarea[2]
         else:
+            # print('pixelarea:', pixelarea)
             self.XRes, self.YRes = pixelarea[0], pixelarea[1] # [x, y]
             self.XReal, self.YReal = scanarea[0], scanarea[1]
 
@@ -1275,17 +1338,18 @@ class FileHandler(PlotDefinitions):
     def _get_optomechanical_indicator(self, channel) -> tuple:
         """This function returns the optomechanical indicator of the channel and its index in the channel name.
         Meaning it tries to find out wether the cannel is an optical or mechanical channel."""
-        channel = list(channel)
+        channel_list = list(channel)
         indicator = None
         indicator_index = None
         if self.optical_indicator != None and self.mechanical_indicator != None:
-            for i in range(len(channel)):
-                # for char in channel:
-                if channel[i] == self.optical_indicator:
+            for i in range(len(channel_list)):
+                opto_len = len(self.optical_indicator)
+                mech_len = len(self.mechanical_indicator)
+                if channel[i:i+opto_len][0] == self.optical_indicator:
                     indicator = self.optical_indicator
                     indicator_index = i # return the first occurence of the indicator
                     break
-                elif channel[i] == self.mechanical_indicator:	
+                elif channel[i:i+mech_len][0] == self.mechanical_indicator:	
                     indicator = self.mechanical_indicator
                     indicator_index = i
                     break
@@ -1467,55 +1531,72 @@ class FileHandler(PlotDefinitions):
                 content=f.read()
 
 
-            channel_tags = self._get_from_config('channel_tags')
-            for key, tag in channel_tags.items():
-                is_list = False
-                tag_value_found = False
-                value = None
-                values = [None]
-                if isinstance(tag, list):
-                    is_list = True
-                # so far each tag contains a maximum of 2 values
-                if is_list:
-                    values = []
-                    for element in tag:
-                        try: value = self._get_tagval(content, element)
-                        except: 
-                            values.append(None)
-                            tag_value_found = False
-                        else: 
-                            values.append(value)
-                            tag_value_found = True
-                else:
-                    try: value = self._get_tagval(content, tag)
-                    except: value = None
-                    else: tag_value_found = True
-                    # try to find out if the value is a number or a unit
-                    try: float(value)
-                    except: pass
-                # check if tag value was found
-                if not tag_value_found:
-                    print(f'Could not find the tag value for {tag} in channel {channel}. You should probably check the config file.')
-                    continue
-                if key == 'PIXELAREA':
-                    try: channel_dict[ChannelTags.PIXELAREA] = [int(values[0]), int(values[1]), int(values[2])]
-                    except: channel_dict[ChannelTags.PIXELAREA] = [int(values[0]), int(values[1])]
-                elif key == 'YINCOMPLETE':
-                    channel_dict[ChannelTags.YINCOMPLETE] = int(value)
-                elif key == 'SCANNERCENTERPOSITION':
-                    try: channel_dict[ChannelTags.SCANNERCENTERPOSITION] = [float(values[0]), float(values[1]), float(values[2])]
-                    except: channel_dict[ChannelTags.SCANNERCENTERPOSITION] = [float(values[0]), float(values[1])]
-                elif key == 'ROTATION':
-                    channel_dict[ChannelTags.ROTATION] = float(value)
-                elif key == 'SCANAREA':
-                    try: channel_dict[ChannelTags.SCANAREA] = [float(values[0]), float(values[1]), float(values[2])]
-                    except: channel_dict[ChannelTags.SCANAREA] = [float(values[0]), float(values[1])]
-                elif key == 'XYUNIT':
-                    channel_dict[ChannelTags.XYUNIT] = value
-                elif key == 'ZUNIT':
-                    channel_dict[ChannelTags.ZUNIT] = value
-                elif key == 'WAVENUMBERSCALING':
-                    channel_dict[ChannelTags.WAVENUMBERSCALING] = float(value)
+            try: channel_tags = self._get_from_config('channel_tags')
+            except:
+                # seem like there are no channel tags in the config file
+                # so we will just use the measurement tags to initialize the channel tags
+                measurement_tags = self._get_from_config('measurement_tags', self.file_type)
+                measurement_tag_enums = list(MeasurementTags)
+                channel_tag_enums = list(ChannelTags)
+                for key, value in measurement_tags.items():
+                    # get the data from the measurement tag dict
+                    for i in range(len(measurement_tag_enums)):
+                        if key == measurement_tag_enums[i].name:
+                            data = self.measurement_tag_dict[measurement_tag_enums[i]]
+                    # insert the data into the channel tag dict with the corresponding key wich is an enum of the channel tags class but has the same name as the measurement tag
+                    for i in range(len(channel_tag_enums)):
+                        if key == channel_tag_enums[i].name:
+                            channel_dict[channel_tag_enums[i]] = data
+
+            else:
+                for key, tag in channel_tags.items():
+                    is_list = False
+                    tag_value_found = False
+                    value = None
+                    values = [None]
+                    if isinstance(tag, list):
+                        is_list = True
+                    # so far each tag contains a maximum of 2 values
+                    if is_list:
+                        values = []
+                        for element in tag:
+                            try: value = self._get_tagval(content, element)
+                            except: 
+                                values.append(None)
+                                tag_value_found = False
+                            else: 
+                                values.append(value)
+                                tag_value_found = True
+                    else:
+                        try: value = self._get_tagval(content, tag)
+                        except: value = None
+                        else: tag_value_found = True
+                        # try to find out if the value is a number or a unit
+                        try: float(value)
+                        except: pass
+                    # check if tag value was found
+                    if not tag_value_found:
+                        print(f'Could not find the tag value for {tag} in channel {channel}. You should probably check the config file.')
+                        continue
+                    if key == 'PIXELAREA':
+                        try: channel_dict[ChannelTags.PIXELAREA] = [int(values[0]), int(values[1]), int(values[2])]
+                        except: channel_dict[ChannelTags.PIXELAREA] = [int(values[0]), int(values[1])]
+                    elif key == 'YINCOMPLETE':
+                        channel_dict[ChannelTags.YINCOMPLETE] = int(value)
+                    elif key == 'SCANNERCENTERPOSITION':
+                        try: channel_dict[ChannelTags.SCANNERCENTERPOSITION] = [float(values[0]), float(values[1]), float(values[2])]
+                        except: channel_dict[ChannelTags.SCANNERCENTERPOSITION] = [float(values[0]), float(values[1])]
+                    elif key == 'ROTATION':
+                        channel_dict[ChannelTags.ROTATION] = float(value)
+                    elif key == 'SCANAREA':
+                        try: channel_dict[ChannelTags.SCANAREA] = [float(values[0]), float(values[1]), float(values[2])]
+                        except: channel_dict[ChannelTags.SCANAREA] = [float(values[0]), float(values[1])]
+                    elif key == 'XYUNIT':
+                        channel_dict[ChannelTags.XYUNIT] = value
+                    elif key == 'ZUNIT':
+                        channel_dict[ChannelTags.ZUNIT] = value
+                    elif key == 'WAVENUMBERSCALING':
+                        channel_dict[ChannelTags.WAVENUMBERSCALING] = float(value)
             # add pixel scaling to the channel dict, initially this is always 1
             channel_dict[ChannelTags.PIXELSCALING] = 1
                     
@@ -1565,8 +1646,8 @@ class SnomMeasurement(FileHandler):
                 self.quadratic_pixels()
             # initialize instance variables:
             self.mask_array = [] # not shure if it's best to reset the mask...
-            self.upper_y_bound = None
-            self.lower_y_bound = None
+            # self.upper_y_bound = None
+            # self.lower_y_bound = None
             self.align_points = None
             self.y_shifts = None
             self.scalebar_channels = []    
@@ -1648,7 +1729,7 @@ class SnomMeasurement(FileHandler):
         for channel in channels:
             if channel in self.channels:
                 self.all_data[self.channels.index(channel)] = self._scale_array(self.all_data[self.channels.index(channel)], scaling)
-                XReal, YReal = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+                XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
                 self._set_channel_tag_dict_value(channel, ChannelTags.PIXELAREA, [XReal*scaling, YReal*scaling])
                 self._set_channel_tag_dict_value(channel, ChannelTags.PIXELSCALING, scaling)
             else:
@@ -1702,7 +1783,7 @@ class SnomMeasurement(FileHandler):
                 datalist = np.array(datalist[:-1], dtype=float)#, dtype=np.float convert list to np.array and strings to float
             
             # get the resolution of the channel 
-            XRes, YRes = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+            XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
             datasize=int(XRes*YRes*4)
             channel_data = np.zeros((YRes, XRes))
             # we knwo the resolution of the data from the header or parameter file
@@ -1738,6 +1819,12 @@ class SnomMeasurement(FileHandler):
                     rounding_decimal = self.rounding_decimal_complex_default
                 elif channel_type == 'custom':
                     rounding_decimal = self.rounding_decimal_complex_custom
+            # print(f'channel: {channel} is a {channel_type} channel')
+            # print(f'channel: {channel} is a amp channel ', self._is_amp_channel(channel))
+            # print(f'channel: {channel} is a phase channel ', self._is_phase_channel(channel))
+            # print(f'channel: {channel} is a height channel ', self._is_height_channel(channel))
+            # print(f'channel: {channel}, scaling: {scaling}, phase_offset: {phase_offset}, rounding_decimal: {rounding_decimal}')
+
             # now read the data and apply the scaling, phase offset and rounding
             for y in range(0,YRes):
                 for x in range(0,XRes):
@@ -1745,7 +1832,7 @@ class SnomMeasurement(FileHandler):
                         pixval = unpack("f",reduced_binarydata[4*(y*XRes+x):4*(y*XRes+x+1)])[0]
                         channel_data[y][x] = round(pixval*scaling + phase_offset, rounding_decimal)
                     elif read_mode == 'r':
-                        datalist[y][x] = round(datalist[y][x]*scaling + phase_offset, rounding_decimal)
+                        channel_data[y][x] = round(datalist[y][x]*scaling + phase_offset, rounding_decimal)
             
             all_data.append(channel_data)
             data_dict.append(channel)
@@ -2447,7 +2534,7 @@ class SnomMeasurement(FileHandler):
             XOffset, YOffset = self._get_measurement_tag_dict_value(MeasurementTags.SCANNERCENTERPOSITION)
         else: 
             # if channel is in memory it has to have a channel dict, where all necessary infos are stored
-            XReal, YReal = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
+            XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
             rotation = self._get_channel_tag_dict_value(channel, ChannelTags.ROTATION)[0]
             XOffset, YOffset = self._get_channel_tag_dict_value(channel, ChannelTags.SCANNERCENTERPOSITION)
         if rotation is None:
@@ -2762,19 +2849,17 @@ class SnomMeasurement(FileHandler):
                 mask_array[y][x] = value
         return mask_array
 
-    def _get_height_treshold(self, height_data:np.array, mask_array:np.array, threshold:float) -> float:
-        """This function returns the height threshold value dependent on the user input.
-        The user can change the threshold value and see a preview of the mask array.
+    def _get_height_treshold(self, height_data:np.array) -> float:
+        """This function returns the height threshold value. The user is prompted with a preview of the mask array and can adjust the threshold using a slider.
         
         Args:
             height_data (np.array): the height data
-            mask_array (np.array): the mask array
-            threshold (float): the threshold value
         
         Returns:
-            float: the new threshold
+            float: the new threshold [0-1]
         """
-        self._create_height_mask_preview(mask_array)
+        threshold = round(get_height_treshold(height_data), 2)
+        '''self._create_height_mask_preview(mask_array)
         print('Do you want to use these parameters to mask the data?')
         mask_data = self._user_input_bool()
         if mask_data == False:
@@ -2789,10 +2874,10 @@ class SnomMeasurement(FileHandler):
                 print('Do you want to abort the masking procedure?')
                 abort = self._user_input_bool()
                 if abort == True:
-                    exit()
+                    exit()'''
         return threshold
 
-    def heigth_mask_channels(self, channels:list=None, mask_channel=None, threshold=0.5, mask_data=False, export:bool=False) -> None:
+    def heigth_mask_channels(self, channels:list=None, mask_channel:str=None, threshold:float=None) -> None:
         """
         The treshold factor should be between 0 and 1. It sets the threshold for the height pixels.
         Every pixel below threshold will be set to 0. This also applies for all other channels. 
@@ -2803,62 +2888,42 @@ class SnomMeasurement(FileHandler):
                 
         Args:
             channels (list): list of channels, will override the already existing channels
-            mask_channel (str): the channel to use for the height mask, if not specified the height channel will be used
-            threshold (float): threshold value to create the height mask from
-            mask_data (bool): if you want to apply the mask directly with the specified threshold change to 'True',
-                            otherwise you will be prompted with a preview and can then change the threshold iteratively
-            export (bool): if you want to apply the mask to all channels and export them change to 'True'
+            mask_channel (str): The channel to use for the height mask, if not specified the height channel will be used
+            threshold (float): Threshold value to create the height mask from. Default is None, the user can select the threshold with a slider.
         """
-        if export == True:
-            channels = self.all_channels_default
-        self._initialize_data(channels)
+        if channels == None:
+            channels = self.channels
         if (mask_channel == None) or (mask_channel not in self.channels):
             if self.height_channel in self.channels:
-                height_data = self.all_data[self.channels.index(self.height_channel)]
-                if 'leveled' not in self.channels_label[self.channels.index(self.height_channel)]:
-                    leveled_height_data = self._height_levelling_3point(height_data)
-                else:
-                    leveled_height_data = height_data # since height_data is already leveled
-                
-                # if the height channel is used in the instance for example with gaussian blurr, this data will be used and not the raw data
-                # because the data might be scaled, careful to always use the corrected height channel 'Z C'
+                mask_channel = self.height_channel
             else:
-                height_data, trash = self._load_data([self.height_channel])
-                leveled_height_data = self._height_levelling_3point(height_data[0])
+                print('Please specify a mask channel!')
+                exit()
+        if self.height_indicator not in mask_channel:
+            print('Please specify a height channel!')
+            exit()
         else:
-            leveled_height_data = self._height_levelling_3point(self.all_data[self.channels.index(mask_channel)])
+            height_data = self.all_data[self.channels.index(mask_channel)]                
 
-        mask_array = self._create_mask_array(leveled_height_data, threshold)
+        if threshold is None:
+            threshold = self._get_height_treshold(height_data)
 
-        
-        if mask_data == False:
-            threshold = self._get_height_treshold(leveled_height_data, mask_array, threshold)
-            mask_data == True #unnecessary from now on...
-        self._write_to_logfile('height_masking_threshold', threshold)
-        mask_array = self._create_mask_array(leveled_height_data, threshold)
+        mask_array = self._create_mask_array(height_data, threshold)
         self.mask_array = mask_array # todo, mask array must be saved as part of the image, otherwise multiple measurement creations will use the same mask
-        if export == True:
-            # open files for the masked data:
-            for channel in channels:
-                header, NUL= self._create_header(channel)
-                data, trash = self._load_data([channel])
-                datafile = open(self.directory_name / Path(self.filename.name + f' {channel}_masked.gsf'),"bw")
-                datafile.write(header)
-                datafile.write(NUL)
-                masked_array = np.multiply(data[0], mask_array)
-                flattened_data = masked_array.flatten()
-                
-                for pixeldata in flattened_data:
-                    datafile.write(pack("f", pixeldata))
-                datafile.close()
-            print('All channels have been masked and exported!')
-        elif export == False:
-            dataset = self.all_data
-            print('Channels in memory have been masked!')
-            for i in range(len(dataset)):
-                if self.height_channel not in self.channels_label[i]:
-                    self.all_data[i] = np.multiply(dataset[i], mask_array)
-                self.channels_label[i] = self.channels_label[i] + '_masked'
+
+        self._write_to_logfile('height_masking_threshold', threshold)
+        for channel in channels:
+            if channel not in self.channels:
+                print(f'Channel {channel} is not in memory! Please initiate the channels you want to use first!')
+            self.all_data[self.channels.index(channel)] = np.multiply(self.all_data[self.channels.index(channel)], mask_array)
+            self.channels_label[self.channels.index(channel)] = self.channels_label[self.channels.index(channel)] + '_masked'
+            
+        # dataset = self.all_data
+        # for i in range(len(dataset)):
+        #     if self.height_channel not in self.channels_label[i]:
+        #         self.all_data[i] = np.multiply(dataset[i], mask_array)
+        #     self.channels_label[i] = self.channels_label[i] + '_masked'
+        print('Channels in memory have been masked!')
 
     def _check_pixel_position(self, xres:int, yres:int, x:int, y:int) -> bool:
         """This function checks if the pixel position is within the bounds.
@@ -2981,7 +3046,7 @@ class SnomMeasurement(FileHandler):
         pixel_value = self._get_mean_value(data, x, y, zone)
         return pixel_value
 
-    def _height_levelling_3point(self, height_data:np.array, zone:int=1) -> np.array:
+    def _height_levelling_3point(self, height_data:np.array, coords:list=None, zone:int=1) -> np.array:
         """This function levels the height data with a 3 point leveling.
         The user has to click on three points to specify the underground plane.
         The function returns the leveled height data.
@@ -2993,27 +3058,29 @@ class SnomMeasurement(FileHandler):
         Returns:
             np.array: the leveled height data
         """
-        fig, ax = plt.subplots()
-        ax.pcolormesh(height_data, cmap=SNOM_height)
-        klicker = clicker(ax, ["event"], markers=["x"])
-        ax.legend()
-        ax.axis('scaled')
-        plt.title('3 Point leveling: please click on three points\nto specify the underground plane.')
-        if PlotDefinitions.show_plot:
-            plt.show()
-        klicker_coords = klicker.get_positions()['event'] #klicker returns a dictionary for the events
-        klick_coordinates = [[round(element[0]), round(element[1])] for element in klicker_coords]
-        self._write_to_logfile('height_leveling_coordinates', klick_coordinates)
-        if len(klick_coordinates) != 3:
+        # check if coordinates are given, then we don't need to display the image
+        if coords == None:
+            fig, ax = plt.subplots()
+            ax.pcolormesh(height_data, cmap=SNOM_height)
+            klicker = clicker(ax, ["event"], markers=["x"])
+            ax.legend()
+            ax.axis('scaled')
+            plt.title('3 Point leveling: please click on three points\nto specify the underground plane.')
+            if PlotDefinitions.show_plot:
+                plt.show()
+            klicker_coords = klicker.get_positions()['event'] #klicker returns a dictionary for the events
+            coords = [[round(element[0]), round(element[1])] for element in klicker_coords]
+        if len(coords) != 3:
             print('You need to specify 3 point coordinates! \nDo you want to try again?')
             user_input = self._user_input_bool()
             if user_input == True:
-                self._height_levelling_3point(zone)
+                self._height_levelling_3point(height_data, coords, zone)
             else:
                 exit()
+        self._write_to_logfile('height_leveling_coordinates', coords)
         # for the 3 point coordinates the height data is calculated over a small area around the clicked pixels to reduce deviations due to noise
-        mean_values = [self._get_mean_value(height_data, klick_coordinates[i][0], klick_coordinates[i][1], zone) for i in range(len(klick_coordinates))]
-        matrix = [[klick_coordinates[i][0], klick_coordinates[i][1], mean_values[i]] for i in range(3)]
+        mean_values = [self._get_mean_value(height_data, coords[i][0], coords[i][1], zone) for i in range(len(coords))]
+        matrix = [[coords[i][0], coords[i][1], mean_values[i]] for i in range(3)]
         A = matrix
         b = [100,100,100] # not sure why, 100 is a bit random, but 0 didn't work
         solution = np.linalg.solve(A, b)
@@ -3537,18 +3604,19 @@ class SnomMeasurement(FileHandler):
                 exit()
         gc.collect()
 
-    def level_height_channels(self, channels:list=None) -> None:
+    def level_height_channels_3point(self, channels:list=None, coords:list=None) -> None:
         """This function levels all height channels which are either user specified or in the instance memory.
         The leveling will prompt the user with a preview to select 3 points for getting the coordinates of the leveling plane.
         
         Args:
             channels (list, optional): List of channels to level. If not specified all channels in memory will be used. Defaults to None.
+            coords (list, optional): List of coordinates to use for the leveling. If not specified the user will be prompted to click on the points. Defaults to None.
         """
         if channels is None:
             channels = self.channels
         for channel in channels:
             if channel in self.channels and self.height_indicator in channel:
-                self.all_data[self.channels.index(channel)] = self._height_levelling_3point(self.all_data[self.channels.index(channel)])
+                self.all_data[self.channels.index(channel)] = self._height_levelling_3point(self.all_data[self.channels.index(channel)], coords)
                 self.channels_label[self.channels.index(channel)] += '_leveled' 
         gc.collect()
 
@@ -3662,7 +3730,7 @@ class SnomMeasurement(FileHandler):
                 data_shifted[y + y_shift][x] = data[y][x]
         return data_shifted
 
-    def realign(self, channels:list=None): # ToDo
+    def realign(self, channels:list=None, bounds:list=None): # ToDo
         """This function corrects the drift of the piezo motor. As of now it needs to be fitted to a region of the sample which is assumed to be straight.
         In the future this could be implemented with a general map containing the distortion created by the piezo motor, if it turns out to be constant...
         Anyways, you will be prompted with a preview of the height data, please select an area of the scan with only one 'straight' waveguide. 
@@ -3673,6 +3741,8 @@ class SnomMeasurement(FileHandler):
         
         Args:  
             channels (list): list of channels, will override the already existing channels
+            bounds (list): The bounds for the fitting routine. If not specified you will be prompted with a window to select an area.
+                Should be specified like this: [lower_bound, upper_bound] in px.
         
         """
         self._initialize_data(channels)
@@ -3682,11 +3752,17 @@ class SnomMeasurement(FileHandler):
             data = self.all_data[self.channels.index(self.height_channel)]
         else:
             data, trash = self._load_data([self.height_channel])
-        coords = select_rectangle(data, self.height_channel)
-        lower = coords[0][1]
-        upper = coords[1][1]
-        self.lower_y_bound = lower
-        self.upper_y_bound = upper
+        if bounds is None:
+            coords = select_rectangle(data, self.height_channel)
+            lower = coords[0][1]
+            upper = coords[1][1]
+            # self.lower_y_bound = lower
+            # self.upper_y_bound = upper
+        else:
+            lower = bounds[0]
+            upper = bounds[1]
+            # self.lower_y_bound = bounds[0]
+            # self.upper_y_bound = bounds[1]
         self._write_to_logfile('realign_bounds', [lower, upper])
         if self.height_channel in self.channels:
             height_data = self.all_data[self.channels.index(self.height_channel)]
@@ -3725,7 +3801,8 @@ class SnomMeasurement(FileHandler):
         axis.set_title('realinging')
         axis.axis('scaled')
         axis.plot(self.align_points, [element + lower + (upper-lower)/2 for element in self.y_shifts], color='red')
-        axis.hlines([self.upper_y_bound, self.lower_y_bound], xmin=0, xmax=XRes, color='white')
+        # axis.hlines([self.upper_y_bound, self.lower_y_bound], xmin=0, xmax=XRes, color='white')
+        axis.hlines([upper, lower], xmin=0, xmax=XRes, color='white')
         plt.show()
 
         # reinitialize the instance data to fit the new bigger arrays
@@ -3777,20 +3854,22 @@ class SnomMeasurement(FileHandler):
             # get the coordinates of the selection rectangle
             if coords is None:
                 coords = select_rectangle(data, preview_channel)
-            self._write_to_logfile('cut_coords', coords)
-            # use the selection to create a mask and multiply to all channels, then apply auto_cut function
-            yres = len(data)
-            xres = len(data[0])
-            self.mask_array = np.zeros((yres, xres))
-            for y in range(yres):
-                if y in range(coords[0][1], coords[1][1]):
-                    for x in range(xres):
-                        if x in range(coords[0][0], coords[1][0]):
-                            self.mask_array[y][x] = 1
-            for channel in channels:
-                index = self.channels.index(channel)
-                # set all values outside of the mask to zero and then cut all zero away from the outside with _auto_cut_channels(channels)
-                self.all_data[index] = np.multiply(self.all_data[index], self.mask_array)
+            # check if coords are none, if so, the user has canceled the selection
+            if coords is not None:
+                self._write_to_logfile('cut_coords', coords)
+                # use the selection to create a mask and multiply to all channels, then apply auto_cut function
+                yres = len(data)
+                xres = len(data[0])
+                self.mask_array = np.zeros((yres, xres))
+                for y in range(yres):
+                    if y in range(coords[0][1], coords[1][1]):
+                        for x in range(xres):
+                            if x in range(coords[0][0], coords[1][0]):
+                                self.mask_array[y][x] = 1
+                for channel in channels:
+                    index = self.channels.index(channel)
+                    # set all values outside of the mask to zero and then cut all zero away from the outside with _auto_cut_channels(channels)
+                    self.all_data[index] = np.multiply(self.all_data[index], self.mask_array)
         # apply the auto cut function to remove masked areas around the data
         self._auto_cut_channels(channels)
         gc.collect()
@@ -3812,8 +3891,8 @@ class SnomMeasurement(FileHandler):
         for channel in channels:
             index = self.channels.index(channel)
             # get the old size of the data
-            xres, yres = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
-            xreal, yreal = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
+            xres, yres, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+            xreal, yreal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
             self.all_data[index] = self._auto_cut_data(self.all_data[index])
             xres_new = len(self.all_data[index][0])
             yres_new = len(self.all_data[index])
@@ -3881,8 +3960,8 @@ class SnomMeasurement(FileHandler):
         
         count = 0
         for channel in self.channels:
-            XRes, YRes = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
-            XReal, YReal = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
+            XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+            XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
             pixel_scaling = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELSCALING)
             dx = XReal/(XRes)
             scalebar_var = [dx, units, dimension, label, length_fraction, height_fraction, width_fraction,
@@ -3912,9 +3991,9 @@ class SnomMeasurement(FileHandler):
         self.all_data = []
         for channel in self.channels:
             # flip pixelarea and scanarea as well
-            XReal, YReal = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
+            XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
             self._set_channel_tag_dict_value(channel, ChannelTags.SCANAREA, [YReal, XReal])
-            XRes, YRes = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+            XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
             self._set_channel_tag_dict_value(channel, ChannelTags.PIXELAREA, [YRes, XRes])
             self.all_data.append(np.rot90(all_data[self.channels.index(channel)], axes=axes))
 
@@ -4297,8 +4376,8 @@ class SnomMeasurement(FileHandler):
             channels = self.channels
         for channel in channels:
             if channel in self.channels:
-                XRes, YRes = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
-                XReal, YReal = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
+                XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+                XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
                 pixel_size_x = round(XReal/XRes *1000000000) # pixel size in nm
                 pixel_size_y = round(YReal/YRes *1000000000)
                 scale_x = 1
@@ -4381,8 +4460,8 @@ class SnomMeasurement(FileHandler):
                 #test:
                 if self.height_indicator in channel:
                     # get current res and size and add the additional res and size due to addition of zeros while shifting
-                    XRes, YRes = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
-                    XReal, YReal = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
+                    XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+                    XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
                     XRes_new = XRes + abs(index)# absolute value? index can be negative, but resolution can only increase, same for real dimensions
                     XReal_new = XReal + XReal/XRes*abs(index)
                     
@@ -4411,8 +4490,8 @@ class SnomMeasurement(FileHandler):
                     self.all_data.append(realign.Create_Mean_Array(self.all_data[self.channels.index(channel)], self.all_data[self.channels.index(self.backwards_indicator+ channel)]))
                 else:
                     # get current res and size and add the additional res and size due to addition of zeros while shifting
-                    XRes, YRes = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
-                    XReal, YReal = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
+                    XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+                    XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
                     XRes_new = XRes + abs(index)# absolute value? index can be negative, but resolution can only increase, same for real dimensions
                     XReal_new = XReal + XReal/XRes*abs(index)
                     
@@ -5292,7 +5371,6 @@ class Scan3D(FileHandler):
         # load the channels from the datafile
         self._load_data()
 
-    
     def _update_measurement_channel_indicators(self):
         self.height_channel = 'Z'
         self.height_channels = ['Z']

@@ -20,9 +20,11 @@ def convert_header_to_dict(filepath, separator=':', header_indicator='#', tags_l
     except:
         print('could not read header')
         return None
+    # print('header:', header)
     parameters_dict = {}
     for i in range(len(header)):
         key, value = _simplify_line(header[i], separator, header_indicator, tags_list)
+        # print(f'key: <{key}>' , f'value: <{value}>')
         # check if the key is in the tags list
         if key in tags_list:
             parameters_dict[key] = value
@@ -41,7 +43,10 @@ def _read_parameters_txt(filepath, header_indicator, tags) -> list:
     with open(filepath, 'r', encoding='UTF-8') as file:
         all = file.read()
     # split content into lines
+    # print('all:', all)
     all_lines = all.split('\n')
+    # print('all_lines:', all_lines)
+    # print('tags:', tags)
     # check if the lines contain on of the tags
     for line in all_lines:
         for tag in tags:
@@ -52,6 +57,7 @@ def _read_parameters_txt(filepath, header_indicator, tags) -> list:
                 for subtag in tag:
                     if subtag in line:
                         content.append(line)
+    # print('content:', content)
     return content
 
 def _simplify_line(line, separator, header_indicator, tags) -> tuple:
@@ -78,6 +84,31 @@ def _simplify_line(line, separator, header_indicator, tags) -> tuple:
         except: pass
         if len(line[1]) == 1:
             line[1] = line[1][0]
+        # try to simplyfy line[0] to only contain the tags, sometimes to much spaces might be in the line
+        # however sometimes shorter tags might be part of longer tags, such as 'SCAN' and 'SCAN AREA'...
+        for tag in tags:
+            if tag in line[0]:
+                # if there is a chracter around the tag it is not the tag we are looking for, optimally we want to make sure that the tag is sourrounded by 2 spaces or the end of the line
+                # print('tag:', tag)
+                # print('line[0]:', line[0])
+                start_index = line[0].index(tag)
+                end_index = start_index + len(tag)
+                if start_index > 1 and line[0][start_index-2] != ' ':
+                    continue
+                elif start_index > 0 and line[0][start_index-1] != ' ':
+                    continue
+                if end_index < len(line[0])-1 and line[0][end_index+1] != ' ':
+                    continue
+                elif end_index < len(line[0]) and line[0][end_index] != ' ':
+                    continue
+                # if len(line[0]) > len(tag):
+                #     if line[0][line[0].index(tag)-1] != ' ' or line[0][line[0].index(tag)+len(tag)] != ' ':
+                #         if line[0][line[0].index(tag)-2] != '\t' or line[0][line[0].index(tag)+len(tag)] != '\t':
+                #             continue
+                line[0] = tag
+                # print('line[0]:', line[0])
+
+                break
         key = line[0]
         value = line[1]
 

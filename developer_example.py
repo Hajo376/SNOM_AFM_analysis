@@ -73,220 +73,187 @@ Hajo Schill
 
 
 def test_realign():
-    directory_name = 'example_measurements/2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long'
+    directory_name = 'tests/testdata/2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long'
     # Example to realign horizontal waveguides
     # channels = ['O3P', 'O3A', 'Z C']
     channels = ['O2P', 'O2A', 'Z C']
-    Measurement = SnomMeasurement(directory_name, channels)
-    Measurement.display_channels()
-    Measurement.set_min_to_zero(['Z C'])
-    Measurement.scale_channels()
-    Measurement.realign()
-    # Measurement.display_channels()
-    Measurement.gauss_filter_channels_complex()
-    Measurement.level_height_channels()
-    Measurement.cut_channels()
-    # Measurement.heigth_mask_channels()
-    Measurement.display_channels()
-    Measurement.display_all_subplots()
- 
-def cut_masked():
+    measurement = SnomMeasurement(directory_name, channels)
+    measurement.display_channels()
+    measurement.set_min_to_zero(['Z C'])
+    measurement.scale_channels()
+    # measurement.realign()
+    measurement.realign(bounds=[131, 255])
+    # measurement.display_channels()
+    measurement.gauss_filter_channels_complex()
+    # measurement.level_height_channels_3point()
+    measurement.level_height_channels_3point(coords=[[514, 175], [1763, 375], [2635, 169]])
+    # measurement.cut_channels()
+    measurement.cut_channels(coords=[[64, 25], [3093, 388]])
+    # measurement.heigth_mask_channels()
+    measurement.display_channels()
+    measurement.display_all_subplots()
+
+def test_cut():
     directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
     channels = ['O2P', 'O2A', 'Z C']
-    Measurement = SnomMeasurement(directory_name, channels)
-    # Measurement.set_min_to_zero(['Z C'])
-    # Measurement.scale_channels()
-    # Measurement.gauss_filter_channels_complex()
-    # Measurement.heigth_mask_channels()
-    # Measurement.display_channels()
-    Measurement.cut_channels(autocut=False) # autocut will remove all empty lines and columns
-    Measurement.display_channels()
-    # Measurement.display_all_subplots()
+    measurement = SnomMeasurement(directory_name, channels)
+    # measurement.cut_channels(autocut=False) # autocut will remove all empty lines and columns
+    measurement.cut_channels(coords=[[6, 8], [43, 41]]) # autocut will remove all empty lines and columns
+    measurement.display_channels()
+
+def test_height_masking():
+    directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
+    channels = ['O2P', 'O2A', 'Z C']
+    measurement = SnomMeasurement(directory_name, channels)
+    # measurement.scale_channels()
+    # measurement.gauss_filter_channels_complex()
+    # measurement.level_height_channels_3point(coords=[[42, 42], [84, 186], [184, 107]])
+    # measurement.set_min_to_zero(['Z C'])
+    # measurement.heigth_mask_channels(threshold=0.58)
+
+    measurement.set_min_to_zero(['Z C'])
+    measurement.level_height_channels_3point(coords=[[12, 9], [13, 43], [42, 34]])
+    # measurement.heigth_mask_channels()
+    # measurement.heigth_mask_channels(channels=['O2A'], threshold=0.45)
+    measurement.heigth_mask_channels(threshold=0.45)
+    measurement.display_channels()
+    # measurement.cut_channels(autocut=False) # autocut will remove all empty lines and columns
+    # measurement.cut_channels(coords=[[6, 8], [43, 41]]) # autocut will remove all empty lines and columns
+    # measurement.display_channels()
+    # measurement.display_all_subplots()
 
 def test_scalebar():
-    directory_name = 'example_measurements/2022-04-25 1227 PH pentamer_840nm_s50_2'
+    directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
     channels = ['O2P', 'O2A', 'Z C']
-    # Measurement = SnomMeasurement(directory_name, channels)
-    Measurement = SnomMeasurement(directory_name, channels)
-    Measurement.scalebar(['Z C'], length_fraction=0.5)
-    Measurement.display_channels()
-    Measurement.scale_channels()
-    Measurement.gauss_filter_channels_complex()
-    Measurement.scalebar(['Z C'], length_fraction=0.5)
-    # Measurement.cut_channels()
-    Measurement.display_channels()    
-    Measurement.display_all_subplots()
+    measurement = SnomMeasurement(directory_name, channels)
+    measurement.scalebar(['Z C'], length_fraction=0.5)
+    measurement.display_channels()
+    measurement.scale_channels()
+    measurement.gauss_filter_channels_complex()
+    measurement.scalebar(['Z C'], length_fraction=0.5)
+    measurement.cut_channels(coords=[[20, 29], [174, 167]])
+    measurement.display_channels()    
+    measurement.display_all_subplots()
     
 def test_phaseshift():
-    # directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
-    directory_name = 'tests/testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
-    
-    channels = ['O2P', 'O3P', 'O2A', 'Z C']
+    directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
+    channels = ['O2P', 'O2A', 'Z C']
     # PlotDefinitions.full_phase_range = False
-    PlotDefinitions.shared_phase_range = False
-    # channels = ['O2P_manipulated', 'O3P_manipulated', 'O2A', 'Z C']
-    # Measurement = SnomMeasurement(directory_name, channels)
-    Measurement = SnomMeasurement(directory_name, channels)
-    Measurement.scale_channels()
-    # Measurement.gauss_filter_channels_complex()
-    Measurement.display_channels()
-    Measurement.shift_phase()
-    # Measurement.shift_phase(1.96)
-    Measurement.display_channels()
-    # Measurement.remove_subplots([2,3,6,7])
-    # Measurement.display_all_subplots()
+    # PlotDefinitions.shared_phase_range = False
+    measurement = SnomMeasurement(directory_name, channels)
+    # measurement.scale_channels()
+    # measurement.gauss_filter_channels_complex()
+    measurement.display_channels()
+    # measurement.shift_phase()
+    measurement.shift_phase(shift=4.82)
+    measurement.display_channels()
+    measurement.display_all_subplots()
 
 def compare_measurements():
     channels = ['O2A', 'O2P', 'Z C']
     measurement_titles = ['measurment1: ', 'measurement2: '] # the measurment title just precedes the generic subplot titles
+    directories = ['tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1', 'tests/testdata/2022-04-25 1227 PH pentamer_840nm_s50_2']
     PlotDefinitions.autodelete_all_subplots = False # keep subplots from previous measurement in memory!
     N = 2
     for i in range(N):
-        # directory_name = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2022_07_27')
-        directory_name = filedialog.askdirectory(initialdir='tests/testdata')
+        # directory_name = filedialog.askdirectory(initialdir='tests/testdata')
+        directory_name = directories[i]
         measurement_title = measurement_titles[i]
-        Measurement = SnomMeasurement(directory_name, channels, measurement_title)
-        Measurement.display_channels()
-
-    Measurement.display_all_subplots()
-
-def test_rectangle_selector():
-    directory_name = 'tests/testdata/2022-04-25 1227 PH pentamer_840nm_s50_2'
-    channels = ['O2P', 'O2A', 'Z C']
-    Measurement = SnomMeasurement(directory_name, channels)
-    Measurement.display_channels()
-    # print('Select a rectangle in the plot')
-    Measurement.cut_channels(reset_mask=True)
-    Measurement.display_channels()
-    Measurement.display_all_subplots()
+        measurement = SnomMeasurement(directory_name, channels, measurement_title)
+        if i == 0:
+            # just to make shure plot memory is cleared before the first measurement is displayed
+            measurement._delete_all_subplots()
+        measurement.display_channels()
+    # display measurements
+    measurement.display_all_subplots()
 
 def correct_phase_drift():
-    directory_name = 'tests/testdata/2020-03-04 1810 PH Arrow EFM Tip 9K_815nm_hires'
+    directory_name = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
+    # the linear slope is not sufficient in this case, we need a nonlinear correction to do better
     channels = ['O2P', 'O3P', 'Z C']
-    Measurement = SnomMeasurement(directory_name, channels)
-    Measurement.display_channels()
-    Measurement.shift_phase()
-    Measurement.display_channels()
-    Measurement.correct_phase_drift()
-    Measurement.display_channels()
-    Measurement.shift_phase()
-    Measurement.display_channels()
-    Measurement.display_all_subplots()
+    measurement = SnomMeasurement(directory_name, channels)
+    # measurement.display_channels()
+    # measurement.shift_phase()
+    measurement.display_channels()
+    # measurement.correct_phase_drift(zone=2)
+    measurement.correct_phase_drift(phase_slope=0.016)
+    measurement.display_channels()
+    measurement.display_all_subplots()
+
+def correct_phase_drift_nonlinear():
+    directory_name = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
+    # the linear slope is not sufficient in this case, we need a nonlinear correction to do better
+    channels = ['O2P', 'O3P', 'Z C']
+    measurement = SnomMeasurement(directory_name, channels)
+    # measurement.display_channels()
+    # measurement.shift_phase()
+    measurement.display_channels()
+    # measurement.correct_phase_drift(zone=2)
+    measurement.correct_phase_drift_nonlinear()
+    measurement.display_channels()
+    measurement.display_all_subplots()
     
 def synccorrection():
-    # directory_name = 'tests/testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
-    directory_name = 'tests/testdatats/2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R'
+    directory_name = 'tests/testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
     channels = ['O2P', 'O2A', 'Z C']
-    # channels = ['O2P_corrected', 'O2A', 'Z C']
-    # channels = ['O2Re_corrected', 'O2A', 'Z C']
-    Measurement = SnomMeasurement(directory_name, channels, autoscale=False)
-    Measurement.synccorrection(1.6)
-    # Measurement.display_channels(['O2Re_corrected', 'O2A', 'Z C'])
-    Measurement.display_channels(['O2A', 'Z C'])
-
-def complete_example_1():
-    # examples from aachen group Taubner
-    # directory_name = 'example_measurements/2022-07-07_16-10-33_scan_AaronLukas_2D_4x4_array' # version unknown, .dump files
-    # directory_name = 'example_measurements/2018-09-10_16-44-27_scan' # version unknown, .dump files and .ascii files
-    # channels = ['O2-F-abs', 'O2-F-arg', 'MT-F-abs']
-    # own examples from Bonn for different software versions
-    # directory_name = 'example_measurements/2018-02-09 1506 PH dt20nmwindow1' # version 1.6.3359.1
-    # directory_name = 'example_measurements/2022-04-25 1227 PH pentamer_840nm_s50_2' # version 1.8.5017.0
-    # directory_name = 'example_measurements/2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R' # version 1.8.5017.0
-    directory_name = 'example_measurements/2024-10-24 104052 PH wg_wv_No3_15slits_pol45deg_anal90deg_fine' # version 1.10.9592.0
-    channels = ['O2P', 'O2A', 'Z C']
-
-    Measurement = SnomMeasurement(directory_name, channels)
-    # Measurement.set_min_to_zero(['Z C'])
-    # Measurement.display_channels()
-    # Measurement.scale_channels()
-    Measurement.gauss_filter_channels_complex()
-    # Measurement.shift_phase()
-    # Measurement.heigth_mask_channels()
-    Measurement.scalebar([channels[-1]])
-    Measurement.display_channels()
-    # Measurement.cut_channels(autocut=True) # autocut will remove all empty lines and columns
-    # Measurement.display_channels()
-    # Measurement.display_all_subplots()
-    # Measurement._export_all_subplots()
+    measurement = SnomMeasurement(directory_name, channels, autoscale=False)
+    # measurement.synccorrection(wavelength=1.6)
+    measurement.synccorrection(wavelength=1.6, phasedir=1)
+    # measurement.display_channels(['O2Re_corrected', 'O2A', 'Z C'])
+    measurement.initialize_channels(['O2P_corrected', 'O2A', 'Z C'])
+    measurement.display_channels()
 
 def test_aachen_files():
-    # File_Definitions.file_type = File_Type.aachen_gsf
-    # File_Definitions.file_type = File_Type.aachen_ascii
-    # File_Definitions.parmeters_type = File_Type.txt
+    # limited support for aachen files, only ascii files are supported, could not load .dump files
     channels = ['O2-F-abs', 'O2-F-arg', 'MT-F-abs']
-    # directory_name = '2018-09-10_16-44-27_scan'
-    # directory_name = 'example_measurements/2022-07-07_16-10-33_scan_AaronLukas_2D_4x4_array'
-    directory_name = 'example_measurements/2018-09-10_16-44-27_scan'
+    directory_name = 'tests/testdata/2018-09-10_16-44-27_scan'
 
-    Measurement = SnomMeasurement(directory_name, channels)
+    measurement = SnomMeasurement(directory_name, channels)
     PlotDefinitions.full_phase_range = False
-    # Measurement.display_channels()
-    # Measurement.set_min_to_zero()
-    # Measurement.scale_channels()
-    # Measurement.gauss_filter_channels_complex() # will blurr the complex values of the specified channels, if optical
-    Measurement.scalebar(['MT-F-abs'])
-    Measurement.display_channels()
-    # Measurement.gauss_filter_channels() # not ideal, will just blurr all channels independently
-    # Measurement.correct_phase_drift()
-    # Measurement.shift_phase()
-    # Measurement.heigth_mask_channels()
-    # Measurement.fourier_filter_channels()
-    # Measurement.cut_channels()
-    # Measurement.set_min_to_zero(['MT-F-abs'])
-    # Measurement.level_height_channels()
-    # Measurement.display_channels()
-    # Measurement.remove_subplots([1])
-    # Measurement.remove_last_subplots(2)
-    # Measurement.display_all_subplots()
-    # Measurement.switch_supplots(2, 3)
-    # Measurement.display_all_subplots()
+    # measurement.display_channels()
+    # measurement.set_min_to_zero()
+    # measurement.scale_channels()
+    # measurement.gauss_filter_channels_complex() # will blurr the complex values of the specified channels, if optical
+    measurement.scalebar(['MT-F-abs'])
+    measurement.display_channels()
+    # measurement.gauss_filter_channels() # not ideal, will just blurr all channels independently
+    # measurement.correct_phase_drift()
+    # measurement.shift_phase()
+    # measurement.heigth_mask_channels()
+    # measurement.fourier_filter_channels()
+    measurement.cut_channels()
+    # measurement.set_min_to_zero(['MT-F-abs'])
+    # measurement.level_height_channels()
+    measurement.display_channels()
+    # measurement.remove_subplots([1])
+    # measurement.remove_last_subplots(2)
+    # measurement.display_all_subplots()
+    # measurement.switch_supplots(2, 3)
+    # measurement.display_all_subplots()
 
 def test_export_to_gsf():
-    channels = ['O2-F-abs', 'O2-F-arg', 'MT-F-abs']
-    # directory_name = 'tests/testdata/2022-04-25 1227 PH pentamer_840nm_s50_2'
-    # channels = ['O2P', 'O2A', 'Z C']
-    directory_name = 'tests/testdata/2018-09-10_16-44-27_scan'
-    Measurement = SnomMeasurement(directory_name, channels)
-    # Measurement.set_min_to_zero(['Z C'])
-    Measurement.scale_channels()
-    Measurement.gauss_filter_channels_complex()
-    # Measurement.heigth_mask_channels()
-    Measurement.display_channels()
-    # Measurement.cut_channels(autocut=True) # autocut will remove all empty lines and columns
-    # Measurement.display_channels()
-    Measurement.display_all_subplots()
-    Measurement.save_to_gsf()
-
-def test_export_and_load_all_subplots():
-    directory_name = 'tests/testdata/2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R'
+    directory_name = 'tests/testdata/2022-04-25 1227 PH pentamer_840nm_s50_2'
     channels = ['O2P', 'O2A', 'Z C']
-    Measurement = SnomMeasurement(directory_name, channels)
-    Measurement.scale_channels()
-    Measurement.gauss_filter_channels_complex()
-    Measurement.scalebar(['Z C'])
-    Measurement.display_channels()
-    Measurement.display_channels()
-    Measurement.display_channels()
-    Measurement.display_channels()
-    Measurement.display_channels()
-    # Measurement._export_all_subplots()
-    # Measurement._load_all_subplots()
-    # Measurement.display_all_subplots()
-    # Measurement._delete_all_subplots()
+    measurement = SnomMeasurement(directory_name, channels)
+    measurement.scale_channels()
+    measurement.gauss_filter_channels_complex()
+    measurement.set_min_to_zero(['Z C'])
+    measurement.heigth_mask_channels(threshold=0.45)
+    measurement.cut_channels(autocut=True) # autocut will remove all empty lines and columns
+    measurement.display_channels()
+    measurement.save_to_gsf()
 
-def gif():
-    directory_name = 'tests/testdata/2024-03-14 112623 PH single_wg_lowest_long_interf_sync'
-    # directory_name =  'tests/testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
+def test_gif():
+    directory_name =  'tests/testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
     # directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
     channels = ['O2A', 'O2P_corrected', 'Z C']
-    Measurement = SnomMeasurement(directory_name, channels)
-    # Measurement.display_channels()
-    Measurement.rotate_90_deg(orientation='left')
-    # Measurement.gauss_filter_channels_complex()
-    Measurement.create_gif('O2A', 'O2P_corrected', frames=20, fps=10, dpi=100)
-    # Measurement.create_gif_V2('O2A', 'O2P_corrected', 20, 10)
-    # Measurement.create_gif_Old('O2A', 'O2P_corrected', 20, 10)
+    measurement = SnomMeasurement(directory_name, channels)
+    # measurement.display_channels()
+    # measurement.rotate_90_deg(orientation='left')
+    # measurement.gauss_filter_channels_complex()
+    measurement.create_gif('O2A', 'O2P_corrected', frames=20, fps=10, dpi=100)
+    # measurement.create_gif_V2('O2A', 'O2P_corrected', 20, 10)
+    # measurement.create_gif_Old('O2A', 'O2P_corrected', 20, 10)
 
 def test_3d_scan():
     # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 144100 PH 3D single_wg_20mu_3d'
@@ -309,13 +276,13 @@ def test_3d_scan():
     # measurement.display_cutplane_V2_Realpart(axis='x', line=0, demodulation=3)
     measurement.generate_all_cutplane_data()
     measurement.match_phase_offset(channels=['O2P', 'O3P'], reference_channel='O2P', reference_area='manual', manual_width=3)
-    measurement.display_cutplane_v3(axis='x', line=0, channel='O2P')
-    measurement.display_cutplane_v3(axis='x', line=0, channel='O3P')
+    measurement.display_cutplanes(axis='x', line=0, channels=['O2P'])
+    measurement.display_cutplanes(axis='x', line=0, channels=['O3P'])
     measurement.shift_phase()
-    measurement.display_cutplane_v3(axis='x', line=0, channel='O2P')
-    measurement.display_cutplane_v3(axis='x', line=0, channel='O3P')
-    measurement.display_cutplane_v3_realpart(axis='x', line=0, demodulation=2)
-    measurement.display_cutplane_v3_realpart(axis='x', line=0, demodulation=3)
+    measurement.display_cutplanes(axis='x', line=0, channels=['O2P'])
+    measurement.display_cutplanes(axis='x', line=0, channels=['O3P'])
+    measurement.display_cutplane_realpart(axis='x', line=0, demodulation=2)
+    measurement.display_cutplane_realpart(axis='x', line=0, demodulation=3)
 
 def phase_correction_3d_scan():
     directory = 'C:/Users/hajos/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
@@ -326,13 +293,13 @@ def phase_correction_3d_scan():
     PlotDefinitions.colorbar_width = 3
     measurement.generate_all_cutplane_data()
     measurement.match_phase_offset(channels=['O2P', 'O3P'], reference_channel='O2P', reference_area='manual', manual_width=3)
-    measurement.display_cutplane_v3(axis='x', line=0, channel='O2P')
-    measurement.display_cutplane_v3(axis='x', line=0, channel='O3P')
+    measurement.display_cutplanes(axis='x', line=0, channels=['O2P'])
+    measurement.display_cutplanes(axis='x', line=0, channels=['O3P'])
     measurement.shift_phase()
-    measurement.display_cutplane_v3(axis='x', line=0, channel='O2P')
-    measurement.display_cutplane_v3(axis='x', line=0, channel='O3P')
-    measurement.display_cutplane_v3_realpart(axis='x', line=0, demodulation=2)
-    measurement.display_cutplane_v3_realpart(axis='x', line=0, demodulation=3)
+    measurement.display_cutplanes(axis='x', line=0, channels=['O2P'])
+    measurement.display_cutplanes(axis='x', line=0, channels=['O3P'])
+    measurement.display_cutplane_realpart(axis='x', line=0, demodulation=2)
+    measurement.display_cutplane_realpart(axis='x', line=0, demodulation=3)
 
 def average_3d_scan():
     # directory = 'C:/Users/hajos/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
@@ -343,24 +310,24 @@ def average_3d_scan():
     measurement.set_min_to_zero()
     PlotDefinitions.colorbar_width = 3
     # measurement.generate_all_cutplane_data()
-    # measurement.display_cutplane_V3(axis='x', line=0, channel='O2A')
-    # measurement.display_cutplane_V3(axis='x', line=0, channel='O2P')
-    # measurement.display_cutplane_V3(axis='x', line=0, channel='O3A')
-    # measurement.display_cutplane_V3(axis='x', line=0, channel='O3P')
+    # measurement.display_cutplanes(axis='x', line=0, channels=['O2A'])
+    # measurement.display_cutplanes(axis='x', line=0, channels=['O2P'])
+    # measurement.display_cutplanes(axis='x', line=0, channels=['O3A'])
+    # measurement.display_cutplanes(axis='x', line=0, channels=['O3P'])
     measurement.average_data()
-    # measurement.display_cutplane_V3(axis='x', line=0, channel='O2A')
-    # measurement.display_cutplane_V3(axis='x', line=0, channel='O2P')
-    # measurement.display_cutplane_V3(axis='x', line=0, channel='O3A')
-    # measurement.display_cutplane_V3(axis='x', line=0, channel='O3P')
+    # measurement.display_cutplanes(axis='x', line=0, channels=['O2A'])
+    # measurement.display_cutplanes(axis='x', line=0, channels=['O2P'])
+    # measurement.display_cutplanes(axis='x', line=0, channels=['O3A'])
+    # measurement.display_cutplanes(axis='x', line=0, channels=['O3P'])
 
     measurement.match_phase_offset(channels=['O2P', 'O3P'], reference_channel='O2P', reference_area='manual', manual_width=3)
-    measurement.display_cutplane_v3(axis='x', line=0, channel='O2P')
-    measurement.display_cutplane_v3(axis='x', line=0, channel='O3P')
+    measurement.display_cutplanes(axis='x', line=0, channels=['O2P'])
+    measurement.display_cutplanes(axis='x', line=0, channels=['O3P'])
     measurement.shift_phase()
-    measurement.display_cutplane_v3(axis='x', line=0, channel='O2P')
-    measurement.display_cutplane_v3(axis='x', line=0, channel='O3P')
-    measurement.display_cutplane_v3_realpart(axis='x', line=0, demodulation=2)
-    measurement.display_cutplane_v3_realpart(axis='x', line=0, demodulation=3)
+    measurement.display_cutplanes(axis='x', line=0, channels=['O2P'])
+    measurement.display_cutplanes(axis='x', line=0, channels=['O3P'])
+    measurement.display_cutplane_realpart(axis='x', line=0, demodulation=2)
+    measurement.display_cutplane_realpart(axis='x', line=0, demodulation=3)
 
 def test_phase_drift_correction():
     # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-23 113254 PH single_wv-on-wg_long'
@@ -538,11 +505,11 @@ def test_config():
     directory_name = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo')
     # directory_name = 'example_measurements/DLSPPW_bragg_8slits_Ex_ongold' # comsol
 
-    Measurement = SnomMeasurement(directory_name, channels)
-    Measurement.display_channels()
-    # Measurement._create_default_config()
-    # Measurement._print_measurement_tags()
-    # Measurement._print_config()
+    measurement = SnomMeasurement(directory_name, channels)
+    measurement.display_channels()
+    # measurement._create_default_config()
+    # measurement._print_measurement_tags()
+    # measurement._print_config()
 
 def test_approach_curve():
     directory_name = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo')
@@ -709,6 +676,36 @@ def example_snommeasurement_3():
     # You can also compare the data before and after the modifications.
     # measurement.display_all_subplots()
 
+def example_snommeasurement_4():
+    """This is an example of how to create a realpart gif.
+    """
+    # Load the main functionality from the package, in this case the SnomMeasurement class.
+    from snom_analysis.main import SnomMeasurement, PlotDefinitions
+    PlotDefinitions.colorbar_width = 4 # colorbar width for long thin measurements looks too big
+
+    # Open a file dialog to select the measurement folder.
+    # directory = filedialog.askdirectory() # for documentation purposes
+    directory = data_path_3
+
+    # Create an instance of the SnomMeasurement class by providing the path to the measurement folder.
+    # If we want to apply the synccorrection we need to set autoscale to False.
+    measurement = SnomMeasurement(directory, autoscale=False)
+
+    # Plot the data without any modifications.
+    measurement.display_channels()
+
+    # Apply the synccorrection to the data. But we don't know the direction yet. The interferometer sometimes goes in the wron direction.
+    # This will create corrected channels and save them as .gsf with the appendix '_corrected'.
+    # measurement.synccorrection(1.6) # for chiral coupler
+    measurement.synccorrection(0.97)
+
+    # We want to use the corrected channels, so we reinitialize the channels with the corrected channels.
+    measurement.autoscale = True
+    measurement.initialize_channels(['O2A', 'O2P_corrected'])
+
+    # create a gif of the realpart of the O2A channel and the O2P_corrected channel.
+    measurement.create_gif('O2A', 'O2P_corrected', frames=20, fps=10, dpi=100)
+    
 def example_approachcurve_1():
     # Import filedialog to open a file dialog to select the measurement folder.
     from tkinter import filedialog
@@ -812,20 +809,18 @@ def example_scan3d_2():
 
 def main():
      
-    # realign()
-    cut_masked()
-    # test_scalebar()
+    # test_realign()
+    # test_cut()
+    # test_height_masking()
+    test_scalebar()
     # test_phaseshift()
     # compare_measurements()
-    # test_rectangle_selector()
     # correct_phase_drift()
+    # correct_phase_drift_nonlinear()
     # synccorrection()
-    # complete_example_1()
     # test_aachen_files()
     # test_export_to_gsf()
-
-    # test_export_and_load_all_subplots()
-    # gif()
+    # test_gif()
     # test_3d_scan()
     # phase_correction_3d_scan()
     # average_3d_scan()
@@ -848,6 +843,7 @@ def main():
     # example_snommeasurement_1()
     # example_snommeasurement_2()
     # example_snommeasurement_3()
+    # example_snommeasurement_4()
     # example_approachcurve_1()
     # example_scan3d_1()
     # example_scan3d_2()
