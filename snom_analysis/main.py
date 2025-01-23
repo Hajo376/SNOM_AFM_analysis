@@ -3,9 +3,10 @@
 ##########################################################################
 # This code was created by Hans-Joachim Schill, University of Bonn, 2022 #
 ##########################################################################
-from scipy.ndimage import gaussian_filter
+
+from scipy.ndimage import gaussian_filter # one could implement a bunch more filters
 from scipy.optimize import curve_fit
-from struct import *
+from struct import unpack, pack
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_point_clicker import clicker# used for getting coordinates from images
@@ -13,15 +14,14 @@ from matplotlib_scalebar.scalebar import ScaleBar # used for creating scale bars
 from matplotlib import patches # used for creating rectangles 
 import numpy as np
 from datetime import datetime
-from enum import Enum, auto
 from pathlib import Path, PurePath
 import os
-import pickle as pkl
-import gc
-import json
+import pickle as pkl # for saving and loading pickle files, the plot memory is saved in a pickle file
+import gc # garbage collector to free memory
+import json # for saving and loading json files like the plotting parameters, easy to view and edit by the user
 import ast # for string to list, dict ... conversion
 # for gif creation
-import imageio
+import imageio # for creating/viewing gifs
 from matplotlib.animation import FuncAnimation
 # for old version
 from PIL import Image
@@ -39,113 +39,11 @@ from .lib import profile
 from .lib import phase_analysis
 from .lib.file_handling import get_parameter_values, find_index, convert_header_to_dict
 from .lib.profile_selector import select_profile
-
-# keep this for internal referencing
-class Definitions(Enum):
-    """This class keeps track of the implemented definitions."""
-    vertical = auto()
-    horizontal = auto()
-
-class MeasurementTags(Enum):
-    """This class keeps track of the implemented measurement tags. 
-    These are tags wich are measurement specific.
-    Only tags which are listed here can be used.
-    """
-    SCAN = auto()   # scan type, afm, snom, approach curve, 2d/3d, PsHet...
-    PROJECT = auto()   
-    DESCRIPTION = auto()   
-    DATE = auto()   
-    SCANNERCENTERPOSITION = auto()   
-    ROTATION = auto()   
-    SCANAREA = auto()  
-    PIXELAREA = auto()   
-    AVERAGING = auto()   
-    INTEGRATIONTIME = auto()   
-    LASERSOURCE = auto()   
-    DETECTOR = auto()   
-    TARGETWAVELENGTH = auto()    
-    DEMODULATIONMODE = auto()   
-    TIPFREQUENCY = auto()   
-    TIPAMPLITUTDE = auto()   
-    TAPPINGAMPLITUDE = auto()   
-    MODULATIONFREQUENCY = auto()   
-    MODULATIONAMPLITUDE = auto()   
-    MODULATIONOFFSET = auto()   
-    SETPOINT = auto()   
-    REGULATOR = auto()   
-    TIPPOTENTIAL = auto()   
-    M1ASCALING = auto()  
-    QFACTOR = auto()   
-    VERSION = auto()   
-
-class ChannelTags(Enum):
-    """This class keeps track of the implemented channel tags.
-    These are tags which are channel specific.
-    So multiple channels might have varying channel tag values but
-    they will share the same measurement tag values. However, the 
-    current channel tag values are always to prefer over the same measurement tag value.
-    As the channel tag values change when the channel is manipulated.
-    """
-    PIXELAREA = auto()  
-    YINCOMPLETE = auto() 
-    SCANNERCENTERPOSITION = auto()   
-    ROTATION = auto()   
-    SCANAREA = auto()  
-    XYUNIT = auto()
-    ZUNIT = auto()
-    WAVENUMBERSCALING = auto()
-    # additional tags
-    PIXELSCALING = auto()
-    # additional for aachen files (.dump)
-    # INTEGRATIONTIME = auto()
-    # TIPFREQUENCY = auto()
-    # MODULATIONFREQUENCY = auto()
-    # TAPPINGAMPLITUDE = auto()
-    # MODULATIONOFFSET = auto()
-    # SETPOINT = auto()
-    
-class PlotDefinitions:
-    """This class contains all the definitions for the plotting parameters.
-    """
-    hide_ticks = True
-    figsizex = 10
-    figsizey = 5
-    show_titles = True
-    tight_layout = True
-    colorbar_width = 10 # in percent, standard is 5 or 10
-    hspace = 0.4 #standard is 0.4
-    # Define Plot font sizes
-    font_size_default = 8
-    font_size_axes_title = 12
-    font_size_axes_label = 10
-    font_size_tick_labels = 8
-    font_size_legend = 8
-    font_size_fig_title = 12
-    #definitions for color bar ranges:
-    # using the same range for all channels is useful for comparison
-    # make all height channels have the same range?
-    height_cbar_range = False
-    vmin_height = None
-    vmax_height = None
-    # make all amplitude channels have the same range?
-    amp_cbar_range = False
-    vmin_amp = None#1 # to make shure that the values will be initialized with the first plotting command
-    vmax_amp = None#-1
-    # phase_cbar_range = True
-    # plot the full 2pi range for the phase channels no matter what the actual data range is?
-    full_phase_range = True # this will overwrite the cbar
-    # make all phase channels have the same range?
-    shared_phase_range = False # only used if full phase range is false
-    vmin_phase = None
-    vmax_phase = None
-    real_cbar_range = True
-    vlimit_real = None
-    # vmin_real = None
-    # vmax_real = None
-    # show plot automatically? turn to false for gui programming
-    show_plot = True
-    autodelete_all_subplots = True # if true old subplots will be deleted on creation of new measurement
-    
+# import additional functions
+from .lib.additional_functions import set_nan_to_zero, gauss_function, get_largest_abs
+# import definitions such as measurement and channel tags
+from .lib.definitions import Definitions, MeasurementTags, ChannelTags, PlotDefinitions
+ 
 # new version is based on filehandler to do basic stuff and then a class for each different measurement type like snom/afm, approach curves, spectra etc.
 class FileHandler(PlotDefinitions):
     """This class handles the filetype and parameter type and all toplevel functionality.
@@ -1623,6 +1521,8 @@ class FileHandler(PlotDefinitions):
                     
             self.channel_tag_dict.append(channel_dict)
 
+# this could be split in AFM and SNOM measurement classes where AFM has all the base functions and SNOM inherits from it
+# make it easier for AFM users to finde the functions they need
 class SnomMeasurement(FileHandler):
     """This class opens a snom measurement and handels all the snom related functions.
     
@@ -1842,7 +1742,7 @@ class SnomMeasurement(FileHandler):
             for y in range(0,YRes):
                 for x in range(0,XRes):
                     if read_mode == 'br':
-                        pixval=unpack("f",reduced_binarydata[4*(y*XRes+x):4*(y*XRes+x+1)])[0]
+                        pixval = unpack("f",reduced_binarydata[4*(y*XRes+x):4*(y*XRes+x+1)])[0]
                         channel_data[y][x] = round(pixval*scaling + phase_offset, rounding_decimal)
                     elif read_mode == 'r':
                         datalist[y][x] = round(datalist[y][x]*scaling + phase_offset, rounding_decimal)
@@ -2091,8 +1991,8 @@ class SnomMeasurement(FileHandler):
                     max_data = np.max(flattened_data)
                     if self.real_indicator in title or self.imag_indicator in title: # for real part or imaginary part data
                         if self.file_type == 'FILETYPE6':
-                            data = Set_nan_to_zero(data) #comsol data can contain nan values which are problematic for min and max
-                        data_limit = Get_Largest_Abs(min_data, max_data)
+                            data = set_nan_to_zero(data) #comsol data can contain nan values which are problematic for min and max
+                        data_limit = get_largest_abs(min_data, max_data)
                         if PlotDefinitions.vlimit_real is None: PlotDefinitions.vlimit_real = data_limit
                         if PlotDefinitions.real_cbar_range is True:
                             if PlotDefinitions.vlimit_real < data_limit: PlotDefinitions.vlimit_real = data_limit
@@ -6113,25 +6013,3 @@ class Scan3D(FileHandler):
         self._set_measurement_tag_dict_value(MeasurementTags.PIXELAREA, [XRes+max_shift, YRes, ZRes])
 
 
-
-
-
-# could be exported to external file
-
-def Set_nan_to_zero(data) -> np.array:
-    xres = len(data[0])
-    yres = len(data)
-    for y in range(yres):
-        for x in range(xres):
-            if str(data[y][x]) == 'nan':
-                data[y][x] = 0
-    return data       
-
-# needed for the realign function
-def gauss_function(x, A, mu, sigma, offset):
-    return A*np.exp(-(x-mu)**2/(2.*sigma**2)) + offset
-
-def Get_Largest_Abs(val1, val2):
-    if abs(val1) > abs(val2): return abs(val1)
-    else: return abs(val2)
-# not in use, delete?

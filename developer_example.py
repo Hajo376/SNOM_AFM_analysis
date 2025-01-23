@@ -1,12 +1,15 @@
 ##########################################################################
 # This code was created by Hans-Joachim Schill, University of Bonn, 2022 #
 ##########################################################################
+
 import tkinter as tk
 from tkinter import filedialog
 import pathlib
 this_files_path = pathlib.Path(__file__).parent.absolute()
 
-from snom_analysis.main import*
+# from snom_analysis.main import*
+from snom_analysis.main import SnomMeasurement, ApproachCurve, Scan3D
+from snom_analysis.lib.definitions import Definitions, MeasurementTags, ChannelTags, PlotDefinitions
 
 '''
 This is an example script of how to use this package to display and manipulate example data.
@@ -140,7 +143,7 @@ def compare_measurements():
     N = 2
     for i in range(N):
         # directory_name = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2022_07_27')
-        directory_name = filedialog.askdirectory(initialdir='testdata')
+        directory_name = filedialog.askdirectory(initialdir='tests/testdata')
         measurement_title = measurement_titles[i]
         Measurement = SnomMeasurement(directory_name, channels, measurement_title)
         Measurement.display_channels()
@@ -148,7 +151,7 @@ def compare_measurements():
     Measurement.display_all_subplots()
 
 def test_rectangle_selector():
-    directory_name = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2022-04-25 1227 PH pentamer_840nm_s50_2'
+    directory_name = 'tests/testdata/2022-04-25 1227 PH pentamer_840nm_s50_2'
     channels = ['O2P', 'O2A', 'Z C']
     Measurement = SnomMeasurement(directory_name, channels)
     Measurement.display_channels()
@@ -158,7 +161,7 @@ def test_rectangle_selector():
     Measurement.display_all_subplots()
 
 def correct_phase_drift():
-    directory_name = 'example_measurements/2020-03-04 1810 PH Arrow EFM Tip 9K_815nm_hires'
+    directory_name = 'tests/testdata/2020-03-04 1810 PH Arrow EFM Tip 9K_815nm_hires'
     channels = ['O2P', 'O3P', 'Z C']
     Measurement = SnomMeasurement(directory_name, channels)
     Measurement.display_channels()
@@ -171,8 +174,8 @@ def correct_phase_drift():
     Measurement.display_all_subplots()
     
 def synccorrection():
-    # directory_name = 'example_measurements/2020-01-08 1337 PH denmark_skurve_02_synchronize'
-    directory_name = 'example_measurements/2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R'
+    # directory_name = 'tests/testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
+    directory_name = 'tests/testdatats/2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R'
     channels = ['O2P', 'O2A', 'Z C']
     # channels = ['O2P_corrected', 'O2A', 'Z C']
     # channels = ['O2Re_corrected', 'O2A', 'Z C']
@@ -241,9 +244,9 @@ def test_aachen_files():
 
 def test_export_to_gsf():
     channels = ['O2-F-abs', 'O2-F-arg', 'MT-F-abs']
-    # directory_name = 'example_measurements/2022-04-25 1227 PH pentamer_840nm_s50_2'
+    # directory_name = 'tests/testdata/2022-04-25 1227 PH pentamer_840nm_s50_2'
     # channels = ['O2P', 'O2A', 'Z C']
-    directory_name = 'example_measurements/2018-09-10_16-44-27_scan'
+    directory_name = 'tests/testdata/2018-09-10_16-44-27_scan'
     Measurement = SnomMeasurement(directory_name, channels)
     # Measurement.set_min_to_zero(['Z C'])
     Measurement.scale_channels()
@@ -256,7 +259,7 @@ def test_export_to_gsf():
     Measurement.save_to_gsf()
 
 def test_export_and_load_all_subplots():
-    directory_name = 'example_measurements/2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R'
+    directory_name = 'tests/testdata/2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R'
     channels = ['O2P', 'O2A', 'Z C']
     Measurement = SnomMeasurement(directory_name, channels)
     Measurement.scale_channels()
@@ -273,9 +276,9 @@ def test_export_and_load_all_subplots():
     # Measurement._delete_all_subplots()
 
 def gif():
-    directory_name = 'C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-03-14-ssh-snom/2024-03-14 112623 PH single_wg_lowest_long_interf_sync'
-    # directory_name =  'C:/Users/Hajo/sciebo/Phd/python/SNOM/example_measurements/2020-01-08 1337 PH denmark_skurve_02_synchronize'
-    # directory_name = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2022-04-25 1212 PH pentamer_840nm_s50_1'
+    directory_name = 'tests/testdata/2024-03-14 112623 PH single_wg_lowest_long_interf_sync'
+    # directory_name =  'tests/testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
+    # directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
     channels = ['O2A', 'O2P_corrected', 'Z C']
     Measurement = SnomMeasurement(directory_name, channels)
     # Measurement.display_channels()
