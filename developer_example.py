@@ -8,7 +8,7 @@ import pathlib
 this_files_path = pathlib.Path(__file__).parent.absolute()
 
 # from snom_analysis.main import*
-from snom_analysis.main import SnomMeasurement, ApproachCurve, Scan3D
+from snom_analysis.main import SnomMeasurement, ApproachCurve, Scan3D, FileHandler
 from snom_analysis.lib.definitions import Definitions, MeasurementTags, ChannelTags, PlotDefinitions
 
 '''
@@ -302,12 +302,11 @@ def phase_correction_3d_scan():
     measurement.display_cutplane_realpart(axis='x', line=0, demodulation=3)
 
 def average_3d_scan():
-    # directory = 'C:/Users/hajos/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
-    directory = filedialog.askdirectory()
+    directory = 'tests/testdata/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
+    # directory = filedialog.askdirectory()
     channels = ['O2A', 'O2P', 'O3A', 'O3P', 'Z']
     # channels = ['Z']
     measurement = Scan3D(directory, channels)
-    measurement.set_min_to_zero()
     PlotDefinitions.colorbar_width = 3
     # measurement.generate_all_cutplane_data()
     # measurement.display_cutplanes(axis='x', line=0, channels=['O2A'])
@@ -315,19 +314,20 @@ def average_3d_scan():
     # measurement.display_cutplanes(axis='x', line=0, channels=['O3A'])
     # measurement.display_cutplanes(axis='x', line=0, channels=['O3P'])
     measurement.average_data()
+    measurement.set_min_to_zero()
     # measurement.display_cutplanes(axis='x', line=0, channels=['O2A'])
     # measurement.display_cutplanes(axis='x', line=0, channels=['O2P'])
     # measurement.display_cutplanes(axis='x', line=0, channels=['O3A'])
     # measurement.display_cutplanes(axis='x', line=0, channels=['O3P'])
 
-    measurement.match_phase_offset(channels=['O2P', 'O3P'], reference_channel='O2P', reference_area='manual', manual_width=3)
-    measurement.display_cutplanes(axis='x', line=0, channels=['O2P'])
+    # measurement.match_phase_offset(channels=['O2P', 'O3P'], reference_channel='O2P', reference_area='manual', manual_width=3)
+    measurement.display_cutplanes(axis='x', line=0, channels=['O2P'], auto_align=True)
     measurement.display_cutplanes(axis='x', line=0, channels=['O3P'])
-    measurement.shift_phase()
-    measurement.display_cutplanes(axis='x', line=0, channels=['O2P'])
-    measurement.display_cutplanes(axis='x', line=0, channels=['O3P'])
-    measurement.display_cutplane_realpart(axis='x', line=0, demodulation=2)
-    measurement.display_cutplane_realpart(axis='x', line=0, demodulation=3)
+    # measurement.shift_phase()
+    # measurement.display_cutplanes(axis='x', line=0, channels=['O2P'])
+    # measurement.display_cutplanes(axis='x', line=0, channels=['O3P'])
+    # measurement.display_cutplane_realpart(axis='x', line=0, demodulation=2)
+    # measurement.display_cutplane_realpart(axis='x', line=0, demodulation=3)
 
 def test_phase_drift_correction():
     # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-23 113254 PH single_wv-on-wg_long'
@@ -380,6 +380,7 @@ def test_channel_substraction():
     measurement.display_channels()
 
 def simple_afm_example():
+    import matplotlib.pyplot as plt
     directory = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-05-23-ssh-reflection')
     channels = ['Z C']
     measurement = SnomMeasurement(directory, channels, autoscale=False)
@@ -517,6 +518,12 @@ def test_approach_curve():
     measurement = ApproachCurve(directory_name, channels)
     measurement.set_min_to_zero()
     measurement.display_channels_v2()
+
+def test_find_measurement_type():
+    directory_name = 'tests/testdata/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
+    handler = FileHandler(directory_name)
+    print(handler.measurement_type)
+    print(handler.file_type)
 
 #########################################
 #### Examples used in documentation: ####
@@ -773,7 +780,7 @@ def example_scan3d_2():
     # directory = filedialog.askdirectory()
 
     # It is always a good idea to select the channels you want to use before loading the data.
-    channels = ['O2A', 'O2P', 'Z']
+    channels = ['O2A', 'O2P', 'O3A', 'O3P', 'Z']
 
     # Create an instance of the Scan3D class by providing the path to the measurement folder.
     # measurement = Scan3D(directory, channels)
@@ -792,19 +799,19 @@ def example_scan3d_2():
     measurement.match_phase_offset(channels=['O2P', 'O3P'], reference_channel='O2P', reference_area='manual', manual_width=3)
 
     # For example display just the first cutplane of the O2P channel. Then display the first cutplane of the O3P channel.
-    measurement.display_cutplane_v3(axis='x', line=0, channel='O2P')
-    measurement.display_cutplane_v3(axis='x', line=0, channel='O3P')
+    measurement.display_cutplanes(axis='x', line=0, channels=['O2P'])
+    measurement.display_cutplanes(axis='x', line=0, channels=['O3P'])
 
     # Shift the phase of the channels O2P and O3P by an arbitrary amount to make it visually clearer what you want to see.
     measurement.shift_phase()
 
     # Display the first cutplane again with all the changes applied.
-    measurement.display_cutplane_v3(axis='x', line=0, channel='O2P')
-    measurement.display_cutplane_v3(axis='x', line=0, channel='O3P')
+    measurement.display_cutplanes(axis='x', line=0, channels=['O2P'])
+    measurement.display_cutplanes(axis='x', line=0, channels=['O3P'])
 
     # Display the real part of the first cutplane of the O2 channel and the O3 channel.
-    measurement.display_cutplane_v3_realpart(axis='x', line=0, demodulation=2)
-    measurement.display_cutplane_v3_realpart(axis='x', line=0, demodulation=3)
+    measurement.display_cutplane_realpart(axis='x', line=0, demodulation=2)
+    measurement.display_cutplane_realpart(axis='x', line=0, demodulation=3)
 
 
 def main():
@@ -812,7 +819,7 @@ def main():
     # test_realign()
     # test_cut()
     # test_height_masking()
-    test_scalebar()
+    # test_scalebar()
     # test_phaseshift()
     # compare_measurements()
     # correct_phase_drift()
@@ -823,7 +830,7 @@ def main():
     # test_gif()
     # test_3d_scan()
     # phase_correction_3d_scan()
-    # average_3d_scan()
+    average_3d_scan()
     # test_phase_drift_correction()
     # test_amplitude_drift_correction()
     # test_height_drift_correction()
@@ -838,6 +845,7 @@ def main():
     # test_comsol_height_data()
     # test_config()
     # test_approach_curve()
+    # test_find_measurement_type()
 
     # examples for documentation
     # example_snommeasurement_1()

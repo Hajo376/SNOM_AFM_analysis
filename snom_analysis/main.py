@@ -42,7 +42,7 @@ from .lib.profile_selector import select_profile
 # import additional functions
 from .lib.additional_functions import set_nan_to_zero, gauss_function, get_largest_abs
 # import definitions such as measurement and channel tags
-from .lib.definitions import Definitions, MeasurementTags, ChannelTags, PlotDefinitions
+from .lib.definitions import Definitions, MeasurementTags, ChannelTags, PlotDefinitions, MeasurementTypes
 from .lib.height_masking import get_height_treshold
  
 # new version is based on filehandler to do basic stuff and then a class for each different measurement type like snom/afm, approach curves, spectra etc.
@@ -56,6 +56,7 @@ class FileHandler(PlotDefinitions):
         title (str, optional): The title of the measurement. Defaults to None.
     """
     def __init__(self, directory_name:str, title:str=None) -> None:
+        self.measurement_type = MeasurementTypes.NONE
         self.directory_name = Path(directory_name)
         self.filename = Path(PurePath(self.directory_name).parts[-1])
         self._generate_savefolder()
@@ -71,7 +72,6 @@ class FileHandler(PlotDefinitions):
         
         self._initialize_file_type()
         
-
     def _generate_savefolder(self):
         """Generate savefolder if not already existing. Careful, has to be the same one as for the snom plotter gui app.
         """
@@ -699,20 +699,29 @@ class FileHandler(PlotDefinitions):
             parameters_path = self.directory_name / Path(self.filename.name + parameters_name)
             # try to create the measurement tag dict
             succsess = self._create_measurement_tag_dict(parameters_path, filetype)
+            # if succsess:
+            #     print('measurement tag dict: ', self.measurement_tag_dict)
             # the correct creation of teh measurement tag dict is not enough to determine the filetype
             # try to also to create the channel tag dict for one arbitrary channel
             # self._initialize_file_type()
             self.file_type = filetype
             self._initialize_measurement_channel_indicators()
-            # height_channel = self._get_from_config('height_channel', filetype)
+            # amp_channel = self._get_from_config('amp_channels', filetype)[0]
             # try to create the channel tag dict, if it fails the filetype is not correct
             # print('Trying to create channel tag dict')
             # print('all_channels_default[0]: ', self.all_channels_default[0])
             # print('filetype: ', filetype)
             # print('succsess: ', succsess)
-            try: self._create_channel_tag_dict([self.all_channels_default[0]])
-            except: 
-                succsess = False
+            # this approach does not work for comsol files, approach curves and 3d scans
+            # print('measurement_type: ', self.measurement_type)
+            # in case the Filehandler was called directly the measurement type is not set yet
+            # try to find the measurement type
+            if self.measurement_type == MeasurementTypes.NONE:
+                self._find_measurement_type()
+            if self.measurement_type == MeasurementTypes.SNOM:
+                try: self._create_channel_tag_dict([self.all_channels_default[0]])
+                except: 
+                    succsess = False
             self.file_type = None
             if succsess:
                 # the correct filetype has been found
@@ -723,8 +732,35 @@ class FileHandler(PlotDefinitions):
 
         # if no filetype was found return False
         print('No filetype was found!')
+        exit()
         return False
-            
+
+    def _find_measurement_type(self) -> None:
+        # print('Trying to find the measurement type')
+        if self.file_type != None:
+            try:
+                # not every filetype has a scan type
+                scan_type = self.measurement_tag_dict[MeasurementTags.SCAN]
+            except:
+                # scan_type = None
+                # self.plotting_mode = MeasurementTypes.NONE
+                # todo, not all filetypes have a scan type, use additional ways to identify the measurement type
+                # for now assume, that all files without a scan type are standard snom measurements
+                self.measurement_type = MeasurementTypes.SNOM
+            else:
+                if 'Approach Curve' in scan_type:
+                    self.measurement_type = MeasurementTypes.APPROACHCURVE
+                elif '3D' in scan_type:
+                    self.measurement_type = MeasurementTypes.SCAN3D
+                elif 'Spectrum' in scan_type: # todo, not implemented yet
+                    self.measurement_type = MeasurementTypes.SPECTRUM
+                else:
+                    self.measurement_type = MeasurementTypes.SNOM
+        else:
+            print('Could not identify the measurement type!')
+            self.measurement_type = MeasurementTypes.NONE
+        # print('Measurement type: ', self.measurement_type)
+
     def _initialize_logfile(self) -> str:
         # logfile_path = self.directory_name + '/python_manipulation_log.txt'
         logfile_path = self.directory_name / Path('python_manipulation_log.txt')
@@ -1526,7 +1562,10 @@ class FileHandler(PlotDefinitions):
             elif self.file_ending == '.ascii':
                 encod = 'latin1'
             else:
-                print('file ending not supported')
+                pass
+                # not necessarily a problem, since the creation of the channel tag dict is also a test if the correct filetype was found
+                # print('file ending not supported')
+                # print('in _create_channel_tag_dict')
             with open(self.directory_name / Path(self.filename.name + f'{prefix}{channel}{suffix}{self.file_ending}'), 'r', encoding=encod) as f:
                 content=f.read()
 
@@ -1615,6 +1654,7 @@ class SnomMeasurement(FileHandler):
     """
     all_subplots = [] # list containing all subplots
     def __init__(self, directory_name:str, channels:list=None, title:str=None, autoscale:bool=True) -> None:
+        self.measurement_type = MeasurementTypes.SNOM
         super().__init__(directory_name, title)
         self._initialize_measurement_channel_indicators()
         if channels == None: # the standard channels which will be used if no channels are specified
@@ -5167,6 +5207,7 @@ class ApproachCurve(FileHandler):
         title (str, optional): Title of the measurement. Defaults to None.
     """
     def __init__(self, directory_name:str, channels:list=None, title:str=None) -> None:
+        self.measurement_type = MeasurementTypes.APPROACHCURVE
         if channels == None:
             channels = ['M1A']
         self.channels = channels.copy()
@@ -5345,9 +5386,10 @@ class Scan3D(FileHandler):
         title (str, optional): Title of the measurement. Defaults to None.
     """
     def __init__(self, directory_name: str, channels:list=None, title: str = None) -> None:
+        self.measurement_type = MeasurementTypes.SCAN3D
         # set channelname if none is given
         if channels == None:
-            channels = ['Z', 'O2A'] # if you want to plot approach curves 'Z' must be included!
+            channels = ['Z', 'O2A', 'O2P'] # if you want to plot approach curves 'Z' must be included!
         self.channels = channels.copy()
         self.x_channel = 'Z'
         # call the init constructor of the filehandler class
@@ -5355,7 +5397,7 @@ class Scan3D(FileHandler):
         # define header, probably same as for approach curve
         self.header = 27
         # initialize the channel indicators
-        print('filetype: ', self.file_type)
+        # print('filetype: ', self.file_type)
         self._initialize_measurement_channel_indicators()
         self._update_measurement_channel_indicators()
         # for some reason the naming convention does not always follow the default for the snom measurements of the same filetype
@@ -5377,6 +5419,8 @@ class Scan3D(FileHandler):
         self.mechanical_channels = ['M1A', 'M1P'] # todo
         self.phase_channels = ['O1P','O2P','O3P','O4P','O5P']
         self.amp_channels = ['O1A','O2A','O3A','O4A','O5A']
+        self.all_channels_default = self.mechanical_channels + self.phase_channels + self.amp_channels
+        self.all_channels_custom = self.height_channels
     
     def _load_data(self):
         datafile = self.directory_name / Path(self.filename.name + '.txt')
@@ -5515,8 +5559,14 @@ class Scan3D(FileHandler):
             cmap = plotting_parameters["phase_cmap"]
             label = plotting_parameters["phase_cbar_label"]
             title = plotting_parameters["phase_title"]
+        elif self.height_indicator in channel:
+            cmap = plotting_parameters["height_cmap"]
+            label = plotting_parameters["height_cbar_label"]
+            title = plotting_parameters["height_title"]
         else:
             cmap = 'viridis'
+            label = 'unknown'
+            title = 'unknown'
         return cutplane_data, cmap, label, title
     
     def display_cutplanes(self, axis:str='x', line:int=0, channels:list=None, auto_align:bool=False):
@@ -5542,8 +5592,8 @@ class Scan3D(FileHandler):
         rows = number_of_channels//cols
         if number_of_channels%cols != 0:
             rows += 1
-        print('rows: ', rows)
-        print('cols: ', cols)
+        # print('rows: ', rows)
+        # print('cols: ', cols)
         fig, axs = plt.subplots(rows, cols, figsize=(PlotDefinitions.figsizex, PlotDefinitions.figsizey))
         for channel in channels:
             # get column and row index
@@ -5636,7 +5686,7 @@ class Scan3D(FileHandler):
         # now we need to shift each approach curve by the corresponding z_shift
         # therefore we need to create a new data array which can encorporate the shifted data
         XRes, YRes, ZRes = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
-        print('ZR: ', ZRes)
+        # print('ZR: ', ZRes)
         XRange, YRange, ZRange = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
         XYZUnit = self._get_measurement_tag_dict_unit(MeasurementTags.SCANAREA)
         # convert Range to nm
@@ -5647,11 +5697,11 @@ class Scan3D(FileHandler):
         else:
             print('Error! The unit of the scan area is not supported yet!')
         z_pixelsize = ZRange/ZRes
-        print('z_shifts: ', z_shifts)
+        # print('z_shifts: ', z_shifts)
         # calculate the new z range
         ZRange_new = ZRange + z_shifts.max()
         ZRes_new = int(ZRange_new/z_pixelsize)
-        print('ZRes_new: ', ZRes_new)
+        # print('ZRes_new: ', ZRes_new)
         # create the new data array
         cutplane_real_data = np.zeros((ZRes_new, XRes))
         for i in range(XRes):
@@ -5999,7 +6049,7 @@ class Scan3D(FileHandler):
                         # print(len(phase_data[0]))
                         break
             shift = get_phase_offset(phase_data)
-            print('The phase shift you chose is:', shift)
+            # print('The phase shift you chose is:', shift)
             shift_known = True
 
         # export shift value to logfile
@@ -6008,7 +6058,7 @@ class Scan3D(FileHandler):
         # could also be implemented to shift each channel individually...
         
         for channel in channels:
-            print(channel)
+            # print(channel)
             if self.phase_indicator in channel:
                 # print('Before phase shift: ', channel)
                 # print('Min phase value:', np.min(self.all_cutplane_data[channel]))

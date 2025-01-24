@@ -8,6 +8,14 @@ class Definitions(Enum):
     vertical = auto()
     horizontal = auto()
 
+class MeasurementTypes(Enum):
+    AFM = auto()
+    SNOM = auto()
+    APPROACHCURVE = auto()
+    SCAN3D = auto()
+    SPECTRUM = auto()
+    NONE = auto()
+
 class MeasurementTags(Enum):
     """This class keeps track of the implemented measurement tags. 
     These are tags wich are measurement specific.
