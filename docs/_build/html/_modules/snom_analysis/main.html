@@ -9,6 +9,7 @@
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=7dc6ce7e" />
 
   
@@ -17,6 +18,7 @@
       <script src="../../_static/documentation_options.js?v=8d563738"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -116,7 +118,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.file_handling</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_parameter_values</span><span class="p">,</span> <span class="n">find_index</span><span class="p">,</span> <span class="n">convert_header_to_dict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.profile_selector</span><span class="w"> </span><span class="kn">import</span> <span class="n">select_profile</span>
 <span class="c1"># import additional functions</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.lib.additional_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_nan_to_zero</span><span class="p">,</span> <span class="n">gauss_function</span><span class="p">,</span> <span class="n">get_largest_abs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.lib.additional_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_nan_to_zero</span><span class="p">,</span> <span class="n">gauss_function</span><span class="p">,</span> <span class="n">get_largest_abs</span><span class="p">,</span> <span class="n">calculate_colorbar_size</span>
 <span class="c1"># import definitions such as measurement and channel tags</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.definitions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Definitions</span><span class="p">,</span> <span class="n">MeasurementTags</span><span class="p">,</span> <span class="n">ChannelTags</span><span class="p">,</span> <span class="n">PlotDefinitions</span><span class="p">,</span> <span class="n">MeasurementTypes</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.height_masking</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_height_treshold</span>
@@ -1789,6 +1791,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">autoscale</span> <span class="o">=</span> <span class="n">autoscale</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">PlotDefinitions</span><span class="o">.</span><span class="n">autodelete_all_subplots</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delete_all_subplots</span><span class="p">()</span> <span class="c1"># automatically delete old subplots</span>
+        <span class="c1"># get the plotting style from the mpl style file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_mpl_style</span><span class="p">()</span>
     
     <span class="k">def</span><span class="w"> </span><span class="nf">_initialize_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function initializes the data in memory. If no channels are specified the already existing data is used,</span>
@@ -2205,16 +2209,6 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;figure&#39;</span><span class="p">,</span> <span class="n">titlesize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">font_size_fig_title</span><span class="p">)</span>  <span class="c1"># fontsize of the figure title</span>
         <span class="c1"># get the plotting style from the mpl style file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_mpl_style</span><span class="p">()</span>
-
-        <span class="k">def</span><span class="w"> </span><span class="nf">calculate_colorbar_size</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">colorbar_size</span><span class="p">):</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;This function converts a colorbar size in % of the fig width to a colorbar size in % of the axis width.&quot;&quot;&quot;</span>
-            <span class="c1"># size of the figure in inches</span>
-            <span class="n">fig_width</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">get_figwidth</span><span class="p">()</span>
-            <span class="c1"># size of the axis in inches</span>
-            <span class="n">ax_width</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="n">fig_width</span>
-            <span class="c1"># calculate the size of the colorbar in percent</span>
-            <span class="c1"># it should always be x % of the figure width</span>
-            <span class="k">return</span> <span class="n">colorbar_size</span> <span class="o">*</span> <span class="n">fig_width</span> <span class="o">/</span> <span class="n">ax_width</span> 
 
         <span class="k">if</span> <span class="n">nrows</span> <span class="o">&gt;=</span><span class="mi">2</span><span class="p">:</span>
             <span class="n">ncols</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">number_of_axis</span><span class="p">))</span>
@@ -5523,6 +5517,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">header</span> <span class="o">=</span> <span class="mi">27</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_measurement_channel_indicators</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_data</span><span class="p">()</span>
+        <span class="c1"># get the plotting style from the mpl style file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_mpl_style</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_initialize_measurement_channel_indicators</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">height_channel</span> <span class="o">=</span> <span class="s1">&#39;Z&#39;</span>
@@ -5606,6 +5602,8 @@
 <span class="sd">        Args:</span>
 <span class="sd">            y_channels (list, optional): List of channels to display. Defaults to None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># get the plotting style from the mpl style file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_mpl_style</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">y_channels</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">y_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span>
         <span class="n">x_channel</span> <span class="o">=</span> <span class="s1">&#39;Z&#39;</span>
@@ -5734,6 +5732,8 @@
                 <span class="n">exit</span><span class="p">()</span>
         <span class="c1"># load the channels from the datafile</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_data</span><span class="p">()</span>
+        <span class="c1"># get the plotting style from the mpl style file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_mpl_style</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_measurement_channel_indicators</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">height_channel</span> <span class="o">=</span> <span class="s1">&#39;Z&#39;</span>
@@ -5913,6 +5913,8 @@
 <span class="sd">            align (bool, optional): Alignment of the approach curves.</span>
 <span class="sd">            If set to True the individual approach curves will be shifted such that they start at the same Z corrdinate. Defaults to False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># get the plotting style from the mpl style file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_mpl_style</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">channels</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span>
         <span class="n">number_of_channels</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span>
@@ -5946,12 +5948,13 @@
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The channel &lt;</span><span class="si">{</span><span class="n">channel</span><span class="si">}</span><span class="s1">&gt; is not in memory!&#39;</span><span class="p">)</span>
                 <span class="k">continue</span>
             <span class="n">cutplane_data</span><span class="p">,</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_subplot</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="n">line</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="n">channel</span><span class="p">,</span> <span class="n">auto_align</span><span class="o">=</span><span class="n">auto_align</span><span class="p">)</span>
-            <span class="n">img</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">cutplane_data</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">)</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">cutplane_data</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">rasterized</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="n">divider</span> <span class="o">=</span> <span class="n">make_axes_locatable</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
-            <span class="n">cax</span> <span class="o">=</span> <span class="n">divider</span><span class="o">.</span><span class="n">append_axes</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">colorbar_width</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span> <span class="c1"># size is the size of colorbar relative to original axis, 100% means same size, 10% means 10% of original</span>
+            <span class="n">cax</span> <span class="o">=</span> <span class="n">divider</span><span class="o">.</span><span class="n">append_axes</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">calculate_colorbar_size</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span><span class="w"> </span><span class="n">ax</span><span class="p">,</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">colorbar_width</span><span class="p">)</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span> <span class="c1"># size is the size of colorbar relative to original axis, 100% means same size, 10% means 10% of original</span>
+            <span class="c1"># f&quot;{calculate_colorbar_size(fig, axis, self.colorbar_width)}%&quot;</span>
             <span class="n">cbar</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cax</span><span class="o">=</span><span class="n">cax</span><span class="p">)</span>
-            <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">get_yaxis</span><span class="p">()</span><span class="o">.</span><span class="n">label</span>
-            <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+            <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">get_yaxis</span><span class="p">()</span><span class="o">.</span><span class="n">labelpad</span> <span class="o">=</span> <span class="mi">15</span>
+            <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">270</span><span class="p">)</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;scaled&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hide_ticks</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="c1"># remove ticks on x and y axis, they only show pixelnumber anyways, better to add a scalebar</span>

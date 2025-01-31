@@ -576,7 +576,7 @@ def example_snommeasurement_1():
 
     # You can use a simple 3 point correction to level the height data.
     # For better leveling you can always use some other software like Gwyddion and import already leveled data.
-    measurement.level_height_channels()
+    measurement.level_height_channels_3point()
 
     # I always like to set the minimum of the height channel to zero.
     # This should be applied after the leveling. Otherwise the leveling will also change the minimum.
@@ -601,7 +601,9 @@ def example_snommeasurement_2():
     # from tkinter import filedialog # for documentation purposes
 
     # Load the main functionality from the package, in this case the SnomMeasurement class.
-    from snom_analysis.main import SnomMeasurement
+    from snom_analysis.main import SnomMeasurement, PlotDefinitions
+    PlotDefinitions.colorbar_width = 3
+
 
     # Open a file dialog to select the measurement folder.
     # directory = filedialog.askdirectory() # for documentation purposes
@@ -651,7 +653,7 @@ def example_snommeasurement_3():
     """
     # Load the main functionality from the package, in this case the SnomMeasurement class.
     from snom_analysis.main import SnomMeasurement, PlotDefinitions
-    PlotDefinitions.colorbar_width = 4 # colorbar width for long thin measurements looks too big
+    # PlotDefinitions.colorbar_width = 4 # colorbar width for long thin measurements looks too big
 
     # Open a file dialog to select the measurement folder.
     # directory = filedialog.askdirectory() # for documentation purposes
@@ -711,10 +713,12 @@ def example_snommeasurement_4():
 
     # We want to use the corrected channels, so we reinitialize the channels with the corrected channels.
     measurement.autoscale = True
-    measurement.initialize_channels(['O2A', 'O2P_corrected'])
+    measurement.initialize_channels(['O3A', 'O3P_corrected'])
+    # measurement.scale_channels()
+    # measurement.gauss_filter_channels_complex()
 
-    # create a gif of the realpart of the O2A channel and the O2P_corrected channel.
-    measurement.create_gif('O2A', 'O2P_corrected', frames=20, fps=10, dpi=100)
+    # create a gif of the realpart of the O3A channel and the O3P_corrected channel.
+    measurement.create_gif('O3A', 'O3P_corrected', frames=20, fps=10, dpi=100)
     
 def example_approachcurve_1():
     # Import filedialog to open a file dialog to select the measurement folder.
@@ -763,7 +767,7 @@ def example_scan3d_1():
     measurement.set_min_to_zero()
 
     # Change the colorbar width to 3 on the fly will apply to all following plots.
-    PlotDefinitions.colorbar_width = 3
+    # PlotDefinitions.colorbar_width = 3
 
     # Generate all cutplane data for the channels.
     measurement.generate_all_cutplane_data()
@@ -822,7 +826,7 @@ def main():
     # test_realign()
     # test_cut()
     # test_height_masking()
-    test_scalebar()
+    # test_scalebar()
     # test_phaseshift()
     # compare_measurements()
     # correct_phase_drift()
@@ -856,7 +860,7 @@ def main():
     # example_snommeasurement_3()
     # example_snommeasurement_4()
     # example_approachcurve_1()
-    # example_scan3d_1()
+    example_scan3d_1()
     # example_scan3d_2()
 
 

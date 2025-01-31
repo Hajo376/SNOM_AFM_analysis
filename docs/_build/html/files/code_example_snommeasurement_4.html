@@ -1,0 +1,138 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>&lt;no title&gt; &mdash; SNOM Analysis 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7dc6ce7e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SNOM Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">Readme</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snom_analysis.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SNOM Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">&lt;no title&gt;</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/files/code_example_snommeasurement_4.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># Import filedialog to open a file dialog to select the measurement folder.</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">tkinter</span><span class="w"> </span><span class="kn">import</span> <span class="n">filedialog</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="c1"># Load the main functionality from the package, in this case the SnomMeasurement class.</span>
+<span class="linenos"> 5</span><span class="kn">from</span><span class="w"> </span><span class="nn">snom_analysis.main</span><span class="w"> </span><span class="kn">import</span> <span class="n">SnomMeasurement</span><span class="p">,</span> <span class="n">PlotDefinitions</span>
+<span class="linenos"> 6</span><span class="n">PlotDefinitions</span><span class="o">.</span><span class="n">colorbar_width</span> <span class="o">=</span> <span class="mi">4</span> <span class="c1"># colorbar width for long thin measurements looks too big</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="c1"># Open a file dialog to select the measurement folder.</span>
+<span class="linenos"> 9</span><span class="n">directory_name</span> <span class="o">=</span> <span class="n">filedialog</span><span class="o">.</span><span class="n">askdirectory</span><span class="p">()</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="c1"># Create an instance of the SnomMeasurement class by providing the path to the measurement folder.</span>
+<span class="linenos">12</span><span class="c1"># If we want to apply the synccorrection we need to set autoscale to False.</span>
+<span class="linenos">13</span><span class="n">measurement</span> <span class="o">=</span> <span class="n">SnomMeasurement</span><span class="p">(</span><span class="n">directory_name</span><span class="p">,</span> <span class="n">autoscale</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span><span class="c1"># Plot the data without any modifications.</span>
+<span class="linenos">16</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span><span class="c1"># Apply the synccorrection to the data. But we don&#39;t know the direction yet. The interferometer sometimes goes in the wron direction.</span>
+<span class="linenos">19</span><span class="c1"># This will create corrected channels and save them as .gsf with the appendix &#39;_corrected&#39;.</span>
+<span class="linenos">20</span><span class="c1"># measurement.synccorrection(1.6) # for chiral coupler</span>
+<span class="linenos">21</span><span class="n">measurement</span><span class="o">.</span><span class="n">synccorrection</span><span class="p">(</span><span class="mf">0.97</span><span class="p">)</span>
+<span class="linenos">22</span>
+<span class="linenos">23</span><span class="c1"># We want to use the corrected channels, so we reinitialize the channels with the corrected channels.</span>
+<span class="linenos">24</span><span class="n">measurement</span><span class="o">.</span><span class="n">autoscale</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="linenos">25</span><span class="n">measurement</span><span class="o">.</span><span class="n">initialize_channels</span><span class="p">([</span><span class="s1">&#39;O2A&#39;</span><span class="p">,</span> <span class="s1">&#39;O2P_corrected&#39;</span><span class="p">])</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span><span class="c1"># create a gif of the realpart of the O2A channel and the O2P_corrected channel.</span>
+<span class="linenos">28</span><span class="n">measurement</span><span class="o">.</span><span class="n">create_gif</span><span class="p">(</span><span class="s1">&#39;O2A&#39;</span><span class="p">,</span> <span class="s1">&#39;O2P_corrected&#39;</span><span class="p">,</span> <span class="n">frames</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Hans-Joachim Schill.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

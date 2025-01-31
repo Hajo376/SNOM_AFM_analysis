@@ -40,7 +40,7 @@ from .lib import phase_analysis
 from .lib.file_handling import get_parameter_values, find_index, convert_header_to_dict
 from .lib.profile_selector import select_profile
 # import additional functions
-from .lib.additional_functions import set_nan_to_zero, gauss_function, get_largest_abs
+from .lib.additional_functions import set_nan_to_zero, gauss_function, get_largest_abs, calculate_colorbar_size
 # import definitions such as measurement and channel tags
 from .lib.definitions import Definitions, MeasurementTags, ChannelTags, PlotDefinitions, MeasurementTypes
 from .lib.height_masking import get_height_treshold
@@ -1708,6 +1708,8 @@ class SnomMeasurement(FileHandler):
         self.autoscale = autoscale
         self._initialize_data(self.channels)
         if PlotDefinitions.autodelete_all_subplots: self._delete_all_subplots() # automatically delete old subplots
+        # get the plotting style from the mpl style file
+        self._load_mpl_style()
     
     def _initialize_data(self, channels=None) -> None:
         """This function initializes the data in memory. If no channels are specified the already existing data is used,
@@ -2106,16 +2108,6 @@ class SnomMeasurement(FileHandler):
         plt.rc('figure', titlesize=self.font_size_fig_title)  # fontsize of the figure title
         # get the plotting style from the mpl style file
         self._load_mpl_style()
-
-        def calculate_colorbar_size(fig, ax, colorbar_size):
-            """This function converts a colorbar size in % of the fig width to a colorbar size in % of the axis width."""
-            # size of the figure in inches
-            fig_width = fig.get_figwidth()
-            # size of the axis in inches
-            ax_width = ax.get_position().width * fig_width
-            # calculate the size of the colorbar in percent
-            # it should always be x % of the figure width
-            return colorbar_size * fig_width / ax_width 
 
         if nrows >=2:
             ncols = int(np.sqrt(number_of_axis))
@@ -5292,6 +5284,8 @@ class ApproachCurve(FileHandler):
         self.header = 27
         self._initialize_measurement_channel_indicators()
         self._load_data()
+        # get the plotting style from the mpl style file
+        self._load_mpl_style()
 
     def _initialize_measurement_channel_indicators(self):
         self.height_channel = 'Z'
@@ -5370,6 +5364,8 @@ class ApproachCurve(FileHandler):
         Args:
             y_channels (list, optional): List of channels to display. Defaults to None.
         """
+        # get the plotting style from the mpl style file
+        self._load_mpl_style()
         if y_channels == None:
             y_channels = self.channels
         x_channel = 'Z'
@@ -5488,6 +5484,8 @@ class Scan3D(FileHandler):
                 exit()
         # load the channels from the datafile
         self._load_data()
+        # get the plotting style from the mpl style file
+        self._load_mpl_style()
 
     def _update_measurement_channel_indicators(self):
         self.height_channel = 'Z'
@@ -5656,6 +5654,8 @@ class Scan3D(FileHandler):
             align (bool, optional): Alignment of the approach curves.
             If set to True the individual approach curves will be shifted such that they start at the same Z corrdinate. Defaults to False.
         """
+        # get the plotting style from the mpl style file
+        self._load_mpl_style()
         if channels == None:
             channels = self.channels
         number_of_channels = len(channels)
@@ -5689,12 +5689,13 @@ class Scan3D(FileHandler):
                 print(f'The channel <{channel}> is not in memory!')
                 continue
             cutplane_data, cmap, label, title = self._create_subplot(axis=axis, line=line, channel=channel, auto_align=auto_align)
-            img = ax.pcolormesh(cutplane_data, cmap=cmap)
+            img = ax.pcolormesh(cutplane_data, cmap=cmap, rasterized=True)
             divider = make_axes_locatable(ax)
-            cax = divider.append_axes("right", size=f"{self.colorbar_width}%", pad=0.05) # size is the size of colorbar relative to original axis, 100% means same size, 10% means 10% of original
+            cax = divider.append_axes("right", size=f"{calculate_colorbar_size(fig, ax, self.colorbar_width)}%", pad=0.05) # size is the size of colorbar relative to original axis, 100% means same size, 10% means 10% of original
+            # f"{calculate_colorbar_size(fig, axis, self.colorbar_width)}%"
             cbar = plt.colorbar(img, aspect=1, cax=cax)
-            cbar.ax.get_yaxis().label
-            cbar.ax.set_ylabel(label)
+            cbar.ax.get_yaxis().labelpad = 15
+            cbar.ax.set_ylabel(label, rotation=270)
             ax.axis('scaled')
             if self.hide_ticks == True:
                 # remove ticks on x and y axis, they only show pixelnumber anyways, better to add a scalebar

@@ -39,20 +39,27 @@ This is an example using the tkinter filedialog and some more advanced fuctions.
 .. include:: ../docs/files/code_example_snommeasurement_3.rst
 
 .. _code example 4:
+Example showing how to create a gif from the realpart data, useful to visualize traveling waves:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This is a very simple example using just some base functions without any extra parameters.
+
+.. include:: ../docs/files/code_example_snommeasurement_4.rst
+
+.. _code example 5:
 Simple usage example using the ApproachCurve class:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This is a very simple example using just some base functions without any extra parameters.
 
 .. include:: ../docs/files/code_example_approachcurve_1.rst
 
-.. _code example 5:
+.. _code example 6:
 Simple usage example using the Scan3D class:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This is a very simple example using just some base functions to display x-z-cutplanes from the 3D scans.
 
 .. include:: ../docs/files/code_example_scan3d_1.rst
 
-.. _code example 6:
+.. _code example 7:
 Simple usage example using the Scan3D class and averaging the data:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This is an example using just some base functions and using the multiple y lines to average each x-z-cutplane.

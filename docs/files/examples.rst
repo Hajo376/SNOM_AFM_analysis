@@ -26,8 +26,8 @@ Example 2:
 ~~~~~~~~~~
 
 .. figure:: images/snom_example_2_comparison.png
-   :width: 545 px
-   :height: 816 px
+   :width: 601 px
+   :height: 903 px
    :scale: 100 %
    :alt: Image of the second example code discussed in the how to section.
 
@@ -45,13 +45,13 @@ Example 2:
 Example 3:
 ~~~~~~~~~~
 
-.. figure:: images/snom_example_3_alternative_comparison.png
-   :width: 672 px
-   :height: 501 px
+.. figure:: images/snom_example_3_comparison.png
+   :width: 648 px
+   :height: 490 px
    :scale: 100 %
    :alt: Image of the third example code discussed in the how to section.
 
-   This is shows the phase data before and after the synccorrection. The synccorrection gets rid of the linear phase drift caused by the movement of the lower parabola.
+   This shows the phase data before and after the synccorrection. The synccorrection gets rid of the linear phase drift caused by the movement of the lower parabola.
    This measurement was performed in transmission mode on a grating milled inside of a gold film. What you see is the excitation of surface plasmon polaritons propagating
    to the left and right of the grating.
 
@@ -61,6 +61,22 @@ Example 3:
 
 .. _plot example 4:
 Example 4:
+~~~~~~~~~~
+
+.. figure:: images/snom_example_4.gif
+   :width: 200 px
+   :height: 200 px
+   :scale: 100 %
+   :alt: Image of the fouth example code discussed in the how to section.
+
+   This shows a gif created from the realpart of the O3A channel and the O3P_corrected channel.
+
+.. dropdown:: Code
+
+   .. include:: ../docs/files/code_example_snommeasurement_4.rst
+
+.. _plot example 5:
+Example 5:
 ~~~~~~~~~~
 
 .. figure:: images/approachcurve_example_1.png
@@ -75,8 +91,8 @@ Example 4:
 
    .. include:: ../docs/files/code_example_approachcurve_1.rst
 
-.. _plot example 5:
-Example 5:
+.. _plot example 6:
+Example 6:
 ~~~~~~~~~~
 
 .. figure:: images/3dscan_example_1.png
@@ -92,8 +108,8 @@ Example 5:
 
    .. include:: ../docs/files/code_example_scan3d_1.rst
 
-.. _plot example 6:
-Example 6:
+.. _plot example 7:
+Example 7:
 ~~~~~~~~~~
 
 .. figure:: images/3dscan_example_1_shifted.png

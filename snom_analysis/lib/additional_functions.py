@@ -18,3 +18,13 @@ def gauss_function(x, A, mu, sigma, offset):
 def get_largest_abs(val1, val2):
     if abs(val1) > abs(val2): return abs(val1)
     else: return abs(val2)
+
+def calculate_colorbar_size(fig, ax, colorbar_size):
+    """This function converts a colorbar size in % of the fig width to a colorbar size in % of the axis width."""
+    # size of the figure in inches
+    fig_width = fig.get_figwidth()
+    # size of the axis in inches
+    ax_width = ax.get_position().width * fig_width
+    # calculate the size of the colorbar in percent
+    # it should always be x % of the figure width
+    return colorbar_size * fig_width / ax_width 

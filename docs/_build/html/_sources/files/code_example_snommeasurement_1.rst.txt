@@ -26,7 +26,7 @@
     # You can use a simple 3 point correction to level the height data.
     # For better leveling you can always use some other software
     # like Gwyddion and import already leveled data.
-    measurement.level_height_channels()
+    measurement.level_height_channels_3point()
 
     # I always like to set the minimum of the height channel to zero.
     # This should be applied after the leveling. Otherwise the leveling will also change the minimum.

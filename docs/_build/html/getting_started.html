@@ -56,6 +56,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#simple-usage-example-using-the-snommeasurement-class">Simple usage example using the SnomMeasurement class:</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#more-advanced-usage-example-using-the-snommeasurement-class">More advanced usage example using the SnomMeasurement class:</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#example-showing-how-to-do-a-synccorrection-of-transmission-mode-measurements">Example showing how to do a synccorrection of transmission mode measurements:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-showing-how-to-create-a-gif-from-the-realpart-data-useful-to-visualize-traveling-waves">Example showing how to create a gif from the realpart data, useful to visualize traveling waves:</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#simple-usage-example-using-the-approachcurve-class">Simple usage example using the ApproachCurve class:</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#simple-usage-example-using-the-scan3d-class">Simple usage example using the Scan3D class:</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#simple-usage-example-using-the-scan3d-class-and-averaging-the-data">Simple usage example using the Scan3D class and averaging the data:</a></li>
@@ -137,7 +138,7 @@ This gives you a lot of freedome to implement your own functionality.</p>
 <span class="linenos">22</span><span class="c1"># You can use a simple 3 point correction to level the height data.</span>
 <span class="linenos">23</span><span class="c1"># For better leveling you can always use some other software</span>
 <span class="linenos">24</span><span class="c1"># like Gwyddion and import already leveled data.</span>
-<span class="linenos">25</span><span class="n">measurement</span><span class="o">.</span><span class="n">level_height_channels</span><span class="p">()</span>
+<span class="linenos">25</span><span class="n">measurement</span><span class="o">.</span><span class="n">level_height_channels_3point</span><span class="p">()</span>
 <span class="linenos">26</span>
 <span class="linenos">27</span><span class="c1"># I always like to set the minimum of the height channel to zero.</span>
 <span class="linenos">28</span><span class="c1"># This should be applied after the leveling. Otherwise the leveling will also change the minimum.</span>
@@ -251,8 +252,42 @@ This gives you a lot of freedome to implement your own functionality.</p>
 </pre></div>
 </div>
 </section>
+<section id="example-showing-how-to-create-a-gif-from-the-realpart-data-useful-to-visualize-traveling-waves">
+<span id="code-example-4"></span><h3>Example showing how to create a gif from the realpart data, useful to visualize traveling waves:<a class="headerlink" href="#example-showing-how-to-create-a-gif-from-the-realpart-data-useful-to-visualize-traveling-waves" title="Link to this heading"></a></h3>
+<p>This is a very simple example using just some base functions without any extra parameters.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># Import filedialog to open a file dialog to select the measurement folder.</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">tkinter</span><span class="w"> </span><span class="kn">import</span> <span class="n">filedialog</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="c1"># Load the main functionality from the package, in this case the SnomMeasurement class.</span>
+<span class="linenos"> 5</span><span class="kn">from</span><span class="w"> </span><span class="nn">snom_analysis.main</span><span class="w"> </span><span class="kn">import</span> <span class="n">SnomMeasurement</span><span class="p">,</span> <span class="n">PlotDefinitions</span>
+<span class="linenos"> 6</span><span class="n">PlotDefinitions</span><span class="o">.</span><span class="n">colorbar_width</span> <span class="o">=</span> <span class="mi">4</span> <span class="c1"># colorbar width for long thin measurements looks too big</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="c1"># Open a file dialog to select the measurement folder.</span>
+<span class="linenos"> 9</span><span class="n">directory_name</span> <span class="o">=</span> <span class="n">filedialog</span><span class="o">.</span><span class="n">askdirectory</span><span class="p">()</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="c1"># Create an instance of the SnomMeasurement class by providing the path to the measurement folder.</span>
+<span class="linenos">12</span><span class="c1"># If we want to apply the synccorrection we need to set autoscale to False.</span>
+<span class="linenos">13</span><span class="n">measurement</span> <span class="o">=</span> <span class="n">SnomMeasurement</span><span class="p">(</span><span class="n">directory_name</span><span class="p">,</span> <span class="n">autoscale</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span><span class="c1"># Plot the data without any modifications.</span>
+<span class="linenos">16</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span><span class="c1"># Apply the synccorrection to the data. But we don&#39;t know the direction yet. The interferometer sometimes goes in the wron direction.</span>
+<span class="linenos">19</span><span class="c1"># This will create corrected channels and save them as .gsf with the appendix &#39;_corrected&#39;.</span>
+<span class="linenos">20</span><span class="c1"># measurement.synccorrection(1.6) # for chiral coupler</span>
+<span class="linenos">21</span><span class="n">measurement</span><span class="o">.</span><span class="n">synccorrection</span><span class="p">(</span><span class="mf">0.97</span><span class="p">)</span>
+<span class="linenos">22</span>
+<span class="linenos">23</span><span class="c1"># We want to use the corrected channels, so we reinitialize the channels with the corrected channels.</span>
+<span class="linenos">24</span><span class="n">measurement</span><span class="o">.</span><span class="n">autoscale</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="linenos">25</span><span class="n">measurement</span><span class="o">.</span><span class="n">initialize_channels</span><span class="p">([</span><span class="s1">&#39;O2A&#39;</span><span class="p">,</span> <span class="s1">&#39;O2P_corrected&#39;</span><span class="p">])</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span><span class="c1"># create a gif of the realpart of the O2A channel and the O2P_corrected channel.</span>
+<span class="linenos">28</span><span class="n">measurement</span><span class="o">.</span><span class="n">create_gif</span><span class="p">(</span><span class="s1">&#39;O2A&#39;</span><span class="p">,</span> <span class="s1">&#39;O2P_corrected&#39;</span><span class="p">,</span> <span class="n">frames</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
 <section id="simple-usage-example-using-the-approachcurve-class">
-<span id="code-example-4"></span><h3>Simple usage example using the ApproachCurve class:<a class="headerlink" href="#simple-usage-example-using-the-approachcurve-class" title="Link to this heading"></a></h3>
+<span id="code-example-5"></span><h3>Simple usage example using the ApproachCurve class:<a class="headerlink" href="#simple-usage-example-using-the-approachcurve-class" title="Link to this heading"></a></h3>
 <p>This is a very simple example using just some base functions without any extra parameters.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># Import filedialog to open a file dialog to select the measurement folder.</span>
 <span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">tkinter</span><span class="w"> </span><span class="kn">import</span> <span class="n">filedialog</span>
@@ -281,7 +316,7 @@ This gives you a lot of freedome to implement your own functionality.</p>
 </div>
 </section>
 <section id="simple-usage-example-using-the-scan3d-class">
-<span id="code-example-5"></span><h3>Simple usage example using the Scan3D class:<a class="headerlink" href="#simple-usage-example-using-the-scan3d-class" title="Link to this heading"></a></h3>
+<span id="code-example-6"></span><h3>Simple usage example using the Scan3D class:<a class="headerlink" href="#simple-usage-example-using-the-scan3d-class" title="Link to this heading"></a></h3>
 <p>This is a very simple example using just some base functions to display x-z-cutplanes from the 3D scans.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># Import filedialog to open a file dialog to select the measurement folder.</span>
 <span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">tkinter</span><span class="w"> </span><span class="kn">import</span> <span class="n">filedialog</span>
@@ -328,7 +363,7 @@ This gives you a lot of freedome to implement your own functionality.</p>
 </div>
 </section>
 <section id="simple-usage-example-using-the-scan3d-class-and-averaging-the-data">
-<span id="code-example-6"></span><h3>Simple usage example using the Scan3D class and averaging the data:<a class="headerlink" href="#simple-usage-example-using-the-scan3d-class-and-averaging-the-data" title="Link to this heading"></a></h3>
+<span id="code-example-7"></span><h3>Simple usage example using the Scan3D class and averaging the data:<a class="headerlink" href="#simple-usage-example-using-the-scan3d-class-and-averaging-the-data" title="Link to this heading"></a></h3>
 <p>This is an example using just some base functions and using the multiple y lines to average each x-z-cutplane.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># Import filedialog to open a file dialog to select the measurement folder.</span>
 <span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">tkinter</span><span class="w"> </span><span class="kn">import</span> <span class="n">filedialog</span>
