@@ -87,6 +87,7 @@ class FileHandler(PlotDefinitions):
         self.all_subplots_path = self.save_folder / Path('all_subplots.p')
         self.plotting_parameters_path = self.save_folder / Path('plotting_parameters.json') # probably not a good idea to use the same folder as the snom plotter app
         self.config_path = self.save_folder / Path('config.ini')
+        self.mpl_style_path = self.save_folder / Path('snom_analysis.mplstyle')
      
     def _initialize_file_type(self) -> None:
         # try to find the filetype automatically
@@ -613,6 +614,49 @@ class FileHandler(PlotDefinitions):
         with open(self.config_path, 'r') as f:
             self.config.read_file(f)
 
+    def _load_mpl_style(self):
+        if not Path.exists(self.mpl_style_path):
+            with open(self.mpl_style_path, 'w') as f:
+                f.write('axes.grid: True\n')
+                f.write('axes.grid.axis: both\n')
+                f.write('axes.grid.which: major\n')
+                f.write('grid.linestyle: -\n')
+                f.write('grid.linewidth: 0.5\n')
+                f.write('grid.color: black\n')
+                f.write('xtick.direction: in\n')
+                f.write('ytick.direction: in\n')
+                f.write('xtick.minor.visible: True\n')
+                f.write('ytick.minor.visible: True\n')
+                f.write('xtick.major.size: 5\n')
+                f.write('ytick.major.size: 5\n')
+                f.write('xtick.minor.size: 3\n')
+                f.write('ytick.minor.size: 3\n')
+                f.write('xtick.major.width: 0.5\n')
+                f.write('ytick.major.width: 0.5\n')
+                f.write('xtick.minor.width: 0.5\n')
+                f.write('ytick.minor.width: 0.5\n')
+                f.write('xtick.major.pad: 5\n')
+                f.write('ytick.major.pad: 5\n')
+                f.write('xtick.minor.pad: 5\n')
+                f.write('ytick.minor.pad: 5\n')
+                f.write('xtick.major.top: True\n')
+                f.write('ytick.major.right: True\n')
+                f.write('xtick.minor.top: True\n')
+                f.write('ytick.minor.right: True\n')
+                f.write('axes.linewidth: 0.5\n')
+                f.write('axes.edgecolor: black\n')
+                f.write('axes.labelcolor: black\n')
+                f.write('axes.labelsize: 12\n')
+                f.write('axes.labelweight: normal\n')
+                f.write('axes.labelpad: 4.0\n')
+                f.write('axes.formatter.limits: -7, 7\n')
+                f.write('axes.formatter.use_locale: False\n')
+                f.write('axes.formatter.use_mathtext: False\n')
+                f.write('axes.formatter.useoffset: True\n')
+                f.write('axes.formatter.offset_threshold: 4\n')
+                f.write('axes.formatter.min_exponent: 0\n')
+        plt.style.use(self.mpl_style_path)
+
     def _print_config(self):
         """This function prints the config file.
         """
@@ -1078,22 +1122,22 @@ class FileHandler(PlotDefinitions):
     def _generate_default_plotting_parameters(self):
         dictionary = {
             "amplitude_cmap": "<SNOM_amplitude>",
-            "amplitude_cbar_label": "Amplitude / a.u.",
+            "amplitude_cbar_label": "Amplitude (arb.u.)",
             "amplitude_title": "<channel>",
             "phase_cmap": "<SNOM_phase>",
-            "phase_cbar_label": "Phase / rad",
+            "phase_cbar_label": "Phase (rad)",
             "phase_title": "<channel>",
             "phase_positive_title": "Positively corrected phase <channel>",
             "phase_negative_title": "Negatively corrected phase <channel>",
             "height_cmap": "<SNOM_height>",
-            "height_cbar_label": "Height / nm",
+            "height_cbar_label": "Height (nm)",
             "height_title": "<channel>",
             "real_cmap": "<SNOM_realpart>",
-            "real_cbar_label": "E / a.u.",
+            "real_cbar_label": "E (arb.u.)",
             "real_title_real": "<channel>",
             "real_title_imag": "<channel>",
             "fourier_cmap": "viridis",
-            "fourier_cbar_label": "Intensity / a.u.",
+            "fourier_cbar_label": "Intensity (arb.u.)",
             "fourier_title": "Fourier transform",
             "gauss_blurred_title": "Blurred <channel>"
         }
@@ -1641,6 +1685,7 @@ class FileHandler(PlotDefinitions):
                     
             self.channel_tag_dict.append(channel_dict)
 
+
 # this could be split in AFM and SNOM measurement classes where AFM has all the base functions and SNOM inherits from it
 # make it easier for AFM users to finde the functions they need
 class SnomMeasurement(FileHandler):
@@ -1677,7 +1722,7 @@ class SnomMeasurement(FileHandler):
             # update the channel tag dictionary, makes the program compatible with differrently sized datasets, like original data plus manipulated, eg. cut data
             self._create_channel_tag_dict()
             # self._Create_Channels_Tag_Dict()
-            self.all_data, self.channels_label = self._load_data(channels)
+            self.all_data, self.channels_label = self._load_data(channels) # could be changed to a single dictionary containing the data and the channel names
             xres = len(self.all_data[0][0])
             yres = len(self.all_data[0])
             # reset all the instance variables dependent on the data, but nor the ones responsible for plotting
@@ -2059,6 +2104,18 @@ class SnomMeasurement(FileHandler):
         plt.rc('ytick', labelsize=self.font_size_tick_labels)    # fontsize of the tick labels
         plt.rc('legend', fontsize=self.font_size_legend)    # legend fontsize
         plt.rc('figure', titlesize=self.font_size_fig_title)  # fontsize of the figure title
+        # get the plotting style from the mpl style file
+        self._load_mpl_style()
+
+        def calculate_colorbar_size(fig, ax, colorbar_size):
+            """This function converts a colorbar size in % of the fig width to a colorbar size in % of the axis width."""
+            # size of the figure in inches
+            fig_width = fig.get_figwidth()
+            # size of the axis in inches
+            ax_width = ax.get_position().width * fig_width
+            # calculate the size of the colorbar in percent
+            # it should always be x % of the figure width
+            return colorbar_size * fig_width / ax_width 
 
         if nrows >=2:
             ncols = int(np.sqrt(number_of_axis))
@@ -2123,14 +2180,14 @@ class SnomMeasurement(FileHandler):
                         if PlotDefinitions.vlimit_real is None: PlotDefinitions.vlimit_real = data_limit
                         if PlotDefinitions.real_cbar_range is True:
                             if PlotDefinitions.vlimit_real < data_limit: PlotDefinitions.vlimit_real = data_limit
-                            img = axis.pcolormesh(data, cmap=cmap, vmin=-PlotDefinitions.vlimit_real, vmax=PlotDefinitions.vlimit_real)
+                            img = axis.pcolormesh(data, cmap=cmap, vmin=-PlotDefinitions.vlimit_real, vmax=PlotDefinitions.vlimit_real, rasterized=True)
                         else:
-                            img = axis.pcolormesh(data, cmap=cmap, vmin=-data_limit, vmax=data_limit)
+                            img = axis.pcolormesh(data, cmap=cmap, vmin=-data_limit, vmax=data_limit, rasterized=True)
                     else:
                         if cmap == SNOM_phase and PlotDefinitions.full_phase_range is True: # for phase data
                             vmin = 0
                             vmax = 2*np.pi
-                            img = axis.pcolormesh(data, cmap=cmap, vmin=vmin, vmax=vmax)
+                            img = axis.pcolormesh(data, cmap=cmap, vmin=vmin, vmax=vmax, rasterized=True)
                         elif cmap == SNOM_phase and PlotDefinitions.full_phase_range is False:
                             if PlotDefinitions.vmin_phase is None: PlotDefinitions.vmin_phase = min_data
                             if PlotDefinitions.vmax_phase is None: PlotDefinitions.vmax_phase = max_data
@@ -2140,7 +2197,7 @@ class SnomMeasurement(FileHandler):
                             else:
                                 PlotDefinitions.vmin_phase = min_data
                                 PlotDefinitions.vmax_phase = max_data
-                            img = axis.pcolormesh(data, cmap=cmap, vmin=PlotDefinitions.vmin_phase, vmax=PlotDefinitions.vmax_phase)
+                            img = axis.pcolormesh(data, cmap=cmap, vmin=PlotDefinitions.vmin_phase, vmax=PlotDefinitions.vmax_phase, rasterized=True)
                             
                         elif cmap == SNOM_amplitude and PlotDefinitions.amp_cbar_range is True:
                             if PlotDefinitions.vmin_amp is None: PlotDefinitions.vmin_amp = min_data
@@ -2149,7 +2206,7 @@ class SnomMeasurement(FileHandler):
                             if max_data > PlotDefinitions.vmax_amp: PlotDefinitions.vmax_amp = max_data
                             vmin = PlotDefinitions.vmin_amp
                             vmax = PlotDefinitions.vmax_amp
-                            img = axis.pcolormesh(data, cmap=cmap, vmin=vmin, vmax=vmax)
+                            img = axis.pcolormesh(data, cmap=cmap, vmin=vmin, vmax=vmax, rasterized=True)
                         elif cmap == SNOM_height and PlotDefinitions.height_cbar_range is True:
                             if PlotDefinitions.vmin_height is None: PlotDefinitions.vmin_height = min_data # initialize for the first time
                             if PlotDefinitions.vmax_height is None: PlotDefinitions.vmax_height = max_data
@@ -2157,10 +2214,10 @@ class SnomMeasurement(FileHandler):
                             if max_data > PlotDefinitions.vmax_height: PlotDefinitions.vmax_height = max_data
                             vmin = PlotDefinitions.vmin_height
                             vmax = PlotDefinitions.vmax_height
-                            img = axis.pcolormesh(data, cmap=cmap, vmin=vmin, vmax=vmax)
+                            img = axis.pcolormesh(data, cmap=cmap, vmin=vmin, vmax=vmax, rasterized=True)
                         else:
                             # print('not plotting full range phase')
-                            img = axis.pcolormesh(data, cmap=cmap)
+                            img = axis.pcolormesh(data, cmap=cmap, rasterized=True)
                     
                     # legacy method to draw white pixels around masked areas, currently out of service because 
                     # the mask is not stored in the plot variable but for the whole measurement.
@@ -2198,7 +2255,8 @@ class SnomMeasurement(FileHandler):
                     # invert y axis to fit to the scanning procedure which starts in the top left corner
                     axis.invert_yaxis()
                     divider = make_axes_locatable(axis)
-                    cax = divider.append_axes("right", size=f"{self.colorbar_width}%", pad=0.05) # size is the size of colorbar relative to original axis, 100% means same size, 10% means 10% of original
+                    # cax = divider.append_axes("right", size=f"{self.colorbar_width}%", pad=0.05) # size is the size of colorbar relative to original axis, 100% means same size, 10% means 10% of original
+                    cax = divider.append_axes("right", size=f"{calculate_colorbar_size(fig, axis, self.colorbar_width)}%", pad=0.05) # size is the size of colorbar relative to original axis, 100% means same size, 10% means 10% of original
                     cbar = plt.colorbar(img, aspect=1, cax=cax)
                     cbar.ax.get_yaxis().labelpad = 15
                     cbar.ax.set_ylabel(label, rotation=270)
@@ -4422,14 +4480,32 @@ class SnomMeasurement(FileHandler):
                 pixel_size_y = round(YReal/YRes *1000000000)
                 scale_x = 1
                 scale_y = 1
+                # if pixel_size_x < pixel_size_y:
+                #     scale_y = int(pixel_size_y/pixel_size_x)
+                # elif pixel_size_x > pixel_size_y:
+                #     scale_x = int(pixel_size_x/pixel_size_y)
+                # if pixel_size_x/scale_x != pixel_size_y/scale_y:
+                    # print('The pixel size does not fit perfectly, you probably chose weired resolution values. You should probably not use this function then...\nScaling the data anyways!')
+                # self.all_data[self.channels.index(channel)] = self._scale_data_xy(self.all_data[self.channels.index(channel)], scale_x, scale_y)
+                # self._set_channel_tag_dict_value(channel, ChannelTags.PIXELAREA, [XRes*scale_x, YRes*scale_y])
+                ###### New method using pillow to scale the image with interpolation, better if the scaling is not an integer
+                # one could also implement a method using pillow to scale the image with interpolation, better if the scaling is not an integer
+                rescaling = False
                 if pixel_size_x < pixel_size_y:
-                    scale_y = int(pixel_size_y/pixel_size_x)
+                    # scale_y, rest = divmod(pixel_size_y, pixel_size_x)
+                    xres = XRes
+                    yres = int(YRes*pixel_size_y/pixel_size_x)
+                    rescaling = True
                 elif pixel_size_x > pixel_size_y:
-                    scale_x = int(pixel_size_x/pixel_size_y)
-                if pixel_size_x/scale_x != pixel_size_y/scale_y:
-                    print('The pixel size does not fit perfectly, you probably chose weired resolution values. You should probably not use this function then...')
-                self.all_data[self.channels.index(channel)] = self._scale_data_xy(self.all_data[self.channels.index(channel)], scale_x, scale_y)
-                self._set_channel_tag_dict_value(channel, ChannelTags.PIXELAREA, [XRes*scale_x, YRes*scale_y])
+                    # scale_x, rest = divmod(pixel_size_x, pixel_size_y)
+                    yres = YRes
+                    xres = int(XRes*pixel_size_x/pixel_size_y)
+                    rescaling = True
+                if rescaling:
+                    img = Image.fromarray(self.all_data[self.channels.index(channel)])
+                    img = img.resize((xres, yres), Image.Resampling.NEAREST)
+                    self.all_data[self.channels.index(channel)] = np.array(img)
+                    self._set_channel_tag_dict_value(channel, ChannelTags.PIXELAREA, [xres, yres])
 
     def overlay_forward_and_backward_channels(self, height_channel_forward:str, height_channel_backward:str, channels:list=None):
         """This function is ment to overlay the backwards and forwards version of the specified channels.

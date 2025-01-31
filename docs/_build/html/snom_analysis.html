@@ -10,6 +10,7 @@
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=7dc6ce7e" />
 
   
@@ -18,6 +19,7 @@
       <script src="_static/documentation_options.js?v=8d563738"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/design-tabs.js?v=f930bc37"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -51,82 +53,6 @@
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-snom_analysis.main">snom_analysis.main module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#snom_analysis.main.Definitions"><code class="docutils literal notranslate"><span class="pre">Definitions</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.Definitions.vertical"><code class="docutils literal notranslate"><span class="pre">Definitions.vertical</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.Definitions.horizontal"><code class="docutils literal notranslate"><span class="pre">Definitions.horizontal</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#snom_analysis.main.MeasurementTags"><code class="docutils literal notranslate"><span class="pre">MeasurementTags</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.SCAN"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.SCAN</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.PROJECT"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.PROJECT</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.DESCRIPTION</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.DATE"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.DATE</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.SCANNERCENTERPOSITION"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.SCANNERCENTERPOSITION</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.ROTATION"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.ROTATION</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.SCANAREA"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.SCANAREA</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.PIXELAREA"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.PIXELAREA</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.AVERAGING"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.AVERAGING</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.INTEGRATIONTIME"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.INTEGRATIONTIME</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.LASERSOURCE"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.LASERSOURCE</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.DETECTOR"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.DETECTOR</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.TARGETWAVELENGTH"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.TARGETWAVELENGTH</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.DEMODULATIONMODE"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.DEMODULATIONMODE</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.TIPFREQUENCY"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.TIPFREQUENCY</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.TIPAMPLITUTDE"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.TIPAMPLITUTDE</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.TAPPINGAMPLITUDE"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.TAPPINGAMPLITUDE</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.MODULATIONFREQUENCY"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.MODULATIONFREQUENCY</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.MODULATIONAMPLITUDE"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.MODULATIONAMPLITUDE</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.MODULATIONOFFSET"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.MODULATIONOFFSET</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.SETPOINT"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.SETPOINT</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.REGULATOR"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.REGULATOR</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.TIPPOTENTIAL"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.TIPPOTENTIAL</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.M1ASCALING"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.M1ASCALING</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.QFACTOR"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.QFACTOR</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.MeasurementTags.VERSION"><code class="docutils literal notranslate"><span class="pre">MeasurementTags.VERSION</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#snom_analysis.main.ChannelTags"><code class="docutils literal notranslate"><span class="pre">ChannelTags</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.ChannelTags.PIXELAREA"><code class="docutils literal notranslate"><span class="pre">ChannelTags.PIXELAREA</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.ChannelTags.YINCOMPLETE"><code class="docutils literal notranslate"><span class="pre">ChannelTags.YINCOMPLETE</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.ChannelTags.SCANNERCENTERPOSITION"><code class="docutils literal notranslate"><span class="pre">ChannelTags.SCANNERCENTERPOSITION</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.ChannelTags.ROTATION"><code class="docutils literal notranslate"><span class="pre">ChannelTags.ROTATION</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.ChannelTags.SCANAREA"><code class="docutils literal notranslate"><span class="pre">ChannelTags.SCANAREA</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.ChannelTags.XYUNIT"><code class="docutils literal notranslate"><span class="pre">ChannelTags.XYUNIT</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.ChannelTags.ZUNIT"><code class="docutils literal notranslate"><span class="pre">ChannelTags.ZUNIT</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.ChannelTags.WAVENUMBERSCALING"><code class="docutils literal notranslate"><span class="pre">ChannelTags.WAVENUMBERSCALING</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.ChannelTags.PIXELSCALING"><code class="docutils literal notranslate"><span class="pre">ChannelTags.PIXELSCALING</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.hide_ticks"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.hide_ticks</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.figsizex"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.figsizex</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.figsizey"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.figsizey</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.show_titles"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.show_titles</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.tight_layout"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.tight_layout</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.colorbar_width"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.colorbar_width</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.hspace"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.hspace</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.font_size_default"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.font_size_default</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.font_size_axes_title"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.font_size_axes_title</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.font_size_axes_label"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.font_size_axes_label</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.font_size_tick_labels"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.font_size_tick_labels</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.font_size_legend"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.font_size_legend</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.font_size_fig_title"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.font_size_fig_title</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.height_cbar_range"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.height_cbar_range</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.vmin_height"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.vmin_height</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.vmax_height"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.vmax_height</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.amp_cbar_range"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.amp_cbar_range</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.vmin_amp"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.vmin_amp</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.vmax_amp"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.vmax_amp</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.full_phase_range"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.full_phase_range</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.shared_phase_range"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.shared_phase_range</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.vmin_phase"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.vmin_phase</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.vmax_phase"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.vmax_phase</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.real_cbar_range"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.real_cbar_range</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.vlimit_real"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.vlimit_real</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.show_plot"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.show_plot</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.PlotDefinitions.autodelete_all_subplots"><code class="docutils literal notranslate"><span class="pre">PlotDefinitions.autodelete_all_subplots</span></code></a></li>
-</ul>
-</li>
 <li class="toctree-l3"><a class="reference internal" href="#snom_analysis.main.FileHandler"><code class="docutils literal notranslate"><span class="pre">FileHandler</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#snom_analysis.main.SnomMeasurement"><code class="docutils literal notranslate"><span class="pre">SnomMeasurement</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.all_subplots"><code class="docutils literal notranslate"><span class="pre">SnomMeasurement.all_subplots</span></code></a></li>
@@ -155,7 +81,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.match_phase_offset"><code class="docutils literal notranslate"><span class="pre">SnomMeasurement.match_phase_offset()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.correct_amplitude_drift_nonlinear"><code class="docutils literal notranslate"><span class="pre">SnomMeasurement.correct_amplitude_drift_nonlinear()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.correct_height_drift_nonlinear"><code class="docutils literal notranslate"><span class="pre">SnomMeasurement.correct_height_drift_nonlinear()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.level_height_channels"><code class="docutils literal notranslate"><span class="pre">SnomMeasurement.level_height_channels()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.level_height_channels_3point"><code class="docutils literal notranslate"><span class="pre">SnomMeasurement.level_height_channels_3point()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.level_height_channels_forGui"><code class="docutils literal notranslate"><span class="pre">SnomMeasurement.level_height_channels_forGui()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.shift_phase"><code class="docutils literal notranslate"><span class="pre">SnomMeasurement.shift_phase()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.realign"><code class="docutils literal notranslate"><span class="pre">SnomMeasurement.realign()</span></code></a></li>
@@ -203,9 +129,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.Scan3D.align_lines"><code class="docutils literal notranslate"><span class="pre">Scan3D.align_lines()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#snom_analysis.main.Set_nan_to_zero"><code class="docutils literal notranslate"><span class="pre">Set_nan_to_zero()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#snom_analysis.main.gauss_function"><code class="docutils literal notranslate"><span class="pre">gauss_function()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#snom_analysis.main.Get_Largest_Abs"><code class="docutils literal notranslate"><span class="pre">Get_Largest_Abs()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
@@ -241,7 +164,7 @@
            <div itemprop="articleBody">
              
   <section id="api-reference">
-<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading"></a></h1>
+<span id="snom-analysis"></span><h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading"></a></h1>
 <p>This is the API reference for the SNOM Analysis package. Here you can find detailed descriptions of all the functions and classes in the package.
 There are how ever much more functions hidden inide the package which are not documented here. These are internal functions and should only be used by experienced users.
 But they can help to built more functionality on top of the package. So feel free to check out the source code.</p>
@@ -249,364 +172,9 @@ But they can help to built more functionality on top of the package. So feel fre
 <span id="snom-analysis-main-module"></span><h2>snom_analysis.main module<a class="headerlink" href="#module-snom_analysis.main" title="Link to this heading"></a></h2>
 <p>This module contains the basic classes and functions for the snom analysis.</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="snom_analysis.main.Definitions">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">snom_analysis.main.</span></span><span class="sig-name descname"><span class="pre">Definitions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=&lt;not</span> <span class="pre">given&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/main.html#Definitions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.Definitions" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
-<p>This class keeps track of the implemented definitions.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.Definitions.vertical">
-<span class="sig-name descname"><span class="pre">vertical</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#snom_analysis.main.Definitions.vertical" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.Definitions.horizontal">
-<span class="sig-name descname"><span class="pre">horizontal</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#snom_analysis.main.Definitions.horizontal" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">snom_analysis.main.</span></span><span class="sig-name descname"><span class="pre">MeasurementTags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=&lt;not</span> <span class="pre">given&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/main.html#MeasurementTags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.MeasurementTags" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
-<p>This class keeps track of the implemented measurement tags.
-These are tags wich are measurement specific.
-Only tags which are listed here can be used.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.SCAN">
-<span class="sig-name descname"><span class="pre">SCAN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.SCAN" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.PROJECT">
-<span class="sig-name descname"><span class="pre">PROJECT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.PROJECT" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.DESCRIPTION">
-<span class="sig-name descname"><span class="pre">DESCRIPTION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.DESCRIPTION" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.DATE">
-<span class="sig-name descname"><span class="pre">DATE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.DATE" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.SCANNERCENTERPOSITION">
-<span class="sig-name descname"><span class="pre">SCANNERCENTERPOSITION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.SCANNERCENTERPOSITION" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.ROTATION">
-<span class="sig-name descname"><span class="pre">ROTATION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.ROTATION" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.SCANAREA">
-<span class="sig-name descname"><span class="pre">SCANAREA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.SCANAREA" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.PIXELAREA">
-<span class="sig-name descname"><span class="pre">PIXELAREA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.PIXELAREA" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.AVERAGING">
-<span class="sig-name descname"><span class="pre">AVERAGING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.AVERAGING" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.INTEGRATIONTIME">
-<span class="sig-name descname"><span class="pre">INTEGRATIONTIME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.INTEGRATIONTIME" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.LASERSOURCE">
-<span class="sig-name descname"><span class="pre">LASERSOURCE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">11</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.LASERSOURCE" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.DETECTOR">
-<span class="sig-name descname"><span class="pre">DETECTOR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.DETECTOR" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.TARGETWAVELENGTH">
-<span class="sig-name descname"><span class="pre">TARGETWAVELENGTH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">13</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.TARGETWAVELENGTH" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.DEMODULATIONMODE">
-<span class="sig-name descname"><span class="pre">DEMODULATIONMODE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">14</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.DEMODULATIONMODE" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.TIPFREQUENCY">
-<span class="sig-name descname"><span class="pre">TIPFREQUENCY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">15</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.TIPFREQUENCY" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.TIPAMPLITUTDE">
-<span class="sig-name descname"><span class="pre">TIPAMPLITUTDE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.TIPAMPLITUTDE" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.TAPPINGAMPLITUDE">
-<span class="sig-name descname"><span class="pre">TAPPINGAMPLITUDE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">17</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.TAPPINGAMPLITUDE" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.MODULATIONFREQUENCY">
-<span class="sig-name descname"><span class="pre">MODULATIONFREQUENCY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">18</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.MODULATIONFREQUENCY" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.MODULATIONAMPLITUDE">
-<span class="sig-name descname"><span class="pre">MODULATIONAMPLITUDE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">19</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.MODULATIONAMPLITUDE" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.MODULATIONOFFSET">
-<span class="sig-name descname"><span class="pre">MODULATIONOFFSET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.MODULATIONOFFSET" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.SETPOINT">
-<span class="sig-name descname"><span class="pre">SETPOINT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">21</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.SETPOINT" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.REGULATOR">
-<span class="sig-name descname"><span class="pre">REGULATOR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">22</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.REGULATOR" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.TIPPOTENTIAL">
-<span class="sig-name descname"><span class="pre">TIPPOTENTIAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">23</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.TIPPOTENTIAL" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.M1ASCALING">
-<span class="sig-name descname"><span class="pre">M1ASCALING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">24</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.M1ASCALING" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.QFACTOR">
-<span class="sig-name descname"><span class="pre">QFACTOR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">25</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.QFACTOR" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.MeasurementTags.VERSION">
-<span class="sig-name descname"><span class="pre">VERSION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">26</span></em><a class="headerlink" href="#snom_analysis.main.MeasurementTags.VERSION" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="snom_analysis.main.ChannelTags">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">snom_analysis.main.</span></span><span class="sig-name descname"><span class="pre">ChannelTags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=&lt;not</span> <span class="pre">given&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/main.html#ChannelTags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.ChannelTags" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
-<p>This class keeps track of the implemented channel tags.
-These are tags which are channel specific.
-So multiple channels might have varying channel tag values but
-they will share the same measurement tag values. However, the
-current channel tag values are always to prefer over the same measurement tag value.
-As the channel tag values change when the channel is manipulated.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.ChannelTags.PIXELAREA">
-<span class="sig-name descname"><span class="pre">PIXELAREA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#snom_analysis.main.ChannelTags.PIXELAREA" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.ChannelTags.YINCOMPLETE">
-<span class="sig-name descname"><span class="pre">YINCOMPLETE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#snom_analysis.main.ChannelTags.YINCOMPLETE" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.ChannelTags.SCANNERCENTERPOSITION">
-<span class="sig-name descname"><span class="pre">SCANNERCENTERPOSITION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#snom_analysis.main.ChannelTags.SCANNERCENTERPOSITION" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.ChannelTags.ROTATION">
-<span class="sig-name descname"><span class="pre">ROTATION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#snom_analysis.main.ChannelTags.ROTATION" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.ChannelTags.SCANAREA">
-<span class="sig-name descname"><span class="pre">SCANAREA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#snom_analysis.main.ChannelTags.SCANAREA" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.ChannelTags.XYUNIT">
-<span class="sig-name descname"><span class="pre">XYUNIT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#snom_analysis.main.ChannelTags.XYUNIT" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.ChannelTags.ZUNIT">
-<span class="sig-name descname"><span class="pre">ZUNIT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#snom_analysis.main.ChannelTags.ZUNIT" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.ChannelTags.WAVENUMBERSCALING">
-<span class="sig-name descname"><span class="pre">WAVENUMBERSCALING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#snom_analysis.main.ChannelTags.WAVENUMBERSCALING" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.ChannelTags.PIXELSCALING">
-<span class="sig-name descname"><span class="pre">PIXELSCALING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></em><a class="headerlink" href="#snom_analysis.main.ChannelTags.PIXELSCALING" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">snom_analysis.main.</span></span><span class="sig-name descname"><span class="pre">PlotDefinitions</span></span><a class="reference internal" href="_modules/snom_analysis/main.html#PlotDefinitions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.PlotDefinitions" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>This class contains all the definitions for the plotting parameters.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.hide_ticks">
-<span class="sig-name descname"><span class="pre">hide_ticks</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.hide_ticks" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.figsizex">
-<span class="sig-name descname"><span class="pre">figsizex</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.figsizex" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.figsizey">
-<span class="sig-name descname"><span class="pre">figsizey</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.figsizey" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.show_titles">
-<span class="sig-name descname"><span class="pre">show_titles</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.show_titles" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.tight_layout">
-<span class="sig-name descname"><span class="pre">tight_layout</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.tight_layout" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.colorbar_width">
-<span class="sig-name descname"><span class="pre">colorbar_width</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.colorbar_width" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.hspace">
-<span class="sig-name descname"><span class="pre">hspace</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.4</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.hspace" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.font_size_default">
-<span class="sig-name descname"><span class="pre">font_size_default</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.font_size_default" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.font_size_axes_title">
-<span class="sig-name descname"><span class="pre">font_size_axes_title</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.font_size_axes_title" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.font_size_axes_label">
-<span class="sig-name descname"><span class="pre">font_size_axes_label</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.font_size_axes_label" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.font_size_tick_labels">
-<span class="sig-name descname"><span class="pre">font_size_tick_labels</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.font_size_tick_labels" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.font_size_legend">
-<span class="sig-name descname"><span class="pre">font_size_legend</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.font_size_legend" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.font_size_fig_title">
-<span class="sig-name descname"><span class="pre">font_size_fig_title</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.font_size_fig_title" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.height_cbar_range">
-<span class="sig-name descname"><span class="pre">height_cbar_range</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.height_cbar_range" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.vmin_height">
-<span class="sig-name descname"><span class="pre">vmin_height</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.vmin_height" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.vmax_height">
-<span class="sig-name descname"><span class="pre">vmax_height</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.vmax_height" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.amp_cbar_range">
-<span class="sig-name descname"><span class="pre">amp_cbar_range</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.amp_cbar_range" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.vmin_amp">
-<span class="sig-name descname"><span class="pre">vmin_amp</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.vmin_amp" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.vmax_amp">
-<span class="sig-name descname"><span class="pre">vmax_amp</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.vmax_amp" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.full_phase_range">
-<span class="sig-name descname"><span class="pre">full_phase_range</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.full_phase_range" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.shared_phase_range">
-<span class="sig-name descname"><span class="pre">shared_phase_range</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.shared_phase_range" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.vmin_phase">
-<span class="sig-name descname"><span class="pre">vmin_phase</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.vmin_phase" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.vmax_phase">
-<span class="sig-name descname"><span class="pre">vmax_phase</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.vmax_phase" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.real_cbar_range">
-<span class="sig-name descname"><span class="pre">real_cbar_range</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.real_cbar_range" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.vlimit_real">
-<span class="sig-name descname"><span class="pre">vlimit_real</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.vlimit_real" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.show_plot">
-<span class="sig-name descname"><span class="pre">show_plot</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.show_plot" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.PlotDefinitions.autodelete_all_subplots">
-<span class="sig-name descname"><span class="pre">autodelete_all_subplots</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#snom_analysis.main.PlotDefinitions.autodelete_all_subplots" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="snom_analysis.main.FileHandler">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">snom_analysis.main.</span></span><span class="sig-name descname"><span class="pre">FileHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/main.html#FileHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.FileHandler" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#snom_analysis.main.PlotDefinitions" title="snom_analysis.main.PlotDefinitions"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlotDefinitions</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PlotDefinitions</span></code></p>
 <p>This class handles the filetype and parameter type and all toplevel functionality.
 When creating a new instance of this class the config file will be loaded and the filetype will be determined.
 Also the measurement tag dictionary will be created.</p>
@@ -867,7 +435,7 @@ Afterwards the original channels and data will be reloaded in memory.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="snom_analysis.main.SnomMeasurement.heigth_mask_channels">
-<span class="sig-name descname"><span class="pre">heigth_mask_channels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">export</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/snom_analysis/main.html#SnomMeasurement.heigth_mask_channels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.SnomMeasurement.heigth_mask_channels" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">heigth_mask_channels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/snom_analysis/main.html#SnomMeasurement.heigth_mask_channels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.SnomMeasurement.heigth_mask_channels" title="Link to this definition"></a></dt>
 <dd><p>The treshold factor should be between 0 and 1. It sets the threshold for the height pixels.
 Every pixel below threshold will be set to 0. This also applies for all other channels.
 You can either specify specific channels to mask or if you don’t specify channels,
@@ -878,11 +446,8 @@ For this function to also work with scaled data the height channel has to be spe
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>channels</strong> (<em>list</em>) – list of channels, will override the already existing channels</p></li>
-<li><p><strong>mask_channel</strong> (<em>str</em>) – the channel to use for the height mask, if not specified the height channel will be used</p></li>
-<li><p><strong>threshold</strong> (<em>float</em>) – threshold value to create the height mask from</p></li>
-<li><p><strong>mask_data</strong> (<em>bool</em>) – if you want to apply the mask directly with the specified threshold change to ‘True’,
-otherwise you will be prompted with a preview and can then change the threshold iteratively</p></li>
-<li><p><strong>export</strong> (<em>bool</em>) – if you want to apply the mask to all channels and export them change to ‘True’</p></li>
+<li><p><strong>mask_channel</strong> (<em>str</em>) – The channel to use for the height mask, if not specified the height channel will be used</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>) – Threshold value to create the height mask from. Default is None, the user can select the threshold with a slider.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1029,13 +594,16 @@ If not specified the whole image will be used. Defaults to [None, None].</p></li
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.main.SnomMeasurement.level_height_channels">
-<span class="sig-name descname"><span class="pre">level_height_channels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/snom_analysis/main.html#SnomMeasurement.level_height_channels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.SnomMeasurement.level_height_channels" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="snom_analysis.main.SnomMeasurement.level_height_channels_3point">
+<span class="sig-name descname"><span class="pre">level_height_channels_3point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/snom_analysis/main.html#SnomMeasurement.level_height_channels_3point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.SnomMeasurement.level_height_channels_3point" title="Link to this definition"></a></dt>
 <dd><p>This function levels all height channels which are either user specified or in the instance memory.
 The leveling will prompt the user with a preview to select 3 points for getting the coordinates of the leveling plane.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>channels</strong> (<em>list</em><em>, </em><em>optional</em>) – List of channels to level. If not specified all channels in memory will be used. Defaults to None.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>channels</strong> (<em>list</em><em>, </em><em>optional</em>) – List of channels to level. If not specified all channels in memory will be used. Defaults to None.</p></li>
+<li><p><strong>coords</strong> (<em>list</em><em>, </em><em>optional</em>) – List of coordinates to use for the leveling. If not specified the user will be prompted to click on the points. Defaults to None.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -1073,7 +641,7 @@ If not specified all channels in memory will be used. Defaults to None.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="snom_analysis.main.SnomMeasurement.realign">
-<span class="sig-name descname"><span class="pre">realign</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/main.html#SnomMeasurement.realign"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.SnomMeasurement.realign" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">realign</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/main.html#SnomMeasurement.realign"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.SnomMeasurement.realign" title="Link to this definition"></a></dt>
 <dd><p>This function corrects the drift of the piezo motor. As of now it needs to be fitted to a region of the sample which is assumed to be straight.
 In the future this could be implemented with a general map containing the distortion created by the piezo motor, if it turns out to be constant…
 Anyways, you will be prompted with a preview of the height data, please select an area of the scan with only one ‘straight’ waveguide.
@@ -1082,7 +650,11 @@ This function is quite special to my needs and will probably not make it into th
 <p>Careful! Will not yet affect the scan size, so the pixelsize will be altered… ToDo</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>channels</strong> (<em>list</em>) – list of channels, will override the already existing channels</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>channels</strong> (<em>list</em>) – list of channels, will override the already existing channels</p></li>
+<li><p><strong>bounds</strong> (<em>list</em>) – The bounds for the fitting routine. If not specified you will be prompted with a window to select an area.
+Should be specified like this: [lower_bound, upper_bound] in px.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -1129,7 +701,7 @@ otherwise the first of the specified channels will be used. Defaults to None</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="snom_analysis.main.SnomMeasurement.select_profile">
-<span class="sig-name descname"><span class="pre">select_profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">profile_channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preview_channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#snom_analysis.main.Definitions" title="snom_analysis.main.Definitions"><span class="pre">Definitions</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Definitions.vertical</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_orientation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/main.html#SnomMeasurement.select_profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.SnomMeasurement.select_profile" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">select_profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">profile_channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preview_channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Definitions</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Definitions.vertical</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_orientation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/main.html#SnomMeasurement.select_profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.SnomMeasurement.select_profile" title="Link to this definition"></a></dt>
 <dd><p>This function lets the user select a profile with given width in pixels and displays the data.
 This is quite unfinished and only allows for profiles which extend over the whole image in the x-direction or y-direction.</p>
 <dl class="field-list simple">
@@ -1137,7 +709,7 @@ This is quite unfinished and only allows for profiles which extend over the whol
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>profile_channel</strong> (<em>str</em>) – channel to use for profile data extraction</p></li>
 <li><p><strong>preview_channel</strong> (<em>str</em><em>, </em><em>optional</em>) – channel to preview the profile positions. If not specified the height channel will be used for that. Defaults to None.</p></li>
-<li><p><strong>orientation</strong> (<a class="reference internal" href="#snom_analysis.main.Definitions" title="snom_analysis.main.Definitions"><em>Definitions</em></a><em>, </em><em>optional</em>) – profiles can be horizontal or vertical. Defaults to Definitions.vertical.</p></li>
+<li><p><strong>orientation</strong> (<em>Definitions</em><em>, </em><em>optional</em>) – profiles can be horizontal or vertical. Defaults to Definitions.vertical.</p></li>
 <li><p><strong>width</strong> (<em>int</em><em>, </em><em>optional</em>) – width of the profile in pixels, will calculate the mean. Defaults to 10.</p></li>
 <li><p><strong>phase_orientation</strong> (<em>int</em><em>, </em><em>optional</em>) – only relevant for phase profiles. Necessary for the flattening to work properly. Defaults to 1.</p></li>
 <li><p><strong>coordinates</strong> (<em>list</em><em>, </em><em>optional</em>) – if you already now the position of your profile you can also specify the coordinates and skip the selection. Defaults to None.</p></li>
@@ -1148,7 +720,7 @@ This is quite unfinished and only allows for profiles which extend over the whol
 
 <dl class="py method">
 <dt class="sig sig-object py" id="snom_analysis.main.SnomMeasurement.select_profiles">
-<span class="sig-name descname"><span class="pre">select_profiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">profile_channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preview_channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#snom_analysis.main.Definitions" title="snom_analysis.main.Definitions"><span class="pre">Definitions</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Definitions.vertical</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/main.html#SnomMeasurement.select_profiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.SnomMeasurement.select_profiles" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">select_profiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">profile_channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preview_channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Definitions</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Definitions.vertical</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/main.html#SnomMeasurement.select_profiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.SnomMeasurement.select_profiles" title="Link to this definition"></a></dt>
 <dd><p>This function lets the user select multiple profiles with given width in pixels and displays the data.
 Also unfinished, but allows for the selection of multiple profiles.</p>
 <dl class="field-list simple">
@@ -1156,7 +728,7 @@ Also unfinished, but allows for the selection of multiple profiles.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>profile_channel</strong> (<em>str</em>) – channel to use for profile data extraction</p></li>
 <li><p><strong>preview_channel</strong> (<em>str</em><em>, </em><em>optional</em>) – channel to preview the profile positions. If not specified the height channel will be used for that. Defaults to None.</p></li>
-<li><p><strong>orientation</strong> (<a class="reference internal" href="#snom_analysis.main.Definitions" title="snom_analysis.main.Definitions"><em>Definitions</em></a><em>, </em><em>optional</em>) – profiles can be horizontal or vertical. Defaults to Definitions.vertical.</p></li>
+<li><p><strong>orientation</strong> (<em>Definitions</em><em>, </em><em>optional</em>) – profiles can be horizontal or vertical. Defaults to Definitions.vertical.</p></li>
 <li><p><strong>width</strong> (<em>int</em><em>, </em><em>optional</em>) – width of the profile in pixels, will calculate the mean. Defaults to 10.</p></li>
 <li><p><strong>coordinates</strong> (<em>list</em><em>, </em><em>optional</em>) – if you already now the position of your profile you can also specify the coordinates and skip the selection. Defaults to None.</p></li>
 </ul>
@@ -1166,7 +738,7 @@ Also unfinished, but allows for the selection of multiple profiles.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="snom_analysis.main.SnomMeasurement.select_profiles_SSH">
-<span class="sig-name descname"><span class="pre">select_profiles_SSH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">profile_channel_amp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile_channel_phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preview_channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#snom_analysis.main.Definitions" title="snom_analysis.main.Definitions"><span class="pre">Definitions</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Definitions.vertical</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width_amp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width_phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/main.html#SnomMeasurement.select_profiles_SSH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.SnomMeasurement.select_profiles_SSH" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">select_profiles_SSH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">profile_channel_amp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile_channel_phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preview_channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Definitions</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Definitions.vertical</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width_amp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width_phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/main.html#SnomMeasurement.select_profiles_SSH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.SnomMeasurement.select_profiles_SSH" title="Link to this definition"></a></dt>
 <dd><p>This function lets the user select a profile with given width in pixels and displays the data.
 Specific function for ssh model measurements. This will create a plot of field per waveguide index for the topological array.
 The field is calculated from the amplitude profiles times the cosine of the phasedifference to the central waveguide.
@@ -1177,7 +749,7 @@ Also a very specific function for me, will probably not make it into the final v
 <li><p><strong>profile_channel_amp</strong> (<em>str</em>) – amplitude channel for profile data</p></li>
 <li><p><strong>profile_channel_phase</strong> (<em>str</em>) – phase channel for profile data</p></li>
 <li><p><strong>preview_channel</strong> (<em>str</em><em>, </em><em>optional</em>) – channel to preview the profile positions. If not specified the height channel will be used for that. Defaults to None.</p></li>
-<li><p><strong>orientation</strong> (<a class="reference internal" href="#snom_analysis.main.Definitions" title="snom_analysis.main.Definitions"><em>Definitions</em></a><em>, </em><em>optional</em>) – profiles can be horizontal or vertical. Defaults to Definitions.vertical.</p></li>
+<li><p><strong>orientation</strong> (<em>Definitions</em><em>, </em><em>optional</em>) – profiles can be horizontal or vertical. Defaults to Definitions.vertical.</p></li>
 <li><p><strong>width_amp</strong> (<em>int</em><em>, </em><em>optional</em>) – width of the amplitude profile in pixels. Defaults to 10.</p></li>
 <li><p><strong>width_phase</strong> (<em>int</em><em>, </em><em>optional</em>) – width of the phase profile in pixels. Defaults to 1.</p></li>
 <li><p><strong>coordinates</strong> (<em>list</em><em>, </em><em>optional</em>) – if you already now the position of your profile you can also specify the coordinates and skip the selection. Defaults to None.</p></li>
@@ -1627,21 +1199,6 @@ If not specified all channels in memory will be used. Defaults to None.</p></li>
 <dd></dd></dl>
 
 </dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="snom_analysis.main.Set_nan_to_zero">
-<span class="sig-prename descclassname"><span class="pre">snom_analysis.main.</span></span><span class="sig-name descname"><span class="pre">Set_nan_to_zero</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference internal" href="_modules/snom_analysis/main.html#Set_nan_to_zero"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.Set_nan_to_zero" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="snom_analysis.main.gauss_function">
-<span class="sig-prename descclassname"><span class="pre">snom_analysis.main.</span></span><span class="sig-name descname"><span class="pre">gauss_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/main.html#gauss_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.gauss_function" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="snom_analysis.main.Get_Largest_Abs">
-<span class="sig-prename descclassname"><span class="pre">snom_analysis.main.</span></span><span class="sig-name descname"><span class="pre">Get_Largest_Abs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/main.html#Get_Largest_Abs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.Get_Largest_Abs" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 </section>
 <section id="subpackages">

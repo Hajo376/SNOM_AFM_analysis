@@ -47,6 +47,10 @@ When saving the data make shure to use an appendix to the filename, as the packa
 However, the function will use a default appendix if you don't specify one.
 Nevertheles, i would recommend to work on a copy of the data and not on the original data.
 
+Also for plotting the package makes use of a matplotlib style file which is also located in the users home directory. Feel free to change this file to your needs.
+You can also experiment with latex mode if you want to create plots for your thesis, then however the scalebar will not work properly since symbols like a 'µ' aren't rendered properly...
+If you delete this file it will be recreated with the default settings.
+
 
 
 Key areas to improve:

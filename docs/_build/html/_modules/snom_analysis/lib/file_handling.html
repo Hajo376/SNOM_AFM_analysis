@@ -9,6 +9,7 @@
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=7dc6ce7e" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
@@ -42,10 +43,10 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples:</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../readme.html">Readme</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../how_to.html">How to</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../snom_analysis.html">snom_analysis package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snom_analysis.html">API Reference</a></li>
 </ul>
 
         </div>
@@ -103,9 +104,11 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;could not read header&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
+    <span class="c1"># print(&#39;header:&#39;, header)</span>
     <span class="n">parameters_dict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">)):</span>
         <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">_simplify_line</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">separator</span><span class="p">,</span> <span class="n">header_indicator</span><span class="p">,</span> <span class="n">tags_list</span><span class="p">)</span>
+        <span class="c1"># print(f&#39;key: &lt;{key}&gt;&#39; , f&#39;value: &lt;{value}&gt;&#39;)</span>
         <span class="c1"># check if the key is in the tags list</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tags_list</span><span class="p">:</span>
             <span class="n">parameters_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
@@ -125,7 +128,10 @@
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
         <span class="nb">all</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
     <span class="c1"># split content into lines</span>
+    <span class="c1"># print(&#39;all:&#39;, all)</span>
     <span class="n">all_lines</span> <span class="o">=</span> <span class="nb">all</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="c1"># print(&#39;all_lines:&#39;, all_lines)</span>
+    <span class="c1"># print(&#39;tags:&#39;, tags)</span>
     <span class="c1"># check if the lines contain on of the tags</span>
     <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">all_lines</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
@@ -136,6 +142,7 @@
                 <span class="k">for</span> <span class="n">subtag</span> <span class="ow">in</span> <span class="n">tag</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">subtag</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
                         <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="c1"># print(&#39;content:&#39;, content)</span>
     <span class="k">return</span> <span class="n">content</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_simplify_line</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">separator</span><span class="p">,</span> <span class="n">header_indicator</span><span class="p">,</span> <span class="n">tags</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
@@ -162,6 +169,31 @@
         <span class="k">except</span><span class="p">:</span> <span class="k">pass</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># try to simplyfy line[0] to only contain the tags, sometimes to much spaces might be in the line</span>
+        <span class="c1"># however sometimes shorter tags might be part of longer tags, such as &#39;SCAN&#39; and &#39;SCAN AREA&#39;...</span>
+        <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="c1"># if there is a chracter around the tag it is not the tag we are looking for, optimally we want to make sure that the tag is sourrounded by 2 spaces or the end of the line</span>
+                <span class="c1"># print(&#39;tag:&#39;, tag)</span>
+                <span class="c1"># print(&#39;line[0]:&#39;, line[0])</span>
+                <span class="n">start_index</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+                <span class="n">end_index</span> <span class="o">=</span> <span class="n">start_index</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">start_index</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">start_index</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39; &#39;</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">elif</span> <span class="n">start_index</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">start_index</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39; &#39;</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">end_index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">end_index</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39; &#39;</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">elif</span> <span class="n">end_index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">end_index</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39; &#39;</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="c1"># if len(line[0]) &gt; len(tag):</span>
+                <span class="c1">#     if line[0][line[0].index(tag)-1] != &#39; &#39; or line[0][line[0].index(tag)+len(tag)] != &#39; &#39;:</span>
+                <span class="c1">#         if line[0][line[0].index(tag)-2] != &#39;\t&#39; or line[0][line[0].index(tag)+len(tag)] != &#39;\t&#39;:</span>
+                <span class="c1">#             continue</span>
+                <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">tag</span>
+                <span class="c1"># print(&#39;line[0]:&#39;, line[0])</span>
+
+                <span class="k">break</span>
         <span class="n">key</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 

@@ -1,3 +1,4 @@
+.. _snom_analysis:
 API Reference
 =============
 

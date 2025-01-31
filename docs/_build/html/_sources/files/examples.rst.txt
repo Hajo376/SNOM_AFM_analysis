@@ -3,6 +3,7 @@ Here are some examples what you can do with the library:
 
 These examples are just using built in functionality.
 
+.. _plot example 1:
 Example 1:
 ~~~~~~~~~~
 
@@ -16,6 +17,11 @@ Example 1:
    In the second image modifications such as simple 3 point height leveling, cutting the data, scaling and adding a gaussian filter.
    This measurement was performed in transmission mode on a thin gold pentamer structur on a glass substrate.
 
+.. dropdown:: Code
+
+   .. include:: ../docs/files/code_example_snommeasurement_1.rst
+
+.. _plot example 2:
 Example 2:
 ~~~~~~~~~~
 
@@ -31,8 +37,11 @@ Example 2:
    Due to poor AFM stability at that time the amplitude and phase data drifted quite a bit over time and need correction. Since the drifts are not linear we cannot simply
    use a linear correction.
 
+.. dropdown:: Code
 
+   .. include:: ../docs/files/code_example_snommeasurement_2.rst
 
+.. _plot example 3:
 Example 3:
 ~~~~~~~~~~
 
@@ -46,6 +55,11 @@ Example 3:
    This measurement was performed in transmission mode on a grating milled inside of a gold film. What you see is the excitation of surface plasmon polaritons propagating
    to the left and right of the grating.
 
+.. dropdown:: Code
+
+   .. include:: ../docs/files/code_example_snommeasurement_3.rst
+
+.. _plot example 4:
 Example 4:
 ~~~~~~~~~~
 
@@ -57,6 +71,11 @@ Example 4:
 
    This shows basic plotting of approach curves. The data is loaded and the minimum is set to zero. The data is then displayed in a plot.
 
+.. dropdown:: Code
+
+   .. include:: ../docs/files/code_example_approachcurve_1.rst
+
+.. _plot example 5:
 Example 5:
 ~~~~~~~~~~
 
@@ -69,6 +88,11 @@ Example 5:
    This shows basic plotting of 3D scans. The data is loaded, cutplanes are created and the minimum is set to zero. A single cutplane is then displayed in a plot.
    The measurement was performed on a dielectric loaded surface plasmon polariton waveguide on top of a gold film. The measurement is a cut perpendicular to the waveguide.
 
+.. dropdown:: Code
+
+   .. include:: ../docs/files/code_example_scan3d_1.rst
+
+.. _plot example 6:
 Example 6:
 ~~~~~~~~~~
 
@@ -83,4 +107,6 @@ Example 6:
    to a much better physical representation of the data. In this case a waveguide was in the center of the scan. This image is equivalent to the previous one
    but the data is shifted to align the waveguide in the center of the image.
 
+.. dropdown:: Code
 
+   .. include:: ../docs/files/code_example_scan3d_2.rst

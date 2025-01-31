@@ -123,17 +123,20 @@ def test_height_masking():
     # measurement.display_all_subplots()
 
 def test_scalebar():
+    # directory_name = 'tests/testdata/2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long'
+    # directory_name = 'tests/testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
     directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
     channels = ['O2P', 'O2A', 'Z C']
-    measurement = SnomMeasurement(directory_name, channels)
+    measurement = SnomMeasurement(directory_name, channels, autoscale=True)
+    PlotDefinitions.colorbar_width = 2
     measurement.scalebar(['Z C'], length_fraction=0.5)
     measurement.display_channels()
-    measurement.scale_channels()
-    measurement.gauss_filter_channels_complex()
-    measurement.scalebar(['Z C'], length_fraction=0.5)
-    measurement.cut_channels(coords=[[20, 29], [174, 167]])
-    measurement.display_channels()    
-    measurement.display_all_subplots()
+    # measurement.scale_channels()
+    # measurement.gauss_filter_channels_complex()
+    # measurement.scalebar(['Z C'], length_fraction=0.5)
+    # measurement.cut_channels(coords=[[20, 29], [174, 167]])
+    # measurement.display_channels()    
+    # measurement.display_all_subplots()
     
 def test_phaseshift():
     directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
@@ -819,7 +822,7 @@ def main():
     # test_realign()
     # test_cut()
     # test_height_masking()
-    # test_scalebar()
+    test_scalebar()
     # test_phaseshift()
     # compare_measurements()
     # correct_phase_drift()
@@ -830,7 +833,7 @@ def main():
     # test_gif()
     # test_3d_scan()
     # phase_correction_3d_scan()
-    average_3d_scan()
+    # average_3d_scan()
     # test_phase_drift_correction()
     # test_amplitude_drift_correction()
     # test_height_drift_correction()

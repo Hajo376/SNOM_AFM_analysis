@@ -10,6 +10,7 @@
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=7dc6ce7e" />
 
   
@@ -18,6 +19,7 @@
       <script src="_static/documentation_options.js?v=8d563738"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/design-tabs.js?v=f930bc37"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -88,26 +90,73 @@
            <div itemprop="articleBody">
              
   <section id="examples">
-<h1>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h1>
+<span id="id1"></span><h1>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h1>
 <p>Here are some examples what you can do with the library.</p>
 <section id="here-are-some-examples-what-you-can-do-with-the-library">
 <h2>Here are some examples what you can do with the library:<a class="headerlink" href="#here-are-some-examples-what-you-can-do-with-the-library" title="Link to this heading"></a></h2>
 <p>These examples are just using built in functionality.</p>
 <section id="example-1">
-<h3>Example 1:<a class="headerlink" href="#example-1" title="Link to this heading"></a></h3>
-<figure class="align-default" id="id1">
+<span id="plot-example-1"></span><h3>Example 1:<a class="headerlink" href="#example-1" title="Link to this heading"></a></h3>
+<figure class="align-default" id="id2">
 <a class="reference internal image-reference" href="_images/snom_example_1_comparison.png"><img alt="Image of the first example code discussed in the how to section." src="_images/snom_example_1_comparison.png" style="width: 900.0px; height: 450.0px;" />
 </a>
 <figcaption>
 <p><span class="caption-text">This is a comparison of the data before and after modifications, this is possible because each created image is saved in a file.
 In the second image modifications such as simple 3 point height leveling, cutting the data, scaling and adding a gaussian filter.
-This measurement was performed in transmission mode on a thin gold pentamer structur on a glass substrate.</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+This measurement was performed in transmission mode on a thin gold pentamer structur on a glass substrate.</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
 </figcaption>
 </figure>
-</section>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Code</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># Load the main functionality from the package, in this case the SnomMeasurement class.</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">snom_analysis.main</span><span class="w"> </span><span class="kn">import</span> <span class="n">SnomMeasurement</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="c1"># Create an instance of the SnomMeasurement class by providing the path to the measurement folder.</span>
+<span class="linenos"> 5</span><span class="n">measurement</span> <span class="o">=</span> <span class="n">SnomMeasurement</span><span class="p">(</span><span class="s1">&#39;path/to/your/measurement/folder&#39;</span><span class="p">)</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="c1"># Now you can access the data and the functions of the measurement instance.</span>
+<span class="linenos"> 8</span><span class="c1"># For example you can plot the data by calling the plot function.</span>
+<span class="linenos"> 9</span><span class="c1"># If you don&#39;t specify any arguments all channels will be plotted.</span>
+<span class="linenos">10</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
+<span class="linenos">11</span>
+<span class="linenos">12</span><span class="c1"># You can also apply some modifications to the data, for example you can crop the data.</span>
+<span class="linenos">13</span><span class="c1"># If you don&#39;t specify any arguments you will be asked to provide the cropping range using</span>
+<span class="linenos">14</span><span class="c1"># some default channel and the crop will be applied to all channels.</span>
+<span class="linenos">15</span><span class="n">measurement</span><span class="o">.</span><span class="n">cut_channels</span><span class="p">()</span>
+<span class="linenos">16</span>
+<span class="linenos">17</span><span class="c1"># You can also blurr the data using a gaussian filter.</span>
+<span class="linenos">18</span><span class="c1"># If you want to blurr phase data you will need to have</span>
+<span class="linenos">19</span><span class="c1"># the phase and amplitude channels of the same demodulation in memory.</span>
+<span class="linenos">20</span><span class="n">measurement</span><span class="o">.</span><span class="n">gauss_filter_channels_complex</span><span class="p">()</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span><span class="c1"># You can use a simple 3 point correction to level the height data.</span>
+<span class="linenos">23</span><span class="c1"># For better leveling you can always use some other software</span>
+<span class="linenos">24</span><span class="c1"># like Gwyddion and import already leveled data.</span>
+<span class="linenos">25</span><span class="n">measurement</span><span class="o">.</span><span class="n">level_height_channels</span><span class="p">()</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span><span class="c1"># I always like to set the minimum of the height channel to zero.</span>
+<span class="linenos">28</span><span class="c1"># This should be applied after the leveling. Otherwise the leveling will also change the minimum.</span>
+<span class="linenos">29</span><span class="n">measurement</span><span class="o">.</span><span class="n">set_min_to_zero</span><span class="p">([</span><span class="s1">&#39;Z C&#39;</span><span class="p">])</span>
+<span class="linenos">30</span>
+<span class="linenos">31</span><span class="c1"># Now you can plot the data again to see the modifications.</span>
+<span class="linenos">32</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
+<span class="linenos">33</span>
+<span class="linenos">34</span><span class="c1"># You can also compare the data before and after the modifications.</span>
+<span class="linenos">35</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_all_subplots</span><span class="p">()</span>
+<span class="linenos">36</span>
+<span class="linenos">37</span><span class="c1"># If you are happy with the modifications you can save the data.</span>
+<span class="linenos">38</span><span class="c1"># This will save the data to a new .gsf file in the measurement folder.</span>
+<span class="linenos">39</span><span class="n">measurement</span><span class="o">.</span><span class="n">save_to_gsf</span><span class="p">()</span>
+<span class="linenos">40</span><span class="c1"># Per default the &#39;_manipulated&#39; suffix will be added to the filename,</span>
+<span class="linenos">41</span><span class="c1"># to ensure you don&#39;t overwrite the original data.</span>
+</pre></div>
+</div>
+</div>
+</details></section>
 <section id="example-2">
-<h3>Example 2:<a class="headerlink" href="#example-2" title="Link to this heading"></a></h3>
-<figure class="align-default" id="id2">
+<span id="plot-example-2"></span><h3>Example 2:<a class="headerlink" href="#example-2" title="Link to this heading"></a></h3>
+<figure class="align-default" id="id3">
 <a class="reference internal image-reference" href="_images/snom_example_2_comparison.png"><img alt="Image of the second example code discussed in the how to section." src="_images/snom_example_2_comparison.png" style="width: 545.0px; height: 816.0px;" />
 </a>
 <figcaption>
@@ -115,56 +164,264 @@ This measurement was performed in transmission mode on a thin gold pentamer stru
 and also a phase shift to make slight phase changes more obvious. This measurement was performed in reflection mode on a thin PMMA wedge on top of a gold film.
 The fringes you see are an interference of the surface plasmon polaritons excited by the tip and the reflection from the PMMA edges.
 Due to poor AFM stability at that time the amplitude and phase data drifted quite a bit over time and need correction. Since the drifts are not linear we cannot simply
-use a linear correction.</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+use a linear correction.</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
 </figcaption>
 </figure>
-</section>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Code</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># Import filedialog to open a file dialog to select the measurement folder.</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">tkinter</span><span class="w"> </span><span class="kn">import</span> <span class="n">filedialog</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="c1"># Load the main functionality from the package, in this case the SnomMeasurement class.</span>
+<span class="linenos"> 5</span><span class="kn">from</span><span class="w"> </span><span class="nn">snom_analysis.main</span><span class="w"> </span><span class="kn">import</span> <span class="n">SnomMeasurement</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="c1"># Open a file dialog to select the measurement folder.</span>
+<span class="linenos"> 8</span><span class="n">directory</span> <span class="o">=</span> <span class="n">filedialog</span><span class="o">.</span><span class="n">askdirectory</span><span class="p">()</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="c1"># It is always a good idea to select the channels you want to use before loading the data.</span>
+<span class="linenos">11</span><span class="n">channels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;O2P&#39;</span><span class="p">,</span> <span class="s1">&#39;O2A&#39;</span><span class="p">,</span> <span class="s1">&#39;Z C&#39;</span><span class="p">]</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="c1"># Create an instance of the SnomMeasurement class by providing the path to the measurement folder.</span>
+<span class="linenos">14</span><span class="n">measurement</span> <span class="o">=</span> <span class="n">SnomMeasurement</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">channels</span><span class="p">)</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="c1"># Plot the data without any modifications.</span>
+<span class="linenos">17</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span><span class="c1"># You can also add a scalebar, which will be saved to the plot memory.</span>
+<span class="linenos">20</span><span class="n">measurement</span><span class="o">.</span><span class="n">scalebar</span><span class="p">([</span><span class="s1">&#39;Z C&#39;</span><span class="p">])</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span><span class="c1"># for phase data the level_data_columnwise function is not yet working properly,</span>
+<span class="linenos">23</span><span class="c1"># if the phase data is not in the range of 0 to 2pi (drifts more than 2pi)</span>
+<span class="linenos">24</span><span class="c1"># but we can correct a linear drift in the phase data before.</span>
+<span class="linenos">25</span><span class="n">measurement</span><span class="o">.</span><span class="n">correct_phase_drift_nonlinear</span><span class="p">()</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span><span class="c1"># You can also aplly corrections such as a linear 2 point based y-phase drift correction.</span>
+<span class="linenos">28</span><span class="c1"># measurement.correct_phase_drift()</span>
+<span class="linenos">29</span><span class="c1"># or a nonlinear dift correction, wich takes into account each line and also applies</span>
+<span class="linenos">30</span><span class="c1"># a linear correction in x-direction if both sides are specified</span>
+<span class="linenos">31</span><span class="n">measurement</span><span class="o">.</span><span class="n">level_data_columnwise</span><span class="p">()</span>
+<span class="linenos">32</span>
+<span class="linenos">33</span><span class="c1"># I always like to set the minimum of the height channel to zero.</span>
+<span class="linenos">34</span><span class="c1"># This should be applied after the drift correction.</span>
+<span class="linenos">35</span><span class="c1"># Otherwise the drift correction will also change the minimum.</span>
+<span class="linenos">36</span><span class="n">measurement</span><span class="o">.</span><span class="n">set_min_to_zero</span><span class="p">([</span><span class="s1">&#39;Z C&#39;</span><span class="p">])</span>
+<span class="linenos">37</span>
+<span class="linenos">38</span><span class="c1"># You can shift the phase-offset of the phase channel.</span>
+<span class="linenos">39</span><span class="c1"># Some functions will take additional parameters, if given they will apply directly.</span>
+<span class="linenos">40</span><span class="c1"># If not they will promt the user with a popup window to select the parameters manually.</span>
+<span class="linenos">41</span><span class="n">measurement</span><span class="o">.</span><span class="n">shift_phase</span><span class="p">()</span>
+<span class="linenos">42</span><span class="c1"># or you can specify the shift directly.</span>
+<span class="linenos">43</span><span class="c1"># measurement.shift_phase(shift=0.3)</span>
+<span class="linenos">44</span>
+<span class="linenos">45</span><span class="c1"># Now you can plot the data.</span>
+<span class="linenos">46</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
+<span class="linenos">47</span>
+<span class="linenos">48</span><span class="c1"># You can also compare the data before and after the modifications.</span>
+<span class="linenos">49</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_all_subplots</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</details></section>
 <section id="example-3">
-<h3>Example 3:<a class="headerlink" href="#example-3" title="Link to this heading"></a></h3>
-<figure class="align-default" id="id3">
+<span id="plot-example-3"></span><h3>Example 3:<a class="headerlink" href="#example-3" title="Link to this heading"></a></h3>
+<figure class="align-default" id="id4">
 <a class="reference internal image-reference" href="_images/snom_example_3_alternative_comparison.png"><img alt="Image of the third example code discussed in the how to section." src="_images/snom_example_3_alternative_comparison.png" style="width: 672.0px; height: 501.0px;" />
 </a>
 <figcaption>
 <p><span class="caption-text">This is shows the phase data before and after the synccorrection. The synccorrection gets rid of the linear phase drift caused by the movement of the lower parabola.
 This measurement was performed in transmission mode on a grating milled inside of a gold film. What you see is the excitation of surface plasmon polaritons propagating
-to the left and right of the grating.</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
+to the left and right of the grating.</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
 </figcaption>
 </figure>
-</section>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Code</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># Import filedialog to open a file dialog to select the measurement folder.</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">tkinter</span><span class="w"> </span><span class="kn">import</span> <span class="n">filedialog</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="c1"># Load the main functionality from the package, in this case the SnomMeasurement class.</span>
+<span class="linenos"> 5</span><span class="kn">from</span><span class="w"> </span><span class="nn">snom_analysis.main</span><span class="w"> </span><span class="kn">import</span> <span class="n">SnomMeasurement</span><span class="p">,</span> <span class="n">PlotDefinitions</span>
+<span class="linenos"> 6</span><span class="n">PlotDefinitions</span><span class="o">.</span><span class="n">colorbar_width</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1"># colorbar width for long thin measurements looks too big</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="c1"># Open a file dialog to select the measurement folder.</span>
+<span class="linenos"> 9</span><span class="n">directory</span> <span class="o">=</span> <span class="n">filedialog</span><span class="o">.</span><span class="n">askdirectory</span><span class="p">()</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="c1"># It is always a good idea to select the channels you want to use before loading the data.</span>
+<span class="linenos">12</span><span class="n">channels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;O2P&#39;</span><span class="p">,</span> <span class="s1">&#39;O2A&#39;</span><span class="p">,</span> <span class="s1">&#39;Z C&#39;</span><span class="p">]</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span><span class="c1"># Create an instance of the SnomMeasurement class by providing the path to the measurement folder.</span>
+<span class="linenos">15</span><span class="c1"># If we want to apply the synccorrection we need to set autoscale to False.</span>
+<span class="linenos">16</span><span class="n">measurement</span> <span class="o">=</span> <span class="n">SnomMeasurement</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">channels</span><span class="p">,</span> <span class="n">autoscale</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span><span class="c1"># Plot the data without any modifications.</span>
+<span class="linenos">19</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span><span class="c1"># Apply the synccorrection to the data. But we don&#39;t know the direction yet.</span>
+<span class="linenos">22</span><span class="c1"># The interferometer sometimes goes in the wron direction.</span>
+<span class="linenos">23</span><span class="c1"># This will create corrected channels and save them as .gsf with the appendix &#39;_corrected&#39;.</span>
+<span class="linenos">24</span><span class="n">measurement</span><span class="o">.</span><span class="n">synccorrection</span><span class="p">(</span><span class="mf">1.6</span><span class="p">)</span>
+<span class="linenos">25</span>
+<span class="linenos">26</span><span class="c1"># We want to display the corrected channels, so we reinitialize the channels with the corrected channels.</span>
+<span class="linenos">27</span><span class="n">measurement</span><span class="o">.</span><span class="n">initialize_channels</span><span class="p">([</span><span class="s1">&#39;O2P_corrected&#39;</span><span class="p">,</span> <span class="s1">&#39;O2A&#39;</span><span class="p">,</span> <span class="s1">&#39;Z C&#39;</span><span class="p">])</span>
+<span class="linenos">28</span>
+<span class="linenos">29</span><span class="c1"># Plot the corrected data.</span>
+<span class="linenos">30</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
+<span class="linenos">31</span>
+<span class="linenos">32</span><span class="c1"># You can also compare the data before and after the modifications.</span>
+<span class="linenos">33</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_all_subplots</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</details></section>
 <section id="example-4">
-<h3>Example 4:<a class="headerlink" href="#example-4" title="Link to this heading"></a></h3>
-<figure class="align-default" id="id4">
+<span id="plot-example-4"></span><h3>Example 4:<a class="headerlink" href="#example-4" title="Link to this heading"></a></h3>
+<figure class="align-default" id="id5">
 <a class="reference internal image-reference" href="_images/approachcurve_example_1.png"><img alt="Image of the fouth example code discussed in the how to section." src="_images/approachcurve_example_1.png" style="width: 512.0px; height: 384.0px;" />
 </a>
 <figcaption>
-<p><span class="caption-text">This shows basic plotting of approach curves. The data is loaded and the minimum is set to zero. The data is then displayed in a plot.</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
+<p><span class="caption-text">This shows basic plotting of approach curves. The data is loaded and the minimum is set to zero. The data is then displayed in a plot.</span><a class="headerlink" href="#id5" title="Link to this image"></a></p>
 </figcaption>
 </figure>
-</section>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Code</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># Import filedialog to open a file dialog to select the measurement folder.</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">tkinter</span><span class="w"> </span><span class="kn">import</span> <span class="n">filedialog</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="c1"># Load the main functionality from the package, in this case the SnomMeasurement class.</span>
+<span class="linenos"> 5</span><span class="kn">from</span><span class="w"> </span><span class="nn">snom_analysis.main</span><span class="w"> </span><span class="kn">import</span> <span class="n">ApproachCurve</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="c1"># Open a file dialog to select the measurement folder.</span>
+<span class="linenos"> 8</span><span class="n">directory_name</span> <span class="o">=</span> <span class="n">filedialog</span><span class="o">.</span><span class="n">askdirectory</span><span class="p">()</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="c1"># It is always a good idea to select the channels you want to use before loading the data.</span>
+<span class="linenos">11</span><span class="n">channels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;M1A&#39;</span><span class="p">,</span> <span class="s1">&#39;O2P&#39;</span><span class="p">,</span> <span class="s1">&#39;O2A&#39;</span><span class="p">]</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="c1"># Create an instance of the ApproachCurve class by providing the path to the measurement folder.</span>
+<span class="linenos">14</span><span class="n">measurement</span> <span class="o">=</span> <span class="n">ApproachCurve</span><span class="p">(</span><span class="n">directory_name</span><span class="p">,</span> <span class="n">channels</span><span class="p">)</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="c1"># Set the minimum value of the data to zero.</span>
+<span class="linenos">17</span><span class="n">measurement</span><span class="o">.</span><span class="n">set_min_to_zero</span><span class="p">()</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span><span class="c1"># Display the channels in a plot. And scale each data set to the whole image size.</span>
+<span class="linenos">20</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels_v2</span><span class="p">()</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span><span class="c1"># Alternatively you can use the display_channels() function, which will display the channels in a plot without rescaling.</span>
+<span class="linenos">23</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_channels</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</details></section>
 <section id="example-5">
-<h3>Example 5:<a class="headerlink" href="#example-5" title="Link to this heading"></a></h3>
-<figure class="align-default" id="id5">
+<span id="plot-example-5"></span><h3>Example 5:<a class="headerlink" href="#example-5" title="Link to this heading"></a></h3>
+<figure class="align-default" id="id6">
 <a class="reference internal image-reference" href="_images/3dscan_example_1.png"><img alt="Image of the fouth example code discussed in the how to section." src="_images/3dscan_example_1.png" style="width: 800.0px; height: 400.0px;" />
 </a>
 <figcaption>
 <p><span class="caption-text">This shows basic plotting of 3D scans. The data is loaded, cutplanes are created and the minimum is set to zero. A single cutplane is then displayed in a plot.
-The measurement was performed on a dielectric loaded surface plasmon polariton waveguide on top of a gold film. The measurement is a cut perpendicular to the waveguide.</span><a class="headerlink" href="#id5" title="Link to this image"></a></p>
+The measurement was performed on a dielectric loaded surface plasmon polariton waveguide on top of a gold film. The measurement is a cut perpendicular to the waveguide.</span><a class="headerlink" href="#id6" title="Link to this image"></a></p>
 </figcaption>
 </figure>
-</section>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Code</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># Import filedialog to open a file dialog to select the measurement folder.</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">tkinter</span><span class="w"> </span><span class="kn">import</span> <span class="n">filedialog</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="c1"># Load the main functionality from the package, in this case the SnomMeasurement class.</span>
+<span class="linenos"> 5</span><span class="kn">from</span><span class="w"> </span><span class="nn">snom_analysis.main</span><span class="w"> </span><span class="kn">import</span> <span class="n">Scan3D</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="c1"># Open a file dialog to select the measurement folder.</span>
+<span class="linenos"> 8</span><span class="n">directory</span> <span class="o">=</span> <span class="n">filedialog</span><span class="o">.</span><span class="n">askdirectory</span><span class="p">()</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="c1"># It is always a good idea to select the channels you want to use before loading the data.</span>
+<span class="linenos">11</span><span class="n">channels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;O2A&#39;</span><span class="p">,</span> <span class="s1">&#39;O2P&#39;</span><span class="p">,</span> <span class="s1">&#39;O3A&#39;</span><span class="p">,</span> <span class="s1">&#39;O3P&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">]</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="c1"># Create an instance of the Scan3D class by providing the path to the measurement folder.</span>
+<span class="linenos">14</span><span class="n">measurement</span> <span class="o">=</span> <span class="n">Scan3D</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">channels</span><span class="p">)</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="c1"># Set the minimum value of the data to zero.</span>
+<span class="linenos">17</span><span class="n">measurement</span><span class="o">.</span><span class="n">set_min_to_zero</span><span class="p">()</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span><span class="c1"># Change the colorbar width to 3 on the fly will apply to all following plots.</span>
+<span class="linenos">20</span><span class="n">PlotDefinitions</span><span class="o">.</span><span class="n">colorbar_width</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span><span class="c1"># Generate all cutplane data for the channels.</span>
+<span class="linenos">23</span><span class="n">measurement</span><span class="o">.</span><span class="n">generate_all_cutplane_data</span><span class="p">()</span>
+<span class="linenos">24</span>
+<span class="linenos">25</span><span class="c1"># Match the phase offset of the channels O2P and O3P to the reference channel O2P.</span>
+<span class="linenos">26</span><span class="n">measurement</span><span class="o">.</span><span class="n">match_phase_offset</span><span class="p">(</span><span class="n">channels</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;O2P&#39;</span><span class="p">,</span> <span class="s1">&#39;O3P&#39;</span><span class="p">],</span> <span class="n">reference_channel</span><span class="o">=</span><span class="s1">&#39;O2P&#39;</span><span class="p">,</span> <span class="n">reference_area</span><span class="o">=</span><span class="s1">&#39;manual&#39;</span><span class="p">,</span> <span class="n">manual_width</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="linenos">27</span>
+<span class="linenos">28</span><span class="c1"># For example display just the first cutplane of the O2P channel. Then display the first cutplane of the O3P channel.</span>
+<span class="linenos">29</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_cutplane_v3</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="s1">&#39;O2P&#39;</span><span class="p">)</span>
+<span class="linenos">30</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_cutplane_v3</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="s1">&#39;O3P&#39;</span><span class="p">)</span>
+<span class="linenos">31</span>
+<span class="linenos">32</span><span class="c1"># Shift the phase of the channels O2P and O3P by an arbitrary amount to make it visually clearer what you want to see.</span>
+<span class="linenos">33</span><span class="n">measurement</span><span class="o">.</span><span class="n">shift_phase</span><span class="p">()</span>
+<span class="linenos">34</span>
+<span class="linenos">35</span><span class="c1"># Display the first cutplane again with all the changes applied.</span>
+<span class="linenos">36</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_cutplane_v3</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="s1">&#39;O2P&#39;</span><span class="p">)</span>
+<span class="linenos">37</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_cutplane_v3</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="s1">&#39;O3P&#39;</span><span class="p">)</span>
+<span class="linenos">38</span>
+<span class="linenos">39</span><span class="c1"># Display the real part of the first cutplane of the O2 channel and the O3 channel.</span>
+<span class="linenos">40</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_cutplane_v3_realpart</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">demodulation</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="linenos">41</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_cutplane_v3_realpart</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">demodulation</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</details></section>
 <section id="example-6">
-<h3>Example 6:<a class="headerlink" href="#example-6" title="Link to this heading"></a></h3>
-<figure class="align-default" id="id6">
+<span id="plot-example-6"></span><h3>Example 6:<a class="headerlink" href="#example-6" title="Link to this heading"></a></h3>
+<figure class="align-default" id="id7">
 <a class="reference internal image-reference" href="_images/3dscan_example_1_shifted.png"><img alt="Image of the fouth example code discussed in the how to section." src="_images/3dscan_example_1_shifted.png" style="width: 800.0px; height: 400.0px;" />
 </a>
 <figcaption>
 <p><span class="caption-text">This shows basic plotting of 3D scans. The data is loaded, cutplanes are created and the minimum is set to zero. The cutplanes are then autoaligned,
 such that the start point of each individual approach curve is identical in z, and then displayed in a plot. This leads
 to a much better physical representation of the data. In this case a waveguide was in the center of the scan. This image is equivalent to the previous one
-but the data is shifted to align the waveguide in the center of the image.</span><a class="headerlink" href="#id6" title="Link to this image"></a></p>
+but the data is shifted to align the waveguide in the center of the image.</span><a class="headerlink" href="#id7" title="Link to this image"></a></p>
 </figcaption>
 </figure>
-</section>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Code</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># Import filedialog to open a file dialog to select the measurement folder.</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">tkinter</span><span class="w"> </span><span class="kn">import</span> <span class="n">filedialog</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="c1"># Load the main functionality from the package, in this case the SnomMeasurement class.</span>
+<span class="linenos"> 5</span><span class="kn">from</span><span class="w"> </span><span class="nn">snom_analysis.main</span><span class="w"> </span><span class="kn">import</span> <span class="n">Scan3D</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="c1"># Open a file dialog to select the measurement folder.</span>
+<span class="linenos"> 8</span><span class="n">directory</span> <span class="o">=</span> <span class="n">filedialog</span><span class="o">.</span><span class="n">askdirectory</span><span class="p">()</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="c1"># It is always a good idea to select the channels you want to use before loading the data.</span>
+<span class="linenos">11</span><span class="n">channels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;O2A&#39;</span><span class="p">,</span> <span class="s1">&#39;O2P&#39;</span><span class="p">,</span> <span class="s1">&#39;O3A&#39;</span><span class="p">,</span> <span class="s1">&#39;O3P&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">]</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="c1"># Create an instance of the Scan3D class by providing the path to the measurement folder.</span>
+<span class="linenos">14</span><span class="n">measurement</span> <span class="o">=</span> <span class="n">Scan3D</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">channels</span><span class="p">)</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="c1"># Set the minimum value of the data to zero.</span>
+<span class="linenos">17</span><span class="n">measurement</span><span class="o">.</span><span class="n">set_min_to_zero</span><span class="p">()</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span><span class="c1"># Change the colorbar width to 3 on the fly will apply to all following plots.</span>
+<span class="linenos">20</span><span class="n">PlotDefinitions</span><span class="o">.</span><span class="n">colorbar_width</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span><span class="c1"># Average all individual cutplanes of the channels O2P and O3P.</span>
+<span class="linenos">23</span><span class="c1"># This is an alternative approach to generating individual cutplanes.</span>
+<span class="linenos">24</span><span class="c1"># All other functions will work with the averaged data, just make shure to use the &#39;line=0&#39; parameter.</span>
+<span class="linenos">25</span><span class="n">measurement</span><span class="o">.</span><span class="n">average_data</span><span class="p">()</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span><span class="c1"># Match the phase offset of the channels O2P and O3P to the reference channel O2P.</span>
+<span class="linenos">28</span><span class="n">measurement</span><span class="o">.</span><span class="n">match_phase_offset</span><span class="p">(</span><span class="n">channels</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;O2P&#39;</span><span class="p">,</span> <span class="s1">&#39;O3P&#39;</span><span class="p">],</span> <span class="n">reference_channel</span><span class="o">=</span><span class="s1">&#39;O2P&#39;</span><span class="p">,</span> <span class="n">reference_area</span><span class="o">=</span><span class="s1">&#39;manual&#39;</span><span class="p">,</span> <span class="n">manual_width</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="linenos">29</span>
+<span class="linenos">30</span><span class="c1"># For example display just the first cutplane of the O2P channel. Then display the first cutplane of the O3P channel.</span>
+<span class="linenos">31</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_cutplane_v3</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="s1">&#39;O2P&#39;</span><span class="p">)</span>
+<span class="linenos">32</span><span class="n">measurement</span><span class="o">.</span><span class="n">display_cutplane_v3</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="s1">&#39;O3P&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</details></section>
 </section>
 </section>
 

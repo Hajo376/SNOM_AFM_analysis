@@ -1,3 +1,4 @@
+.. _code example:
 How to use:
 -----------
 
@@ -13,40 +14,52 @@ These are just dictionaries containing the parameters from the parameters.txt fi
 and the individual headers from the .gsf files (channels_tag_dict). Note that the channels_tag_dict is also a list correlated with instance.channels.
 This gives you a lot of freedome to implement your own functionality.
 
-Anyways, here is a short example of how to use the package:
+Anyways, here is a short example of how to use the package.
 
+.. _code example 1:
 Simple usage example using the SnomMeasurement class:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This is a very simple example using just some base functions without any extra parameters.
 
+
 .. include:: ../docs/files/code_example_snommeasurement_1.rst
 
+.. _code example 2:
 More advanced usage example using the SnomMeasurement class:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This is an example using the tkinter filedialog and some more advanced fuctions.
 
 .. include:: ../docs/files/code_example_snommeasurement_2.rst
 
+.. _code example 3:
 Example showing how to do a synccorrection of transmission mode measurements:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This is an example using the tkinter filedialog and some more advanced fuctions.
 
 .. include:: ../docs/files/code_example_snommeasurement_3.rst
 
+.. _code example 4:
 Simple usage example using the ApproachCurve class:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This is a very simple example using just some base functions without any extra parameters.
 
 .. include:: ../docs/files/code_example_approachcurve_1.rst
 
+.. _code example 5:
 Simple usage example using the Scan3D class:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This is a very simple example using just some base functions to display x-z-cutplanes from the 3D scans.
 
 .. include:: ../docs/files/code_example_scan3d_1.rst
 
+.. _code example 6:
 Simple usage example using the Scan3D class and averaging the data:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This is an example using just some base functions and using the multiple y lines to average each x-z-cutplane.
 
 .. include:: ../docs/files/code_example_scan3d_2.rst
+
+
+
+
+:ref:`code example`

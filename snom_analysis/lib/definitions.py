@@ -82,7 +82,7 @@ class PlotDefinitions:
     figsizey = 5
     show_titles = True
     tight_layout = True
-    colorbar_width = 10 # in percent, standard is 5 or 10
+    colorbar_width = 2 # in percent of the fig width, standard is 2
     hspace = 0.4 #standard is 0.4
     # Define Plot font sizes
     font_size_default = 8
@@ -115,4 +115,6 @@ class PlotDefinitions:
     # show plot automatically? turn to false for gui programming
     show_plot = True
     autodelete_all_subplots = True # if true old subplots will be deleted on creation of new measurement
+    # matplotlib style file
+    use_mplstyle = False
    

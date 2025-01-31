@@ -23,12 +23,17 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinx.ext.viewcode'
     'sphinx.ext.graphviz',
     'sphinx.ext.inheritance_diagram',
     'sphinx.ext.intersphinx',
-    'sphinx.ext.ifconfig']
+    'sphinx.ext.ifconfig',
+    'sphinx.ext.autosectionlabel',
+    'sphinx.ext.intersphinx',
+    "sphinx_design"
+    ]
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
-
+autosectionlabel_prefix_document = True
+autosectionlabel_maxdepth = 2
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
