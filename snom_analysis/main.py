@@ -47,7 +47,8 @@ from .lib.height_masking import get_height_treshold
  
 # new version is based on filehandler to do basic stuff and then a class for each different measurement type like snom/afm, approach curves, spectra etc.
 class FileHandler(PlotDefinitions):
-    """This class handles the filetype and parameter type and all toplevel functionality.
+    """This class handles the measurement filetype and all toplevel functionality.
+    This class will be called by each measurement type class to handle the filetype, measurement and channel dictionaries and the config file.
     When creating a new instance of this class the config file will be loaded and the filetype will be determined.
     Also the measurement tag dictionary will be created.
     
@@ -617,7 +618,7 @@ class FileHandler(PlotDefinitions):
     def _load_mpl_style(self):
         if not Path.exists(self.mpl_style_path):
             with open(self.mpl_style_path, 'w') as f:
-                f.write('axes.grid: True\n')
+                f.write('axes.grid: False\n')
                 f.write('axes.grid.axis: both\n')
                 f.write('axes.grid.which: major\n')
                 f.write('grid.linestyle: -\n')
@@ -1071,6 +1072,35 @@ class FileHandler(PlotDefinitions):
         # if everything went well return True
         return True
         
+    def print_measurement_tag_dict(self):
+        """This function prints the measurement tag dict.
+        """
+        print('-------------------------------')
+        print('Measurement tag dict:')
+        print('-------------------------------')
+        for key, value in self.measurement_tag_dict.items():
+            print(f'{key} = {value}')
+
+    def print_channel_tag_dict(self, channel=None):
+        """This function prints the measurement tag dict.
+
+        Args:
+            channel (str, optional): The channel to print. If None all channels will be printed. Defaults to None.
+        """
+        if channel is not None:
+            print('-------------------------------')
+            print(f'{channel} channel tag dict:')
+            print('-------------------------------')
+            for key, value in self.channel_tag_dict[self.channels.index(channel)].items():
+                print(f'{key} = {value}')
+        else:
+            for channel in self.channels:
+                print('-------------------------------')
+                print(f'{channel} channel tag dict:')
+                print('-------------------------------')
+                for key, value in self.channel_tag_dict[self.channels.index(channel)].items():
+                    print(f'{key} = {value}')
+
     def _replace_plotting_parameter_placeholders(self, dictionary:dict, placeholders:dict) -> dict:
         """This function replaces the placeholders in the plotting parameters dictionary with the actual values. 
         Afterwards it replaces the colormap placeholders with the actual colormaps.
@@ -3452,7 +3482,8 @@ class SnomMeasurement(FileHandler):
             reference_channel (str, optional): The reference channel to which all other phase channels will be matched.
                 If not specified the first phase channel in memory will be used. Defaults to None.
             reference_area (list or str, optional): The area in the reference channel which will be used to calculate the phase offset. If not specified the whole image will be used.
-                You can also specify 'manual' then you will be asked to click on a point in the image. The area around that pixel will then be used as reference. Defaults to None.
+                You can also specify 'manual' then you will be asked to click on a point in the image. The area around that pixel will then be used as reference
+                You can also specify a list like in the logfile to use a specific area. Defaults to None.
             manual_width (int, optional): The width of the manual reference area. Only applies if reference_area='manual'. Defaults to 5.
         """
         # if a list of channels is specified those will be loaded and the old ones will be overwritten
@@ -3501,7 +3532,7 @@ class SnomMeasurement(FileHandler):
         cbar = plt.colorbar(img, cax=cax)
         cbar.ax.get_yaxis().labelpad = 15
         cbar.ax.set_ylabel('phase', rotation=270)
-        ax.legend()
+        # ax.legend()
         ax.axis('scaled')  
         rect = patches.Rectangle((reference_area[0][0], reference_area[1][0]), reference_area[0][1]-reference_area[0][0], reference_area[1][1]-reference_area[1][0], linewidth=1, edgecolor='g', facecolor='none')
         ax.add_patch(rect)
@@ -5116,10 +5147,10 @@ class SnomMeasurement(FileHandler):
         """
         # start, end, is_horizontal, inverted = self._select_data_range(channel, data, use_memory)
         # create one or two arrays from the data using the coordinates
-        print(f'start: <{start}>, end: <{end}>, is_horizontal: <{is_horizontal}>, inverted: <{inverted}>')
-        print(f'start type: <{type(start)}>, end type: <{type(end)}>, is_horizontal type: <{type(is_horizontal)}>, inverted type: <{type(inverted)}>')
-        print(f'data shape: {data.shape}')
-        print(f'data type: {type(data)}')
+        # print(f'start: <{start}>, end: <{end}>, is_horizontal: <{is_horizontal}>, inverted: <{inverted}>')
+        # print(f'start type: <{type(start)}>, end type: <{type(end)}>, is_horizontal type: <{type(is_horizontal)}>, inverted type: <{type(inverted)}>')
+        # print(f'data shape: {data.shape}')
+        # print(f'data type: {type(data)}')
         reduced_data = []
         if is_horizontal:
             if inverted:
@@ -5140,7 +5171,7 @@ class SnomMeasurement(FileHandler):
                 selected_data = data[start:end,:]
         return reduced_data
     
-    def level_data_columnwise(self, channel_list:list=None, display_channel:str=None) -> None:
+    def level_data_columnwise(self, channel_list:list=None, display_channel:str=None, selection:list=None) -> None:
         """This function will level the data of the specified channels columnwise.
         The function will use the data from the display channel to select the range for leveling.
         If no channels are specified all channels in memory will be leveled. If no display channel is specified the first channel in memory will be used.
@@ -5148,6 +5179,8 @@ class SnomMeasurement(FileHandler):
         Args:
             channels (list, optional): Channels from memory which should be leveled. Defaults to None.
             display_channel (str, optional): Channel to use to select the range for leveling. Defaults to None.
+            selection (list, optional): Selection to use for leveling. Defaults to None.
+            You can specify the selection manually as a list with 4 elements like: [bound1 (int), bound2 (int), is_horizontal (bool), inverted (bool)].
         """
         # todo sofar only for the horizontal selection (slow drifts), maybe problematic if the data was rotated...
         # todo does not work yet for phase and amplitude channels
@@ -5164,9 +5197,9 @@ class SnomMeasurement(FileHandler):
             if display_channel is None:
                 display_channel = self.channels[0]
         # get the selection from the display channel
-        selection = self._select_data_range(display_channel)
+        if selection is None:
+            selection = self._select_data_range(display_channel)
         # now use the selection to level all channels
-        import time
         for channel in channel_list:
             # get the data from memory
             data = self.all_data[self.channels.index(channel)]
@@ -5174,7 +5207,7 @@ class SnomMeasurement(FileHandler):
             reduced_data = self._get_data_from_selected_range(data, *selection)
             # level the data
             if len(reduced_data) == 1:
-                print('leveling with one reference area')
+                # print('leveling with one reference area')
                 # get the reference data from the mean of the reduced data for each row
                 reference_data = np.mean(reduced_data[0], axis=1)
                 # create the leveled data
@@ -5187,7 +5220,7 @@ class SnomMeasurement(FileHandler):
                     else:
                         leveled_data[i] = data[i]
             elif len(reduced_data) == 2:
-                print('leveling with two reference areas')
+                # print('leveling with two reference areas')
                 # get the reference data from the mean of the reduced data for each column and for both sides
                 reference_data_left = np.mean(reduced_data[0], axis=1)
                 reference_data_right = np.mean(reduced_data[1], axis=1)
@@ -5222,6 +5255,7 @@ class SnomMeasurement(FileHandler):
             # keep original channel name, but change the data and the channels_label
             self.all_data[self.channels.index(channel)] = leveled_data
             self.channels_label[self.channels.index(channel)] = channel + '_leveled'
+        self._write_to_logfile('level_data_columnwise_selection', [channel_list, [elem for elem in selection]])
 
     def create_new_channel(self, data, channel_name:str, channel_tag_dict:dict, channel_label:str=None) -> None:
         """This function will create a new channel from the specified data and add it to memory.
@@ -5252,8 +5286,8 @@ class SnomMeasurement(FileHandler):
         # plt.pcolormesh(array_2d)
         # plt.show()
         profile, start, end, width = select_profile(array_2d, channel)
-        plt.plot(profile)
-        plt.show()
+        # plt.plot(profile)
+        # plt.show()
         return profile, start, end, width
         '''self.profile_channel = channel
         self.profiles = [profile]

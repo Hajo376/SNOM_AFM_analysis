@@ -250,7 +250,8 @@ def test_gif():
     directory_name =  'tests/testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
     # directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
     channels = ['O2A', 'O2P_corrected', 'Z C']
-    measurement = SnomMeasurement(directory_name, channels)
+    measurement = SnomMeasurement(directory_name, channels, autoscale=False)
+    # measurement.synccorrection(wavelength=1.6)
     # measurement.display_channels()
     # measurement.rotate_90_deg(orientation='left')
     # measurement.gauss_filter_channels_complex()
@@ -259,38 +260,8 @@ def test_gif():
     # measurement.create_gif_Old('O2A', 'O2P_corrected', 20, 10)
 
 def test_3d_scan():
-    # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 144100 PH 3D single_wg_20mu_3d'
-    # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
-    # directory = 'C:/Users/hajos/git_projects/SNOM_AFM_analysis/tests/testdata/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
-    # directory = 'C:/Users/hajos/git_projects/SNOM_AFM_analysis/tests/testdata/2024-05-08 163342 PH 3D single_wg_20mu_3d_5ypx'
-    directory = filedialog.askdirectory(initialdir='C:/Users/hajos/git_projects/SNOM_AFM_analysis/tests/testdata')
+    directory = 'tests/testdata/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
     channels = ['O2A', 'O2P', 'O3A', 'O3P', 'Z']
-    # channels = ['Z']
-    measurement = Scan3D(directory, channels)
-    measurement.set_min_to_zero()
-    # measurement.display_approach_curve(20, 0, 'Z', ['Z', 'O2A', 'O3A']) 
-    # measurement.display_cutplane(axis='x', line=0, channel='O3A')
-    PlotDefinitions.colorbar_width = 3
-    # measurement.display_cutplane_V2(axis='x', line=0, channel='O2A')
-    # measurement.display_cutplane_V2(axis='x', line=0, channel='O2P')
-    # measurement.display_cutplane_V2_Realpart(axis='x', line=0, demodulation=2)
-    # measurement.display_cutplane_V2(axis='x', line=0, channel='O3A')
-    # measurement.display_cutplane_V2(axis='x', line=0, channel='O3P')
-    # measurement.display_cutplane_V2_Realpart(axis='x', line=0, demodulation=3)
-    measurement.generate_all_cutplane_data()
-    measurement.match_phase_offset(channels=['O2P', 'O3P'], reference_channel='O2P', reference_area='manual', manual_width=3)
-    measurement.display_cutplanes(axis='x', line=0, channels=['O2P'])
-    measurement.display_cutplanes(axis='x', line=0, channels=['O3P'])
-    measurement.shift_phase()
-    measurement.display_cutplanes(axis='x', line=0, channels=['O2P'])
-    measurement.display_cutplanes(axis='x', line=0, channels=['O3P'])
-    measurement.display_cutplane_realpart(axis='x', line=0, demodulation=2)
-    measurement.display_cutplane_realpart(axis='x', line=0, demodulation=3)
-
-def phase_correction_3d_scan():
-    directory = 'C:/Users/hajos/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
-    channels = ['O2A', 'O2P', 'O3A', 'O3P', 'Z']
-    # channels = ['Z']
     measurement = Scan3D(directory, channels)
     measurement.set_min_to_zero()
     PlotDefinitions.colorbar_width = 3
@@ -306,126 +277,88 @@ def phase_correction_3d_scan():
 
 def average_3d_scan():
     directory = 'tests/testdata/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
-    # directory = filedialog.askdirectory()
     channels = ['O2A', 'O2P', 'O3A', 'O3P', 'Z']
-    # channels = ['Z']
     measurement = Scan3D(directory, channels)
     PlotDefinitions.colorbar_width = 3
-    # measurement.generate_all_cutplane_data()
-    # measurement.display_cutplanes(axis='x', line=0, channels=['O2A'])
-    # measurement.display_cutplanes(axis='x', line=0, channels=['O2P'])
-    # measurement.display_cutplanes(axis='x', line=0, channels=['O3A'])
-    # measurement.display_cutplanes(axis='x', line=0, channels=['O3P'])
     measurement.average_data()
     measurement.set_min_to_zero()
-    # measurement.display_cutplanes(axis='x', line=0, channels=['O2A'])
-    # measurement.display_cutplanes(axis='x', line=0, channels=['O2P'])
-    # measurement.display_cutplanes(axis='x', line=0, channels=['O3A'])
-    # measurement.display_cutplanes(axis='x', line=0, channels=['O3P'])
-
-    # measurement.match_phase_offset(channels=['O2P', 'O3P'], reference_channel='O2P', reference_area='manual', manual_width=3)
-    measurement.display_cutplanes(axis='x', line=0, channels=['O2P'], auto_align=True)
-    measurement.display_cutplanes(axis='x', line=0, channels=['O3P'])
-    # measurement.shift_phase()
-    # measurement.display_cutplanes(axis='x', line=0, channels=['O2P'])
-    # measurement.display_cutplanes(axis='x', line=0, channels=['O3P'])
-    # measurement.display_cutplane_realpart(axis='x', line=0, demodulation=2)
-    # measurement.display_cutplane_realpart(axis='x', line=0, demodulation=3)
+    measurement.display_cutplanes(axis='x', line=0, channels=['O2A', 'O2P'], auto_align=False)
+    measurement.display_cutplanes(axis='x', line=0, channels=['O3A', 'O3P'])
 
 def test_phase_drift_correction():
-    # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-23 113254 PH single_wv-on-wg_long'
-    directory = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-05-23-ssh-reflection')
+    directory = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
     channels = ['O2P', 'O3P', 'O4P']
     measurement = SnomMeasurement(directory, channels)
     measurement.display_channels()
-    measurement.correct_phase_drift_nonlinear(channels=['O2P', 'O3P', 'O4P'], reference_area=[0, 50])
+    measurement.correct_phase_drift_nonlinear(channels=['O2P', 'O3P', 'O4P']) # , reference_area=[0, 50]
+    # measurement.level_data_columnwise(selection=[32, 169, True, True]) # optional to get rid of dirft in individual lines
     measurement.display_channels()
-    # measurement.match_phase_offset(channels=['O2P', 'O3P', 'O4P'], reference_channel='O2P', reference_area=[[0,50],[0,50]])
-    # print('channels: ', measurement.channels)
-    measurement.match_phase_offset(reference_channel='O2P', reference_area='manual', manual_width=20)
-    measurement.display_channels()
+    # measurement.match_phase_offset(reference_channel='O2P', reference_area=[[142, 182], [587, 627]], manual_width=20)
+    # measurement.shift_phase(shift=3.11)
+    # measurement.display_channels()
 
 def test_amplitude_drift_correction():
-    # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-23 113254 PH single_wv-on-wg_long'
-    directory = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-05-23-ssh-reflection')
+    directory = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
     channels = ['O2A', 'O3A', 'O4A']
     measurement = SnomMeasurement(directory, channels)
     PlotDefinitions.amp_cbar_range = False
     measurement.display_channels()
-    # measurement.correct_amplitude_drift_nonlinear(channels=['O2A'], reference_area=[0, 50])
-    measurement.correct_amplitude_drift_nonlinear(channels=['O2A', 'O3A', 'O4A'], reference_area=[140, 160])
+    measurement.correct_amplitude_drift_nonlinear(channels=['O2A', 'O3A', 'O4A'], reference_area=[0, 30])
     measurement.display_channels()
 
 def test_height_drift_correction():
-    # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-05-23 113254 PH single_wv-on-wg_long'
-    # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-10-23 113133 PH wg_wv_long_refl_15slits_No3_fine'
-    directory = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-05-23-ssh-reflection')
+    directory = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
     channels = ['Z C']
-    # channels = ['O2A']
     measurement = SnomMeasurement(directory, channels)
-    PlotDefinitions.amp_cbar_range = False
     measurement.display_channels()
-    # measurement.correct_amplitude_drift_nonlinear(channels=['O2A'], reference_area=[0, 50])
-    # measurement.correct_height_drift_nonlinear(channels=['Z C'], reference_area=[20, 40])
-    measurement.level_data_columnwise(channel_list=channels)
+    measurement.correct_height_drift_nonlinear(channels=['Z C'], reference_area=[0, 30])
     measurement.display_channels()
 
 def test_channel_substraction():
-    initialdir = 'C:/Users/Hajo/sciebo/Phd/Paper/Dielectric_Waveguides/raw_data/reflection_mode/24-07-10/970nm'
-    directory = filedialog.askdirectory(initialdir=initialdir)
+    directory = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
     channels = ['O3P', 'O4P']
     PlotDefinitions.amp_cbar_range = False
     PlotDefinitions.colorbar_width = 3
     measurement = SnomMeasurement(directory, channels)
     measurement.display_channels()
     measurement.substract_channels('O3P', 'O4P')
-    measurement.shift_phase(channels=['O3P-O4P'])
+    measurement.shift_phase(channels=['O3P-O4P'], shift=3.22)
     measurement.display_channels()
 
-def simple_afm_example():
+def use_data_external_example():
     import matplotlib.pyplot as plt
-    directory = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo/Exchange/s-SNOM Measurements/Hajo/PhD/ssh/2024-05-23-ssh-reflection')
+    directory = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
     channels = ['Z C']
     measurement = SnomMeasurement(directory, channels, autoscale=False)
     height_data = measurement.all_data[0]
+    # do your own stuff using the data as a numpy array, e.g. plot the data
     plt.pcolormesh(height_data)
     plt.show()
-
-    # measurement.display_channels()
-
-def test_data_range_selector():
-    '''array = [[1, 2, 3, 4, 5], 
-             [6, 7, 8, 9, 10], 
-             [11, 12, 13, 14, 15], 
-             [16, 17, 18, 19, 20], 
-             [21, 22, 23, 24, 25]]
-    array = np.array(array)
-    # slice array:
-    # only display center three columns
-    array_1 = array[:,1:4]
-    print(array_1)'''
-    directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2022-04-25 1227 PH pentamer_840nm_s50_2'
-    channels = ['Z C']
-    # channels = ['O2A']
-    measurement = SnomMeasurement(directory, channels)
-    measurement.test_data_range_selector()
-
+    # you can also use the channels and measurement tag dicts to get additional information about the data
+    measurement_tag_dict = measurement.measurement_tag_dict
+    channel_tag_dict = measurement.channel_tag_dict[0]
+    # e.g. print the content of the measurement tag dict
+    print('Measurement tag dict:')
+    for key, value in measurement_tag_dict.items():
+        print(f'{key} = {value}')
+    print('Channel tag dict:')
+    # e.g. print the content of the channel tag dict
+    for key, value in channel_tag_dict.items():
+        print(f'{key} = {value}')
+    # but you could also use the build in functions for that
+    measurement.print_measurement_tag_dict()
+    measurement.print_channel_tag_dict()
+    
 def test_level_columnwise():
-    # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-10-24 104052 PH wg_wv_No3_15slits_pol45deg_anal90deg_fine' # for height
-    directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm' # for height, amplitude and phase
-    # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-08-21 132732 PH pmma_wedge_on_gold_thick_1600nm' # for height, amplitude and phase
-    channels = ['Z C']
-    # channels = ['O2A']
-    # channels = ['O2P']
-    # PlotDefinitions.height_cbar_range = False
+    directory = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
+    channels = ['O2P', 'O2A', 'Z C']
     measurement = SnomMeasurement(directory, channels)
-    measurement.level_data_columnwise(channel_list=channels)
-    measurement.level_data_columnwise(channel_list=channels)
+    measurement.level_data_columnwise(channel_list=channels, selection=[32, 169, True, True])
+    # its expected that phase jumps lead to problems, is not yet fully implemented
     measurement.display_channels() 
-    # print(measurement.all_data[1])
 
 def test_get_pixel_value():
-    directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm' # for height, amplitude and phase
+    directory = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
     channels = ['Z C']
     measurement = SnomMeasurement(directory, channels)
     coords = measurement.get_pixel_coordinates(channels[0])
@@ -434,31 +367,34 @@ def test_get_pixel_value():
     print(val)
 
 def test_profile_selector():
-    # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm' # for height, amplitude and phase
-    directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-10-24 104052 PH wg_wv_No3_15slits_pol45deg_anal90deg_fine'
+    import matplotlib.pyplot as plt
+    directory = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
     channels = ['Z C']
     measurement = SnomMeasurement(directory, channels)
-    measurement.test_profile_selection()
+    profile, start, end, width = measurement.test_profile_selection()
+    plt.plot(profile)
+    plt.show()
+    # this tests a new funtion to select arbitrary profiles from the data, it is however not yet fully implemented
     # measurement.Display_Profiles()
 
 def test_gauss_filter_v2():
-    # directory = 'C:/Users/Hajo/git_projects/SNOM_AFM_analysis/example_measurements/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm' # for height, amplitude and phase
-    directory = 'C:/Users/Hajo/sciebo/Phd/Paper/Dielectric_Waveguides/raw_data/transmission_mode/reflection_grating/2024-10-24 100547 PH wg_wv_No3_15slits_pol45deg_anal0deg_fine'
-    # channels = ['Z C', 'O2P', 'O2A']
-    channels = ['Z C', 'O2P_corrected_aligned', 'O2A']
-
+    directory = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
+    channels = ['Z C', 'O2P', 'O2A']
+    # channels = ['Z C', 'O2P_corrected_aligned', 'O2A'] # should work with all kinds of phase data as long as the shape is identical
     measurement = SnomMeasurement(directory, channels)
+    measurement.scale_channels()
     measurement.gauss_filter_channels_complex()
     measurement.display_channels()
 
 def test_comsol_data():
-    directory = 'example_measurements/DLSPPW_bragg_8slits_Ex_ongold'
+    directory = 'tests/testdata/DLSPPW_bragg_8slits_Ex_ongold'
     # channels = ['Z C', 'O2P_corrected_aligned', 'O2A']
     measurement = SnomMeasurement(directory)
     measurement.display_channels()
     # print('All channels: ', measurement.channels)
 
 def test_comsol_height_data():
+    import numpy as np
     def create_comsol_height_data():
         height = 0.14 # in um
         wg_width = 0.3
@@ -485,8 +421,8 @@ def test_comsol_height_data():
         # return the height data
         return height_data
 
+    directory = 'tests/testdata/DLSPPW_bragg_8slits_Ex_ongold'
     channels = ['abs', 'arg']
-    directory = 'example_measurements/DLSPPW_bragg_8slits_Ex_ongold'
     measurement = SnomMeasurement(directory, channels)
     measurement.display_channels()
     # create the height data
@@ -494,29 +430,13 @@ def test_comsol_height_data():
     height_channel_tag_dict = measurement.channel_tag_dict[0] # just copy the amp channel tag dict
     measurement.create_new_channel(height_data, 'Z', height_channel_tag_dict, 'Height')
     measurement.display_channels()
-    amp = measurement.all_data[0]
-    height_data = measurement.all_data[2]
+    # amp = measurement.all_data[0]
+    # height_data = measurement.all_data[2]
     measurement.display_overlay('abs', 'Z', alpha=0.2)
     # measurement.save_to_gsf(['Z'], appendix='')
 
-def test_config():
-    # directory_name = 'example_measurements/2018-02-09 1506 PH dt20nmwindow1' # version 1.6.3359.1
-    # directory_name = 'example_measurements/2022-04-25 1227 PH pentamer_840nm_s50_2' # version 1.8.5017.0
-    # directory_name = 'example_measurements/2022-08-30 1454 PH cc_BV_No3_interf_sync_CP1R' # version 1.8.5017.0
-    # directory_name = 'example_measurements/2024-10-24 104052 PH wg_wv_No3_15slits_pol45deg_anal90deg_fine' # version 1.10.9592.0
-    # channels = ['O2P', 'O2A', 'Z C']
-    channels = ['abs', 'arg']
-    directory_name = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo')
-    # directory_name = 'example_measurements/DLSPPW_bragg_8slits_Ex_ongold' # comsol
-
-    measurement = SnomMeasurement(directory_name, channels)
-    measurement.display_channels()
-    # measurement._create_default_config()
-    # measurement._print_measurement_tags()
-    # measurement._print_config()
-
 def test_approach_curve():
-    directory_name = filedialog.askdirectory(initialdir='C:/Users/Hajo/sciebo')
+    directory_name = 'tests/testdata/2024-04-03 133202 PH AC topol_20mufromcoupler_right_interf_peak'
     channels = ['M1A', 'O2P', 'O2A']
     measurement = ApproachCurve(directory_name, channels)
     measurement.set_min_to_zero()
@@ -822,7 +742,9 @@ def example_scan3d_2():
 
 
 def main():
-     
+    #######################################################################################
+    #### Testes functions, which can be used to test the functionality of the package. ####
+    #######################################################################################
     # test_realign()
     # test_cut()
     # test_height_masking()
@@ -836,32 +758,35 @@ def main():
     # test_export_to_gsf()
     # test_gif()
     # test_3d_scan()
-    # phase_correction_3d_scan()
     # average_3d_scan()
     # test_phase_drift_correction()
     # test_amplitude_drift_correction()
     # test_height_drift_correction()
     # test_channel_substraction()
-    # simple_afm_example()
-    # test_data_range_selector()
+    # use_data_external_example()
     # test_level_columnwise()
     # test_get_pixel_value()
     # test_profile_selector()
     # test_gauss_filter_v2()
     # test_comsol_data()
     # test_comsol_height_data()
-    # test_config()
     # test_approach_curve()
-    # test_find_measurement_type()
+    test_find_measurement_type()
 
-    # examples for documentation
+    ################################
+    #### Documentation examples ####
+    ################################
     # example_snommeasurement_1()
     # example_snommeasurement_2()
     # example_snommeasurement_3()
     # example_snommeasurement_4()
     # example_approachcurve_1()
-    example_scan3d_1()
+    # example_scan3d_1()
     # example_scan3d_2()
+
+    ############################
+    #### Untested functions ####
+    ############################
 
 
 if __name__ == '__main__':
