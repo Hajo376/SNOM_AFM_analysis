@@ -53,7 +53,11 @@
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-snom_analysis.main">snom_analysis.main module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#snom_analysis.main.FileHandler"><code class="docutils literal notranslate"><span class="pre">FileHandler</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#snom_analysis.main.FileHandler"><code class="docutils literal notranslate"><span class="pre">FileHandler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.FileHandler.print_measurement_tag_dict"><code class="docutils literal notranslate"><span class="pre">FileHandler.print_measurement_tag_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.FileHandler.print_channel_tag_dict"><code class="docutils literal notranslate"><span class="pre">FileHandler.print_channel_tag_dict()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#snom_analysis.main.SnomMeasurement"><code class="docutils literal notranslate"><span class="pre">SnomMeasurement</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.all_subplots"><code class="docutils literal notranslate"><span class="pre">SnomMeasurement.all_subplots</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.initialize_channels"><code class="docutils literal notranslate"><span class="pre">SnomMeasurement.initialize_channels()</span></code></a></li>
@@ -175,7 +179,8 @@ But they can help to built more functionality on top of the package. So feel fre
 <dt class="sig sig-object py" id="snom_analysis.main.FileHandler">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">snom_analysis.main.</span></span><span class="sig-name descname"><span class="pre">FileHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/main.html#FileHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.FileHandler" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PlotDefinitions</span></code></p>
-<p>This class handles the filetype and parameter type and all toplevel functionality.
+<p>This class handles the measurement filetype and all toplevel functionality.
+This class will be called by each measurement type class to handle the filetype, measurement and channel dictionaries and the config file.
 When creating a new instance of this class the config file will be loaded and the filetype will be determined.
 Also the measurement tag dictionary will be created.</p>
 <dl class="field-list simple">
@@ -186,6 +191,23 @@ Also the measurement tag dictionary will be created.</p>
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="snom_analysis.main.FileHandler.print_measurement_tag_dict">
+<span class="sig-name descname"><span class="pre">print_measurement_tag_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/main.html#FileHandler.print_measurement_tag_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.FileHandler.print_measurement_tag_dict" title="Link to this definition"></a></dt>
+<dd><p>This function prints the measurement tag dict.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="snom_analysis.main.FileHandler.print_channel_tag_dict">
+<span class="sig-name descname"><span class="pre">print_channel_tag_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/main.html#FileHandler.print_channel_tag_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.FileHandler.print_channel_tag_dict" title="Link to this definition"></a></dt>
+<dd><p>This function prints the measurement tag dict.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>channel</strong> (<em>str</em><em>, </em><em>optional</em>) – The channel to print. If None all channels will be printed. Defaults to None.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -546,7 +568,8 @@ The reference channel is the first phase channel in memory if not specified.</p>
 <li><p><strong>reference_channel</strong> (<em>str</em><em>, </em><em>optional</em>) – The reference channel to which all other phase channels will be matched.
 If not specified the first phase channel in memory will be used. Defaults to None.</p></li>
 <li><p><strong>reference_area</strong> (<em>list</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – The area in the reference channel which will be used to calculate the phase offset. If not specified the whole image will be used.
-You can also specify ‘manual’ then you will be asked to click on a point in the image. The area around that pixel will then be used as reference. Defaults to None.</p></li>
+You can also specify ‘manual’ then you will be asked to click on a point in the image. The area around that pixel will then be used as reference
+You can also specify a list like in the logfile to use a specific area. Defaults to None.</p></li>
 <li><p><strong>manual_width</strong> (<em>int</em><em>, </em><em>optional</em>) – The width of the manual reference area. Only applies if reference_area=’manual’. Defaults to 5.</p></li>
 </ul>
 </dd>
@@ -934,7 +957,7 @@ The new channel will be named channel1-channel2.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="snom_analysis.main.SnomMeasurement.level_data_columnwise">
-<span class="sig-name descname"><span class="pre">level_data_columnwise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/snom_analysis/main.html#SnomMeasurement.level_data_columnwise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.SnomMeasurement.level_data_columnwise" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">level_data_columnwise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/snom_analysis/main.html#SnomMeasurement.level_data_columnwise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.SnomMeasurement.level_data_columnwise" title="Link to this definition"></a></dt>
 <dd><p>This function will level the data of the specified channels columnwise.
 The function will use the data from the display channel to select the range for leveling.
 If no channels are specified all channels in memory will be leveled. If no display channel is specified the first channel in memory will be used.</p>
@@ -943,6 +966,8 @@ If no channels are specified all channels in memory will be leveled. If no displ
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>channels</strong> (<em>list</em><em>, </em><em>optional</em>) – Channels from memory which should be leveled. Defaults to None.</p></li>
 <li><p><strong>display_channel</strong> (<em>str</em><em>, </em><em>optional</em>) – Channel to use to select the range for leveling. Defaults to None.</p></li>
+<li><p><strong>selection</strong> (<em>list</em><em>, </em><em>optional</em>) – Selection to use for leveling. Defaults to None.</p></li>
+<li><p><strong>like</strong> (<em>You can specify the selection manually as a list with 4 elements</em>) – [bound1 (int), bound2 (int), is_horizontal (bool), inverted (bool)].</p></li>
 </ul>
 </dd>
 </dl>

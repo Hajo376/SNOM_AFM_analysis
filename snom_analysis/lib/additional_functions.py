@@ -47,3 +47,31 @@ def calculate_colorbar_size(fig, ax, colorbar_size):
     # calculate the size of the colorbar in percent
     # it should always be x % of the figure width
     return colorbar_size * fig_width / ax_width 
+
+def mean_index_array(array, interpolation=4):
+    """Returns the index of the mean in the given list. The mean is calculated by interpolating the data and then calculating the mean index of the half area.
+
+    Args:
+        array (np.array or list): data array to calculate the mean index from
+        interpolation (int, optional): how many datapoints to interpolate in between the given data. Defaults to 4.
+
+    Returns:
+        float: the mean index of the data
+    """
+    from scipy.interpolate import interp1d
+    # create a spline interpolation of the data with x times the resolution
+    x = np.arange(len(array))
+    xn = np.linspace(0, len(array)-1, len(array)*interpolation)
+    spline = interp1d(x, array, kind='cubic')
+    array_interp = spline(xn)
+    # calculate the mean index
+    mean = 0
+    half_area = np.sum(array_interp)/2
+    lower_sum = 0
+    for i in range(len(array_interp)):
+        if lower_sum + array_interp[i] <= half_area:
+            lower_sum += array_interp[i]
+            mean = i
+        else:
+            break
+    return mean/interpolation 

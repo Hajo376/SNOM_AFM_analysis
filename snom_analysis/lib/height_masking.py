@@ -26,10 +26,10 @@ from .snom_colormaps import *
 
 
 def get_height_treshold(preview_data):
-    popup = Phase_Slider(preview_data)
+    popup = HeightSlider(preview_data)
     return popup.threshold
 
-class Phase_Slider():
+class HeightSlider():
     def __init__(self, preview_data):
         self.data = preview_data
         self.threshold = None

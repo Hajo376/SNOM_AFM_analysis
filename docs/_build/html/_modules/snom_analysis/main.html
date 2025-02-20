@@ -78,9 +78,24 @@
   <h1>Source code for snom_analysis.main</h1><div class="highlight"><pre>
 <span></span><span class="sd">&#39;&#39;&#39;This module contains the basic classes and functions for the snom analysis.&#39;&#39;&#39;</span>
 
-<span class="c1">##########################################################################</span>
-<span class="c1"># This code was created by Hans-Joachim Schill, University of Bonn, 2022 #</span>
-<span class="c1">##########################################################################</span>
+<span class="c1">##############################################################################</span>
+<span class="c1"># Copyright (C) 2020-2025 Hans-Joachim Schill</span>
+
+<span class="c1"># This file is part of snom_analysis.</span>
+
+<span class="c1"># snom_analysis is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+
+<span class="c1"># snom_analysis is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU General Public License</span>
+<span class="c1"># along with snom_analysis.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="c1">##############################################################################</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.ndimage</span><span class="w"> </span><span class="kn">import</span> <span class="n">gaussian_filter</span> <span class="c1"># one could implement a bunch more filters</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">curve_fit</span>
@@ -127,7 +142,8 @@
 <div class="viewcode-block" id="FileHandler">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.FileHandler">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">FileHandler</span><span class="p">(</span><span class="n">PlotDefinitions</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class handles the filetype and parameter type and all toplevel functionality.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class handles the measurement filetype and all toplevel functionality.</span>
+<span class="sd">    This class will be called by each measurement type class to handle the filetype, measurement and channel dictionaries and the config file.</span>
 <span class="sd">    When creating a new instance of this class the config file will be loaded and the filetype will be determined.</span>
 <span class="sd">    Also the measurement tag dictionary will be created.</span>
 <span class="sd">    </span>
@@ -697,7 +713,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_load_mpl_style</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">Path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mpl_style_path</span><span class="p">):</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mpl_style_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;axes.grid: True</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;axes.grid: False</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;axes.grid.axis: both</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;axes.grid.which: major</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;grid.linestyle: -</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -1151,6 +1167,41 @@
         <span class="c1"># if everything went well return True</span>
         <span class="k">return</span> <span class="kc">True</span>
         
+<div class="viewcode-block" id="FileHandler.print_measurement_tag_dict">
+<a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.FileHandler.print_measurement_tag_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">print_measurement_tag_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function prints the measurement tag dict.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-------------------------------&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Measurement tag dict:&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-------------------------------&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurement_tag_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FileHandler.print_channel_tag_dict">
+<a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.FileHandler.print_channel_tag_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">print_channel_tag_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function prints the measurement tag dict.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            channel (str, optional): The channel to print. If None all channels will be printed. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">channel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-------------------------------&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">channel</span><span class="si">}</span><span class="s1"> channel tag dict:&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-------------------------------&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel_tag_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-------------------------------&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">channel</span><span class="si">}</span><span class="s1"> channel tag dict:&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-------------------------------&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel_tag_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_replace_plotting_parameter_placeholders</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dictionary</span><span class="p">:</span><span class="nb">dict</span><span class="p">,</span> <span class="n">placeholders</span><span class="p">:</span><span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function replaces the placeholders in the plotting parameters dictionary with the actual values. </span>
 <span class="sd">        Afterwards it replaces the colormap placeholders with the actual colormaps.</span>
@@ -3603,7 +3654,8 @@
 <span class="sd">            reference_channel (str, optional): The reference channel to which all other phase channels will be matched.</span>
 <span class="sd">                If not specified the first phase channel in memory will be used. Defaults to None.</span>
 <span class="sd">            reference_area (list or str, optional): The area in the reference channel which will be used to calculate the phase offset. If not specified the whole image will be used.</span>
-<span class="sd">                You can also specify &#39;manual&#39; then you will be asked to click on a point in the image. The area around that pixel will then be used as reference. Defaults to None.</span>
+<span class="sd">                You can also specify &#39;manual&#39; then you will be asked to click on a point in the image. The area around that pixel will then be used as reference</span>
+<span class="sd">                You can also specify a list like in the logfile to use a specific area. Defaults to None.</span>
 <span class="sd">            manual_width (int, optional): The width of the manual reference area. Only applies if reference_area=&#39;manual&#39;. Defaults to 5.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># if a list of channels is specified those will be loaded and the old ones will be overwritten</span>
@@ -3652,7 +3704,7 @@
         <span class="n">cbar</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">cax</span><span class="o">=</span><span class="n">cax</span><span class="p">)</span>
         <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">get_yaxis</span><span class="p">()</span><span class="o">.</span><span class="n">labelpad</span> <span class="o">=</span> <span class="mi">15</span>
         <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;phase&#39;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">270</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="c1"># ax.legend()</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;scaled&#39;</span><span class="p">)</span>  
         <span class="n">rect</span> <span class="o">=</span> <span class="n">patches</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">((</span><span class="n">reference_area</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">reference_area</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span> <span class="n">reference_area</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">reference_area</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">reference_area</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">reference_area</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">rect</span><span class="p">)</span>
@@ -5337,10 +5389,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># start, end, is_horizontal, inverted = self._select_data_range(channel, data, use_memory)</span>
         <span class="c1"># create one or two arrays from the data using the coordinates</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;start: &lt;</span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s1">&gt;, end: &lt;</span><span class="si">{</span><span class="n">end</span><span class="si">}</span><span class="s1">&gt;, is_horizontal: &lt;</span><span class="si">{</span><span class="n">is_horizontal</span><span class="si">}</span><span class="s1">&gt;, inverted: &lt;</span><span class="si">{</span><span class="n">inverted</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;start type: &lt;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">start</span><span class="p">)</span><span class="si">}</span><span class="s1">&gt;, end type: &lt;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">end</span><span class="p">)</span><span class="si">}</span><span class="s1">&gt;, is_horizontal type: &lt;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">is_horizontal</span><span class="p">)</span><span class="si">}</span><span class="s1">&gt;, inverted type: &lt;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">inverted</span><span class="p">)</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;data shape: </span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;data type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1"># print(f&#39;start: &lt;{start}&gt;, end: &lt;{end}&gt;, is_horizontal: &lt;{is_horizontal}&gt;, inverted: &lt;{inverted}&gt;&#39;)</span>
+        <span class="c1"># print(f&#39;start type: &lt;{type(start)}&gt;, end type: &lt;{type(end)}&gt;, is_horizontal type: &lt;{type(is_horizontal)}&gt;, inverted type: &lt;{type(inverted)}&gt;&#39;)</span>
+        <span class="c1"># print(f&#39;data shape: {data.shape}&#39;)</span>
+        <span class="c1"># print(f&#39;data type: {type(data)}&#39;)</span>
         <span class="n">reduced_data</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">is_horizontal</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">inverted</span><span class="p">:</span>
@@ -5363,7 +5415,7 @@
     
 <div class="viewcode-block" id="SnomMeasurement.level_data_columnwise">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.level_data_columnwise">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">level_data_columnwise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel_list</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">display_channel</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">level_data_columnwise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel_list</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">display_channel</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">selection</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will level the data of the specified channels columnwise.</span>
 <span class="sd">        The function will use the data from the display channel to select the range for leveling.</span>
 <span class="sd">        If no channels are specified all channels in memory will be leveled. If no display channel is specified the first channel in memory will be used.</span>
@@ -5371,6 +5423,8 @@
 <span class="sd">        Args:</span>
 <span class="sd">            channels (list, optional): Channels from memory which should be leveled. Defaults to None.</span>
 <span class="sd">            display_channel (str, optional): Channel to use to select the range for leveling. Defaults to None.</span>
+<span class="sd">            selection (list, optional): Selection to use for leveling. Defaults to None.</span>
+<span class="sd">            You can specify the selection manually as a list with 4 elements like: [bound1 (int), bound2 (int), is_horizontal (bool), inverted (bool)].</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># todo sofar only for the horizontal selection (slow drifts), maybe problematic if the data was rotated...</span>
         <span class="c1"># todo does not work yet for phase and amplitude channels</span>
@@ -5387,9 +5441,9 @@
             <span class="k">if</span> <span class="n">display_channel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">display_channel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="c1"># get the selection from the display channel</span>
-        <span class="n">selection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_select_data_range</span><span class="p">(</span><span class="n">display_channel</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">selection</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">selection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_select_data_range</span><span class="p">(</span><span class="n">display_channel</span><span class="p">)</span>
         <span class="c1"># now use the selection to level all channels</span>
-        <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
         <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">channel_list</span><span class="p">:</span>
             <span class="c1"># get the data from memory</span>
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)]</span>
@@ -5397,7 +5451,7 @@
             <span class="n">reduced_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_data_from_selected_range</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">selection</span><span class="p">)</span>
             <span class="c1"># level the data</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">reduced_data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;leveling with one reference area&#39;</span><span class="p">)</span>
+                <span class="c1"># print(&#39;leveling with one reference area&#39;)</span>
                 <span class="c1"># get the reference data from the mean of the reduced data for each row</span>
                 <span class="n">reference_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">reduced_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
                 <span class="c1"># create the leveled data</span>
@@ -5410,7 +5464,7 @@
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">leveled_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">reduced_data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;leveling with two reference areas&#39;</span><span class="p">)</span>
+                <span class="c1"># print(&#39;leveling with two reference areas&#39;)</span>
                 <span class="c1"># get the reference data from the mean of the reduced data for each column and for both sides</span>
                 <span class="n">reference_data_left</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">reduced_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
                 <span class="n">reference_data_right</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">reduced_data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -5444,7 +5498,8 @@
             <span class="c1"># save the leveled data and replace old data</span>
             <span class="c1"># keep original channel name, but change the data and the channels_label</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)]</span> <span class="o">=</span> <span class="n">leveled_data</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">channels_label</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)]</span> <span class="o">=</span> <span class="n">channel</span> <span class="o">+</span> <span class="s1">&#39;_leveled&#39;</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">channels_label</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">channel</span><span class="p">)]</span> <span class="o">=</span> <span class="n">channel</span> <span class="o">+</span> <span class="s1">&#39;_leveled&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_to_logfile</span><span class="p">(</span><span class="s1">&#39;level_data_columnwise_selection&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">channel_list</span><span class="p">,</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">selection</span><span class="p">]])</span></div>
 
 
 <div class="viewcode-block" id="SnomMeasurement.create_new_channel">
@@ -5481,8 +5536,8 @@
         <span class="c1"># plt.pcolormesh(array_2d)</span>
         <span class="c1"># plt.show()</span>
         <span class="n">profile</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="n">select_profile</span><span class="p">(</span><span class="n">array_2d</span><span class="p">,</span> <span class="n">channel</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">profile</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="c1"># plt.plot(profile)</span>
+        <span class="c1"># plt.show()</span>
         <span class="k">return</span> <span class="n">profile</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">width</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;self.profile_channel = channel</span>
 <span class="sd">        self.profiles = [profile]</span>

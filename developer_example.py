@@ -71,27 +71,29 @@ Hajo Schill
 
 '''
 
-
 def test_realign():
     directory_name = 'tests/testdata/2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long'
     # Example to realign horizontal waveguides
     # channels = ['O3P', 'O3A', 'Z C']
     channels = ['O2P', 'O2A', 'Z C']
     measurement = SnomMeasurement(directory_name, channels)
+    measurement.rotate_90_deg()
     measurement.display_channels()
     measurement.set_min_to_zero(['Z C'])
     measurement.scale_channels()
-    # measurement.realign()
-    measurement.realign(bounds=[131, 255])
-    # measurement.display_channels()
     measurement.gauss_filter_channels_complex()
+    # measurement.realign()
+    # measurement.realign(bounds=[182, 238], axis=0)
+    measurement.realign(bounds=[147, 238])
+    # measurement.realign(bounds=[38, 58])
+    # measurement.display_channels()
     # measurement.level_height_channels_3point()
     measurement.level_height_channels_3point(coords=[[514, 175], [1763, 375], [2635, 169]])
     # measurement.cut_channels()
     measurement.cut_channels(coords=[[64, 25], [3093, 388]])
     # measurement.heigth_mask_channels()
     measurement.display_channels()
-    measurement.display_all_subplots()
+    # measurement.display_all_subplots()
 
 def test_cut():
     directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
@@ -767,7 +769,7 @@ def main():
     # test_level_columnwise()
     # test_get_pixel_value()
     # test_profile_selector()
-    test_gauss_filter_v2()
+    # test_gauss_filter_v2()
     # test_comsol_data()
     # test_comsol_height_data()
     # test_approach_curve()

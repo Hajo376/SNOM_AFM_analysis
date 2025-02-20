@@ -48,14 +48,13 @@ from .lib.snom_colormaps import SNOM_height, SNOM_amplitude, SNOM_phase, SNOM_re
 from .lib.phase_slider import get_phase_offset
 from .lib.rectangle_selector import select_rectangle
 from .lib.data_range_selector import select_data_range
-from .lib.get_directionality import ChiralCoupler
 from .lib import realign
 from .lib import profile
 from .lib import phase_analysis
 from .lib.file_handling import get_parameter_values, find_index, convert_header_to_dict
 from .lib.profile_selector import select_profile
 # import additional functions
-from .lib.additional_functions import set_nan_to_zero, gauss_function, get_largest_abs, calculate_colorbar_size
+from .lib.additional_functions import set_nan_to_zero, gauss_function, get_largest_abs, calculate_colorbar_size, mean_index_array
 # import definitions such as measurement and channel tags
 from .lib.definitions import Definitions, MeasurementTags, ChannelTags, PlotDefinitions, MeasurementTypes
 from .lib.height_masking import get_height_treshold
@@ -3852,33 +3851,87 @@ class SnomMeasurement(FileHandler):
             p0 = coeff #set the starting parameters for the next fit
         return align_points, list_of_coefficients
 
-    def _shift_data(self, data, y_shifts) -> np.array:
+    def _shift_data(self, data, axis, shifts) -> np.array:
+        # if shifts are not int round them
+        if not all(isinstance(n, int) for n in shifts):
+            shifts = [round(element) for element in shifts]
         YRes = len(data)
         XRes = len(data[0])
-        min_shift = round(min(y_shifts))
-        max_shift = round(max(y_shifts))
-        new_YRes = YRes + int(abs(min_shift-max_shift))
-        data_shifted = np.zeros((new_YRes, XRes))
-        #create the realigned height
-        for x in range(XRes):
-            y_shift = int(-y_shifts[x] + abs(max_shift)) #the calculated shift has to be compensated by shifting the pixels
+        min_shift = round(min(shifts))
+        max_shift = round(max(shifts))
+        if axis == 1:
+            new_YRes = YRes + int(abs(min_shift-max_shift))
+            data_shifted = np.zeros((new_YRes, XRes))
+            #create the realigned height
+            for x in range(XRes):
+                shift = int(-shifts[x] + abs(max_shift)) #the calculated shift has to be compensated by shifting the pixels
+                # shift = round(-shifts[x] + abs(max_shift)) #the calculated shift has to be compensated by shifting the pixels
+                for y in range(YRes):
+                    data_shifted[y + shift][x] = data[y][x]
+        elif axis == 0:
+            YRes = len(data)
+            XRes = len(data[0])
+            min_shift = round(min(shifts))
+            max_shift = round(max(shifts))
+            new_XRes = XRes + int(abs(min_shift-max_shift))
+            data_shifted = np.zeros((YRes, new_XRes))
+            #create the realigned height
             for y in range(YRes):
-                data_shifted[y + y_shift][x] = data[y][x]
+                shift = int(-shifts[y] + abs(max_shift))
+                # shift = round(-shifts[y] + abs(max_shift))
+                for x in range(XRes):
+                    data_shifted[y][x + shift] = data[y][x]
         return data_shifted
 
-    def realign(self, channels:list=None, bounds:list=None): # ToDo
-        """This function corrects the drift of the piezo motor. As of now it needs to be fitted to a region of the sample which is assumed to be straight.
-        In the future this could be implemented with a general map containing the distortion created by the piezo motor, if it turns out to be constant...
-        Anyways, you will be prompted with a preview of the height data, please select an area of the scan with only one 'straight' waveguide. 
-        The bounds for the fitting routine are based on the lower and upper limit of this selection.
-        This function is quite special to my needs and will probably not make it into the final version of the software.
+    def _get_mean_from_area(self, data, axis=1, threshold=0.5):
+        """This function calculates the mean index of an array along a specified axis.
+        The mean index is calculated by setting all values below a certain threshold to zero.
 
-        Careful! Will not yet affect the scan size, so the pixelsize will be altered... ToDo
+        Args:
+            data (np.array): 2d array of data.
+            axis (int): The axis along which the mean index should be calculated. 0 means x-axis, 1 means y-axis. Defaults to 1.
+            threshold (float, optional): threshold, all values below will be set to zero to better estimate the mean index position. Defaults to 0.5.
+
+        Returns:
+            float: np.array of the mean position indices.
+        """
+        if axis == 1:
+            res = len(data[0])
+            sliced_data = [data[:,i] for i in range(res)]
+        elif axis == 0:
+            res = len(data)
+            sliced_data = [data[i] for i in range(res)]
+        #just calculate the shift for each pixel column for now
+        # number_align_points = XRes
+        shifts = np.zeros(res)
+        for i in range(res):
+            max_val = np.max(sliced_data[i])
+            # set all values below threshold to zero
+            sliced_data[i] = np.where(sliced_data[i] < threshold*max_val, 0, sliced_data[i])
+            mean_index = mean_index_array(sliced_data[i])
+            # plot the column data
+            # if i%100 == 0:
+            #     print('mean index:', mean_index)
+            #     plt.plot(column_data)
+            #     plt.vlines(mean_index, ymin=min(column_data), ymax=max(column_data), color='red')
+            #     plt.show()
+            shifts[i] = mean_index
+        return shifts
+
+    def realign(self, channels:list=None, bounds:list=None, axis=1, threshold=0.5):
+        """This function corrects the drift of the piezo motor. As of now it needs a reference region of the sample which is assumed to be straight.
+        In the future this could be implemented with a general map containing the distortion created by the piezo motor, if it turns out to be temporally constant...
+        Anyways, you will be prompted with a preview of the height data, please select an area of the scan with only one 'straight' reference. 
+        It will then calculate the index of the mean according to the specified axis. If you specify a threshold all values below this threshold will be set to zero.
+        This makes the mean index calculation more robust.
+        The bounds for the fitting routine are based on the lower and upper limit of this selection.
         
         Args:  
             channels (list): list of channels, will override the already existing channels
             bounds (list): The bounds for the fitting routine. If not specified you will be prompted with a window to select an area.
                 Should be specified like this: [lower_bound, upper_bound] in px.
+            axis (int): The axis along which the mean index should be calculated. 0 means x-axis, 1 means y-axis. Defaults to 1.
+            threshold (float, optional): threshold, all values below will be set to zero to better estimate the mean index position. Defaults to 0.5.
         
         """
         self._initialize_data(channels)
@@ -3890,16 +3943,16 @@ class SnomMeasurement(FileHandler):
             data, trash = self._load_data([self.height_channel])
         if bounds is None:
             coords = select_rectangle(data, self.height_channel)
-            lower = coords[0][1]
-            upper = coords[1][1]
-            # self.lower_y_bound = lower
-            # self.upper_y_bound = upper
+            if axis == 1:
+                lower = coords[0][1]
+                upper = coords[1][1]
+            elif axis == 0:
+                lower = coords[0][0]
+                upper = coords[1][0]
         else:
             lower = bounds[0]
             upper = bounds[1]
-            # self.lower_y_bound = bounds[0]
-            # self.upper_y_bound = bounds[1]
-        self._write_to_logfile('realign_bounds', [lower, upper])
+        self._write_to_logfile('realign_axis_bounds', [axis, [lower, upper]])
         if self.height_channel in self.channels:
             height_data = self.all_data[self.channels.index(self.height_channel)]
         else:
@@ -3911,47 +3964,69 @@ class SnomMeasurement(FileHandler):
                 height_data = self._scale_array(height_data, self.height_channel, scaling)
         YRes = len(height_data)
         XRes = len(height_data[0])
-        reduced_height_data = np.zeros((upper-lower +1,XRes))
-        for y in range(YRes):
-            if (lower <= y) and (y <= upper):
+        if axis == 1:
+            reduced_height_data = np.zeros((upper-lower +1,XRes))
+            for y in range(YRes):
+                if (lower <= y) and (y <= upper):
+                    for x in range(XRes):
+                        reduced_height_data[y-lower][x] = height_data[y][x]
+        elif axis == 0:
+            reduced_height_data = np.zeros((YRes, upper-lower +1))
+            for y in range(YRes):
                 for x in range(XRes):
-                    reduced_height_data[y-lower][x] = height_data[y][x]
-        align_points, fit_coefficients = self._fit_horizontal_wg(reduced_height_data)
-        y_shifts = [round(coeff[1],0) -int((upper - lower)/2) for coeff in fit_coefficients]
-        # save the align points and y_shifts as instance variables so the plotting algorithm can access them
-        self.align_points = align_points
-        self.y_shifts = y_shifts
+                    if (lower <= x) and (x <= upper):
+                        reduced_height_data[y][x-lower] = height_data[y][x]
+        shifts = self._get_mean_from_area(reduced_height_data, axis, threshold)
 
         # plot 
-        fig, axis = plt.subplots()    
+        fig, axs = plt.subplots()    
         fig.set_figheight(self.figsizey)
         fig.set_figwidth(self.figsizex) 
         cmap = SNOM_height
-        img = axis.pcolormesh(height_data, cmap=cmap)
-        # axis.invert_yaxis()
-        divider = make_axes_locatable(axis)
+        img = axs.pcolormesh(height_data, cmap=cmap)
+        # axs.invert_yaxis()
+        divider = make_axes_locatable(axs)
         cax = divider.append_axes("right", size="5%", pad=0.05)
         cbar = plt.colorbar(img, cax=cax)
         cbar.ax.get_yaxis().labelpad = 15
-        cbar.ax.set_ylabel('height [nm]', rotation=270)
-        axis.set_title('realinging')
-        axis.axis('scaled')
-        axis.plot(self.align_points, [element + lower + (upper-lower)/2 for element in self.y_shifts], color='red')
-        # axis.hlines([self.upper_y_bound, self.lower_y_bound], xmin=0, xmax=XRes, color='white')
-        axis.hlines([upper, lower], xmin=0, xmax=XRes, color='white')
+        cbar.ax.set_ylabel('height (nm)', rotation=270)
+        axs.set_title('Realigned')
+        axs.axis('scaled')
+        if axis == 1:
+            axs.plot(range(XRes), [element + lower for element in shifts], color='red')
+            axs.hlines([upper, lower], xmin=0, xmax=XRes, color='white')
+        elif axis == 0:
+            axs.plot([element + lower for element in shifts], range(YRes), color='red')
+            axs.vlines([upper, lower], ymin=0, ymax=YRes, color='white')
         plt.show()
 
         # reinitialize the instance data to fit the new bigger arrays
-        min_shift = round(min(y_shifts))
-        max_shift = round(max(y_shifts))
+        min_shift = round(min(shifts))
+        max_shift = round(max(shifts))
         new_YRes = YRes + int(abs(min_shift-max_shift))
         all_data = self.all_data
         self.all_data = []
         for i in range(len(self.channels)):
-            shifted_data = self._shift_data(all_data[i], y_shifts)
+            shifted_data = self._shift_data(all_data[i], axis, shifts)
             
             self.all_data.append(shifted_data)
             self.channels_label[i] += '_shifted'
+            # adjust the scan area and pixel area
+            if axis == 1:
+                xres, yres, *args = self._get_channel_tag_dict_value(self.channels[i], ChannelTags.PIXELAREA)
+                yres_new = new_YRes
+                # new_values = [xres, yres_new, *args]
+                self._set_channel_tag_dict_value(self.channels[i], ChannelTags.PIXELAREA, [xres, yres_new, *args])
+                xreal, yreal, *args = self._get_channel_tag_dict_value(self.channels[i], ChannelTags.SCANAREA)
+                yreal_new = yres_new*yreal/yres
+                self._set_channel_tag_dict_value(self.channels[i], ChannelTags.SCANAREA, [xreal, yreal_new, *args])
+            elif axis == 0:
+                xres, yres, *args = self._get_channel_tag_dict_value(self.channels[i], ChannelTags.PIXELAREA)
+                xres_new = new_YRes
+                self._set_channel_tag_dict_value(self.channels[i], ChannelTags.PIXELAREA, [xres_new, yres, *args])
+                xreal, yreal, *args = self._get_channel_tag_dict_value(self.channels[i], ChannelTags.SCANAREA)
+                xreal_new = xres_new*xreal/xres
+                self._set_channel_tag_dict_value(self.channels[i], ChannelTags.SCANAREA, [xreal_new, yreal, *args])
         gc.collect()
 
     def cut_channels(self, channels:list=None, preview_channel:str=None, autocut:bool=False, coords:list=None, reset_mask:bool=True) -> None:

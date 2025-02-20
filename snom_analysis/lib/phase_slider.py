@@ -26,10 +26,10 @@ from .snom_colormaps import *
 
 
 def get_phase_offset(preview_data):
-    phase_shift = Phase_Slider(preview_data)
+    phase_shift = PhaseSlider(preview_data)
     return phase_shift.phase_shift
 
-class Phase_Slider():
+class PhaseSlider():
     def __init__(self, preview_data):
         self.data = preview_data
         initial_shift = 0 # initial phase shift
