@@ -767,11 +767,11 @@ def main():
     # test_level_columnwise()
     # test_get_pixel_value()
     # test_profile_selector()
-    # test_gauss_filter_v2()
+    test_gauss_filter_v2()
     # test_comsol_data()
     # test_comsol_height_data()
     # test_approach_curve()
-    test_find_measurement_type()
+    # test_find_measurement_type()
 
     ################################
     #### Documentation examples ####
