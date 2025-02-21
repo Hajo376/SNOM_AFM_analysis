@@ -10,3 +10,4 @@ tests
 SNOM_AFM_analysis.zip
 /additional
 /backup
+/src/snom_analysis.egg-info

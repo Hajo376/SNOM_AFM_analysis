@@ -9,7 +9,6 @@
   <title>Readme &mdash; SNOM Analysis 1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=7dc6ce7e" />
 
@@ -19,13 +18,7 @@
       <script src="_static/documentation_options.js?v=8d563738"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-      <script>let toggleHintShow = 'Click to show';</script>
-      <script>let toggleHintHide = 'Click to hide';</script>
-      <script>let toggleOpenOnPrint = 'true';</script>
-      <script src="_static/togglebutton.js?v=4a39c7ea"></script>
       <script src="_static/design-tabs.js?v=f930bc37"></script>
-      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -56,12 +49,13 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Readme</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#how-is-the-package-structured">How is the package structured:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-work-in-progress">Installation: (work in progress)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#documentation-and-examples">Documentation and examples:</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#key-areas-to-improve">Key areas to improve:</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="snom_analysis.html">API Reference</a></li>
 </ul>
 
         </div>
@@ -135,6 +129,21 @@ Nevertheles, i would recommend to work on a copy of the data and not on the orig
 <p>Also for plotting the package makes use of a matplotlib style file which is also located in the users home directory. Feel free to change this file to your needs.
 You can also experiment with latex mode if you want to create plots for your thesis, then however the scalebar will not work properly since symbols like a ‘µ’ aren’t rendered properly…
 If you delete this file it will be recreated with the default settings.</p>
+</section>
+<section id="installation-work-in-progress">
+<h2>Installation: (work in progress)<a class="headerlink" href="#installation-work-in-progress" title="Link to this heading"></a></h2>
+<p>The package can be installed via <code class="docutils literal notranslate"><span class="pre">pip</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">snom</span><span class="o">-</span><span class="n">analysis</span>
+</pre></div>
+</div>
+<p>or via <code class="docutils literal notranslate"><span class="pre">conda</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">snom</span><span class="o">-</span><span class="n">analysis</span>
+</pre></div>
+</div>
+</section>
+<section id="documentation-and-examples">
+<h2>Documentation and examples:<a class="headerlink" href="#documentation-and-examples" title="Link to this heading"></a></h2>
+<p>The documentation can be found at <a class="reference external" href="https://snom-analysis.readthedocs.io/en/latest/index.html">https://snom-analysis.readthedocs.io/en/latest/index.html</a></p>
 </section>
 <section id="key-areas-to-improve">
 <h2>Key areas to improve:<a class="headerlink" href="#key-areas-to-improve" title="Link to this heading"></a></h2>

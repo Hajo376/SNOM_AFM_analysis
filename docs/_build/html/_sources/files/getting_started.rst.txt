@@ -14,7 +14,7 @@ These are just dictionaries containing the parameters from the parameters.txt fi
 and the individual headers from the .gsf files (channels_tag_dict). Note that the channels_tag_dict is also a list correlated with instance.channels.
 This gives you a lot of freedome to implement your own functionality.
 
-Anyways, here is a short example of how to use the package.
+Anyways, here are a few short examples of how to use the package.
 
 .. _code example 1:
 Simple usage example using the SnomMeasurement class:

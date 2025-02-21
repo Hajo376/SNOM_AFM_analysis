@@ -1,12 +1,12 @@
 Metadata-Version: 2.2
 Name: snom_analysis
-Version: 0.1.17
+Version: 0.1.18
 Summary: Package for displaying and manipulating SNOM and AFM data
 Author-email: "H.-J. Schill" <hajo.schill@acetovit.de>
 Maintainer-email: "H.-J. Schill" <hajo.schill@acetovit.de>
 License: GPL-3.0-or-later
-Project-URL: Source, https://github.com/pypa/sampleproject/
-Project-URL: Documentation, https://snom-analysis.readthedocs.io/en/latest/
+Project-URL: Source, https://github.com/Hajo376/SNOM_AFM_analysis/
+Project-URL: Documentation, https://snom-analysis.readthedocs.io/en/latest/index.html
 Keywords: snom,afm,near-field,atomic force microscopy
 Classifier: Programming Language :: Python :: 3 :: Only
 Requires-Python: >=3.9
@@ -39,13 +39,13 @@ Installation
 
 The package can be installed via ``pip``::
 
-    pip install snom_analysis
+    pip install snom-analysis
 
 or via ``conda``::
 
-    conda install -c conda-forge snom_analysis
+    conda install -c conda-forge snom-analysis
 
 Documentation
 -------------
 
-The documentation can be found at https://snom-analysis.readthedocs.io/en/latest/
+The documentation can be found at https://snom-analysis.readthedocs.io/en/latest/index.html

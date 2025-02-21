@@ -57,16 +57,16 @@ Installation: (work in progress)
 
 The package can be installed via ``pip``::
 
-    pip install snom_analysis
+    pip install snom-analysis
 
 or via ``conda``::
 
-    conda install -c conda-forge snom_analysis
+    conda install -c conda-forge snom-analysis
 
 Documentation and examples:
 ---------------------------
 
-The documentation can be found at https://snom-analysis.readthedocs.io/en/latest/
+The documentation can be found at https://snom-analysis.readthedocs.io/en/latest/index.html
 
 Key areas to improve:
 ---------------------
