@@ -52,7 +52,21 @@ Also for plotting the package makes use of a matplotlib style file which is also
 You can also experiment with latex mode if you want to create plots for your thesis, then however the scalebar will not work properly since symbols like a 'µ' aren't rendered properly...
 If you delete this file it will be recreated with the default settings.
 
+Installation:
+-------------
 
+The package can be installed via ``pip``::
+
+    pip install snom_analysis
+
+or via ``conda``::
+
+    conda install -c conda-forge snom_analysis
+
+Documentation and examples:
+---------------------------
+
+The documentation can be found at https://snom-analysis.readthedocs.io/en/latest/
 
 Key areas to improve:
 ---------------------
