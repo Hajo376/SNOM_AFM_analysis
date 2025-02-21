@@ -23,7 +23,7 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
     "sphinx_design",
-    "sphinx_togglebutton",
+    # "sphinx_togglebutton",
     "numpydoc",
     'sphinx.ext.napoleon', 
     'sphinx.ext.viewcode', 
