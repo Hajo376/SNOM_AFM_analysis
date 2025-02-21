@@ -1,2 +1,0 @@
-snom_analysis
-snom_analysis/lib
