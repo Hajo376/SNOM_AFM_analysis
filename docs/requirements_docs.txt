@@ -4,6 +4,7 @@ numpy
 matplotlib
 mpl_point_clicker
 matplotlib_scalebar
+snom-analysis
 imageio
 colorcet
 scikit-image
