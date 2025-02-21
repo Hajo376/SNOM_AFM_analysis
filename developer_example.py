@@ -8,8 +8,8 @@ import pathlib
 this_files_path = pathlib.Path(__file__).parent.absolute()
 
 # from snom_analysis.main import*
-from snom_analysis.main import SnomMeasurement, ApproachCurve, Scan3D, FileHandler
-from snom_analysis.lib.definitions import Definitions, MeasurementTags, ChannelTags, PlotDefinitions
+from src.snom_analysis.main import SnomMeasurement, ApproachCurve, Scan3D, FileHandler
+from src.snom_analysis.lib.definitions import Definitions, MeasurementTags, ChannelTags, PlotDefinitions
 
 '''
 This is an example script of how to use this package to display and manipulate example data.
@@ -748,7 +748,7 @@ def main():
     #### Testes functions, which can be used to test the functionality of the package. ####
     #######################################################################################
     # test_realign()
-    # test_cut()
+    test_cut()
     # test_height_masking()
     # test_scalebar()
     # test_phaseshift()

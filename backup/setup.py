@@ -2,13 +2,13 @@ from setuptools import setup
 
 setup(
     name="snom_analysis",
-    version="0.1.11",
+    version="0.1.12",
     description="Package for displaying and manipulating SNOM and AFM data.",
     packages=["snom_analysis", "snom_analysis/lib"],
     url="#",
     author="Hans-Joachim Schill",
     author_email="hajo.schill@acetovit.de",
-    license="LICENSE",
+    license="LICENSE.txt",
     python_requires=">=3.12",
     zip_safe=False,
     include_package_data=True

@@ -9,7 +9,7 @@
   <title>Readme &mdash; SNOM Analysis 1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=7dc6ce7e" />
 
@@ -19,7 +19,13 @@
       <script src="_static/documentation_options.js?v=8d563738"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="_static/togglebutton.js?v=4a39c7ea"></script>
       <script src="_static/design-tabs.js?v=f930bc37"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -97,7 +103,8 @@ The package also creates a folder in the users ‘home’ directory to store the
 Each plotting command generates a plot and that plot is automatically appended to the plot memory file, allowing to view multiple measurements besides each other.
 This memory can of course be deleted at will, which is by default every time a new measurement is opened.</p>
 <p>For ease of use i also created a GUI version of this package which allows to use many functions more easily.
-I typically use it to quickly generate images of my measurements with minimal modifications.</p>
+I typically use it to quickly generate images of my measurements with minimal modifications.
+It’s not yet available but i will try to make it available in the future.</p>
 <p>I created this package during my PhD for various data analysis purposes. I want to make it available for the general public and have no commercial interests.
 I am not a professional programmer, please keep that in mind if you encounter problems or bugs, which you most probably will.
 I encourage you to use and extend the functionality of this script to turn it into something more useful, which can be used by the SNOM/AFM community.</p>
@@ -108,7 +115,7 @@ This file contains the FileHandler class which does all the file handling and co
 The main measurement class is the ‘SnomMeasurement’ class, which is the main class to load and manipulate the standard 2d data.
 There are also the ‘ApproachCurve’ and ‘Scan3D’ class which are for the other types of measurements.
 Spectra are not yet implemented.
-There is also a PlotDefinitions class which contains the plot definitions for the plotting functions.
+There is also a PlotDefinitions class in the lib.definitions file, which contains the plot definitions for the plotting functions.
 This can also be changed by the user to adapt the plotting to his needs. This will also be saved as a json file in the users home directory.
 Changes made here will become the default settings for the plotting functions.
 The other classes contain enums and are only for internal referencing.
@@ -139,7 +146,8 @@ Better support for approach curves and 3D scans.
 Better and adjustable plotting, (adaptable layout, custom fonts, sizes…)
 Allow for custom colormaps.
 Speed improvements.
-Maybe switch to imshow instead of pcolormesh.</p>
+Maybe switch to imshow instead of pcolormesh.
+And of course, more functionality.</p>
 </section>
 </section>
 

@@ -106,13 +106,13 @@
 <div class="viewcode-block" id="get_phase_offset">
 <a class="viewcode-back" href="../../../snom_analysis.lib.html#snom_analysis.lib.phase_slider.get_phase_offset">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_phase_offset</span><span class="p">(</span><span class="n">preview_data</span><span class="p">):</span>
-    <span class="n">phase_shift</span> <span class="o">=</span> <span class="n">Phase_Slider</span><span class="p">(</span><span class="n">preview_data</span><span class="p">)</span>
+    <span class="n">phase_shift</span> <span class="o">=</span> <span class="n">PhaseSlider</span><span class="p">(</span><span class="n">preview_data</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">phase_shift</span><span class="o">.</span><span class="n">phase_shift</span></div>
 
 
-<div class="viewcode-block" id="Phase_Slider">
-<a class="viewcode-back" href="../../../snom_analysis.lib.html#snom_analysis.lib.phase_slider.Phase_Slider">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Phase_Slider</span><span class="p">():</span>
+<div class="viewcode-block" id="PhaseSlider">
+<a class="viewcode-back" href="../../../snom_analysis.lib.html#snom_analysis.lib.phase_slider.PhaseSlider">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PhaseSlider</span><span class="p">():</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">preview_data</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">preview_data</span>
         <span class="n">initial_shift</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># initial phase shift</span>
@@ -153,15 +153,15 @@
         <span class="n">button</span><span class="o">.</span><span class="n">on_clicked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
     
-<div class="viewcode-block" id="Phase_Slider.accept">
-<a class="viewcode-back" href="../../../snom_analysis.lib.html#snom_analysis.lib.phase_slider.Phase_Slider.accept">[docs]</a>
+<div class="viewcode-block" id="PhaseSlider.accept">
+<a class="viewcode-back" href="../../../snom_analysis.lib.html#snom_analysis.lib.phase_slider.PhaseSlider.accept">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="c1">#close the plot, the recent phase shift is saved in self.phase_shift and can be accessed from outside</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>        </div>
 
     
-<div class="viewcode-block" id="Phase_Slider.update">
-<a class="viewcode-back" href="../../../snom_analysis.lib.html#snom_analysis.lib.phase_slider.Phase_Slider.update">[docs]</a>
+<div class="viewcode-block" id="PhaseSlider.update">
+<a class="viewcode-back" href="../../../snom_analysis.lib.html#snom_analysis.lib.phase_slider.PhaseSlider.update">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">phase_shift</span> <span class="o">=</span> <span class="n">val</span> 
         <span class="bp">self</span><span class="o">.</span><span class="n">shift_phase</span><span class="p">()</span>
@@ -169,8 +169,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw_idle</span><span class="p">()</span></div>
 
     
-<div class="viewcode-block" id="Phase_Slider.shift_phase">
-<a class="viewcode-back" href="../../../snom_analysis.lib.html#snom_analysis.lib.phase_slider.Phase_Slider.shift_phase">[docs]</a>
+<div class="viewcode-block" id="PhaseSlider.shift_phase">
+<a class="viewcode-back" href="../../../snom_analysis.lib.html#snom_analysis.lib.phase_slider.PhaseSlider.shift_phase">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">shift_phase</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">yres</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
         <span class="n">xres</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>

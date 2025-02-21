@@ -113,21 +113,8 @@ class FileHandler(PlotDefinitions):
         This can also be called to reset the config file to default settings. But all manual changes will be lost.
         """
         config = ConfigParser()
-        # careful with default, the content of default will be added to all other sections
-        # config['DEFAULT'] = {'FILETYPE': 'FILETYPE2',
-        #                     'PARAMETERTYPE': 'PARAMETERTYPE6',
-        # }
-        # the default parameters will be taken from the default Filtype definition
-        # todo remove this, this is just for internal testing
-        # config['FILETYPES'] = {
-        #     'FILETYPE1': 'standard_new',
-        #     'FILETYPE2': 'standard',
-        #     'FILETYPE3': 'aachen_gsf',
-        #     'FILETYPE4': 'aachen_ascii',
-        #     'FILETYPE5': 'neaspec_version_1_6_3359_1',
-        #     'FILETYPE6': 'comsol_gsf',
-        # }
         # the order is important, as the script will try to find the filetype in the order specified here
+        # these are just the filetypes i have encountered so far, more can be added
         config['FILETYPES'] = {
             'filetype1': '<FILETYPE1>', # 1.10.9592.0 standard_new
             'filetype2': '<FILETYPE2>', # 1.8.5017.0 standard
@@ -631,6 +618,7 @@ class FileHandler(PlotDefinitions):
 
     def _load_mpl_style(self):
         if not Path.exists(self.mpl_style_path):
+            # generate default mpl style file
             with open(self.mpl_style_path, 'w') as f:
                 f.write('axes.grid: False\n')
                 f.write('axes.grid.axis: both\n')
@@ -672,7 +660,7 @@ class FileHandler(PlotDefinitions):
                 f.write('axes.formatter.min_exponent: 0\n')
         plt.style.use(self.mpl_style_path)
 
-    def _print_config(self):
+    def print_config(self):
         """This function prints the config file.
         """
         for section in self.config.sections():
@@ -1096,7 +1084,7 @@ class FileHandler(PlotDefinitions):
             print(f'{key} = {value}')
 
     def print_channel_tag_dict(self, channel=None):
-        """This function prints the measurement tag dict.
+        """This function prints the channel tag dict.
 
         Args:
             channel (str, optional): The channel to print. If None all channels will be printed. Defaults to None.
@@ -1741,8 +1729,8 @@ class SnomMeasurement(FileHandler):
         title (str, optional): title of the measurement. Defaults to None.
         autoscale (bool, optional): if True the data will be scaled to quadratic pixels. Defaults to True.
     """
-    all_subplots = [] # list containing all subplots
     def __init__(self, directory_name:str, channels:list=None, title:str=None, autoscale:bool=True) -> None:
+        self.all_subplots = [] # list containing all subplots
         self.measurement_type = MeasurementTypes.SNOM
         super().__init__(directory_name, title)
         self._initialize_measurement_channel_indicators()
@@ -1767,20 +1755,15 @@ class SnomMeasurement(FileHandler):
             self.channels = channels
             # update the channel tag dictionary, makes the program compatible with differrently sized datasets, like original data plus manipulated, eg. cut data
             self._create_channel_tag_dict()
-            # self._Create_Channels_Tag_Dict()
             self.all_data, self.channels_label = self._load_data(channels) # could be changed to a single dictionary containing the data and the channel names
             xres = len(self.all_data[0][0])
             yres = len(self.all_data[0])
-            # reset all the instance variables dependent on the data, but nor the ones responsible for plotting
-            # self.scaling_factor = 1
+            # reset all the instance variables dependent on the data, but not the ones responsible for plotting
             if self.autoscale == True:
                 self.quadratic_pixels()
             # initialize instance variables:
             self.mask_array = [] # not shure if it's best to reset the mask...
-            # self.upper_y_bound = None
-            # self.lower_y_bound = None
             self.align_points = None
-            self.y_shifts = None
             self.scalebar_channels = []    
 
     def initialize_channels(self, channels:list) -> None:
@@ -1810,7 +1793,7 @@ class SnomMeasurement(FileHandler):
             self.quadratic_pixels(channels)
 
     def _load_all_subplots(self) -> None:
-        """Load all subplots from memory (located under APPDATA/SNOM_Plotter/all_subplots.p).
+        """Load all subplots from memory (located under home/SNOM_Analysis/all_subplots.p).
         """
         try:
             with open(self.all_subplots_path, 'rb') as file:
@@ -1839,11 +1822,9 @@ class SnomMeasurement(FileHandler):
         xres = len(array[0])
         scaled_array = np.zeros((yres*scaling, xres*scaling))
         for i in range(len(array)):
-            # line = np.zeros((xres))
             for j in range(len(array[0])):
                 for k in range(scaling):
                     for l in range(scaling):
-                        # scaled_dataset[h][i*scaling + k][j*scaling + l] = array[i][j]
                         scaled_array[i*scaling + k][j*scaling + l] = array[i][j]
         return scaled_array
 
@@ -2107,7 +2088,7 @@ class SnomMeasurement(FileHandler):
         """This function removes the specified subplot from the memory.
         
         Args:
-            index_array [list]: The indices of the subplots to remove from the plot list
+            index_array (list): The indices of the subplots to remove from the plot list
         """
         #sort the index array in descending order and delete the corresponding plots from the memory
         index_array.sort(reverse=True)
@@ -2122,7 +2103,7 @@ class SnomMeasurement(FileHandler):
         Times=1 means only the last, times=2 means the two last, ...
         
         Args:
-            times [int]: how many subplots should be removed from the end of the list?
+            times (int): how many subplots should be removed from the end of the list?
         """
         self._load_all_subplots()
         for i in range(times):
@@ -2139,19 +2120,8 @@ class SnomMeasurement(FileHandler):
         """
         number_of_axis = 9
         number_of_subplots = len(subplots)
-        # print('Number of subplots: {}'.format(number_of_subplots))
         #specify the way the subplots are organized
         nrows = int((number_of_subplots-1)/np.sqrt(number_of_axis))+1
-        # set the plotting font sizes:
-        plt.rc('font', size=self.font_size_default)          # controls default text sizes
-        plt.rc('axes', titlesize=self.font_size_axes_title)     # fontsize of the axes title
-        plt.rc('axes', labelsize=self.font_size_axes_label)    # fontsize of the x and y labels
-        plt.rc('xtick', labelsize=self.font_size_tick_labels)    # fontsize of the tick labels
-        plt.rc('ytick', labelsize=self.font_size_tick_labels)    # fontsize of the tick labels
-        plt.rc('legend', fontsize=self.font_size_legend)    # legend fontsize
-        plt.rc('figure', titlesize=self.font_size_fig_title)  # fontsize of the figure title
-        # get the plotting style from the mpl style file
-        self._load_mpl_style()
 
         if nrows >=2:
             ncols = int(np.sqrt(number_of_axis))
@@ -2177,9 +2147,12 @@ class SnomMeasurement(FileHandler):
         fig, ax = plt.subplots(nrows, ncols)    
         fig.set_figheight(self.figsizey)
         fig.set_figwidth(self.figsizex) 
-        counter = 0
+        
+        # get the plotting style from the mpl style file and apply it
+        self._load_mpl_style()
 
         #start the plotting process
+        counter = 0
         for row in range(nrows):
             for col in range(ncols):
                 if counter < number_of_subplots:
@@ -2328,8 +2301,8 @@ class SnomMeasurement(FileHandler):
         This function will be repea you are satisfied.
 
         Args:
-            first_id [int]: the first id of the two subplots which should be switched
-            second_id [int]: the second id of the two subplots which should be switched
+            first_id (int): the first id of the two subplots which should be switched
+            second_id (int): the second id of the two subplots which should be switched
         """
         if (first_id == None) or (second_id == None):
             first_id = int(input('Please enter the id of the first image: '))
@@ -2440,7 +2413,7 @@ class SnomMeasurement(FileHandler):
         gc.collect()
 
     def _gauss_blurr_data(self, array, sigma) -> np.array:
-        """Applies a gaussian blurr to the specified array, with a specified sigma. The blurred data is returned as a list."""
+        """Applies a gaussian blurr to the specified array, with a specified sigma. The blurred data is returned as a np.array."""
         return gaussian_filter(array, sigma)
 
     def gauss_filter_channels(self, channels:list=None, sigma=2):
@@ -2659,6 +2632,7 @@ class SnomMeasurement(FileHandler):
             filetype (str, optional): the filetype to save the data. Defaults to 'gsf'.
         """
         # todo XOffset, YOffset dont work properly, also if the measurement is rotated or cut this is not considered so far
+        # actually not shure if that isn't fixed by now...
         if data is None:
             # channel is not in memory, so the standard values will be used
             data = self._load_data([channel])[0][0]
@@ -2802,12 +2776,9 @@ class SnomMeasurement(FileHandler):
     def _create_synccorr_preview(self, channel, wavelength, nouserinput=False) -> None:
         """
         This function is part of the synccorrection and creates a preview of the corrected data.
-        channel specifies which channel should be used for the preview.
-        Wavelength must be given in µm.
-        Scanangle is the rotation angle of the scan in radians.
 
         Args:
-            channel (str): channel name
+            channel (str): channel to create the preview from
             wavelength (float): wavelength in µm
             nouserinput (bool, optional): if True, the function will not ask for user input. Defaults to False.
         """
@@ -4897,6 +4868,14 @@ class SnomMeasurement(FileHandler):
         gc.collect()
 
     def create_gif_old(self, amp_channel:str, phase_channel:str, frames:int=20, fps:int=10) -> None:
+        """Old gif creation method.
+
+        Args:
+            amp_channel (str): _description_
+            phase_channel (str): _description_
+            frames (int, optional): _description_. Defaults to 20.
+            fps (int, optional): _description_. Defaults to 10.
+        """
         # Todo
         framenumbers=frames
         Duration=1000/fps # in ms
@@ -5365,6 +5344,14 @@ class SnomMeasurement(FileHandler):
 
     # not yet fully implemented, eg. the profile plot function is only ment for full horizontal or vertical profiles only
     def test_profile_selection(self, channel:str=None) -> None:
+        """Select a profile from the data. Allows the user to arbitrarily select a profile from the data.
+
+        Args:
+            channel (str, optional): channel to get the profile data from. Defaults to None.
+
+        Returns:
+            np.array, int, int, int: profile, start, end, width
+        """
         if channel is None:
             channel = self.channels[0]
         

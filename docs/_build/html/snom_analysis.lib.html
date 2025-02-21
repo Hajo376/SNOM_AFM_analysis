@@ -9,7 +9,7 @@
   <title>snom_analysis.lib package &mdash; SNOM Analysis 1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=7dc6ce7e" />
 
@@ -19,7 +19,13 @@
       <script src="_static/documentation_options.js?v=8d563738"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="_static/togglebutton.js?v=4a39c7ea"></script>
       <script src="_static/design-tabs.js?v=f930bc37"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -58,7 +64,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#module-snom_analysis.lib.data_range_selector">snom_analysis.lib.data_range_selector module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-snom_analysis.lib.edge_detection">snom_analysis.lib.edge_detection module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-snom_analysis.lib.file_handling">snom_analysis.lib.file_handling module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-snom_analysis.lib.get_directionality">snom_analysis.lib.get_directionality module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#snom-analysis-lib-get-directionality-module">snom_analysis.lib.get_directionality module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-snom_analysis.lib.phase_analysis">snom_analysis.lib.phase_analysis module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-snom_analysis.lib.phase_slider">snom_analysis.lib.phase_slider module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-snom_analysis.lib.profile">snom_analysis.lib.profile module</a></li>
@@ -66,7 +72,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#module-snom_analysis.lib.realign">snom_analysis.lib.realign module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-snom_analysis.lib.rectangle_selector">snom_analysis.lib.rectangle_selector module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-snom_analysis.lib.snom_colormaps">snom_analysis.lib.snom_colormaps module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-snom_analysis.lib.test_profile_selector">snom_analysis.lib.test_profile_selector module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#snom-analysis-lib-test-profile-selector-module">snom_analysis.lib.test_profile_selector module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-snom_analysis.lib">Module contents</a></li>
 </ul>
 </li>
@@ -117,6 +123,44 @@
 <dt class="sig sig-object py" id="snom_analysis.lib.data_range_selector.ArraySelector">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">snom_analysis.lib.data_range_selector.</span></span><span class="sig-name descname"><span class="pre">ArraySelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/data_range_selector.html#ArraySelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.data_range_selector.ArraySelector" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p class="rubric">Methods</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><strong>fill_canvas</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>get_coordinates</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>highlight_selection</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>invert_selection</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>on_button_press</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>on_button_release</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>on_mouse_drag</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>on_mouse_move</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>on_windowsize_changed</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>toggle_selection_mode</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>update_scaling_factor</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt class="sig sig-object py" id="snom_analysis.lib.data_range_selector.ArraySelector.update_scaling_factor">
 <span class="sig-name descname"><span class="pre">update_scaling_factor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/data_range_selector.html#ArraySelector.update_scaling_factor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.data_range_selector.ArraySelector.update_scaling_factor" title="Link to this definition"></a></dt>
@@ -185,6 +229,26 @@
 The user can adjust the sigma value, the low and high threshold for the edge detection.
 The user can accept the values or exit the GUI.
 Uppon accepting the values the GUI is closed and the values are saved to the class instance variables.</p>
+<p class="rubric">Methods</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><strong>accept</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>calculate_edges</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>create_gui</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>exit</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>update</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt class="sig sig-object py" id="snom_analysis.lib.edge_detection.EdgeDetection.create_gui">
 <span class="sig-name descname"><span class="pre">create_gui</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/edge_detection.html#EdgeDetection.create_gui"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.edge_detection.EdgeDetection.create_gui" title="Link to this definition"></a></dt>
@@ -231,148 +295,8 @@ Uppon accepting the values the GUI is closed and the values are saved to the cla
 <dd></dd></dl>
 
 </section>
-<section id="module-snom_analysis.lib.get_directionality">
-<span id="snom-analysis-lib-get-directionality-module"></span><h2>snom_analysis.lib.get_directionality module<a class="headerlink" href="#module-snom_analysis.lib.get_directionality" title="Link to this heading"></a></h2>
-<p>This script is ment to extract the directionality from a measurement of a chiral coupler.</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.ChiralCoupler">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">snom_analysis.lib.get_directionality.</span></span><span class="sig-name descname"><span class="pre">ChiralCoupler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vertical'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#ChiralCoupler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.ChiralCoupler" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.ChiralCoupler.Fit_Wgs">
-<span class="sig-name descname"><span class="pre">Fit_Wgs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#ChiralCoupler.Fit_Wgs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.ChiralCoupler.Fit_Wgs" title="Link to this definition"></a></dt>
-<dd><p>This fits the data and returns a list with both positions of the waveguides.
-Like: [row, col_wg1, col_wg2]</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.ChiralCoupler.Get_Integration_Width">
-<span class="sig-name descname"><span class="pre">Get_Integration_Width</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#ChiralCoupler.Get_Integration_Width"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.ChiralCoupler.Get_Integration_Width" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.ChiralCoupler.Plot_Data_With_Fit_And_Bounds">
-<span class="sig-name descname"><span class="pre">Plot_Data_With_Fit_And_Bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#ChiralCoupler.Plot_Data_With_Fit_And_Bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.ChiralCoupler.Plot_Data_With_Fit_And_Bounds" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.ChiralCoupler.Extract_WG_Data">
-<span class="sig-name descname"><span class="pre">Extract_WG_Data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#ChiralCoupler.Extract_WG_Data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.ChiralCoupler.Extract_WG_Data" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.ChiralCoupler.Data_Mean">
-<span class="sig-name descname"><span class="pre">Data_Mean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#ChiralCoupler.Data_Mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.ChiralCoupler.Data_Mean" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.ChiralCoupler.Export_Mean_Data">
-<span class="sig-name descname"><span class="pre">Export_Mean_Data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#ChiralCoupler.Export_Mean_Data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.ChiralCoupler.Export_Mean_Data" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.ChiralCoupler.Integrate_Amplitude">
-<span class="sig-name descname"><span class="pre">Integrate_Amplitude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#ChiralCoupler.Integrate_Amplitude"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.ChiralCoupler.Integrate_Amplitude" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.ChiralCoupler.Display_Phase_Profile">
-<span class="sig-name descname"><span class="pre">Display_Phase_Profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#ChiralCoupler.Display_Phase_Profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.ChiralCoupler.Display_Phase_Profile" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.ChiralCoupler.Export_Data">
-<span class="sig-name descname"><span class="pre">Export_Data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">left_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#ChiralCoupler.Export_Data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.ChiralCoupler.Export_Data" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.ChiralCoupler.Display_Phase_Difference">
-<span class="sig-name descname"><span class="pre">Display_Phase_Difference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#ChiralCoupler.Display_Phase_Difference"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.ChiralCoupler.Display_Phase_Difference" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.ChiralCoupler.Fit_Sawtooth">
-<span class="sig-name descname"><span class="pre">Fit_Sawtooth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#ChiralCoupler.Fit_Sawtooth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.ChiralCoupler.Fit_Sawtooth" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.Flatten_Profile">
-<span class="sig-prename descclassname"><span class="pre">snom_analysis.lib.get_directionality.</span></span><span class="sig-name descname"><span class="pre">Flatten_Profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#Flatten_Profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.Flatten_Profile" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.Fit_Decaying_Amplitude">
-<span class="sig-prename descclassname"><span class="pre">snom_analysis.lib.get_directionality.</span></span><span class="sig-name descname"><span class="pre">Fit_Decaying_Amplitude</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#Fit_Decaying_Amplitude"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.Fit_Decaying_Amplitude" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.Damped_Exponenial_Function">
-<span class="sig-prename descclassname"><span class="pre">snom_analysis.lib.get_directionality.</span></span><span class="sig-name descname"><span class="pre">Damped_Exponenial_Function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#Damped_Exponenial_Function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.Damped_Exponenial_Function" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.Exponenial_Function">
-<span class="sig-prename descclassname"><span class="pre">snom_analysis.lib.get_directionality.</span></span><span class="sig-name descname"><span class="pre">Exponenial_Function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#Exponenial_Function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.Exponenial_Function" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.Damped_Oscillation_Function">
-<span class="sig-prename descclassname"><span class="pre">snom_analysis.lib.get_directionality.</span></span><span class="sig-name descname"><span class="pre">Damped_Oscillation_Function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#Damped_Oscillation_Function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.Damped_Oscillation_Function" title="Link to this definition"></a></dt>
-<dd><p>Damped oscillation function</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>[</strong><strong>float</strong><strong>]</strong> (<em>gamma</em>) – amplitude of the oscillation</p></li>
-<li><p><strong>[</strong><strong>float</strong><strong>]</strong> – period of oscillation</p></li>
-<li><p><strong>[</strong><strong>float</strong><strong>]</strong> – initial phase of the oscillation</p></li>
-<li><p><strong>[</strong><strong>float</strong><strong>]</strong> – damping factor of the oscillation</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.Fit_Linear_Function">
-<span class="sig-prename descclassname"><span class="pre">snom_analysis.lib.get_directionality.</span></span><span class="sig-name descname"><span class="pre">Fit_Linear_Function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#Fit_Linear_Function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.Fit_Linear_Function" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.Linear_Function">
-<span class="sig-prename descclassname"><span class="pre">snom_analysis.lib.get_directionality.</span></span><span class="sig-name descname"><span class="pre">Linear_Function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#Linear_Function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.Linear_Function" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.Double_Gauss">
-<span class="sig-prename descclassname"><span class="pre">snom_analysis.lib.get_directionality.</span></span><span class="sig-name descname"><span class="pre">Double_Gauss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#Double_Gauss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.Double_Gauss" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.Sawtooth_v2">
-<span class="sig-prename descclassname"><span class="pre">snom_analysis.lib.get_directionality.</span></span><span class="sig-name descname"><span class="pre">Sawtooth_v2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_periods</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#Sawtooth_v2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.Sawtooth_v2" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.Sawtooth">
-<span class="sig-prename descclassname"><span class="pre">snom_analysis.lib.get_directionality.</span></span><span class="sig-name descname"><span class="pre">Sawtooth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_periods</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#Sawtooth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.Sawtooth" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.Get_Smallest_Difference">
-<span class="sig-prename descclassname"><span class="pre">snom_analysis.lib.get_directionality.</span></span><span class="sig-name descname"><span class="pre">Get_Smallest_Difference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#Get_Smallest_Difference"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.Get_Smallest_Difference" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.Get_Phase_Difference_V2">
-<span class="sig-prename descclassname"><span class="pre">snom_analysis.lib.get_directionality.</span></span><span class="sig-name descname"><span class="pre">Get_Phase_Difference_V2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#Get_Phase_Difference_V2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.Get_Phase_Difference_V2" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="snom_analysis.lib.get_directionality.main">
-<span class="sig-prename descclassname"><span class="pre">snom_analysis.lib.get_directionality.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/get_directionality.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.get_directionality.main" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
+<section id="snom-analysis-lib-get-directionality-module">
+<h2>snom_analysis.lib.get_directionality module<a class="headerlink" href="#snom-analysis-lib-get-directionality-module" title="Link to this heading"></a></h2>
 </section>
 <section id="module-snom_analysis.lib.phase_analysis">
 <span id="snom-analysis-lib-phase-analysis-module"></span><h2>snom_analysis.lib.phase_analysis module<a class="headerlink" href="#module-snom_analysis.lib.phase_analysis" title="Link to this heading"></a></h2>
@@ -437,22 +361,36 @@ previous_element = element</p>
 <dd></dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="snom_analysis.lib.phase_slider.Phase_Slider">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">snom_analysis.lib.phase_slider.</span></span><span class="sig-name descname"><span class="pre">Phase_Slider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">preview_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/phase_slider.html#Phase_Slider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.phase_slider.Phase_Slider" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="snom_analysis.lib.phase_slider.PhaseSlider">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">snom_analysis.lib.phase_slider.</span></span><span class="sig-name descname"><span class="pre">PhaseSlider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">preview_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/phase_slider.html#PhaseSlider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.phase_slider.PhaseSlider" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p class="rubric">Methods</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><strong>accept</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>shift_phase</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>update</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.phase_slider.Phase_Slider.accept">
-<span class="sig-name descname"><span class="pre">accept</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/phase_slider.html#Phase_Slider.accept"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.phase_slider.Phase_Slider.accept" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="snom_analysis.lib.phase_slider.PhaseSlider.accept">
+<span class="sig-name descname"><span class="pre">accept</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/phase_slider.html#PhaseSlider.accept"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.phase_slider.PhaseSlider.accept" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.phase_slider.Phase_Slider.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/phase_slider.html#Phase_Slider.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.phase_slider.Phase_Slider.update" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="snom_analysis.lib.phase_slider.PhaseSlider.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/phase_slider.html#PhaseSlider.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.phase_slider.PhaseSlider.update" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.phase_slider.Phase_Slider.shift_phase">
-<span class="sig-name descname"><span class="pre">shift_phase</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/phase_slider.html#Phase_Slider.shift_phase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.phase_slider.Phase_Slider.shift_phase" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="snom_analysis.lib.phase_slider.PhaseSlider.shift_phase">
+<span class="sig-name descname"><span class="pre">shift_phase</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/phase_slider.html#PhaseSlider.shift_phase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.phase_slider.PhaseSlider.shift_phase" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -477,6 +415,57 @@ previous_element = element</p>
 <dt class="sig sig-object py" id="snom_analysis.lib.profile_selector.CutlineSelector">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">snom_analysis.lib.profile_selector.</span></span><span class="sig-name descname"><span class="pre">CutlineSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/profile_selector.html#CutlineSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.profile_selector.CutlineSelector" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.lib.profile_selector.CutlineSelector.adjust_endpoint" title="snom_analysis.lib.profile_selector.CutlineSelector.adjust_endpoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adjust_endpoint</span></code></a>(fixed_point, new_point)</p></td>
+<td><p>Adjust endpoint along the fixed orientation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.lib.profile_selector.CutlineSelector.clip_point_to_image" title="snom_analysis.lib.profile_selector.CutlineSelector.clip_point_to_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clip_point_to_image</span></code></a>(x, y)</p></td>
+<td><p>Ensure point (x, y) is within the image bounds.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.lib.profile_selector.CutlineSelector.is_near_point" title="snom_analysis.lib.profile_selector.CutlineSelector.is_near_point"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_near_point</span></code></a>(p1, p2)</p></td>
+<td><p>Check if point p1 is near point p2 within a certain tolerance.</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><strong>add_widgets</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>clear_cutline</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>draw_perpendicular_lines</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>extract_cutline</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>on_click</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>on_key_press</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>on_key_release</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>on_motion</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>on_release</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>update_cutline</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>update_width</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt class="sig sig-object py" id="snom_analysis.lib.profile_selector.CutlineSelector.add_widgets">
 <span class="sig-name descname"><span class="pre">add_widgets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/profile_selector.html#CutlineSelector.add_widgets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.profile_selector.CutlineSelector.add_widgets" title="Link to this definition"></a></dt>
@@ -680,6 +669,17 @@ The function will return the drift corrected data.</p>
 <dt class="sig sig-object py" id="snom_analysis.lib.rectangle_selector.Rectangle_Selector">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">snom_analysis.lib.rectangle_selector.</span></span><span class="sig-name descname"><span class="pre">Rectangle_Selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/rectangle_selector.html#Rectangle_Selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.rectangle_selector.Rectangle_Selector" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p class="rubric">Methods</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><strong>accept</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>create_plot</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt class="sig sig-object py" id="snom_analysis.lib.rectangle_selector.Rectangle_Selector.create_plot">
 <span class="sig-name descname"><span class="pre">create_plot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/rectangle_selector.html#Rectangle_Selector.create_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.rectangle_selector.Rectangle_Selector.create_plot" title="Link to this definition"></a></dt>
@@ -696,97 +696,8 @@ The function will return the drift corrected data.</p>
 <section id="module-snom_analysis.lib.snom_colormaps">
 <span id="snom-analysis-lib-snom-colormaps-module"></span><h2>snom_analysis.lib.snom_colormaps module<a class="headerlink" href="#module-snom_analysis.lib.snom_colormaps" title="Link to this heading"></a></h2>
 </section>
-<section id="module-snom_analysis.lib.test_profile_selector">
-<span id="snom-analysis-lib-test-profile-selector-module"></span><h2>snom_analysis.lib.test_profile_selector module<a class="headerlink" href="#module-snom_analysis.lib.test_profile_selector" title="Link to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="snom_analysis.lib.test_profile_selector.CutlineSelector">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">snom_analysis.lib.test_profile_selector.</span></span><span class="sig-name descname"><span class="pre">CutlineSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/test_profile_selector.html#CutlineSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.test_profile_selector.CutlineSelector" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.test_profile_selector.CutlineSelector.add_widgets">
-<span class="sig-name descname"><span class="pre">add_widgets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/test_profile_selector.html#CutlineSelector.add_widgets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.test_profile_selector.CutlineSelector.add_widgets" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.test_profile_selector.CutlineSelector.update_width">
-<span class="sig-name descname"><span class="pre">update_width</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/test_profile_selector.html#CutlineSelector.update_width"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.test_profile_selector.CutlineSelector.update_width" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.test_profile_selector.CutlineSelector.on_key_press">
-<span class="sig-name descname"><span class="pre">on_key_press</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/test_profile_selector.html#CutlineSelector.on_key_press"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.test_profile_selector.CutlineSelector.on_key_press" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.test_profile_selector.CutlineSelector.on_key_release">
-<span class="sig-name descname"><span class="pre">on_key_release</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/test_profile_selector.html#CutlineSelector.on_key_release"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.test_profile_selector.CutlineSelector.on_key_release" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.test_profile_selector.CutlineSelector.on_click">
-<span class="sig-name descname"><span class="pre">on_click</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/test_profile_selector.html#CutlineSelector.on_click"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.test_profile_selector.CutlineSelector.on_click" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.test_profile_selector.CutlineSelector.on_release">
-<span class="sig-name descname"><span class="pre">on_release</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/test_profile_selector.html#CutlineSelector.on_release"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.test_profile_selector.CutlineSelector.on_release" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.test_profile_selector.CutlineSelector.on_motion">
-<span class="sig-name descname"><span class="pre">on_motion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/test_profile_selector.html#CutlineSelector.on_motion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.test_profile_selector.CutlineSelector.on_motion" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.test_profile_selector.CutlineSelector.is_near_point">
-<span class="sig-name descname"><span class="pre">is_near_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/test_profile_selector.html#CutlineSelector.is_near_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.test_profile_selector.CutlineSelector.is_near_point" title="Link to this definition"></a></dt>
-<dd><p>Check if point p1 is near point p2 within a certain tolerance.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.test_profile_selector.CutlineSelector.adjust_endpoint">
-<span class="sig-name descname"><span class="pre">adjust_endpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fixed_point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_point</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/test_profile_selector.html#CutlineSelector.adjust_endpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.test_profile_selector.CutlineSelector.adjust_endpoint" title="Link to this definition"></a></dt>
-<dd><p>Adjust endpoint along the fixed orientation.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.test_profile_selector.CutlineSelector.clip_point_to_image">
-<span class="sig-name descname"><span class="pre">clip_point_to_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/test_profile_selector.html#CutlineSelector.clip_point_to_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.test_profile_selector.CutlineSelector.clip_point_to_image" title="Link to this definition"></a></dt>
-<dd><p>Ensure point (x, y) is within the image bounds.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.test_profile_selector.CutlineSelector.clear_cutline">
-<span class="sig-name descname"><span class="pre">clear_cutline</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/test_profile_selector.html#CutlineSelector.clear_cutline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.test_profile_selector.CutlineSelector.clear_cutline" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.test_profile_selector.CutlineSelector.update_cutline">
-<span class="sig-name descname"><span class="pre">update_cutline</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/test_profile_selector.html#CutlineSelector.update_cutline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.test_profile_selector.CutlineSelector.update_cutline" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.test_profile_selector.CutlineSelector.draw_perpendicular_lines">
-<span class="sig-name descname"><span class="pre">draw_perpendicular_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/test_profile_selector.html#CutlineSelector.draw_perpendicular_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.test_profile_selector.CutlineSelector.draw_perpendicular_lines" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="snom_analysis.lib.test_profile_selector.CutlineSelector.extract_cutline">
-<span class="sig-name descname"><span class="pre">extract_cutline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/test_profile_selector.html#CutlineSelector.extract_cutline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.test_profile_selector.CutlineSelector.extract_cutline" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="snom_analysis.lib.test_profile_selector.get_cutline">
-<span class="sig-prename descclassname"><span class="pre">snom_analysis.lib.test_profile_selector.</span></span><span class="sig-name descname"><span class="pre">get_cutline</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/test_profile_selector.html#get_cutline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.test_profile_selector.get_cutline" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="snom_analysis.lib.test_profile_selector.main">
-<span class="sig-prename descclassname"><span class="pre">snom_analysis.lib.test_profile_selector.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/lib/test_profile_selector.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.lib.test_profile_selector.main" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
+<section id="snom-analysis-lib-test-profile-selector-module">
+<h2>snom_analysis.lib.test_profile_selector module<a class="headerlink" href="#snom-analysis-lib-test-profile-selector-module" title="Link to this heading"></a></h2>
 </section>
 <section id="module-snom_analysis.lib">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-snom_analysis.lib" title="Link to this heading"></a></h2>

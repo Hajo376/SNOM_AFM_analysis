@@ -8,7 +8,7 @@
   <title>snom_analysis.main &mdash; SNOM Analysis 1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
       <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=7dc6ce7e" />
 
@@ -18,7 +18,13 @@
       <script src="../../_static/documentation_options.js?v=8d563738"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../../_static/togglebutton.js?v=4a39c7ea"></script>
       <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -126,14 +132,13 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.phase_slider</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_phase_offset</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.rectangle_selector</span><span class="w"> </span><span class="kn">import</span> <span class="n">select_rectangle</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.data_range_selector</span><span class="w"> </span><span class="kn">import</span> <span class="n">select_data_range</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.lib.get_directionality</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChiralCoupler</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.lib</span><span class="w"> </span><span class="kn">import</span> <span class="n">realign</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.lib</span><span class="w"> </span><span class="kn">import</span> <span class="n">profile</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.lib</span><span class="w"> </span><span class="kn">import</span> <span class="n">phase_analysis</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.file_handling</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_parameter_values</span><span class="p">,</span> <span class="n">find_index</span><span class="p">,</span> <span class="n">convert_header_to_dict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.profile_selector</span><span class="w"> </span><span class="kn">import</span> <span class="n">select_profile</span>
 <span class="c1"># import additional functions</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.lib.additional_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_nan_to_zero</span><span class="p">,</span> <span class="n">gauss_function</span><span class="p">,</span> <span class="n">get_largest_abs</span><span class="p">,</span> <span class="n">calculate_colorbar_size</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.lib.additional_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_nan_to_zero</span><span class="p">,</span> <span class="n">gauss_function</span><span class="p">,</span> <span class="n">get_largest_abs</span><span class="p">,</span> <span class="n">calculate_colorbar_size</span><span class="p">,</span> <span class="n">mean_index_array</span>
 <span class="c1"># import definitions such as measurement and channel tags</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.definitions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Definitions</span><span class="p">,</span> <span class="n">MeasurementTags</span><span class="p">,</span> <span class="n">ChannelTags</span><span class="p">,</span> <span class="n">PlotDefinitions</span><span class="p">,</span> <span class="n">MeasurementTypes</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.lib.height_masking</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_height_treshold</span>
@@ -194,21 +199,8 @@
 <span class="sd">        This can also be called to reset the config file to default settings. But all manual changes will be lost.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">config</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">()</span>
-        <span class="c1"># careful with default, the content of default will be added to all other sections</span>
-        <span class="c1"># config[&#39;DEFAULT&#39;] = {&#39;FILETYPE&#39;: &#39;FILETYPE2&#39;,</span>
-        <span class="c1">#                     &#39;PARAMETERTYPE&#39;: &#39;PARAMETERTYPE6&#39;,</span>
-        <span class="c1"># }</span>
-        <span class="c1"># the default parameters will be taken from the default Filtype definition</span>
-        <span class="c1"># todo remove this, this is just for internal testing</span>
-        <span class="c1"># config[&#39;FILETYPES&#39;] = {</span>
-        <span class="c1">#     &#39;FILETYPE1&#39;: &#39;standard_new&#39;,</span>
-        <span class="c1">#     &#39;FILETYPE2&#39;: &#39;standard&#39;,</span>
-        <span class="c1">#     &#39;FILETYPE3&#39;: &#39;aachen_gsf&#39;,</span>
-        <span class="c1">#     &#39;FILETYPE4&#39;: &#39;aachen_ascii&#39;,</span>
-        <span class="c1">#     &#39;FILETYPE5&#39;: &#39;neaspec_version_1_6_3359_1&#39;,</span>
-        <span class="c1">#     &#39;FILETYPE6&#39;: &#39;comsol_gsf&#39;,</span>
-        <span class="c1"># }</span>
         <span class="c1"># the order is important, as the script will try to find the filetype in the order specified here</span>
+        <span class="c1"># these are just the filetypes i have encountered so far, more can be added</span>
         <span class="n">config</span><span class="p">[</span><span class="s1">&#39;FILETYPES&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;filetype1&#39;</span><span class="p">:</span> <span class="s1">&#39;&lt;FILETYPE1&gt;&#39;</span><span class="p">,</span> <span class="c1"># 1.10.9592.0 standard_new</span>
             <span class="s1">&#39;filetype2&#39;</span><span class="p">:</span> <span class="s1">&#39;&lt;FILETYPE2&gt;&#39;</span><span class="p">,</span> <span class="c1"># 1.8.5017.0 standard</span>
@@ -712,6 +704,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_load_mpl_style</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">Path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mpl_style_path</span><span class="p">):</span>
+            <span class="c1"># generate default mpl style file</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mpl_style_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;axes.grid: False</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;axes.grid.axis: both</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -753,13 +746,16 @@
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;axes.formatter.min_exponent: 0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mpl_style_path</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_print_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="FileHandler.print_config">
+<a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.FileHandler.print_config">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">print_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function prints the config file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">sections</span><span class="p">():</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">section</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">options</span><span class="p">(</span><span class="n">section</span><span class="p">):</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">option</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">section</span><span class="p">,</span><span class="w"> </span><span class="n">option</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">option</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">section</span><span class="p">,</span><span class="w"> </span><span class="n">option</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_change_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function changes the config file.</span>
@@ -1182,7 +1178,7 @@
 <div class="viewcode-block" id="FileHandler.print_channel_tag_dict">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.FileHandler.print_channel_tag_dict">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">print_channel_tag_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function prints the measurement tag dict.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function prints the channel tag dict.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            channel (str, optional): The channel to print. If None all channels will be printed. Defaults to None.</span>
@@ -1831,8 +1827,8 @@
 <span class="sd">        title (str, optional): title of the measurement. Defaults to None.</span>
 <span class="sd">        autoscale (bool, optional): if True the data will be scaled to quadratic pixels. Defaults to True.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">all_subplots</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># list containing all subplots</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory_name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">autoscale</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">all_subplots</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># list containing all subplots</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">measurement_type</span> <span class="o">=</span> <span class="n">MeasurementTypes</span><span class="o">.</span><span class="n">SNOM</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">directory_name</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_measurement_channel_indicators</span><span class="p">()</span>
@@ -1857,20 +1853,15 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">channels</span> <span class="o">=</span> <span class="n">channels</span>
             <span class="c1"># update the channel tag dictionary, makes the program compatible with differrently sized datasets, like original data plus manipulated, eg. cut data</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_create_channel_tag_dict</span><span class="p">()</span>
-            <span class="c1"># self._Create_Channels_Tag_Dict()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_data</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span> <span class="c1"># could be changed to a single dictionary containing the data and the channel names</span>
             <span class="n">xres</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
             <span class="n">yres</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="c1"># reset all the instance variables dependent on the data, but nor the ones responsible for plotting</span>
-            <span class="c1"># self.scaling_factor = 1</span>
+            <span class="c1"># reset all the instance variables dependent on the data, but not the ones responsible for plotting</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoscale</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">quadratic_pixels</span><span class="p">()</span>
             <span class="c1"># initialize instance variables:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mask_array</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># not shure if it&#39;s best to reset the mask...</span>
-            <span class="c1"># self.upper_y_bound = None</span>
-            <span class="c1"># self.lower_y_bound = None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">align_points</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">y_shifts</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">scalebar_channels</span> <span class="o">=</span> <span class="p">[]</span>    
 
 <div class="viewcode-block" id="SnomMeasurement.initialize_channels">
@@ -1906,7 +1897,7 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_load_all_subplots</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load all subplots from memory (located under APPDATA/SNOM_Plotter/all_subplots.p).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load all subplots from memory (located under home/SNOM_Analysis/all_subplots.p).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_subplots_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
@@ -1935,11 +1926,9 @@
         <span class="n">xres</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">array</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="n">scaled_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">yres</span><span class="o">*</span><span class="n">scaling</span><span class="p">,</span> <span class="n">xres</span><span class="o">*</span><span class="n">scaling</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">array</span><span class="p">)):</span>
-            <span class="c1"># line = np.zeros((xres))</span>
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">array</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
                 <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">scaling</span><span class="p">):</span>
                     <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">scaling</span><span class="p">):</span>
-                        <span class="c1"># scaled_dataset[h][i*scaling + k][j*scaling + l] = array[i][j]</span>
                         <span class="n">scaled_array</span><span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="n">scaling</span> <span class="o">+</span> <span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="o">*</span><span class="n">scaling</span> <span class="o">+</span> <span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">scaled_array</span>
 
@@ -2211,7 +2200,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function removes the specified subplot from the memory.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
-<span class="sd">            index_array [list]: The indices of the subplots to remove from the plot list</span>
+<span class="sd">            index_array (list): The indices of the subplots to remove from the plot list</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#sort the index array in descending order and delete the corresponding plots from the memory</span>
         <span class="n">index_array</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -2229,7 +2218,7 @@
 <span class="sd">        Times=1 means only the last, times=2 means the two last, ...</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
-<span class="sd">            times [int]: how many subplots should be removed from the end of the list?</span>
+<span class="sd">            times (int): how many subplots should be removed from the end of the list?</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_all_subplots</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">times</span><span class="p">):</span>
@@ -2247,19 +2236,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">number_of_axis</span> <span class="o">=</span> <span class="mi">9</span>
         <span class="n">number_of_subplots</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">subplots</span><span class="p">)</span>
-        <span class="c1"># print(&#39;Number of subplots: {}&#39;.format(number_of_subplots))</span>
         <span class="c1">#specify the way the subplots are organized</span>
         <span class="n">nrows</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">number_of_subplots</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">number_of_axis</span><span class="p">))</span><span class="o">+</span><span class="mi">1</span>
-        <span class="c1"># set the plotting font sizes:</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;font&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">font_size_default</span><span class="p">)</span>          <span class="c1"># controls default text sizes</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;axes&#39;</span><span class="p">,</span> <span class="n">titlesize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">font_size_axes_title</span><span class="p">)</span>     <span class="c1"># fontsize of the axes title</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;axes&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">font_size_axes_label</span><span class="p">)</span>    <span class="c1"># fontsize of the x and y labels</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;xtick&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">font_size_tick_labels</span><span class="p">)</span>    <span class="c1"># fontsize of the tick labels</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;ytick&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">font_size_tick_labels</span><span class="p">)</span>    <span class="c1"># fontsize of the tick labels</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;legend&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">font_size_legend</span><span class="p">)</span>    <span class="c1"># legend fontsize</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;figure&#39;</span><span class="p">,</span> <span class="n">titlesize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">font_size_fig_title</span><span class="p">)</span>  <span class="c1"># fontsize of the figure title</span>
-        <span class="c1"># get the plotting style from the mpl style file</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_load_mpl_style</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">nrows</span> <span class="o">&gt;=</span><span class="mi">2</span><span class="p">:</span>
             <span class="n">ncols</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">number_of_axis</span><span class="p">))</span>
@@ -2285,9 +2263,12 @@
         <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span><span class="p">)</span>    
         <span class="n">fig</span><span class="o">.</span><span class="n">set_figheight</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">figsizey</span><span class="p">)</span>
         <span class="n">fig</span><span class="o">.</span><span class="n">set_figwidth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">figsizex</span><span class="p">)</span> 
-        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="c1"># get the plotting style from the mpl style file and apply it</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_mpl_style</span><span class="p">()</span>
 
         <span class="c1">#start the plotting process</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nrows</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncols</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="n">number_of_subplots</span><span class="p">:</span>
@@ -2438,8 +2419,8 @@
 <span class="sd">        This function will be repea you are satisfied.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            first_id [int]: the first id of the two subplots which should be switched</span>
-<span class="sd">            second_id [int]: the second id of the two subplots which should be switched</span>
+<span class="sd">            first_id (int): the first id of the two subplots which should be switched</span>
+<span class="sd">            second_id (int): the second id of the two subplots which should be switched</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">first_id</span> <span class="o">==</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">second_id</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>
             <span class="n">first_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s1">&#39;Please enter the id of the first image: &#39;</span><span class="p">))</span>
@@ -2560,7 +2541,7 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_gauss_blurr_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Applies a gaussian blurr to the specified array, with a specified sigma. The blurred data is returned as a list.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Applies a gaussian blurr to the specified array, with a specified sigma. The blurred data is returned as a np.array.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">gaussian_filter</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SnomMeasurement.gauss_filter_channels">
@@ -2791,6 +2772,7 @@
 <span class="sd">            filetype (str, optional): the filetype to save the data. Defaults to &#39;gsf&#39;.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># todo XOffset, YOffset dont work properly, also if the measurement is rotated or cut this is not considered so far</span>
+        <span class="c1"># actually not shure if that isn&#39;t fixed by now...</span>
         <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># channel is not in memory, so the standard values will be used</span>
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_data</span><span class="p">([</span><span class="n">channel</span><span class="p">])[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
@@ -2940,12 +2922,9 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_synccorr_preview</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">nouserinput</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function is part of the synccorrection and creates a preview of the corrected data.</span>
-<span class="sd">        channel specifies which channel should be used for the preview.</span>
-<span class="sd">        Wavelength must be given in µm.</span>
-<span class="sd">        Scanangle is the rotation angle of the scan in radians.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            channel (str): channel name</span>
+<span class="sd">            channel (str): channel to create the preview from</span>
 <span class="sd">            wavelength (float): wavelength in µm</span>
 <span class="sd">            nouserinput (bool, optional): if True, the function will not ask for user input. Defaults to False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -4025,35 +4004,89 @@
             <span class="n">p0</span> <span class="o">=</span> <span class="n">coeff</span> <span class="c1">#set the starting parameters for the next fit</span>
         <span class="k">return</span> <span class="n">align_points</span><span class="p">,</span> <span class="n">list_of_coefficients</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_shift_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">y_shifts</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_shift_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">shifts</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+        <span class="c1"># if shifts are not int round them</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">shifts</span><span class="p">):</span>
+            <span class="n">shifts</span> <span class="o">=</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">element</span><span class="p">)</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">shifts</span><span class="p">]</span>
         <span class="n">YRes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="n">XRes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">min_shift</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">y_shifts</span><span class="p">))</span>
-        <span class="n">max_shift</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">y_shifts</span><span class="p">))</span>
-        <span class="n">new_YRes</span> <span class="o">=</span> <span class="n">YRes</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">min_shift</span><span class="o">-</span><span class="n">max_shift</span><span class="p">))</span>
-        <span class="n">data_shifted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">new_YRes</span><span class="p">,</span> <span class="n">XRes</span><span class="p">))</span>
-        <span class="c1">#create the realigned height</span>
-        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">XRes</span><span class="p">):</span>
-            <span class="n">y_shift</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="o">-</span><span class="n">y_shifts</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">max_shift</span><span class="p">))</span> <span class="c1">#the calculated shift has to be compensated by shifting the pixels</span>
+        <span class="n">min_shift</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">shifts</span><span class="p">))</span>
+        <span class="n">max_shift</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">shifts</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">new_YRes</span> <span class="o">=</span> <span class="n">YRes</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">min_shift</span><span class="o">-</span><span class="n">max_shift</span><span class="p">))</span>
+            <span class="n">data_shifted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">new_YRes</span><span class="p">,</span> <span class="n">XRes</span><span class="p">))</span>
+            <span class="c1">#create the realigned height</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">XRes</span><span class="p">):</span>
+                <span class="n">shift</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="o">-</span><span class="n">shifts</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">max_shift</span><span class="p">))</span> <span class="c1">#the calculated shift has to be compensated by shifting the pixels</span>
+                <span class="c1"># shift = round(-shifts[x] + abs(max_shift)) #the calculated shift has to be compensated by shifting the pixels</span>
+                <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">YRes</span><span class="p">):</span>
+                    <span class="n">data_shifted</span><span class="p">[</span><span class="n">y</span> <span class="o">+</span> <span class="n">shift</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">YRes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">XRes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">min_shift</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">shifts</span><span class="p">))</span>
+            <span class="n">max_shift</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">shifts</span><span class="p">))</span>
+            <span class="n">new_XRes</span> <span class="o">=</span> <span class="n">XRes</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">min_shift</span><span class="o">-</span><span class="n">max_shift</span><span class="p">))</span>
+            <span class="n">data_shifted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">YRes</span><span class="p">,</span> <span class="n">new_XRes</span><span class="p">))</span>
+            <span class="c1">#create the realigned height</span>
             <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">YRes</span><span class="p">):</span>
-                <span class="n">data_shifted</span><span class="p">[</span><span class="n">y</span> <span class="o">+</span> <span class="n">y_shift</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="p">]</span>
+                <span class="n">shift</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="o">-</span><span class="n">shifts</span><span class="p">[</span><span class="n">y</span><span class="p">]</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">max_shift</span><span class="p">))</span>
+                <span class="c1"># shift = round(-shifts[y] + abs(max_shift))</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">XRes</span><span class="p">):</span>
+                    <span class="n">data_shifted</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span> <span class="o">+</span> <span class="n">shift</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">data_shifted</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_mean_from_area</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function calculates the mean index of an array along a specified axis.</span>
+<span class="sd">        The mean index is calculated by setting all values below a certain threshold to zero.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data (np.array): 2d array of data.</span>
+<span class="sd">            axis (int): The axis along which the mean index should be calculated. 0 means x-axis, 1 means y-axis. Defaults to 1.</span>
+<span class="sd">            threshold (float, optional): threshold, all values below will be set to zero to better estimate the mean index position. Defaults to 0.5.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: np.array of the mean position indices.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">sliced_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">res</span><span class="p">)]</span>
+        <span class="k">elif</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">sliced_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">res</span><span class="p">)]</span>
+        <span class="c1">#just calculate the shift for each pixel column for now</span>
+        <span class="c1"># number_align_points = XRes</span>
+        <span class="n">shifts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">res</span><span class="p">):</span>
+            <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">sliced_data</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="c1"># set all values below threshold to zero</span>
+            <span class="n">sliced_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">sliced_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="o">*</span><span class="n">max_val</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sliced_data</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">mean_index</span> <span class="o">=</span> <span class="n">mean_index_array</span><span class="p">(</span><span class="n">sliced_data</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="c1"># plot the column data</span>
+            <span class="c1"># if i%100 == 0:</span>
+            <span class="c1">#     print(&#39;mean index:&#39;, mean_index)</span>
+            <span class="c1">#     plt.plot(column_data)</span>
+            <span class="c1">#     plt.vlines(mean_index, ymin=min(column_data), ymax=max(column_data), color=&#39;red&#39;)</span>
+            <span class="c1">#     plt.show()</span>
+            <span class="n">shifts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">mean_index</span>
+        <span class="k">return</span> <span class="n">shifts</span>
 
 <div class="viewcode-block" id="SnomMeasurement.realign">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.realign">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">realign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bounds</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span> <span class="c1"># ToDo</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function corrects the drift of the piezo motor. As of now it needs to be fitted to a region of the sample which is assumed to be straight.</span>
-<span class="sd">        In the future this could be implemented with a general map containing the distortion created by the piezo motor, if it turns out to be constant...</span>
-<span class="sd">        Anyways, you will be prompted with a preview of the height data, please select an area of the scan with only one &#39;straight&#39; waveguide. </span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">realign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bounds</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function corrects the drift of the piezo motor. As of now it needs a reference region of the sample which is assumed to be straight.</span>
+<span class="sd">        In the future this could be implemented with a general map containing the distortion created by the piezo motor, if it turns out to be temporally constant...</span>
+<span class="sd">        Anyways, you will be prompted with a preview of the height data, please select an area of the scan with only one &#39;straight&#39; reference. </span>
+<span class="sd">        It will then calculate the index of the mean according to the specified axis. If you specify a threshold all values below this threshold will be set to zero.</span>
+<span class="sd">        This makes the mean index calculation more robust.</span>
 <span class="sd">        The bounds for the fitting routine are based on the lower and upper limit of this selection.</span>
-<span class="sd">        This function is quite special to my needs and will probably not make it into the final version of the software.</span>
-
-<span class="sd">        Careful! Will not yet affect the scan size, so the pixelsize will be altered... ToDo</span>
 <span class="sd">        </span>
 <span class="sd">        Args:  </span>
 <span class="sd">            channels (list): list of channels, will override the already existing channels</span>
 <span class="sd">            bounds (list): The bounds for the fitting routine. If not specified you will be prompted with a window to select an area.</span>
 <span class="sd">                Should be specified like this: [lower_bound, upper_bound] in px.</span>
+<span class="sd">            axis (int): The axis along which the mean index should be calculated. 0 means x-axis, 1 means y-axis. Defaults to 1.</span>
+<span class="sd">            threshold (float, optional): threshold, all values below will be set to zero to better estimate the mean index position. Defaults to 0.5.</span>
 <span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_data</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span>
@@ -4065,16 +4098,16 @@
             <span class="n">data</span><span class="p">,</span> <span class="n">trash</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_data</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">height_channel</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">bounds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">coords</span> <span class="o">=</span> <span class="n">select_rectangle</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height_channel</span><span class="p">)</span>
-            <span class="n">lower</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">upper</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
-            <span class="c1"># self.lower_y_bound = lower</span>
-            <span class="c1"># self.upper_y_bound = upper</span>
+            <span class="k">if</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">lower</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">upper</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">lower</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">upper</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">lower</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">upper</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="c1"># self.lower_y_bound = bounds[0]</span>
-            <span class="c1"># self.upper_y_bound = bounds[1]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_write_to_logfile</span><span class="p">(</span><span class="s1">&#39;realign_bounds&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_to_logfile</span><span class="p">(</span><span class="s1">&#39;realign_axis_bounds&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">axis</span><span class="p">,</span> <span class="p">[</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">]])</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">height_channel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">:</span>
             <span class="n">height_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height_channel</span><span class="p">)]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -4086,47 +4119,69 @@
                 <span class="n">height_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale_array</span><span class="p">(</span><span class="n">height_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height_channel</span><span class="p">,</span> <span class="n">scaling</span><span class="p">)</span>
         <span class="n">YRes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">height_data</span><span class="p">)</span>
         <span class="n">XRes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">height_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">reduced_height_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">upper</span><span class="o">-</span><span class="n">lower</span> <span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">XRes</span><span class="p">))</span>
-        <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">YRes</span><span class="p">):</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">lower</span> <span class="o">&lt;=</span> <span class="n">y</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">y</span> <span class="o">&lt;=</span> <span class="n">upper</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">reduced_height_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">upper</span><span class="o">-</span><span class="n">lower</span> <span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">XRes</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">YRes</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">lower</span> <span class="o">&lt;=</span> <span class="n">y</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">y</span> <span class="o">&lt;=</span> <span class="n">upper</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">XRes</span><span class="p">):</span>
+                        <span class="n">reduced_height_data</span><span class="p">[</span><span class="n">y</span><span class="o">-</span><span class="n">lower</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">height_data</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">reduced_height_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">YRes</span><span class="p">,</span> <span class="n">upper</span><span class="o">-</span><span class="n">lower</span> <span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">YRes</span><span class="p">):</span>
                 <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">XRes</span><span class="p">):</span>
-                    <span class="n">reduced_height_data</span><span class="p">[</span><span class="n">y</span><span class="o">-</span><span class="n">lower</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">height_data</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="p">]</span>
-        <span class="n">align_points</span><span class="p">,</span> <span class="n">fit_coefficients</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_horizontal_wg</span><span class="p">(</span><span class="n">reduced_height_data</span><span class="p">)</span>
-        <span class="n">y_shifts</span> <span class="o">=</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">coeff</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span><span class="nb">int</span><span class="p">((</span><span class="n">upper</span> <span class="o">-</span> <span class="n">lower</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">coeff</span> <span class="ow">in</span> <span class="n">fit_coefficients</span><span class="p">]</span>
-        <span class="c1"># save the align points and y_shifts as instance variables so the plotting algorithm can access them</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">align_points</span> <span class="o">=</span> <span class="n">align_points</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">y_shifts</span> <span class="o">=</span> <span class="n">y_shifts</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">lower</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">upper</span><span class="p">):</span>
+                        <span class="n">reduced_height_data</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="o">-</span><span class="n">lower</span><span class="p">]</span> <span class="o">=</span> <span class="n">height_data</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="p">]</span>
+        <span class="n">shifts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_mean_from_area</span><span class="p">(</span><span class="n">reduced_height_data</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
 
         <span class="c1"># plot </span>
-        <span class="n">fig</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>    
+        <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>    
         <span class="n">fig</span><span class="o">.</span><span class="n">set_figheight</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">figsizey</span><span class="p">)</span>
         <span class="n">fig</span><span class="o">.</span><span class="n">set_figwidth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">figsizex</span><span class="p">)</span> 
         <span class="n">cmap</span> <span class="o">=</span> <span class="n">SNOM_height</span>
-        <span class="n">img</span> <span class="o">=</span> <span class="n">axis</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">height_data</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">)</span>
-        <span class="c1"># axis.invert_yaxis()</span>
-        <span class="n">divider</span> <span class="o">=</span> <span class="n">make_axes_locatable</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">axs</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">height_data</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">)</span>
+        <span class="c1"># axs.invert_yaxis()</span>
+        <span class="n">divider</span> <span class="o">=</span> <span class="n">make_axes_locatable</span><span class="p">(</span><span class="n">axs</span><span class="p">)</span>
         <span class="n">cax</span> <span class="o">=</span> <span class="n">divider</span><span class="o">.</span><span class="n">append_axes</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s2">&quot;5%&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
         <span class="n">cbar</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">cax</span><span class="o">=</span><span class="n">cax</span><span class="p">)</span>
         <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">get_yaxis</span><span class="p">()</span><span class="o">.</span><span class="n">labelpad</span> <span class="o">=</span> <span class="mi">15</span>
-        <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;height [nm]&#39;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">270</span><span class="p">)</span>
-        <span class="n">axis</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;realinging&#39;</span><span class="p">)</span>
-        <span class="n">axis</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;scaled&#39;</span><span class="p">)</span>
-        <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">align_points</span><span class="p">,</span> <span class="p">[</span><span class="n">element</span> <span class="o">+</span> <span class="n">lower</span> <span class="o">+</span> <span class="p">(</span><span class="n">upper</span><span class="o">-</span><span class="n">lower</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_shifts</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
-        <span class="c1"># axis.hlines([self.upper_y_bound, self.lower_y_bound], xmin=0, xmax=XRes, color=&#39;white&#39;)</span>
-        <span class="n">axis</span><span class="o">.</span><span class="n">hlines</span><span class="p">([</span><span class="n">upper</span><span class="p">,</span> <span class="n">lower</span><span class="p">],</span> <span class="n">xmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="n">XRes</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">)</span>
+        <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;height (nm)&#39;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">270</span><span class="p">)</span>
+        <span class="n">axs</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Realigned&#39;</span><span class="p">)</span>
+        <span class="n">axs</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;scaled&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">axs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">XRes</span><span class="p">),</span> <span class="p">[</span><span class="n">element</span> <span class="o">+</span> <span class="n">lower</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">shifts</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+            <span class="n">axs</span><span class="o">.</span><span class="n">hlines</span><span class="p">([</span><span class="n">upper</span><span class="p">,</span> <span class="n">lower</span><span class="p">],</span> <span class="n">xmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="n">XRes</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">axs</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">element</span> <span class="o">+</span> <span class="n">lower</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">shifts</span><span class="p">],</span> <span class="nb">range</span><span class="p">(</span><span class="n">YRes</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+            <span class="n">axs</span><span class="o">.</span><span class="n">vlines</span><span class="p">([</span><span class="n">upper</span><span class="p">,</span> <span class="n">lower</span><span class="p">],</span> <span class="n">ymin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ymax</span><span class="o">=</span><span class="n">YRes</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
         <span class="c1"># reinitialize the instance data to fit the new bigger arrays</span>
-        <span class="n">min_shift</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">y_shifts</span><span class="p">))</span>
-        <span class="n">max_shift</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">y_shifts</span><span class="p">))</span>
+        <span class="n">min_shift</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">shifts</span><span class="p">))</span>
+        <span class="n">max_shift</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">shifts</span><span class="p">))</span>
         <span class="n">new_YRes</span> <span class="o">=</span> <span class="n">YRes</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">min_shift</span><span class="o">-</span><span class="n">max_shift</span><span class="p">))</span>
         <span class="n">all_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">)):</span>
-            <span class="n">shifted_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shift_data</span><span class="p">(</span><span class="n">all_data</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y_shifts</span><span class="p">)</span>
+            <span class="n">shifted_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shift_data</span><span class="p">(</span><span class="n">all_data</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">axis</span><span class="p">,</span> <span class="n">shifts</span><span class="p">)</span>
             
             <span class="bp">self</span><span class="o">.</span><span class="n">all_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shifted_data</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">channels_label</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="s1">&#39;_shifted&#39;</span>
+            <span class="c1"># adjust the scan area and pixel area</span>
+            <span class="k">if</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">xres</span><span class="p">,</span> <span class="n">yres</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_channel_tag_dict_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">PIXELAREA</span><span class="p">)</span>
+                <span class="n">yres_new</span> <span class="o">=</span> <span class="n">new_YRes</span>
+                <span class="c1"># new_values = [xres, yres_new, *args]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_set_channel_tag_dict_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">PIXELAREA</span><span class="p">,</span> <span class="p">[</span><span class="n">xres</span><span class="p">,</span> <span class="n">yres_new</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">])</span>
+                <span class="n">xreal</span><span class="p">,</span> <span class="n">yreal</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_channel_tag_dict_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">SCANAREA</span><span class="p">)</span>
+                <span class="n">yreal_new</span> <span class="o">=</span> <span class="n">yres_new</span><span class="o">*</span><span class="n">yreal</span><span class="o">/</span><span class="n">yres</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_set_channel_tag_dict_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">SCANAREA</span><span class="p">,</span> <span class="p">[</span><span class="n">xreal</span><span class="p">,</span> <span class="n">yreal_new</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">xres</span><span class="p">,</span> <span class="n">yres</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_channel_tag_dict_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">PIXELAREA</span><span class="p">)</span>
+                <span class="n">xres_new</span> <span class="o">=</span> <span class="n">new_YRes</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_set_channel_tag_dict_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">PIXELAREA</span><span class="p">,</span> <span class="p">[</span><span class="n">xres_new</span><span class="p">,</span> <span class="n">yres</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">])</span>
+                <span class="n">xreal</span><span class="p">,</span> <span class="n">yreal</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_channel_tag_dict_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">SCANAREA</span><span class="p">)</span>
+                <span class="n">xreal_new</span> <span class="o">=</span> <span class="n">xres_new</span><span class="o">*</span><span class="n">xreal</span><span class="o">/</span><span class="n">xres</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_set_channel_tag_dict_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ChannelTags</span><span class="o">.</span><span class="n">SCANAREA</span><span class="p">,</span> <span class="p">[</span><span class="n">xreal_new</span><span class="p">,</span> <span class="n">yreal</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">])</span>
         <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span></div>
 
 
@@ -5039,6 +5094,14 @@
 <div class="viewcode-block" id="SnomMeasurement.create_gif_old">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.create_gif_old">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">create_gif_old</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amp_channel</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">phase_channel</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">frames</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">fps</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Old gif creation method.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            amp_channel (str): _description_</span>
+<span class="sd">            phase_channel (str): _description_</span>
+<span class="sd">            frames (int, optional): _description_. Defaults to 20.</span>
+<span class="sd">            fps (int, optional): _description_. Defaults to 10.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Todo</span>
         <span class="n">framenumbers</span><span class="o">=</span><span class="n">frames</span>
         <span class="n">Duration</span><span class="o">=</span><span class="mi">1000</span><span class="o">/</span><span class="n">fps</span> <span class="c1"># in ms</span>
@@ -5525,6 +5588,14 @@
 <div class="viewcode-block" id="SnomMeasurement.test_profile_selection">
 <a class="viewcode-back" href="../../snom_analysis.html#snom_analysis.main.SnomMeasurement.test_profile_selection">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">test_profile_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Select a profile from the data. Allows the user to arbitrarily select a profile from the data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            channel (str, optional): channel to get the profile data from. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.array, int, int, int: profile, start, end, width</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">channel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">channel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         

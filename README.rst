@@ -14,6 +14,7 @@ This memory can of course be deleted at will, which is by default every time a n
 
 For ease of use i also created a GUI version of this package which allows to use many functions more easily.
 I typically use it to quickly generate images of my measurements with minimal modifications.
+It's not yet available but i will try to make it available in the future.
 
 I created this package during my PhD for various data analysis purposes. I want to make it available for the general public and have no commercial interests. 
 I am not a professional programmer, please keep that in mind if you encounter problems or bugs, which you most probably will.
@@ -27,7 +28,7 @@ This file contains the FileHandler class which does all the file handling and co
 The main measurement class is the 'SnomMeasurement' class, which is the main class to load and manipulate the standard 2d data.
 There are also the 'ApproachCurve' and 'Scan3D' class which are for the other types of measurements.
 Spectra are not yet implemented.
-There is also a PlotDefinitions class which contains the plot definitions for the plotting functions.
+There is also a PlotDefinitions class in the lib.definitions file, which contains the plot definitions for the plotting functions.
 This can also be changed by the user to adapt the plotting to his needs. This will also be saved as a json file in the users home directory.
 Changes made here will become the default settings for the plotting functions.
 The other classes contain enums and are only for internal referencing.
@@ -56,14 +57,15 @@ If you delete this file it will be recreated with the default settings.
 Key areas to improve:
 ---------------------
 
-Improve the documentation.
-Some sort of Unittesting or Integration testing.
-More universal data loading. (Similar to gwyddion)
-Support for spectra and interferogramms. Maybe incorporate pysnom by Quasars.
-Better support for approach curves and 3D scans.
-Better and adjustable plotting, (adaptable layout, custom fonts, sizes...)
-Allow for custom colormaps.
-Speed improvements.
-Maybe switch to imshow instead of pcolormesh.
+Improve the documentation. 
+Some sort of Unittesting or Integration testing. 
+More universal data loading. (Similar to gwyddion) 
+Support for spectra and interferogramms. Maybe incorporate pysnom by Quasars. 
+Better support for approach curves and 3D scans. 
+Better and adjustable plotting, (adaptable layout, custom fonts, sizes...) 
+Allow for custom colormaps. 
+Speed improvements. 
+Maybe switch to imshow instead of pcolormesh. 
+And of course, more functionality.
 
 

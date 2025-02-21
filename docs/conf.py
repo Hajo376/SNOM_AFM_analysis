@@ -8,7 +8,7 @@
 
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../src'))
 
 project = 'SNOM Analysis'
 copyright = '2025, Hans-Joachim Schill'
@@ -18,15 +18,19 @@ release = '1.0.0'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinx.ext.viewcode', # essential
+extensions = [
+    'sphinx.ext.autodoc', 
     'sphinx.ext.autosummary',
-    'sphinx.ext.graphviz',
-    'sphinx.ext.inheritance_diagram',
     'sphinx.ext.intersphinx',
-    'sphinx.ext.ifconfig',
-    'sphinx.ext.autosectionlabel',
-    'sphinx.ext.intersphinx',
-    "sphinx_design"
+    "sphinx_design",
+    "sphinx_togglebutton",
+    "numpydoc",
+    'sphinx.ext.napoleon', 
+    'sphinx.ext.viewcode', 
+    # 'sphinx.ext.graphviz',
+    # 'sphinx.ext.inheritance_diagram',
+    # 'sphinx.ext.ifconfig',
+    # 'sphinx.ext.autosectionlabel',
     ]
 
 templates_path = ['_templates']

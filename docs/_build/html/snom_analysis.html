@@ -9,7 +9,7 @@
   <title>API Reference &mdash; SNOM Analysis 1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=7dc6ce7e" />
 
@@ -19,7 +19,13 @@
       <script src="_static/documentation_options.js?v=8d563738"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="_static/togglebutton.js?v=4a39c7ea"></script>
       <script src="_static/design-tabs.js?v=f930bc37"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -54,12 +60,12 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-snom_analysis.main">snom_analysis.main module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#snom_analysis.main.FileHandler"><code class="docutils literal notranslate"><span class="pre">FileHandler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.FileHandler.print_config"><code class="docutils literal notranslate"><span class="pre">FileHandler.print_config()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.FileHandler.print_measurement_tag_dict"><code class="docutils literal notranslate"><span class="pre">FileHandler.print_measurement_tag_dict()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.FileHandler.print_channel_tag_dict"><code class="docutils literal notranslate"><span class="pre">FileHandler.print_channel_tag_dict()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#snom_analysis.main.SnomMeasurement"><code class="docutils literal notranslate"><span class="pre">SnomMeasurement</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.all_subplots"><code class="docutils literal notranslate"><span class="pre">SnomMeasurement.all_subplots</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.initialize_channels"><code class="docutils literal notranslate"><span class="pre">SnomMeasurement.initialize_channels()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.add_channels"><code class="docutils literal notranslate"><span class="pre">SnomMeasurement.add_channels()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.scale_channels"><code class="docutils literal notranslate"><span class="pre">SnomMeasurement.scale_channels()</span></code></a></li>
@@ -190,7 +196,38 @@ Also the measurement tag dictionary will be created.</p>
 <li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – The title of the measurement. Defaults to None.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Attributes<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>vlimit_real</strong></dt><dd></dd>
+<dt><strong>vmax_amp</strong></dt><dd></dd>
+<dt><strong>vmax_height</strong></dt><dd></dd>
+<dt><strong>vmax_phase</strong></dt><dd></dd>
+<dt><strong>vmin_amp</strong></dt><dd></dd>
+<dt><strong>vmin_height</strong></dt><dd></dd>
+<dt><strong>vmin_phase</strong></dt><dd></dd>
 </dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.FileHandler.print_channel_tag_dict" title="snom_analysis.main.FileHandler.print_channel_tag_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_channel_tag_dict</span></code></a>([channel])</p></td>
+<td><p>This function prints the channel tag dict.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.FileHandler.print_config" title="snom_analysis.main.FileHandler.print_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_config</span></code></a>()</p></td>
+<td><p>This function prints the config file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.FileHandler.print_measurement_tag_dict" title="snom_analysis.main.FileHandler.print_measurement_tag_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_measurement_tag_dict</span></code></a>()</p></td>
+<td><p>This function prints the measurement tag dict.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="snom_analysis.main.FileHandler.print_config">
+<span class="sig-name descname"><span class="pre">print_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/main.html#FileHandler.print_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.FileHandler.print_config" title="Link to this definition"></a></dt>
+<dd><p>This function prints the config file.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="snom_analysis.main.FileHandler.print_measurement_tag_dict">
 <span class="sig-name descname"><span class="pre">print_measurement_tag_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/main.html#FileHandler.print_measurement_tag_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.FileHandler.print_measurement_tag_dict" title="Link to this definition"></a></dt>
@@ -200,7 +237,7 @@ Also the measurement tag dictionary will be created.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="snom_analysis.main.FileHandler.print_channel_tag_dict">
 <span class="sig-name descname"><span class="pre">print_channel_tag_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/main.html#FileHandler.print_channel_tag_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.FileHandler.print_channel_tag_dict" title="Link to this definition"></a></dt>
-<dd><p>This function prints the measurement tag dict.</p>
+<dd><p>This function prints the channel tag dict.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>channel</strong> (<em>str</em><em>, </em><em>optional</em>) – The channel to print. If None all channels will be printed. Defaults to None.</p>
@@ -224,12 +261,179 @@ Also the measurement tag dictionary will be created.</p>
 <li><p><strong>autoscale</strong> (<em>bool</em><em>, </em><em>optional</em>) – if True the data will be scaled to quadratic pixels. Defaults to True.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Attributes<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>vlimit_real</strong></dt><dd></dd>
+<dt><strong>vmax_amp</strong></dt><dd></dd>
+<dt><strong>vmax_height</strong></dt><dd></dd>
+<dt><strong>vmax_phase</strong></dt><dd></dd>
+<dt><strong>vmin_amp</strong></dt><dd></dd>
+<dt><strong>vmin_height</strong></dt><dd></dd>
+<dt><strong>vmin_phase</strong></dt><dd></dd>
 </dl>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snom_analysis.main.SnomMeasurement.all_subplots">
-<span class="sig-name descname"><span class="pre">all_subplots</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#snom_analysis.main.SnomMeasurement.all_subplots" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.add_channels" title="snom_analysis.main.SnomMeasurement.add_channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_channels</span></code></a>(channels)</p></td>
+<td><p>This function will add the specified channels to memory without changing the already existing ones.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.correct_amplitude_drift_nonlinear" title="snom_analysis.main.SnomMeasurement.correct_amplitude_drift_nonlinear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">correct_amplitude_drift_nonlinear</span></code></a>([...])</p></td>
+<td><p>This function corrects the amplitude drift in the y-direction by using a reference area across the full length of the scan.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.correct_height_drift_nonlinear" title="snom_analysis.main.SnomMeasurement.correct_height_drift_nonlinear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">correct_height_drift_nonlinear</span></code></a>([channels, ...])</p></td>
+<td><p>This function corrects the height drift in the y-direction by using a reference area across the full length of the scan.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.correct_phase_drift" title="snom_analysis.main.SnomMeasurement.correct_phase_drift"><code class="xref py py-obj docutils literal notranslate"><span class="pre">correct_phase_drift</span></code></a>([channels, export, ...])</p></td>
+<td><p>This function asks the user to click on two points which should have the same phase value.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.correct_phase_drift_nonlinear" title="snom_analysis.main.SnomMeasurement.correct_phase_drift_nonlinear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">correct_phase_drift_nonlinear</span></code></a>([channels, ...])</p></td>
+<td><p>This function corrects the phase drift in the y-direction by using a reference area across the full length of the scan.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.create_gif" title="snom_analysis.main.SnomMeasurement.create_gif"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_gif</span></code></a>(amp_channel, phase_channel[, ...])</p></td>
+<td><p>This function will create a gif from the amplitude and phase channel you specify.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.create_gif_old" title="snom_analysis.main.SnomMeasurement.create_gif_old"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_gif_old</span></code></a>(amp_channel, phase_channel[, ...])</p></td>
+<td><p>Old gif creation method.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.create_gif_v2" title="snom_analysis.main.SnomMeasurement.create_gif_v2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_gif_v2</span></code></a>(amp_channel, phase_channel[, ...])</p></td>
+<td><p>This function will create a gif from the amplitude and phase channel you specify.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.create_new_channel" title="snom_analysis.main.SnomMeasurement.create_new_channel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_new_channel</span></code></a>(data, channel_name, ...)</p></td>
+<td><p>This function will create a new channel from the specified data and add it to memory.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.cut_channels" title="snom_analysis.main.SnomMeasurement.cut_channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cut_channels</span></code></a>([channels, preview_channel, ...])</p></td>
+<td><p>This function cuts the specified channels to the specified region.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.display_all_subplots" title="snom_analysis.main.SnomMeasurement.display_all_subplots"><code class="xref py py-obj docutils literal notranslate"><span class="pre">display_all_subplots</span></code></a>()</p></td>
+<td><p>This function displays all the subplots which have been created until this point.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.display_channels" title="snom_analysis.main.SnomMeasurement.display_channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">display_channels</span></code></a>([channels])</p></td>
+<td><p>This function displays the channels in memory or the specified ones.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.display_flattened_profile" title="snom_analysis.main.SnomMeasurement.display_flattened_profile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">display_flattened_profile</span></code></a>(phase_orientation)</p></td>
+<td><p>This function will flatten all profiles in memory and display them.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.display_overlay" title="snom_analysis.main.SnomMeasurement.display_overlay"><code class="xref py py-obj docutils literal notranslate"><span class="pre">display_overlay</span></code></a>(channel1, channel2[, alpha])</p></td>
+<td><p>This function displays an overlay of two channels.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.display_phase_difference" title="snom_analysis.main.SnomMeasurement.display_phase_difference"><code class="xref py py-obj docutils literal notranslate"><span class="pre">display_phase_difference</span></code></a>(reference_index)</p></td>
+<td><p>This function will calculate the phase difference of all profiles relative to the profile specified by the reference index.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.display_profiles" title="snom_analysis.main.SnomMeasurement.display_profiles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">display_profiles</span></code></a>([ylabel, labels])</p></td>
+<td><p>This function will display all current profiles from memory.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.fourier_filter_channels" title="snom_analysis.main.SnomMeasurement.fourier_filter_channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fourier_filter_channels</span></code></a>([channels])</p></td>
+<td><p>This function applies the Fourier filter to all data in memory or specified channels.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.fourier_filter_channels_V2" title="snom_analysis.main.SnomMeasurement.fourier_filter_channels_V2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fourier_filter_channels_V2</span></code></a>([channels])</p></td>
+<td><p>This function applies the Fourier filter to all data in memory or specified channels</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.gauss_filter_channels" title="snom_analysis.main.SnomMeasurement.gauss_filter_channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gauss_filter_channels</span></code></a>([channels, sigma])</p></td>
+<td><p>This function will gauss filter the specified channels.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.gauss_filter_channels_complex" title="snom_analysis.main.SnomMeasurement.gauss_filter_channels_complex"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gauss_filter_channels_complex</span></code></a>([channels, ...])</p></td>
+<td><p>This fucton gauss filters the specified channels.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.get_pixel_coordinates" title="snom_analysis.main.SnomMeasurement.get_pixel_coordinates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_pixel_coordinates</span></code></a>(channel)</p></td>
+<td><p>This function returns the pixel coordinates of the clicked pixel.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.get_pixel_value" title="snom_analysis.main.SnomMeasurement.get_pixel_value"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_pixel_value</span></code></a>(channel[, coordinates, zone])</p></td>
+<td><p>This function returns the pixel value of a channel at the specified coordinates.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.heigth_mask_channels" title="snom_analysis.main.SnomMeasurement.heigth_mask_channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">heigth_mask_channels</span></code></a>([channels, ...])</p></td>
+<td><p>The treshold factor should be between 0 and 1.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.initialize_channels" title="snom_analysis.main.SnomMeasurement.initialize_channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize_channels</span></code></a>(channels)</p></td>
+<td><p>This function will load the data from the specified channels and replace the ones in memory.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.level_data_columnwise" title="snom_analysis.main.SnomMeasurement.level_data_columnwise"><code class="xref py py-obj docutils literal notranslate"><span class="pre">level_data_columnwise</span></code></a>([channel_list, ...])</p></td>
+<td><p>This function will level the data of the specified channels columnwise.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.level_height_channels_3point" title="snom_analysis.main.SnomMeasurement.level_height_channels_3point"><code class="xref py py-obj docutils literal notranslate"><span class="pre">level_height_channels_3point</span></code></a>([channels, coords])</p></td>
+<td><p>This function levels all height channels which are either user specified or in the instance memory.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.level_height_channels_forGui" title="snom_analysis.main.SnomMeasurement.level_height_channels_forGui"><code class="xref py py-obj docutils literal notranslate"><span class="pre">level_height_channels_forGui</span></code></a>([channels])</p></td>
+<td><p>This function levels all height channels which are either user specified or in the instance memory.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.manually_create_complex_channel" title="snom_analysis.main.SnomMeasurement.manually_create_complex_channel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">manually_create_complex_channel</span></code></a>(amp_channel, ...)</p></td>
+<td><p>This function will manually create a realpart channel depending on the amp and phase channel you give.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.match_phase_offset" title="snom_analysis.main.SnomMeasurement.match_phase_offset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">match_phase_offset</span></code></a>([channels, ...])</p></td>
+<td><p>This function matches the phase offset of all phase channels in memory to the reference channel.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.overlay_forward_and_backward_channels" title="snom_analysis.main.SnomMeasurement.overlay_forward_and_backward_channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">overlay_forward_and_backward_channels</span></code></a>(...[, ...])</p></td>
+<td><p>This function is ment to overlay the backwards and forwards version of the specified channels.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.overlay_forward_and_backward_channels_v2" title="snom_analysis.main.SnomMeasurement.overlay_forward_and_backward_channels_v2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">overlay_forward_and_backward_channels_v2</span></code></a>(...)</p></td>
+<td><p>Caution! This variant is ment to keep the scan size identical!</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_channel_tag_dict</span></code>([channel])</p></td>
+<td><p>This function prints the channel tag dict.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_config</span></code>()</p></td>
+<td><p>This function prints the config file.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_measurement_tag_dict</span></code>()</p></td>
+<td><p>This function prints the measurement tag dict.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.quadratic_pixels" title="snom_analysis.main.SnomMeasurement.quadratic_pixels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">quadratic_pixels</span></code></a>([channels])</p></td>
+<td><p>This function scales the data such that each pixel is quadratic, eg.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.realign" title="snom_analysis.main.SnomMeasurement.realign"><code class="xref py py-obj docutils literal notranslate"><span class="pre">realign</span></code></a>([channels, bounds, axis, threshold])</p></td>
+<td><p>This function corrects the drift of the piezo motor.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.remove_last_subplots" title="snom_analysis.main.SnomMeasurement.remove_last_subplots"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_last_subplots</span></code></a>([times])</p></td>
+<td><p>This function removes the last added subplots from the memory.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.remove_subplots" title="snom_analysis.main.SnomMeasurement.remove_subplots"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_subplots</span></code></a>(index_array)</p></td>
+<td><p>This function removes the specified subplot from the memory.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.rotate_90_deg" title="snom_analysis.main.SnomMeasurement.rotate_90_deg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rotate_90_deg</span></code></a>([orientation])</p></td>
+<td><p>This function will rotate all data in memory by 90 degrees.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.save_to_gsf" title="snom_analysis.main.SnomMeasurement.save_to_gsf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_to_gsf</span></code></a>([channels, appendix])</p></td>
+<td><p>This function is ment to save all specified channels to external .gsf files.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.save_to_txt" title="snom_analysis.main.SnomMeasurement.save_to_txt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_to_txt</span></code></a>([channels, appendix])</p></td>
+<td><p>This function is ment to save all specified channels to external .txt files.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.scale_channels" title="snom_analysis.main.SnomMeasurement.scale_channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scale_channels</span></code></a>([channels, scaling])</p></td>
+<td><p>This function scales all the data in memory or the specified channels.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.scalebar" title="snom_analysis.main.SnomMeasurement.scalebar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scalebar</span></code></a>([channels, units, dimension, ...])</p></td>
+<td><p>Adds a scalebar to all specified channels.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.select_profile" title="snom_analysis.main.SnomMeasurement.select_profile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">select_profile</span></code></a>(profile_channel[, ...])</p></td>
+<td><p>This function lets the user select a profile with given width in pixels and displays the data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.select_profiles" title="snom_analysis.main.SnomMeasurement.select_profiles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">select_profiles</span></code></a>(profile_channel[, ...])</p></td>
+<td><p>This function lets the user select multiple profiles with given width in pixels and displays the data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.select_profiles_SSH" title="snom_analysis.main.SnomMeasurement.select_profiles_SSH"><code class="xref py py-obj docutils literal notranslate"><span class="pre">select_profiles_SSH</span></code></a>(profile_channel_amp, ...)</p></td>
+<td><p>This function lets the user select a profile with given width in pixels and displays the data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.set_min_to_zero" title="snom_analysis.main.SnomMeasurement.set_min_to_zero"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_min_to_zero</span></code></a>([channels])</p></td>
+<td><p>This function sets the min value of the specified channels to zero.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.shift_phase" title="snom_analysis.main.SnomMeasurement.shift_phase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shift_phase</span></code></a>([shift, channels])</p></td>
+<td><p>This function will prompt the user with a preview of the first phase channel in memory.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.substract_channels" title="snom_analysis.main.SnomMeasurement.substract_channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">substract_channels</span></code></a>(channel1, channel2)</p></td>
+<td><p>This function will substract the data of channel2 from channel1 and save the result in a new channel.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.switch_supplots" title="snom_analysis.main.SnomMeasurement.switch_supplots"><code class="xref py py-obj docutils literal notranslate"><span class="pre">switch_supplots</span></code></a>([first_id, second_id])</p></td>
+<td><p>This function changes the position of the subplots.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.synccorrection" title="snom_analysis.main.SnomMeasurement.synccorrection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">synccorrection</span></code></a>(wavelength[, phasedir])</p></td>
+<td><p>This function corrects all the phase channels for the linear phase gradient which stems from the synchronized measurement mode.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.SnomMeasurement.test_profile_selection" title="snom_analysis.main.SnomMeasurement.test_profile_selection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_profile_selection</span></code></a>([channel])</p></td>
+<td><p>Select a profile from the data.</p></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt class="sig sig-object py" id="snom_analysis.main.SnomMeasurement.initialize_channels">
 <span class="sig-name descname"><span class="pre">initialize_channels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/snom_analysis/main.html#SnomMeasurement.initialize_channels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.SnomMeasurement.initialize_channels" title="Link to this definition"></a></dt>
@@ -283,7 +487,7 @@ Also the measurement tag dictionary will be created.</p>
 <dd><p>This function removes the specified subplot from the memory.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>[</strong><strong>list</strong><strong>]</strong> (<em>index_array</em>) – The indices of the subplots to remove from the plot list</p>
+<dd class="field-odd"><p><strong>index_array</strong> (<em>list</em>) – The indices of the subplots to remove from the plot list</p>
 </dd>
 </dl>
 </dd></dl>
@@ -296,7 +500,7 @@ Times specifies how often the last subplot should be removed.
 Times=1 means only the last, times=2 means the two last, …</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>[</strong><strong>int</strong><strong>]</strong> (<em>times</em>) – how many subplots should be removed from the end of the list?</p>
+<dd class="field-odd"><p><strong>times</strong> (<em>int</em>) – how many subplots should be removed from the end of the list?</p>
 </dd>
 </dl>
 </dd></dl>
@@ -310,8 +514,8 @@ This function will be repea you are satisfied.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>[</strong><strong>int</strong><strong>]</strong> (<em>second_id</em>) – the first id of the two subplots which should be switched</p></li>
-<li><p><strong>[</strong><strong>int</strong><strong>]</strong> – the second id of the two subplots which should be switched</p></li>
+<li><p><strong>first_id</strong> (<em>int</em>) – the first id of the two subplots which should be switched</p></li>
+<li><p><strong>second_id</strong> (<em>int</em>) – the second id of the two subplots which should be switched</p></li>
 </ul>
 </dd>
 </dl>
@@ -664,19 +868,21 @@ If not specified all channels in memory will be used. Defaults to None.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="snom_analysis.main.SnomMeasurement.realign">
-<span class="sig-name descname"><span class="pre">realign</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/main.html#SnomMeasurement.realign"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.SnomMeasurement.realign" title="Link to this definition"></a></dt>
-<dd><p>This function corrects the drift of the piezo motor. As of now it needs to be fitted to a region of the sample which is assumed to be straight.
-In the future this could be implemented with a general map containing the distortion created by the piezo motor, if it turns out to be constant…
-Anyways, you will be prompted with a preview of the height data, please select an area of the scan with only one ‘straight’ waveguide.
-The bounds for the fitting routine are based on the lower and upper limit of this selection.
-This function is quite special to my needs and will probably not make it into the final version of the software.</p>
-<p>Careful! Will not yet affect the scan size, so the pixelsize will be altered… ToDo</p>
+<span class="sig-name descname"><span class="pre">realign</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snom_analysis/main.html#SnomMeasurement.realign"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.SnomMeasurement.realign" title="Link to this definition"></a></dt>
+<dd><p>This function corrects the drift of the piezo motor. As of now it needs a reference region of the sample which is assumed to be straight.
+In the future this could be implemented with a general map containing the distortion created by the piezo motor, if it turns out to be temporally constant…
+Anyways, you will be prompted with a preview of the height data, please select an area of the scan with only one ‘straight’ reference.
+It will then calculate the index of the mean according to the specified axis. If you specify a threshold all values below this threshold will be set to zero.
+This makes the mean index calculation more robust.
+The bounds for the fitting routine are based on the lower and upper limit of this selection.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>channels</strong> (<em>list</em>) – list of channels, will override the already existing channels</p></li>
 <li><p><strong>bounds</strong> (<em>list</em>) – The bounds for the fitting routine. If not specified you will be prompted with a window to select an area.
 Should be specified like this: [lower_bound, upper_bound] in px.</p></li>
+<li><p><strong>axis</strong> (<em>int</em>) – The axis along which the mean index should be calculated. 0 means x-axis, 1 means y-axis. Defaults to 1.</p></li>
+<li><p><strong>threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – threshold, all values below will be set to zero to better estimate the mean index position. Defaults to 0.5.</p></li>
 </ul>
 </dd>
 </dl>
@@ -897,7 +1103,18 @@ If not specified both will be created. Defaults to None.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="snom_analysis.main.SnomMeasurement.create_gif_old">
 <span class="sig-name descname"><span class="pre">create_gif_old</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amp_channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/snom_analysis/main.html#SnomMeasurement.create_gif_old"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.SnomMeasurement.create_gif_old" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Old gif creation method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>amp_channel</strong> (<em>str</em>) – _description_</p></li>
+<li><p><strong>phase_channel</strong> (<em>str</em>) – _description_</p></li>
+<li><p><strong>frames</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_. Defaults to 20.</p></li>
+<li><p><strong>fps</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_. Defaults to 10.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="snom_analysis.main.SnomMeasurement.create_gif">
@@ -992,7 +1209,19 @@ If no channels are specified all channels in memory will be leveled. If no displ
 <dl class="py method">
 <dt class="sig sig-object py" id="snom_analysis.main.SnomMeasurement.test_profile_selection">
 <span class="sig-name descname"><span class="pre">test_profile_selection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/snom_analysis/main.html#SnomMeasurement.test_profile_selection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.SnomMeasurement.test_profile_selection" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Select a profile from the data. Allows the user to arbitrarily select a profile from the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>channel</strong> (<em>str</em><em>, </em><em>optional</em>) – channel to get the profile data from. Defaults to None.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>profile, start, end, width</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.array, int, int, int</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -1009,7 +1238,44 @@ If no channels are specified all channels in memory will be leveled. If no displ
 <li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – Title of the measurement. Defaults to None.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Attributes<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>vlimit_real</strong></dt><dd></dd>
+<dt><strong>vmax_amp</strong></dt><dd></dd>
+<dt><strong>vmax_height</strong></dt><dd></dd>
+<dt><strong>vmax_phase</strong></dt><dd></dd>
+<dt><strong>vmin_amp</strong></dt><dd></dd>
+<dt><strong>vmin_height</strong></dt><dd></dd>
+<dt><strong>vmin_phase</strong></dt><dd></dd>
 </dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.ApproachCurve.display_channels" title="snom_analysis.main.ApproachCurve.display_channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">display_channels</span></code></a>([y_channels])</p></td>
+<td><p>This function will display the specified channels in a plot.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.ApproachCurve.display_channels_v2" title="snom_analysis.main.ApproachCurve.display_channels_v2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">display_channels_v2</span></code></a>([y_channels])</p></td>
+<td><p>This function will display the specified channels in a plot.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.ApproachCurve.find_index" title="snom_analysis.main.ApproachCurve.find_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_index</span></code></a>(filepath, channel)</p></td>
+<td><p>This function will find the index of the specified channel in the datafile.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_channel_tag_dict</span></code>([channel])</p></td>
+<td><p>This function prints the channel tag dict.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_config</span></code>()</p></td>
+<td><p>This function prints the config file.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_measurement_tag_dict</span></code>()</p></td>
+<td><p>This function prints the measurement tag dict.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.ApproachCurve.set_min_to_zero" title="snom_analysis.main.ApproachCurve.set_min_to_zero"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_min_to_zero</span></code></a>()</p></td>
+<td><p>This function will set the minimum of the xdata array to zero.</p></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt class="sig sig-object py" id="snom_analysis.main.ApproachCurve.set_min_to_zero">
 <span class="sig-name descname"><span class="pre">set_min_to_zero</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/snom_analysis/main.html#ApproachCurve.set_min_to_zero"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.ApproachCurve.set_min_to_zero" title="Link to this definition"></a></dt>
@@ -1072,7 +1338,72 @@ For more channels only the left axis will be used for the first channel.</p>
 <li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – Title of the measurement. Defaults to None.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Attributes<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>vlimit_real</strong></dt><dd></dd>
+<dt><strong>vmax_amp</strong></dt><dd></dd>
+<dt><strong>vmax_height</strong></dt><dd></dd>
+<dt><strong>vmax_phase</strong></dt><dd></dd>
+<dt><strong>vmin_amp</strong></dt><dd></dd>
+<dt><strong>vmin_height</strong></dt><dd></dd>
+<dt><strong>vmin_phase</strong></dt><dd></dd>
 </dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.Scan3D.display_cutplane_realpart" title="snom_analysis.main.Scan3D.display_cutplane_realpart"><code class="xref py py-obj docutils literal notranslate"><span class="pre">display_cutplane_realpart</span></code></a>([axis, line, ...])</p></td>
+<td><p>This function will display the cutplane of the realpart data of the channels of the specified demodulation order.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.Scan3D.display_cutplane_v2_realpart" title="snom_analysis.main.Scan3D.display_cutplane_v2_realpart"><code class="xref py py-obj docutils literal notranslate"><span class="pre">display_cutplane_v2_realpart</span></code></a>([axis, line, ...])</p></td>
+<td><p>This function will display the cutplane of the realpart data of the channels of the specified demodulation order.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.Scan3D.display_cutplanes" title="snom_analysis.main.Scan3D.display_cutplanes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">display_cutplanes</span></code></a>([axis, line, channels, ...])</p></td>
+<td><p>This function will display the cutplanes of the specified channels.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.Scan3D.generate_all_cutplane_data" title="snom_analysis.main.Scan3D.generate_all_cutplane_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_all_cutplane_data</span></code></a>([axis, line])</p></td>
+<td><p>This function will generate the data of all cutplanes for all channels and store them in a dictionary.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.Scan3D.get_cutplane_data" title="snom_analysis.main.Scan3D.get_cutplane_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_cutplane_data</span></code></a>([axis, line, channel])</p></td>
+<td><p>This function will return the data of a cutplane of the 3D scan.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.Scan3D.match_phase_offset" title="snom_analysis.main.Scan3D.match_phase_offset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">match_phase_offset</span></code></a>([channels, ...])</p></td>
+<td><p>This function matches the phase offset of all phase channels in memory to the reference channel.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_channel_tag_dict</span></code>([channel])</p></td>
+<td><p>This function prints the channel tag dict.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_config</span></code>()</p></td>
+<td><p>This function prints the config file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_measurement_tag_dict</span></code>()</p></td>
+<td><p>This function prints the measurement tag dict.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#snom_analysis.main.Scan3D.set_min_to_zero" title="snom_analysis.main.Scan3D.set_min_to_zero"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_min_to_zero</span></code></a>()</p></td>
+<td><p>This function will set the minimum of the xdata array to zero.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#snom_analysis.main.Scan3D.shift_phase" title="snom_analysis.main.Scan3D.shift_phase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shift_phase</span></code></a>([shift, channels])</p></td>
+<td><p>This function will prompt the user with a preview of the first phase channel in memory.</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><strong>align_lines</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>average_data</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>cut_data</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>display_approach_curve</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt class="sig sig-object py" id="snom_analysis.main.Scan3D.set_min_to_zero">
 <span class="sig-name descname"><span class="pre">set_min_to_zero</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/snom_analysis/main.html#Scan3D.set_min_to_zero"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snom_analysis.main.Scan3D.set_min_to_zero" title="Link to this definition"></a></dt>
@@ -1267,36 +1598,7 @@ If not specified all channels in memory will be used. Defaults to None.</p></li>
 <li class="toctree-l3"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.file_handling.convert_header_to_dict"><code class="docutils literal notranslate"><span class="pre">convert_header_to_dict()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="snom_analysis.lib.html#module-snom_analysis.lib.get_directionality">snom_analysis.lib.get_directionality module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.ChiralCoupler"><code class="docutils literal notranslate"><span class="pre">ChiralCoupler</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.ChiralCoupler.Fit_Wgs"><code class="docutils literal notranslate"><span class="pre">ChiralCoupler.Fit_Wgs()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.ChiralCoupler.Get_Integration_Width"><code class="docutils literal notranslate"><span class="pre">ChiralCoupler.Get_Integration_Width()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.ChiralCoupler.Plot_Data_With_Fit_And_Bounds"><code class="docutils literal notranslate"><span class="pre">ChiralCoupler.Plot_Data_With_Fit_And_Bounds()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.ChiralCoupler.Extract_WG_Data"><code class="docutils literal notranslate"><span class="pre">ChiralCoupler.Extract_WG_Data()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.ChiralCoupler.Data_Mean"><code class="docutils literal notranslate"><span class="pre">ChiralCoupler.Data_Mean()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.ChiralCoupler.Export_Mean_Data"><code class="docutils literal notranslate"><span class="pre">ChiralCoupler.Export_Mean_Data()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.ChiralCoupler.Integrate_Amplitude"><code class="docutils literal notranslate"><span class="pre">ChiralCoupler.Integrate_Amplitude()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.ChiralCoupler.Display_Phase_Profile"><code class="docutils literal notranslate"><span class="pre">ChiralCoupler.Display_Phase_Profile()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.ChiralCoupler.Export_Data"><code class="docutils literal notranslate"><span class="pre">ChiralCoupler.Export_Data()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.ChiralCoupler.Display_Phase_Difference"><code class="docutils literal notranslate"><span class="pre">ChiralCoupler.Display_Phase_Difference()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.ChiralCoupler.Fit_Sawtooth"><code class="docutils literal notranslate"><span class="pre">ChiralCoupler.Fit_Sawtooth()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.Flatten_Profile"><code class="docutils literal notranslate"><span class="pre">Flatten_Profile()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.Fit_Decaying_Amplitude"><code class="docutils literal notranslate"><span class="pre">Fit_Decaying_Amplitude()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.Damped_Exponenial_Function"><code class="docutils literal notranslate"><span class="pre">Damped_Exponenial_Function()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.Exponenial_Function"><code class="docutils literal notranslate"><span class="pre">Exponenial_Function()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.Damped_Oscillation_Function"><code class="docutils literal notranslate"><span class="pre">Damped_Oscillation_Function()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.Fit_Linear_Function"><code class="docutils literal notranslate"><span class="pre">Fit_Linear_Function()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.Linear_Function"><code class="docutils literal notranslate"><span class="pre">Linear_Function()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.Double_Gauss"><code class="docutils literal notranslate"><span class="pre">Double_Gauss()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.Sawtooth_v2"><code class="docutils literal notranslate"><span class="pre">Sawtooth_v2()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.Sawtooth"><code class="docutils literal notranslate"><span class="pre">Sawtooth()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.Get_Smallest_Difference"><code class="docutils literal notranslate"><span class="pre">Get_Smallest_Difference()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.Get_Phase_Difference_V2"><code class="docutils literal notranslate"><span class="pre">Get_Phase_Difference_V2()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.get_directionality.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="snom_analysis.lib.html#snom-analysis-lib-get-directionality-module">snom_analysis.lib.get_directionality module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="snom_analysis.lib.html#module-snom_analysis.lib.phase_analysis">snom_analysis.lib.phase_analysis module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.phase_analysis.flatten_phase_profile"><code class="docutils literal notranslate"><span class="pre">flatten_phase_profile()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.phase_analysis.get_smallest_difference"><code class="docutils literal notranslate"><span class="pre">get_smallest_difference()</span></code></a></li>
@@ -1309,10 +1611,10 @@ If not specified all channels in memory will be used. Defaults to None.</p></li>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="snom_analysis.lib.html#module-snom_analysis.lib.phase_slider">snom_analysis.lib.phase_slider module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.phase_slider.get_phase_offset"><code class="docutils literal notranslate"><span class="pre">get_phase_offset()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.phase_slider.Phase_Slider"><code class="docutils literal notranslate"><span class="pre">Phase_Slider</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.phase_slider.Phase_Slider.accept"><code class="docutils literal notranslate"><span class="pre">Phase_Slider.accept()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.phase_slider.Phase_Slider.update"><code class="docutils literal notranslate"><span class="pre">Phase_Slider.update()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.phase_slider.Phase_Slider.shift_phase"><code class="docutils literal notranslate"><span class="pre">Phase_Slider.shift_phase()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.phase_slider.PhaseSlider"><code class="docutils literal notranslate"><span class="pre">PhaseSlider</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.phase_slider.PhaseSlider.accept"><code class="docutils literal notranslate"><span class="pre">PhaseSlider.accept()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.phase_slider.PhaseSlider.update"><code class="docutils literal notranslate"><span class="pre">PhaseSlider.update()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.phase_slider.PhaseSlider.shift_phase"><code class="docutils literal notranslate"><span class="pre">PhaseSlider.shift_phase()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -1363,28 +1665,7 @@ If not specified all channels in memory will be used. Defaults to None.</p></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="snom_analysis.lib.html#module-snom_analysis.lib.snom_colormaps">snom_analysis.lib.snom_colormaps module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="snom_analysis.lib.html#module-snom_analysis.lib.test_profile_selector">snom_analysis.lib.test_profile_selector module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.test_profile_selector.CutlineSelector"><code class="docutils literal notranslate"><span class="pre">CutlineSelector</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.test_profile_selector.CutlineSelector.add_widgets"><code class="docutils literal notranslate"><span class="pre">CutlineSelector.add_widgets()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.test_profile_selector.CutlineSelector.update_width"><code class="docutils literal notranslate"><span class="pre">CutlineSelector.update_width()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.test_profile_selector.CutlineSelector.on_key_press"><code class="docutils literal notranslate"><span class="pre">CutlineSelector.on_key_press()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.test_profile_selector.CutlineSelector.on_key_release"><code class="docutils literal notranslate"><span class="pre">CutlineSelector.on_key_release()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.test_profile_selector.CutlineSelector.on_click"><code class="docutils literal notranslate"><span class="pre">CutlineSelector.on_click()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.test_profile_selector.CutlineSelector.on_release"><code class="docutils literal notranslate"><span class="pre">CutlineSelector.on_release()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.test_profile_selector.CutlineSelector.on_motion"><code class="docutils literal notranslate"><span class="pre">CutlineSelector.on_motion()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.test_profile_selector.CutlineSelector.is_near_point"><code class="docutils literal notranslate"><span class="pre">CutlineSelector.is_near_point()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.test_profile_selector.CutlineSelector.adjust_endpoint"><code class="docutils literal notranslate"><span class="pre">CutlineSelector.adjust_endpoint()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.test_profile_selector.CutlineSelector.clip_point_to_image"><code class="docutils literal notranslate"><span class="pre">CutlineSelector.clip_point_to_image()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.test_profile_selector.CutlineSelector.clear_cutline"><code class="docutils literal notranslate"><span class="pre">CutlineSelector.clear_cutline()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.test_profile_selector.CutlineSelector.update_cutline"><code class="docutils literal notranslate"><span class="pre">CutlineSelector.update_cutline()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.test_profile_selector.CutlineSelector.draw_perpendicular_lines"><code class="docutils literal notranslate"><span class="pre">CutlineSelector.draw_perpendicular_lines()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.test_profile_selector.CutlineSelector.extract_cutline"><code class="docutils literal notranslate"><span class="pre">CutlineSelector.extract_cutline()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.test_profile_selector.get_cutline"><code class="docutils literal notranslate"><span class="pre">get_cutline()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="snom_analysis.lib.html#snom_analysis.lib.test_profile_selector.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="snom_analysis.lib.html#snom-analysis-lib-test-profile-selector-module">snom_analysis.lib.test_profile_selector module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="snom_analysis.lib.html#module-snom_analysis.lib">Module contents</a></li>
 </ul>
 </li>
