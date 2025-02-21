@@ -1,3 +1,4 @@
+.. _snom_analysis.lib:
 snom\_analysis.lib package
 ==========================
 
