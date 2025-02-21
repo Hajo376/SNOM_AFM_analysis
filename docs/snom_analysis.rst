@@ -43,8 +43,11 @@ snom\_analysis.main module
 Subpackages
 -----------
 
-.. include:: ../docs/snom_analysis.lib.rst
+test
 
+.. include:: snom_analysis.lib.rst
+
+toctree
 
 .. toctree::
    :maxdepth: 4
