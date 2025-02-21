@@ -1,9 +1,6 @@
 .. _snom_analysis.lib:
-snom\_analysis.lib package
-==========================
-
-Submodules
-----------
+Subpackages
+===========
 
 snom\_analysis.lib.data\_range\_selector module
 -----------------------------------------------
@@ -25,14 +22,6 @@ snom\_analysis.lib.file\_handling module
 ----------------------------------------
 
 .. automodule:: snom_analysis.lib.file_handling
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-snom\_analysis.lib.get\_directionality module
----------------------------------------------
-
-.. automodule:: snom_analysis.lib.get_directionality
    :members:
    :undoc-members:
    :show-inheritance:
@@ -93,18 +82,5 @@ snom\_analysis.lib.snom\_colormaps module
    :undoc-members:
    :show-inheritance:
 
-snom\_analysis.lib.test\_profile\_selector module
--------------------------------------------------
 
-.. automodule:: snom_analysis.lib.test_profile_selector
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
-Module contents
----------------
-
-.. automodule:: snom_analysis.lib
-   :members:
-   :undoc-members:
-   :show-inheritance:

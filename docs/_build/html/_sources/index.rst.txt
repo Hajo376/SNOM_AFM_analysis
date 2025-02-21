@@ -16,7 +16,7 @@ This is a work in progress documentation for the SNOM Analysis package.
    readme
    examples
    getting_started
-   snom_analysis
+   modules
 
 .. grid:: 2
 
@@ -41,7 +41,7 @@ This is a work in progress documentation for the SNOM Analysis package.
       You want to find out how to install the package und how to get started? Then this is the right place for you.
    
    .. grid-item-card::  API Reference
-      :link: snom_analysis
+      :link: modules
       :link-type: ref
 
       Here you can find detailed descriptions of all the functions and classes in the package.

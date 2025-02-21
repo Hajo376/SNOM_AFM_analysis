@@ -4130,9 +4130,10 @@ class SnomMeasurement(FileHandler):
             location=None, loc=None, pad=None, border_pad=None, sep=None, frameon=None, color=None, box_color=None, box_alpha=None, scale_loc=None,
             label_loc=None, font_properties=None, label_formatter=None, scale_formatter=None, fixed_value=None, fixed_units=None, animated=False, rotation=None):
         """Adds a scalebar to all specified channels.
+        
         Args:
             channels (list): List of channels the scalebar should be added to.
-            various definitions for the scalebar, please look up 'matplotlib_scalebar.scalebar' for more information
+                various definitions for the scalebar, please look up 'matplotlib_scalebar.scalebar' for more information
         """
         
         # scalebar = ScaleBar(dx, units, dimension, label, length_fraction, height_fraction, width_fraction,
