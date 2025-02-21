@@ -18,7 +18,7 @@ But they can help to built more functionality on top of the package. So feel fre
 snom\_analysis.main module
 --------------------------
 
-.. automodule:: src.snom_analysis.main
+.. automodule:: snom_analysis.main
    :members:
    :undoc-members:
    :show-inheritance:
