@@ -1,7 +1,7 @@
-scipy==1.13.*
-matplotlib==3.9.*
-mpl_point_clicker==0.4.*
-matplotlib_scalebar==0.8.*
-imageio==2.34.*
-colorcet==3.1.*
-scikit-image==0.24.*
+scipy==1.13.1
+matplotlib==3.9.0
+mpl_point_clicker==0.4.1
+matplotlib-scalebar==0.8.1
+imageio==2.34.1
+colorcet==3.1.0
+scikit-image==0.24.0
