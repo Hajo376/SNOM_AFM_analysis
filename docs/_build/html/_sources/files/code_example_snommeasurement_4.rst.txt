@@ -19,7 +19,7 @@
     # Plot the data without any modifications.
     measurement.display_channels()
 
-    # Apply the synccorrection to the data. But we don't know the direction yet. The interferometer sometimes goes in the wron direction.
+    # Apply the synccorrection to the data. But we don't know the direction yet. The interferometer sometimes goes in the wrong direction.
     # This will create corrected channels and save them as .gsf with the appendix '_corrected'.
     # measurement.synccorrection(1.6) # for chiral coupler
     measurement.synccorrection(0.97)

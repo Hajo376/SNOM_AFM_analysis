@@ -2,11 +2,11 @@
 How to use:
 -----------
 
-First of all install the package either from PyPi or by using a wheel from the dist folder.
-You can also clone the repository and use it as is or create your own wheel by running pyhton setup.py bdist_wheel.
+First of all install the package either from PyPi or by using a wheel from the dist folder from the github page.
+You can also clone the repository and use it as is or create your own wheel by running pyhton -m build.
 I would always recommend to use a virtual environment to install the package and use the wheel.
 
-Then try out the example script which should be somewhere in the repository. (#todo)
+Then try out the example script which should be somewhere in the repository. (#todo) 
 You can also just use the script as a loader and do whatever you want in between.
 The data is just stored as a list of np.array in the instance.all_data variable, the channel names are in a correlated list instance.channels.
 Additional information is in the two dictionaries instance.measurement_tag_dict and instance.channels_tag_dict.
