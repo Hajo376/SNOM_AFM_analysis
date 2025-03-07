@@ -18,6 +18,8 @@ classifiers = [
   # Specify the Python versions you support here. In particular, ensure
   # that you indicate you support Python 3. These classifiers are *not*
   # checked by "pip install". See instead "requires-python" key in this file.
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
   "Programming Language :: Python :: 3 :: Only",
 ]
 # dependencies = ["scipy>=1.13.1", "matplotlib>=3.9.0", "mpl_point_clicker>=0.4.1", "matplotlib_scalebar>=0.8.1", "imageio>=2.34.1", "colorcet>=3.1.0", "scikit-image>=0.24.0"]

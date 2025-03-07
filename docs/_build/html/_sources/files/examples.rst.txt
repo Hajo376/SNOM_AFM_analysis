@@ -8,9 +8,7 @@ Example 1:
 ~~~~~~~~~~
 
 .. figure:: images/snom_example_1_comparison.png
-   :width: 1000 px
-   :height: 500 px
-   :scale: 90 %
+   :width: 800 
    :alt: Image of the first example code discussed in the how to section.
 
    This is a comparison of the data before and after modifications, this is possible because each created image is saved in a file.
@@ -26,9 +24,7 @@ Example 2:
 ~~~~~~~~~~
 
 .. figure:: images/snom_example_2_comparison.png
-   :width: 601 px
-   :height: 903 px
-   :scale: 100 %
+   :width: 600
    :alt: Image of the second example code discussed in the how to section.
 
    This is the data before and after some modifications such as adding a scalebar, a nonlinear correction to height, amplitude and phase,
@@ -46,9 +42,7 @@ Example 3:
 ~~~~~~~~~~
 
 .. figure:: images/snom_example_3_comparison.png
-   :width: 648 px
-   :height: 490 px
-   :scale: 100 %
+   :width: 600 px
    :alt: Image of the third example code discussed in the how to section.
 
    This shows the phase data before and after the synccorrection. The synccorrection gets rid of the linear phase drift caused by the movement of the lower parabola.
@@ -64,9 +58,7 @@ Example 4:
 ~~~~~~~~~~
 
 .. figure:: images/snom_example_4.gif
-   :width: 200 px
-   :height: 200 px
-   :scale: 100 %
+   :width: 300
    :alt: Image of the fouth example code discussed in the how to section.
 
    This shows a gif created from the realpart of the O3A channel and the O3P_corrected channel.
@@ -80,9 +72,7 @@ Example 5:
 ~~~~~~~~~~
 
 .. figure:: images/approachcurve_example_1.png
-   :width: 640 px
-   :height: 480 px
-   :scale: 80 %
+   :width: 600
    :alt: Image of the fouth example code discussed in the how to section.
 
    This shows basic plotting of approach curves. The data is loaded and the minimum is set to zero. The data is then displayed in a plot.
@@ -96,9 +86,7 @@ Example 6:
 ~~~~~~~~~~
 
 .. figure:: images/3dscan_example_1.png
-   :width: 1000 px
-   :height: 500 px
-   :scale: 80 %
+   :width: 800
    :alt: Image of the fouth example code discussed in the how to section.
 
    This shows basic plotting of 3D scans. The data is loaded, cutplanes are created and the minimum is set to zero. A single cutplane is then displayed in a plot.
@@ -113,9 +101,7 @@ Example 7:
 ~~~~~~~~~~
 
 .. figure:: images/3dscan_example_1_shifted.png
-   :width: 1000 px
-   :height: 500 px
-   :scale: 80 %
+   :width: 800
    :alt: Image of the fouth example code discussed in the how to section.
 
    This shows basic plotting of 3D scans. The data is loaded, cutplanes are created and the minimum is set to zero. The cutplanes are then autoaligned,
