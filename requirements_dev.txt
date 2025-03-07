@@ -1,0 +1,14 @@
+scipy==1.15.2
+matplotlib==3.10.1
+mpl_point_clicker==0.4.1
+matplotlib-scalebar==0.9.0
+imageio==2.37.0
+colorcet==3.1.0
+scikit-image==0.25.2
+numpydoc
+Sphinx==8.1.3
+sphinx_design==0.6.1
+sphinx-rtd-theme==3.0.2
+twine==6.0.1
+wheel
+setuptools

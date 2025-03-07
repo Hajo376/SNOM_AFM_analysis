@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta" # If not defined, then legacy behavior c
 
 [project]
 name = "snom_analysis" # REQUIRED, is the only field that cannot be marked as dynamic.
-version = "0.1.20" # REQUIRED, although can be dynamic
+version = "0.1.21" # REQUIRED, although can be dynamic
 description = "Package for displaying and manipulating SNOM and AFM data"
 readme = "README_short.rst"
 requires-python = ">=3.9"
@@ -22,15 +22,14 @@ classifiers = [
   "Intended Audience :: Science/Research",
   "Programming Language :: Python :: 3 :: Only",
 ]
-# dependencies = ["scipy>=1.13.1", "matplotlib>=3.9.0", "mpl_point_clicker>=0.4.1", "matplotlib_scalebar>=0.8.1", "imageio>=2.34.1", "colorcet>=3.1.0", "scikit-image>=0.24.0"]
 dependencies = [
-  "scipy==1.13.1",
-  "matplotlib==3.9.0",
-  "mpl_point_clicker==0.4.1",
-  "matplotlib-scalebar==0.8.1",
-  "imageio==2.34.1",
-  "colorcet==3.1.0",
-  "scikit-image==0.24.0"
+  "scipy>=1.15.2",
+  "matplotlib>=3.10.1",
+  "mpl_point_clicker>=0.4.1",
+  "matplotlib-scalebar>=0.9.0",
+  "imageio>=2.37.0",
+  "colorcet>=3.1.0",
+  "scikit-image>=0.25.2"
 ]
 
 [project.urls]
