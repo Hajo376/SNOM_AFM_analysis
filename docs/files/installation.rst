@@ -5,9 +5,5 @@ The package can be installed via ``pip``::
 
     pip install snom-analysis
 
-or via ``conda`` (soon)::
-
-    conda install -c conda-forge snom-analysis
-
 Alternatively, you can clone the repository and install the package manually from github https://github.com/Hajo376/SNOM_AFM_analysis/.
-If you install via pip all dependencies will be installed automatically. I recommend to use a virtual environment to install the package.
+If you install via pip all dependencies will be installed automatically. I recommend to use a virtual environment.

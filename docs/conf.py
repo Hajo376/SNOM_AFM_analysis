@@ -23,14 +23,15 @@ release = '1.0.0'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    'sphinx.ext.autodoc', 
-    'sphinx.ext.autosummary',
-    'sphinx.ext.intersphinx',
-    "sphinx_design",
+    'sphinx.ext.autodoc', # to automatically generate documentation from docstrings
+    'sphinx.ext.autosummary', # to automatically generate summaries
+    # 'sphinx.ext.intersphinx', # to link to other projects' documentation
+    "sphinx_design", # important for additional features like the toggle button, code block, etc.
     # "sphinx_togglebutton",
     "numpydoc",
     'sphinx.ext.napoleon', 
-    'sphinx.ext.viewcode', 
+    'sphinx.ext.viewcode', # to add a source button to each method which shows the source code
+    'sphinx_copybutton', # to add a copy button to each code block
     # 'sphinx.ext.graphviz',
     # 'sphinx.ext.inheritance_diagram',
     # 'sphinx.ext.ifconfig',
