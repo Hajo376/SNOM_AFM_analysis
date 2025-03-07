@@ -1,6 +1,6 @@
 Metadata-Version: 2.2
 Name: snom_analysis
-Version: 0.1.21
+Version: 0.1.22
 Summary: Package for displaying and manipulating SNOM and AFM data
 Author-email: "H.-J. Schill" <hajo.schill@acetovit.de>
 Maintainer-email: "H.-J. Schill" <hajo.schill@acetovit.de>
@@ -43,11 +43,7 @@ The package can be installed via ``pip``::
 
     pip install snom-analysis
 
-or via ``conda`` (soon)::
-
-    conda install -c conda-forge snom-analysis
-
-If you install via pip all dependencies will be installed automatically. I recommend to use a virtual environment to install the package.
+If you install via pip all dependencies will be installed automatically. I recommend to use a virtual environment.
 
 Documentation
 -------------
