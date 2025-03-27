@@ -446,6 +446,7 @@ def test_comsol_height_data():
     height_data = create_comsol_height_data()
     height_channel_tag_dict = measurement.channel_tag_dict[0] # just copy the amp channel tag dict
     measurement.create_new_channel(height_data, 'Z', height_channel_tag_dict, 'Height')
+    measurement.rotate_90_deg(orientation='right')
     measurement.display_channels()
     # amp = measurement.all_data[0]
     # height_data = measurement.all_data[2]
@@ -763,7 +764,7 @@ def main():
     #### Testes functions, which can be used to test the functionality of the package. ####
     #######################################################################################
     # test_realign()
-    test_cut()
+    # test_cut()
     # test_height_masking()
     # test_scalebar()
     # test_phaseshift()
@@ -786,7 +787,7 @@ def main():
     # test_profile_selector()
     # test_gauss_filter_v2()
     # test_comsol_data()
-    # test_comsol_height_data()
+    test_comsol_height_data()
     # test_approach_curve()
     # test_find_measurement_type()
 

@@ -2402,7 +2402,7 @@ class SnomMeasurement(FileHandler):
         cbar.ax.get_yaxis().labelpad = 15
         cbar.ax.set_ylabel(label1, rotation=270)
         # invert y axis to fit to the scanning procedure which starts in the top left corner
-        ax.invert_yaxis()
+        # ax.invert_yaxis() # imshow does this automatically
         # add the title
         # ax.set_title(title)
         # remove ticks on x and y axis, they only show pixelnumber anyways, better to add a scalebar
