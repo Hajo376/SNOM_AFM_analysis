@@ -2648,7 +2648,7 @@ class SnomMeasurement(FileHandler):
         if rotation is None:
             # try to get the rotation from the measurement tags
             rotation = self._get_measurement_tag_dict_value(MeasurementTags.ROTATION)[0]
-            if rotation is None: rotation = ''
+            # if rotation is None: rotation = ''
         XRes = len(data[0])
         YRes  = len(data)
         if filetype=='gsf':
@@ -2662,7 +2662,8 @@ class SnomMeasurement(FileHandler):
         header += f'XReal={round(XReal,9)}\nYReal={round(YReal,9)}\n'
         header += f'XYUnits=m\n'
         header += f'XOffset={round(XOffset*pow(10, -6),9)}\nYOffset={round(YOffset*pow(10, -6),9)}\n'
-        header += f'Rotation={round(rotation)}\n'
+        if rotation is not None:
+            header += f'Rotation={round(rotation)}\n' # header is optional, not each filetype has it...
         if self.height_indicator in channel:
             header += 'ZUnits=m\n'
         else:

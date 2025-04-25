@@ -1,6 +1,6 @@
-Metadata-Version: 2.2
+Metadata-Version: 2.4
 Name: snom_analysis
-Version: 0.1.22
+Version: 0.1.24
 Summary: Package for displaying and manipulating SNOM and AFM data
 Author-email: "H.-J. Schill" <hajo.schill@acetovit.de>
 Maintainer-email: "H.-J. Schill" <hajo.schill@acetovit.de>
@@ -21,6 +21,7 @@ Requires-Dist: matplotlib-scalebar>=0.9.0
 Requires-Dist: imageio>=2.37.0
 Requires-Dist: colorcet>=3.1.0
 Requires-Dist: scikit-image>=0.25.2
+Dynamic: license-file
 
 A package to load, manipulate and visualize SNOM and AFM data.
 
