@@ -4010,7 +4010,8 @@ class SnomMeasurement(FileHandler):
             preview_channel (str, optional): The channel to display for the area selection. If not specified the height channel will be used if it is in memory,
                 otherwise the first of the specified channels will be used. Defaults to None
             autocut (bool, optional): If set to 'True' the program will automatically try to remove zero lines and columns, which can result from masking.
-            coords (list, optional): If you already now the coordinates ([[x1,y1], [x2,y2], [x3,y3], [x4,y4]]) to which you want to cut your data. Defaults to None.
+            coords (list, optional): If you already now the coordinates ([[x1,y1], [x2,y2]]), e.g. top left and bottom right coordinate of the rectangle to which you want to cut your data. 
+                Defaults to None.
             reset_mask (bool, optional): If you dont want to reuse an old mask set to True. Defaults to False.
         """
         if channels is None:
