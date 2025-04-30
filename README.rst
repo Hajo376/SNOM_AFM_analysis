@@ -14,7 +14,7 @@ This memory can of course be deleted at will, which is by default every time a n
 
 For ease of use i also created a GUI version of this package which allows to use many functions more easily.
 I typically use it to quickly generate images of my measurements with minimal modifications.
-It's not yet available but i will try to make it available in the future.
+You can find it here https://github.com/Hajo376/SNOM_Plotting.
 
 I created this package during my PhD for various data analysis purposes. I want to make it available for the general public and have no commercial interests. 
 I am not a professional programmer, please keep that in mind if you encounter problems or bugs, which you most probably will.
