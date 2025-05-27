@@ -5395,7 +5395,7 @@ class ApproachCurve(FileHandler):
         self.channels = channels.copy()
         self.x_channel = 'Z'
         super().__init__(directory_name, title)
-        self.header = 27
+        self.header = 27 # todo, add as parameter to config file, varies with different software versions
         self._initialize_measurement_channel_indicators()
         self._load_data()
         # get the plotting style from the mpl style file
@@ -5556,11 +5556,19 @@ class ApproachCurve(FileHandler):
             filepath (str): Path to the datafile.
             channel (str): Channel to find the index for.
         """
+        # with open(filepath, 'r') as file:
+        #     for i in range(self.header+1): # not good enough anymore, since software updates changed the header
+        #         line = file.readline()
+        # header_indicator = '#' # todo, add this parameter to the config file, might vary for different file types
         with open(filepath, 'r') as file:
-            for i in range(self.header+1):
+            while True:
                 line = file.readline()
-        split_line = line.split('\t')
-        split_line.remove('\n')
+                split_line = line.split('\t')
+                if len(split_line) > 10:
+                    break # the first line to contain more than 10 entries is the channels line
+        # split_line = line.split('\t')
+        # print(split_line)
+        # split_line.remove('\n')
         return split_line.index(channel)
 
 class Scan3D(FileHandler):

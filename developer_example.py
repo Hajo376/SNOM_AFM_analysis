@@ -454,7 +454,8 @@ def test_comsol_height_data():
     # measurement.save_to_gsf(['Z'], appendix='')
 
 def test_approach_curve():
-    directory_name = 'tests/testdata/2024-04-03 133202 PH AC topol_20mufromcoupler_right_interf_peak'
+    # directory_name = 'tests/testdata/2024-04-03 133202 PH AC topol_20mufromcoupler_right_interf_peak'
+    directory_name = 'tests/testdata/2025-05-27 104406 AC TGQ1_test'
     channels = ['M1A', 'O2P', 'O2A']
     measurement = ApproachCurve(directory_name, channels)
     measurement.set_min_to_zero()
@@ -787,8 +788,8 @@ def main():
     # test_profile_selector()
     # test_gauss_filter_v2()
     # test_comsol_data()
-    test_comsol_height_data()
-    # test_approach_curve()
+    # test_comsol_height_data()
+    test_approach_curve()
     # test_find_measurement_type()
 
     ################################
