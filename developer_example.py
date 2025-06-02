@@ -455,8 +455,9 @@ def test_comsol_height_data():
 
 def test_approach_curve():
     # directory_name = 'tests/testdata/2024-04-03 133202 PH AC topol_20mufromcoupler_right_interf_peak'
-    directory_name = 'tests/testdata/2025-05-27 104406 AC TGQ1_test'
-    channels = ['M1A', 'O2P', 'O2A']
+    directory_name = 'tests/testdata/2025-06-02 142837 PH AC TGQ1_test_refl_1600nm'
+    # channels = ['M1A', 'O2P', 'O2A']
+    channels = ['M1A', 'O2A', 'O3A', 'O2P', 'O3P']
     measurement = ApproachCurve(directory_name, channels)
     measurement.set_min_to_zero()
     measurement.display_channels_v2()
