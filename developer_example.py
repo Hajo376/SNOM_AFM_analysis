@@ -277,7 +277,8 @@ def test_gif():
     # measurement.create_gif_Old('O2A', 'O2P_corrected', 20, 10)
 
 def test_3d_scan():
-    directory = 'tests/testdata/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
+    # directory = 'tests/testdata/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
+    directory = 'tests/testdata/2025-06-02 152505 PH 3D Gold_refl_1600nm' # newer version with one more header line
     channels = ['O2A', 'O2P', 'O3A', 'O3P', 'Z']
     measurement = Scan3D(directory, channels)
     measurement.set_min_to_zero()
@@ -455,7 +456,7 @@ def test_comsol_height_data():
 
 def test_approach_curve():
     # directory_name = 'tests/testdata/2024-04-03 133202 PH AC topol_20mufromcoupler_right_interf_peak'
-    directory_name = 'tests/testdata/2025-06-02 142837 PH AC TGQ1_test_refl_1600nm'
+    directory_name = 'tests/testdata/2025-06-02 142837 PH AC TGQ1_test_refl_1600nm' # newer version with one more header line
     # channels = ['M1A', 'O2P', 'O2A']
     channels = ['M1A', 'O2A', 'O3A', 'O2P', 'O3P']
     measurement = ApproachCurve(directory_name, channels)

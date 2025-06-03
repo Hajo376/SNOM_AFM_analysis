@@ -5439,6 +5439,8 @@ class ApproachCurve(FileHandler):
     def _load_data(self):
         self.all_data = {}
         datafile = self.directory_name / Path(self.filename.name + '.txt')
+        # find header in the file
+        self.header = self.find_header_length(datafile)
         x_channel_index = self.find_index(datafile, self.x_channel)
         with open(datafile, 'r') as file:
             xdata = np.genfromtxt(file ,skip_header=self.header, usecols=(x_channel_index), delimiter='\t', invalid_raise = False)
@@ -5548,6 +5550,17 @@ class ApproachCurve(FileHandler):
             plt.show()
         gc.collect()
 
+    def find_header_length(self, filepath):
+        header_len = 0
+        with open(filepath, 'r') as file:
+            while True:
+                line = file.readline()
+                split_line = line.split('\t')
+                if len(split_line) > 10:
+                    break
+                else: 
+                    header_len += 1
+        return header_len
 
     def find_index(self, filepath, channel):
         """This function will find the index of the specified channel in the datafile.
@@ -5556,19 +5569,10 @@ class ApproachCurve(FileHandler):
             filepath (str): Path to the datafile.
             channel (str): Channel to find the index for.
         """
-        # with open(filepath, 'r') as file:
-        #     for i in range(self.header+1): # not good enough anymore, since software updates changed the header
-        #         line = file.readline()
-        # header_indicator = '#' # todo, add this parameter to the config file, might vary for different file types
         with open(filepath, 'r') as file:
-            while True:
+            for i in range(self.header+1): # not good enough anymore, since software updates changed the header
                 line = file.readline()
-                split_line = line.split('\t')
-                if len(split_line) > 10:
-                    break # the first line to contain more than 10 entries is the channels line
-        # split_line = line.split('\t')
-        # print(split_line)
-        # split_line.remove('\n')
+        split_line = line.split('\t')
         return split_line.index(channel)
 
 class Scan3D(FileHandler):
@@ -5620,11 +5624,14 @@ class Scan3D(FileHandler):
     
     def _load_data(self):
         datafile = self.directory_name / Path(self.filename.name + '.txt')
+        # find header length of datafile
+        self.header = self.find_header_length(datafile)
         # initialize all data dict
         self.all_data = {} # (key, value) = (channelname, 3d matrix, shape:(xres, yres, zres)) 
         # load the data per channel and add to all_data
         for channel in self.channels:
-            index = find_index(self.header, datafile, channel) # find the index of the channels
+            # index = find_index(self.header, datafile, channel) # find the index of the channels
+            index = self.find_index(datafile, channel) # use local version of find_index
             file = open(datafile, 'r')
             self.all_data[channel] = np.genfromtxt(file ,skip_header=self.header+1, usecols=(index), delimiter='\t', invalid_raise = False)
             file.close()
@@ -6339,4 +6346,39 @@ class Scan3D(FileHandler):
         # self.measurement_tag_dict[MeasurementTags.PIXELAREA] = (XRes+max_shift, YRes, ZRes)
         self._set_measurement_tag_dict_value(MeasurementTags.PIXELAREA, [XRes+max_shift, YRes, ZRes])
 
+    def find_header_length(self, filepath):
+        header_len = 0
+        with open(filepath, 'r') as file:
+            while True:
+                line = file.readline()
+                split_line = line.split('\t')
+                if len(split_line) > 10:
+                    break
+                else: 
+                    header_len += 1
+        return header_len
+
+    def find_index(self, filepath, channel):
+        """This function will find the index of the specified channel in the datafile.
+        
+        Args:
+            filepath (str): Path to the datafile.
+            channel (str): Channel to find the index for.
+        """
+        with open(filepath, 'r') as file:
+            for i in range(self.header+1): # not good enough anymore, since software updates changed the header
+                line = file.readline()
+        split_line = line.split('\t')
+        return split_line.index(channel)
+        # header_indicator = '#' # todo, add this parameter to the config file, might vary for different file types
+        # with open(filepath, 'r') as file:
+        #     while True:
+        #         line = file.readline()
+        #         split_line = line.split('\t')
+        #         if len(split_line) > 10:
+        #             break # the first line to contain more than 10 entries is the channels line
+        # # split_line = line.split('\t')
+        # # print(split_line)
+        # # split_line.remove('\n')
+        # return split_line.index(channel)
 
