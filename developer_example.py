@@ -277,8 +277,8 @@ def test_gif():
     # measurement.create_gif_Old('O2A', 'O2P_corrected', 20, 10)
 
 def test_3d_scan():
-    # directory = 'tests/testdata/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
-    directory = 'tests/testdata/2025-06-02 152505 PH 3D Gold_refl_1600nm' # newer version with one more header line
+    directory = 'tests/testdata/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
+    # directory = 'tests/testdata/2025-06-02 152505 PH 3D Gold_refl_1600nm' # newer version with one more header line
     channels = ['O2A', 'O2P', 'O3A', 'O3P', 'Z']
     measurement = Scan3D(directory, channels)
     measurement.set_min_to_zero()
@@ -776,7 +776,7 @@ def main():
     # correct_phase_drift_nonlinear()
     # synccorrection()
     # test_aachen_files()
-    # test_export_to_gsf()
+    test_export_to_gsf()
     # test_gif()
     # test_3d_scan()
     # average_3d_scan()
@@ -791,7 +791,7 @@ def main():
     # test_gauss_filter_v2()
     # test_comsol_data()
     # test_comsol_height_data()
-    test_approach_curve()
+    # test_approach_curve()
     # test_find_measurement_type()
 
     ################################

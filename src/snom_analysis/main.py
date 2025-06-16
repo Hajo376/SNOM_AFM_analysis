@@ -920,17 +920,25 @@ class FileHandler(PlotDefinitions):
         for key, value in new_parameters_dict.items():
             is_unit = False
             is_list = False
-            if isinstance(value, list):
+            if value == []:
+                continue
+            elif isinstance(value, list):
                 is_list = True
                 value = [item.replace(',', '') for item in value]
                 # check if first value is a is_unit
                 try: float(value[0])
                 except: is_unit = True
                 else: is_unit = False
+                # remove brackets from unit 
+                if is_unit:
+                    value[0] = value[0].replace('[', '').replace(']', '')
             else: # sometimes only the is_unit is given
                 try: float(value)
                 except: is_unit = True
                 else: is_unit = False
+                # remove brackets from unit
+                if is_unit:
+                    value = value.replace('[', '').replace(']', '')
             if value == '':
                 continue
             # if key in measurement_tags.values():
@@ -1298,18 +1306,15 @@ class FileHandler(PlotDefinitions):
         value = self.measurement_tag_dict[tag]
         # check if a unit is part of the value
         if isinstance(value, list):
-            for element in value:
+            if isinstance(value[0], str):
                 # if a unit is part of the value it must be in first place
-                if isinstance(element, str):
-                    return value[0] 
-                else:
-                    return None
+                return value[0]
+            else: return None
         else:
             if isinstance(value, str):
                 return value
-            else:
-                return None
-
+            else: return None
+        
     def _set_channel_tag_dict_value(self, channel:str, tag:ChannelTags, value) -> None:
         """This function sets the value of the specified tag for the specified channel.
         It automatically tries to keep the unit of the value if there is one. 
@@ -2625,6 +2630,10 @@ class SnomMeasurement(FileHandler):
 
     def _create_header(self, channel, data=None, filetype='gsf'):
         """This function creates the header for the gsf file. The header contains all necessary information for the gsf file.
+        If the channel is in memory the channel tag dict will be used to get the necessary information.
+        If not the measurement tag dict will be used to get the necessary information.
+        If possible it is always better to use the channel tag dict, because it contains more specific information about the channel.
+        And issues can occure if the units in the measurement tag dict are not the same as in the channel tag dict.
 
         Args:
             channel (str): channel name
@@ -2638,13 +2647,34 @@ class SnomMeasurement(FileHandler):
             data = self._load_data([channel])[0][0]
             try: XReal, YReal = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
             except: XReal, YReal, ZReal = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
+            Yincomplete = None
+            XYUnit = self._get_measurement_tag_dict_unit(MeasurementTags.SCANAREA)
             rotation = self._get_measurement_tag_dict_value(MeasurementTags.ROTATION)[0]
             XOffset, YOffset = self._get_measurement_tag_dict_value(MeasurementTags.SCANNERCENTERPOSITION)
         else: 
             # if channel is in memory it has to have a channel dict, where all necessary infos are stored
             XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
+            Yincomplete = self._get_channel_tag_dict_value(channel, ChannelTags.YINCOMPLETE)[0]
+            XYUnit = self._get_channel_tag_dict_unit(channel, ChannelTags.XYUNIT)
             rotation = self._get_channel_tag_dict_value(channel, ChannelTags.ROTATION)[0]
             XOffset, YOffset = self._get_channel_tag_dict_value(channel, ChannelTags.SCANNERCENTERPOSITION)
+        # convert values to m if not already in m, and round to nm precision
+        if XYUnit == 'nm':
+            XReal = round(XReal * pow(10, -9), 9)
+            YReal = round(YReal * pow(10, -9), 9)
+            XOffset = round(XOffset * pow(10, -9), 9)
+            YOffset = round(YOffset * pow(10, -9), 9)
+        elif XYUnit == 'µm' or XYUnit == 'um':
+            XReal = round(XReal * pow(10, -6), 9)
+            YReal = round(YReal * pow(10, -6), 9)
+            XOffset = round(XOffset * pow(10, -6), 9)
+            YOffset = round(YOffset * pow(10, -6), 9)
+        elif XYUnit == 'm':
+            XReal = round(XReal, 9)
+            YReal = round(YReal, 9)
+            XOffset = round(XOffset, 9)
+            YOffset = round(YOffset, 9)
+        
         if rotation is None:
             # try to get the rotation from the measurement tags
             rotation = self._get_measurement_tag_dict_value(MeasurementTags.ROTATION)[0]
@@ -2657,18 +2687,33 @@ class SnomMeasurement(FileHandler):
             header = 'Simple Textfile, floats seperated by spaces\n'
         else:
             header = ''
-        # round everything to nm
-        header += f'XRes={int(XRes)}\nYRes={int(YRes)}\n'
-        header += f'XReal={round(XReal,9)}\nYReal={round(YReal,9)}\n'
-        header += f'XYUnits=m\n'
-        header += f'XOffset={round(XOffset*pow(10, -6),9)}\nYOffset={round(YOffset*pow(10, -6),9)}\n'
-        if rotation is not None:
-            header += f'Rotation={round(rotation)}\n' # header is optional, not each filetype has it...
-        if self.height_indicator in channel:
-            header += 'ZUnits=m\n'
-        else:
-            header += 'ZUnits=\n'
         header += f'Title={self.measurement_title}\n'
+        # round everything to nm
+        # but careful, header tag dict and channel tag dict values are sometimes in nm, sometimes in m, so we have to check that
+        channel_tags = self._get_from_config('channel_tags')
+        # use original channel tags from config file, such that new headers can be created with the same tags
+        header += f'{channel_tags['PIXELAREA'][0]}={int(XRes)}\n{channel_tags['PIXELAREA'][1]}={int(YRes)}\n'
+        if Yincomplete is not None:
+            header += f'{channel_tags['YINCOMPLETE']}={Yincomplete}\n'
+        header += f'{channel_tags['SCANAREA'][0]}={XReal}\n{channel_tags['SCANAREA'][1]}={YReal}\n'
+        header += f'{channel_tags['SCANNERCENTERPOSITION'][0]}={XOffset}\n{channel_tags['SCANNERCENTERPOSITION'][1]}={YOffset}\n'
+        if rotation is not None and 'ROTATION' in channel_tags:
+            header += f'{channel_tags['ROTATION']}={round(rotation)}\n' # header is optional, not each filetype has it...
+        header += f'{channel_tags['XYUNIT']}=m\n'
+        if self.height_indicator in channel:
+            header += f'{channel_tags['ZUNIT'][0]}=m\n'
+        else:
+            header += f'{channel_tags['ZUNIT'][0]}=\n'
+        # header += f'XRes={int(XRes)}\nYRes={int(YRes)}\n'
+        # header += f'XReal={XReal}\nYReal={YReal}\n'
+        # header += f'XOffset={XOffset}\nYOffset={YOffset}\n'
+        # if rotation is not None:
+        #     header += f'Rotation={round(rotation)}\n' # header is optional, not each filetype has it...
+        # header += f'XYUnits=m\n'
+        # if self.height_indicator in channel:
+        #     header += 'ZUnits=m\n'
+        # else:
+        #     header += 'ZUnits=\n'
         # lenght = header.count('\n')
         length = len(header)
         number = 4 - ((length) % 4)
@@ -5453,13 +5498,14 @@ class ApproachCurve(FileHandler):
         # scale the x data to nm
         x_scaling = 1
         x_unit = self._get_measurement_tag_dict_unit(MeasurementTags.SCANAREA)
+        print(f'Scaling x data from {x_unit} to nm.')
 
         # we want to convert the xaxis to nm
-        if x_unit == '[µm]':
+        if x_unit == 'µm':
             x_scaling = pow(10,3)
-        elif x_unit == '[nm]':
+        elif x_unit == 'nm':
             x_scaling = 1
-        elif x_unit == '[m]':
+        elif x_unit == 'm':
                 x_scaling = pow(10,9)
         # ok forget about that, the software from neaspec saves the scan area parameters as µm but the actual data is stored in m...
         x_scaling = pow(10,9)
@@ -5641,14 +5687,16 @@ class Scan3D(FileHandler):
         x_scaling = 1
         # try: x_unit = self.measurement_tag_dict[MeasurementTags.SCANAREA][0]
         x_unit = self._get_measurement_tag_dict_unit(MeasurementTags.SCANAREA)
+        # print(f'3dscan load data Scaling x data from {x_unit} to nm.')
+
         # except: x_unit = None
         # else:
         # we want to convert the xaxis to nm
-        if x_unit == '[µm]':
+        if x_unit == 'µm':
             x_scaling = pow(10,3)
-        elif x_unit == '[nm]':
+        elif x_unit == 'nm':
             x_scaling = 1
-        elif x_unit == '[m]':
+        elif x_unit == 'm':
                 x_scaling = pow(10,9)
         # ok forget about that, the software from neaspec saves the scan area parameters as µm but the actual data is stored in m...
         x_scaling = pow(10,9)
@@ -5706,8 +5754,9 @@ class Scan3D(FileHandler):
         # YRes, XRes = cutplane_data.shape # cutplane data might have been
         XRange, YRange, ZRange = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
         XYZUnit = self._get_measurement_tag_dict_unit(MeasurementTags.SCANAREA)
+        # print(f'XRange: {XRange}, YRange: {YRange}, ZRange: {ZRange}, XYZUnit: {XYZUnit}')
         # convert Range to nm
-        if XYZUnit == '[µm]':
+        if XYZUnit == 'µm':
             XRange = XRange*1e3
             YRange = YRange*1e3
             ZRange = ZRange*1e3
@@ -5896,7 +5945,7 @@ class Scan3D(FileHandler):
         XRange, YRange, ZRange = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
         XYZUnit = self._get_measurement_tag_dict_unit(MeasurementTags.SCANAREA)
         # convert Range to nm
-        if XYZUnit == '[µm]':
+        if XYZUnit == 'µm':
             XRange = XRange*1e3
             YRange = YRange*1e3
             ZRange = ZRange*1e3
@@ -5984,7 +6033,7 @@ class Scan3D(FileHandler):
         XRange, YRange, ZRange = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
         XYZUnit = self._get_measurement_tag_dict_unit(MeasurementTags.SCANAREA)
         # convert Range to nm
-        if XYZUnit == '[µm]':
+        if XYZUnit == 'µm':
             XRange = XRange*1e3
             YRange = YRange*1e3
             ZRange = ZRange*1e3
