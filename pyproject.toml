@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta" # If not defined, then legacy behavior c
 
 [project]
 name = "snom_analysis" # REQUIRED, is the only field that cannot be marked as dynamic.
-version = "0.1.27" # REQUIRED, although can be dynamic
+version = "0.1.28" # REQUIRED, although can be dynamic
 description = "Package for displaying and manipulating SNOM and AFM data"
 readme = "README_short.rst"
 requires-python = ">=3.9"

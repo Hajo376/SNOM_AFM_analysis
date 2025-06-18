@@ -31,6 +31,7 @@ import numpy as np
 from datetime import datetime
 from pathlib import Path, PurePath
 import os
+import sys
 import pickle as pkl # for saving and loading pickle files, the plot memory is saved in a pickle file
 import gc # garbage collector to free memory
 import json # for saving and loading json files like the plotting parameters, easy to view and edit by the user
@@ -1607,7 +1608,8 @@ class FileHandler(PlotDefinitions):
         self.overlain_amp_channels = [channel+'_overlain' for channel in self.amp_channels]
         
         self.all_channels_custom = self.height_channels + self.complex_channels + self.overlain_phase_channels + self.overlain_amp_channels + self.corrected_phase_channels + self.corrected_overlain_phase_channels
-  
+        self.all_channels_custom += [channel + self.channel_suffix_manipulated for channel in self.all_channels_default]
+
     def _create_channel_tag_dict(self, channels:list=None):
         """This function reads in the header of the gsf file for the specified channel and extracts the tag values. The tag values are stored in a dictionary for each channel.
         This tag dict is very similar to the measurement_tag_dict, but the measurement_tag_dict is only created on the basis of the parameter file.
@@ -2751,8 +2753,12 @@ class SnomMeasurement(FileHandler):
                 elif self.channel_suffix_synccorrected_phase in channel:
                     appendix = ''
             else:
-                print('channel not found in default or custom channels')
-                exit()
+                print('channel not found in default or custom channels\nNo appendix will be added to the filename')
+                # assume an unknown custom channel was encountered
+                suffix = self.channel_suffix_custom
+                prefix = self.channel_prefix_custom
+                channel_type = 'custom'
+                # sys.exit()
             filepath = self.directory_name / Path(self.filename.name + f'{prefix}{channel}{suffix}{appendix}.gsf')
             data = self.all_data[self.channels.index(channel)]
             XRes = len(data[0])

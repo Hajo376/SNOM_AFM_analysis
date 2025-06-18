@@ -56,7 +56,7 @@ class PhaseSlider():
         ax_phaseshift = plt.axes([0.25, 0.1, 0.65, 0.03])
         self.phase_slider = Slider(
             ax=ax_phaseshift,
-            label='Frequency [Hz]',
+            label='Phase (rad)',
             valmin=0.0,
             valmax=np.pi*2,
             valinit=initial_shift,
