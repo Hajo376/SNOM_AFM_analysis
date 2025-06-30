@@ -469,6 +469,16 @@ def test_find_measurement_type():
     print(handler.measurement_type)
     print(handler.file_type)
 
+def test_delete_data():
+    # the copy has to be remade everytime you want to delete data, otherwise the data will not be deleted
+    directory_name = 'tests/testdata/test_delete/2024-03-28 164507 PH just_incoupler_square'
+    measurement = SnomMeasurement(directory_name)
+    measurement.display_channels()
+    measurement.delete_unwanted_files(mechanical_channels=True, optical_channels=True, images_folder=True, gwy_file=True)
+    # measurement.cut_channels()
+    # measurement.set_min_to_zero(['Z C'])
+    # measurement.display_channels()
+
 #########################################
 #### Examples used in documentation: ####
 #########################################
@@ -776,7 +786,7 @@ def main():
     # correct_phase_drift_nonlinear()
     # synccorrection()
     # test_aachen_files()
-    test_export_to_gsf()
+    # test_export_to_gsf()
     # test_gif()
     # test_3d_scan()
     # average_3d_scan()
@@ -793,6 +803,7 @@ def main():
     # test_comsol_height_data()
     # test_approach_curve()
     # test_find_measurement_type()
+    test_delete_data()
 
     ################################
     #### Documentation examples ####

@@ -136,16 +136,17 @@ class FileHandler(PlotDefinitions):
         config['FILETYPE1'] = {
             'filetype': '<standard_new>',
             'parametertype': '<new_parameters_txt>',
-            'phase_channels': ['O1P','O2P','O3P','O4P','O5P', 'R-O1P','R-O2P','R-O3P','R-O4P','R-O5P'],
-            'amp_channels': ['O1A','O2A','O3A','O4A','O5A', 'R-O1A','R-O2A','R-O3A','R-O4A','R-O5A'],
-            'real_channels': ['O1Re', 'O2Re', 'O3Re', 'O4Re', 'R-O5Re', 'R-O1Re', 'R-O2Re', 'R-O3Re', 'R-O4Re', 'R-O5Re'],
-            'imag_channels': ['O1Im', 'O2Im', 'O3Im', 'O4Im', 'R-O5Im', 'R-O1Im', 'R-O2Im', 'R-O3Im', 'R-O4Im', 'R-O5Im'],
+            'phase_channels': ['O0P','O1P','O2P','O3P','O4P','O5P','R-O0P','R-O1P','R-O2P','R-O3P','R-O4P','R-O5P'],
+            'amp_channels': ['O0A','O1A','O2A','O3A','O4A','O5A','R-O0A','R-O1A','R-O2A','R-O3A','R-O4A','R-O5A'],
+            'real_channels': ['O0Re','O1Re', 'O2Re', 'O3Re', 'O4Re', 'O5Re', 'R-O0Re','R-O1Re', 'R-O2Re', 'R-O3Re', 'R-O4Re', 'R-O5Re'],
+            'imag_channels': ['O0Im','O1Im', 'O2Im', 'O3Im', 'O4Im', 'O5Im', 'R-O0Im','R-O1Im', 'R-O2Im', 'R-O3Im', 'R-O4Im', 'R-O5Im'],
             'height_channel': '<Z C>',
             'height_channels': ['Z C', 'R-Z C'],
             'mechanical_channels': ['M0A', 'M0P', 'M1A', 'M1P', 'M2A', 'M2P', 'M3A', 'M3P', 'M4A', 'M4P', 'M5A', 'M5P', 'R-M0A', 'R-M0P', 'R-M1A', 'R-M1P', 'R-M2A', 'R-M2P', 'R-M3A', 'R-M3P', 'R-M4A', 'R-M4P', 'R-M5A', 'R-M5P'],
             'preview_ampchannel': '<O2A>',
             'preview_phasechannel': '<O2P>',
             'preview_channels': ['O2A', 'O2P', 'Z C'],
+            'channels_to_delete': ['EA', 'EP', 'M', 'M0A', 'M2A', 'M3A', 'M4A', 'M5A', 'M0P', 'M2P', 'M3P', 'M4P', 'M5P', 'R-EA', 'R-EP', 'R-M', 'R-M0A', 'R-M2A', 'R-M3A', 'R-M4A', 'R-M5A', 'R-M0P', 'R-M2P', 'R-M3P', 'R-M4P', 'R-M5P', 'Z', 'R-Z'],
             'height_indicator': '<Z>',
             'amp_indicator': '<A>',
             'phase_indicator': '<P>',
@@ -221,16 +222,17 @@ class FileHandler(PlotDefinitions):
         config['FILETYPE2'] = {
             'filetype': '<standard>',
             'parametertype': '<new_parameters_txt>',
-            'phase_channels': ['O1P','O2P','O3P','O4P','O5P', 'R-O1P','R-O2P','R-O3P','R-O4P','R-O5P'],
-            'amp_channels': ['O1A','O2A','O3A','O4A','O5A', 'R-O1A','R-O2A','R-O3A','R-O4A','R-O5A'],
-            'real_channels': ['O1Re', 'O2Re', 'O3Re', 'O4Re', 'R-O5Re', 'R-O1Re', 'R-O2Re', 'R-O3Re', 'R-O4Re', 'R-O5Re'],
-            'imag_channels': ['O1Im', 'O2Im', 'O3Im', 'O4Im', 'R-O5Im', 'R-O1Im', 'R-O2Im', 'R-O3Im', 'R-O4Im', 'R-O5Im'],
+            'phase_channels': ['O0P','O1P','O2P','O3P','O4P','O5P','R-O0P''R-O1P','R-O2P','R-O3P','R-O4P','R-O5P'],
+            'amp_channels': ['O0A','O1A','O2A','O3A','O4A','O5A','R-O0A','R-O1A','R-O2A','R-O3A','R-O4A','R-O5A'],
+            'real_channels': ['O0Re','O1Re', 'O2Re', 'O3Re', 'O4Re', 'O5Re', 'R-O0Re','R-O1Re', 'R-O2Re', 'R-O3Re', 'R-O4Re', 'R-O5Re'],
+            'imag_channels': ['O0Im','O1Im', 'O2Im', 'O3Im', 'O4Im', 'O5Im', 'R-O0Im','R-O1Im', 'R-O2Im', 'R-O3Im', 'R-O4Im', 'R-O5Im'],
             'height_channel': '<Z C>',
             'height_channels': ['Z C', 'R-Z C'],
             'mechanical_channels': ['M0A', 'M0P', 'M1A', 'M1P', 'M2A', 'M2P', 'M3A', 'M3P', 'M4A', 'M4P', 'M5A', 'M5P', 'R-M0A', 'R-M0P', 'R-M1A', 'R-M1P', 'R-M2A', 'R-M2P', 'R-M3A', 'R-M3P', 'R-M4A', 'R-M4P', 'R-M5A', 'R-M5P'],
             'preview_ampchannel': '<O2A>',
             'preview_phasechannel': '<O2P>',
             'preview_channels': ['O2A', 'O2P', 'Z C'],
+            'channels_to_delete': ['EA', 'EP', 'M', 'M0A', 'M2A', 'M3A', 'M4A', 'M5A', 'M0P', 'M2P', 'M3P', 'M4P', 'M5P', 'R-EA', 'R-EP', 'R-M', 'R-M0A', 'R-M2A', 'R-M3A', 'R-M4A', 'R-M5A', 'R-M0P', 'R-M2P', 'R-M3P', 'R-M4P', 'R-M5P', 'Z', 'R-Z'],
             'height_indicator': '<Z>',
             'amp_indicator': '<A>',
             'phase_indicator': '<P>',
@@ -316,6 +318,7 @@ class FileHandler(PlotDefinitions):
             'preview_ampchannel': '<O2-F-abs>',
             'preview_phasechannel': '<O2-F-arg>',
             'preview_channels': ['O2-F-abs', 'O2-F-arg', 'MT-F-abs'],
+            'channels_to_delete': [],
             'height_indicator': '<MT>',
             'amp_indicator': '<abs>',
             'phase_indicator': '<arg>',
@@ -382,6 +385,7 @@ class FileHandler(PlotDefinitions):
             'preview_ampchannel': '<O2-F-abs>',
             'preview_phasechannel': '<O2-F-arg>',
             'preview_channels': ['O2-F-abs', 'O2-F-arg', 'MT-F-abs'],
+            'channels_to_delete': [],
             'height_indicator': '<MT>',
             'amp_indicator': '<abs>',
             'phase_indicator': '<arg>',
@@ -436,16 +440,17 @@ class FileHandler(PlotDefinitions):
         config['FILETYPE5'] = {
             'filetype': '<standard>',
             'parametertype': '<new_parameters_txt>',
-            'phase_channels': ['O1P','O2P','O3P','O4P','O5P', 'R-O1P','R-O2P','R-O3P','R-O4P','R-O5P'],
-            'amp_channels': ['O1A','O2A','O3A','O4A','O5A', 'R-O1A','R-O2A','R-O3A','R-O4A','R-O5A'],
-            'real_channels': ['O1Re', 'O2Re', 'O3Re', 'O4Re', 'R-O5Re', 'R-O1Re', 'R-O2Re', 'R-O3Re', 'R-O4Re', 'R-O5Re'],
-            'imag_channels': ['O1Im', 'O2Im', 'O3Im', 'O4Im', 'R-O5Im', 'R-O1Im', 'R-O2Im', 'R-O3Im', 'R-O4Im', 'R-O5Im'],
+            'phase_channels': ['O0P','O1P','O2P','O3P','O4P','O5P','R-O0P','R-O1P','R-O2P','R-O3P','R-O4P','R-O5P'],
+            'amp_channels': ['O0A','O1A','O2A','O3A','O4A','O5A','R-O0A','R-O1A','R-O2A','R-O3A','R-O4A','R-O5A'],
+            'real_channels': ['O0Re','O1Re', 'O2Re', 'O3Re', 'O4Re', 'O5Re', 'R-O0Re','R-O1Re', 'R-O2Re', 'R-O3Re', 'R-O4Re', 'R-O5Re'],
+            'imag_channels': ['O0Im','O1Im', 'O2Im', 'O3Im', 'O4Im', 'O5Im', 'R-O0Im','R-O1Im', 'R-O2Im', 'R-O3Im', 'R-O4Im', 'R-O5Im'],
             'height_channel': '<Z C>',
             'height_channels': ['Z C', 'R-Z C'],
             'mechanical_channels': ['M0A', 'M0P', 'M1A', 'M1P', 'M2A', 'M2P', 'M3A', 'M3P', 'M4A', 'M4P', 'M5A', 'M5P', 'R-M0A', 'R-M0P', 'R-M1A', 'R-M1P', 'R-M2A', 'R-M2P', 'R-M3A', 'R-M3P', 'R-M4A', 'R-M4P', 'R-M5A', 'R-M5P'],
             'preview_ampchannel': '<O2A>',
             'preview_phasechannel': '<O2P>',
             'preview_channels': ['O2A', 'O2P', 'Z C'],
+            'channels_to_delete': ['EA', 'EP', 'M', 'M0A', 'M2A', 'M3A', 'M4A', 'M5A', 'M0P', 'M2P', 'M3P', 'M4P', 'M5P', 'R-EA', 'R-EP', 'R-M', 'R-M0A', 'R-M2A', 'R-M3A', 'R-M4A', 'R-M5A', 'R-M0P', 'R-M2P', 'R-M3P', 'R-M4P', 'R-M5P', 'Z', 'R-Z'],
             'height_indicator': '<Z>',
             'amp_indicator': '<A>',
             'phase_indicator': '<P>',
@@ -532,6 +537,7 @@ class FileHandler(PlotDefinitions):
             'preview_ampchannel': '<abs>',
             'preview_phasechannel': '<arg>',
             'preview_channels': ['abs', 'arg'],
+            'channels_to_delete': [],
             'height_indicator': '<Z>',
             'amp_indicator': '<abs>',
             'phase_indicator': '<arg>',
@@ -661,13 +667,21 @@ class FileHandler(PlotDefinitions):
                 f.write('axes.formatter.min_exponent: 0\n')
         plt.style.use(self.mpl_style_path)
 
-    def print_config(self):
+    def print_config(self, section:str=None):
         """This function prints the config file.
         """
-        for section in self.config.sections():
-            print(section)
-            for option in self.config.options(section):
-                print(f'{option} = {self.config.get(section, option)}')
+        if section is None:
+            for section in self.config.sections():
+                print(section)
+                for option in self.config.options(section):
+                    print(f'{option} = {self.config.get(section, option)}')
+        else:
+            if section in self.config.sections():
+                print(section)
+                for option in self.config.options(section):
+                    print(f'{option} = {self.config.get(section, option)}')
+            else:
+                print(f'Section {section} not found in config file!')
 
     def _change_config(self, section:str, option:str, value):
         """This function changes the config file.
@@ -743,12 +757,14 @@ class FileHandler(PlotDefinitions):
         filetypes = self._get_from_config(section='FILETYPES')
         for key in filetypes:
             filetype = self._get_from_config(key, 'FILETYPES')
+            # print('Trying to find filetype: ', filetype)
             parameters_name = self._get_from_config('parameters_name', filetype)
             parameters_path = self.directory_name / Path(self.filename.name + parameters_name)
             # try to create the measurement tag dict
             succsess = self._create_measurement_tag_dict(parameters_path, filetype)
             # if succsess:
-            #     print('measurement tag dict: ', self.measurement_tag_dict)
+                # print('measurement tag dict: ', self.measurement_tag_dict)
+                # print('Measurement tag dict was created successfully')
             # the correct creation of teh measurement tag dict is not enough to determine the filetype
             # try to also to create the channel tag dict for one arbitrary channel
             # self._initialize_file_type()
@@ -767,7 +783,12 @@ class FileHandler(PlotDefinitions):
             if self.measurement_type == MeasurementTypes.NONE:
                 self._find_measurement_type()
             if self.measurement_type == MeasurementTypes.SNOM:
-                try: self._create_channel_tag_dict([self.all_channels_default[0]])
+                channels = self.all_channels_default + self.all_channels_custom # to make sure at least one channel is available
+                # print(f'Using default channels: {default_channels}')
+                channels = self._get_existing_channels(channels)
+                # print(f'Existing channels: {channels}')
+                # try: self._create_channel_tag_dict([self.all_channels_default[0]])
+                try: self._create_channel_tag_dict([channels[0]])
                 except: 
                     succsess = False
             self.file_type = None
@@ -1564,10 +1585,11 @@ class FileHandler(PlotDefinitions):
         self.height_channel = self._get_from_config('height_channel')
         self.height_channels = self._get_from_config('height_channels')
         self.mechanical_channels = self._get_from_config('mechanical_channels')
-        self.all_channels_default = self.phase_channels + self.amp_channels + self.mechanical_channels
+        self.all_channels_default = self.phase_channels + self.amp_channels + self.mechanical_channels # only channels to which the default parameters apply, like prefix and suffix
         self.preview_ampchannel = self._get_from_config('preview_ampchannel')
         self.preview_phasechannel = self._get_from_config('preview_phasechannel')
         self.preview_channels = self._get_from_config('preview_channels')
+        self.channels_to_delete = self._get_from_config('channels_to_delete')
         self.height_indicator = self._get_from_config('height_indicator')
         self.amp_indicator = self._get_from_config('amp_indicator')
         self.phase_indicator = self._get_from_config('phase_indicator')
@@ -1723,7 +1745,34 @@ class FileHandler(PlotDefinitions):
             channel_dict[ChannelTags.PIXELSCALING] = 1
                     
             self.channel_tag_dict.append(channel_dict)
+    
+    def _get_existing_channels(self, channels:list) -> list:
+        """This function checks if the specified channels exist in the measurement.
+        If not a reduced list of channels is returned which only contains the channels that exist.
+    
 
+        Args:
+            channels (list): List of channels to check
+
+        Returns:
+            list: List of channels that exist in the measurement
+        """
+        # try to load the data for the specified channels
+        existing_channels = []
+        for channel in channels:
+            if channel in self.all_channels_default:
+                suffix = self.channel_suffix_default
+                prefix = self.channel_prefix_default
+            elif channel in self.all_channels_custom:
+                suffix = self.channel_suffix_custom
+                prefix = self.channel_prefix_custom
+            # check if the channel exists in the measurement
+            filepath = self.directory_name / Path(self.filename.name + f'{prefix}{channel}{suffix}.gsf')
+            # print(f'Checking if {filepath} exists...')
+            if filepath.exists():
+                existing_channels.append(channel)
+        return existing_channels
+            
 
 # this could be split in AFM and SNOM measurement classes where AFM has all the base functions and SNOM inherits from it
 # make it easier for AFM users to finde the functions they need
@@ -1743,6 +1792,13 @@ class SnomMeasurement(FileHandler):
         self._initialize_measurement_channel_indicators()
         if channels == None: # the standard channels which will be used if no channels are specified
             channels = self.preview_channels
+            # check if the preview channels are available, if not reduce the list to the existing channels
+            channels = self._get_existing_channels(channels)
+            if len(channels) == 0:
+                print('No preview channels found, using default height channels.')
+                # use the height channels as default channels
+                channels = self.height_channels
+                channels = self._get_existing_channels(channels)
         self.channels = channels.copy() # make sure to copy the list to avoid changing the original list     
         self.autoscale = autoscale
         self._initialize_data(self.channels)
@@ -1780,6 +1836,64 @@ class SnomMeasurement(FileHandler):
             channels [list]: a list containing the channels you want to initialize
         """
         self._initialize_data(channels)
+
+    def delete_unwanted_files(self, mechanical_channels=True, optical_channels=False, images_folder=True, gwy_file=True) -> None:
+        """Delete unwanted files to reduce the size of the measurement folder.
+        Careful! This will delete files from the measurement folder, so make sure to have a backup of the data before running this function.
+        If you select mechanical_channels, all mechanical channels will be deleted. This does not include the mechanical amplitude and phase of the first demodulation
+        and not the corrected height channels. This is the recommended choice for SNOM users.
+        If you select optical_channels, all optical channels will be deleted. This in combination with mechanical_channels is the recommended choice for AFM only users.
+        If you select images_folder, the images folder will be deleted. This is the recommended choice for all users as you probably don't use the small preview images.
+        If you select gwy_file, the gwy file will be deleted. This is the recommended choice for all users as you probably don't use the gwy file and it contains an 
+        additional copy of all channels.
+
+        Args:
+            mechanical_channels (bool, optional): Mechanical channels to delete, excluded are mechanical amp and phase and corrected height. Defaults to True.
+            optical_channels (bool, optional): Optical channels to delete, this will delete all default optical channels. Defaults to False.
+            images_folder (bool, optional): This will delete the images subfolder and its content. Defaults to True.
+            gwy_file (bool, optional): This will delete the 'gwy' file if there is one. Defaults to True.
+        """
+        if mechanical_channels:
+            for channel in self.channels_to_delete:
+                filepath = self.directory_name / Path(self.filename.name + f'{self.channel_prefix_default}{channel}{self.channel_suffix_default}.gsf')
+                if filepath.exists():
+                    print(f'Deleting {filepath}')
+                    os.remove(filepath)
+                else:
+                    print(f'File {filepath} does not exist, skipping deletion.')
+        
+        if optical_channels:
+            channels = self.amp_channels + self.phase_channels + self.real_channels + self.imag_channels
+            for channel in channels:
+                filepath = self.directory_name / Path(self.filename.name + f'{self.channel_prefix_default}{channel}{self.channel_suffix_default}.gsf')
+                if filepath.exists():
+                    print(f'Deleting {filepath}')
+                    os.remove(filepath)
+                else:
+                    print(f'File {filepath} does not exist, skipping deletion.')
+        
+        if images_folder:
+            images_folder = self.directory_name / 'Images'
+            if images_folder.exists() and images_folder.is_dir():
+                print(f'Deleting folder {images_folder}')
+                for item in images_folder.iterdir():
+                    if item.is_file():
+                        print(f'Deleting file {item}')
+                        item.unlink()
+                    elif item.is_dir():
+                        print(f'Deleting subfolder {item}')
+                        item.rmdir()
+                images_folder.rmdir()  # Remove the empty folder itself
+            else:
+                print(f'Folder {images_folder} does not exist, skipping deletion.')
+        
+        if gwy_file:
+            gwy_file = self.directory_name / Path(self.filename.name + '.gwy')
+            if gwy_file.exists():
+                print(f'Deleting {gwy_file}')
+                os.remove(gwy_file)
+            else:
+                print(f'File {gwy_file} does not exist, skipping deletion.')
 
     def add_channels(self, channels:list) -> None:
         """This function will add the specified channels to memory without changing the already existing ones.
