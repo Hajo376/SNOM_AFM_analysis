@@ -4224,8 +4224,6 @@ class SnomMeasurement(FileHandler):
         self._auto_cut_channels(channels, self.mask_array)
         gc.collect()
 
-    # todo this function needs improvement, cutting should be based on a mask rather than rows and colums being filled with zeros
-    # especially for simulation data where manually created height data can be exactly zero
     def _auto_cut_channels(self, channels:list=None, mask_array:np.array=None) -> None:
         """This function automatically cuts away all rows and lines which are only filled with zeros.
         This function applies to all channels in memory.
