@@ -118,6 +118,13 @@ def test_cut():
     measurement.cut_channels(coords=[[6, 8], [43, 41]]) # autocut will remove all empty lines and columns
     measurement.display_channels()
 
+def test_cut_comsol():
+    directory_name = 'tests/testdata/DLSPPW_bragg_8slits_Ex_ongold'
+    channels = ['abs', 'arg', 'Z']
+    measurement = SnomMeasurement(directory_name, channels)
+    measurement.cut_channels()
+    measurement.display_channels()
+
 def test_height_masking():
     directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
     channels = ['O2P', 'O2A', 'Z C']
@@ -778,6 +785,7 @@ def main():
     #######################################################################################
     # test_realign()
     # test_cut()
+    test_cut_comsol()
     # test_height_masking()
     # test_scalebar()
     # test_phaseshift()
@@ -803,7 +811,7 @@ def main():
     # test_comsol_height_data()
     # test_approach_curve()
     # test_find_measurement_type()
-    test_delete_data()
+    # test_delete_data()
 
     ################################
     #### Documentation examples ####

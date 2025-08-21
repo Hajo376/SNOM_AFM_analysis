@@ -214,8 +214,8 @@ class FileHandler(PlotDefinitions):
                 'ROTATION': 'Neaspec_Angle',
                 'SCANAREA': ['XReal', 'YReal'],
                 'SCANNERCENTERPOSITION': ['XOffset', 'YOffset'],
-                'XYUNIT': 'XYUnits',
-                'ZUNIT': 'ZUnits',
+                'XYUNIT': 'XYUnit',
+                'ZUNIT': 'ZUnit',
                 'WAVENUMBERSCALING': 'Neaspec_WavenumberScaling',
             },
         }
@@ -300,11 +300,12 @@ class FileHandler(PlotDefinitions):
                 # 'ROTATION': 'Neaspec_Angle',
                 'SCANAREA': ['XReal', 'YReal'],
                 'SCANNERCENTERPOSITION': ['XOffset', 'YOffset'],
-                'XYUNIT': 'XYUnits',
-                'ZUNIT': 'ZUnits',
+                'XYUNIT': 'XYUnit',
+                'ZUNIT': 'ZUnit',
                 'WAVENUMBERSCALING': 'Neaspec_WavenumberScaling',
             },
         }
+        # this filetype is not supported yet
         config['FILETYPE3'] = {
             'filetype': '<aachen_ascii>',
             'parametertype': '<new_parameters_txt>',
@@ -371,7 +372,7 @@ class FileHandler(PlotDefinitions):
 
 
         }
-        # this filetype is not supported yet
+        # this filetype is not fully supported yet
         config['FILETYPE4'] = {
             'filetype': '<aachen_dumb>',
             'parametertype': '<new_parameters_txt>',
@@ -518,8 +519,8 @@ class FileHandler(PlotDefinitions):
                 # 'ROTATION': 'Neaspec_Angle',
                 'SCANAREA': ['XReal', 'YReal'],
                 'SCANNERCENTERPOSITION': ['XOffset', 'YOffset'],
-                'XYUNIT': 'XYUnits',
-                'ZUNIT': 'ZUnits',
+                'XYUNIT': 'XYUnit',
+                'ZUNIT': 'ZUnit',
                 'WAVENUMBERSCALING': 'Neaspec_WavenumberScaling',
             },
         }
@@ -607,8 +608,8 @@ class FileHandler(PlotDefinitions):
                 # 'ROTATION': 'Neaspec_Angle',
                 'SCANAREA': ['XReal', 'YReal'],
                 'SCANNERCENTERPOSITION': ['XOffset', 'YOffset'],
-                'XYUNIT': 'XYUnits',
-                # 'ZUNIT': 'ZUnits',
+                'XYUNIT': 'XYUnit',
+                'ZUNIT': 'ZUnit',
                 # 'WAVENUMBERSCALING': 'Neaspec_WavenumberScaling',
             },
         }
@@ -2844,8 +2845,8 @@ class SnomMeasurement(FileHandler):
         Args:
             channels (list, optional):    list of the channels to be saved, if not specified, all channels in memory are saved.
                                 Careful! The data will be saved as it is right now, so with all the manipulations.
-                                Therefor the data will have an '_manipulated' appendix in the filename.
-            appendix (str, optional):     appendix to add to the filename, default is the default specified in the config of the current filetype.
+                                Therefor the data should be saved with an appendix in the filename to keep the original data.
+            appendix (str, optional):     appendix/suffix to add to the filename, default is the default specified in the config of the current filetype.
         """
         if appendix == 'default':
             appendix = self.channel_suffix_manipulated
@@ -4220,10 +4221,12 @@ class SnomMeasurement(FileHandler):
                     # set all values outside of the mask to zero and then cut all zero away from the outside with _auto_cut_channels(channels)
                     self.all_data[index] = np.multiply(self.all_data[index], self.mask_array)
         # apply the auto cut function to remove masked areas around the data
-        self._auto_cut_channels(channels)
+        self._auto_cut_channels(channels, self.mask_array)
         gc.collect()
 
-    def _auto_cut_channels(self, channels:list=None) -> None:
+    # todo this function needs improvement, cutting should be based on a mask rather than rows and colums being filled with zeros
+    # especially for simulation data where manually created height data can be exactly zero
+    def _auto_cut_channels(self, channels:list=None, mask_array:np.array=None) -> None:
         """This function automatically cuts away all rows and lines which are only filled with zeros.
         This function applies to all channels in memory.
 
@@ -4234,7 +4237,8 @@ class SnomMeasurement(FileHandler):
             channels = self.channels
         
         # get the new size of the reduced channels
-        reduced_data = self._auto_cut_data(self.all_data[0])
+        # reduced_data = self._auto_cut_data(self.all_data[0])
+        reduced_data = self._auto_cut_data(mask_array)
         yres = len(reduced_data)
         xres = len(reduced_data[0])
         for channel in channels:
@@ -4242,7 +4246,7 @@ class SnomMeasurement(FileHandler):
             # get the old size of the data
             xres, yres, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
             xreal, yreal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
-            self.all_data[index] = self._auto_cut_data(self.all_data[index])
+            self.all_data[index] = self._auto_cut_data(self.all_data[index], mask_array)
             xres_new = len(self.all_data[index][0])
             yres_new = len(self.all_data[index])
             xreal_new = xreal*xres_new/xres
@@ -4254,27 +4258,38 @@ class SnomMeasurement(FileHandler):
             self.channels_label[index] += '_reduced'
         self._write_to_logfile('cut', 'autocut')
 
-    def _auto_cut_data(self, data) -> np.array:
+    def _auto_cut_data(self, data, mask_array:np.array=None) -> np.array:
         """This function cuts the data and removes zero values from the outside."""
         xres = len(data[0])
         yres = len(data)
         # find empty columns and rows to delete:
         columns = []
-        for x in range(xres):
-            add_to_columns = True
-            for y in range(yres):
-                if data[y][x] != 0:
-                    add_to_columns = False
-            if add_to_columns == True:
-                columns.append(x)
         rows = []
-        for y in range(yres):
-            add_to_rows = True
+        if mask_array is not None:
+            # if a mask array is given, use it to find empty columns and rows
             for x in range(xres):
-                if data[y][x] != 0:
-                    add_to_rows = False
-            if add_to_rows == True:
-                rows.append(y)
+                if np.all(mask_array[:, x] == 0):
+                    columns.append(x)
+            for y in range(yres):
+                if np.all(mask_array[y, :] == 0):
+                    rows.append(y)
+
+        else:    
+            for x in range(xres):
+                add_to_columns = True
+                for y in range(yres):
+                    if data[y][x] != 0:
+                        add_to_columns = False
+                if add_to_columns == True:
+                    columns.append(x)
+            rows = []
+            for y in range(yres):
+                add_to_rows = True
+                for x in range(xres):
+                    if data[y][x] != 0:
+                        add_to_rows = False
+                if add_to_rows == True:
+                    rows.append(y)
         
         # create reduced data array
         x_reduced = xres - len(columns)
