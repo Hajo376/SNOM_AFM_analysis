@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: snom_analysis
-Version: 0.1.30
+Version: 0.1.31
 Summary: Package for displaying and manipulating SNOM and AFM data
 Author-email: "H.-J. Schill" <hajo.schill@acetovit.de>
 Maintainer-email: "H.-J. Schill" <hajo.schill@acetovit.de>

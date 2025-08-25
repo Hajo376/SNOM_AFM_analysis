@@ -2242,9 +2242,9 @@ class SnomMeasurement(FileHandler):
         """
         number_of_axis = 9
         number_of_subplots = len(subplots)
+
         #specify the way the subplots are organized
         nrows = int((number_of_subplots-1)/np.sqrt(number_of_axis))+1
-
         if nrows >=2:
             ncols = int(np.sqrt(number_of_axis))
         elif nrows == 1:
@@ -2252,6 +2252,7 @@ class SnomMeasurement(FileHandler):
         else:
             print('Number of subplots must be lager than 0!')
             exit()
+
         changed_orientation = False
         if number_of_subplots == 4:
             ncols = 2
@@ -2265,13 +2266,15 @@ class SnomMeasurement(FileHandler):
             nrows = number_of_subplots
             ncols = 1
             changed_orientation = True
-        #create the figure with subplots
-        fig, ax = plt.subplots(nrows, ncols)    
-        fig.set_figheight(self.figsizey)
-        fig.set_figwidth(self.figsizex) 
         
         # get the plotting style from the mpl style file and apply it
         self._load_mpl_style()
+
+        #create the figure with subplots
+        fig, ax = plt.subplots(nrows, ncols) # , constrained_layout=True    
+        fig.set_figheight(self.figsizey)
+        fig.set_figwidth(self.figsizex) 
+        
 
         #start the plotting process
         counter = 0
@@ -2389,6 +2392,8 @@ class SnomMeasurement(FileHandler):
                     # cax = divider.append_axes("right", size=f"{self.colorbar_width}%", pad=0.05) # size is the size of colorbar relative to original axis, 100% means same size, 10% means 10% of original
                     cax = divider.append_axes("right", size=f"{calculate_colorbar_size(fig, axis, self.colorbar_width)}%", pad=0.05) # size is the size of colorbar relative to original axis, 100% means same size, 10% means 10% of original
                     cbar = plt.colorbar(img, aspect=1, cax=cax)
+                    # cbar = fig.colorbar(img, cax=cax, label=label)
+                    # cbar = fig.colorbar(img, ax=axis)
                     cbar.ax.get_yaxis().labelpad = 15
                     cbar.ax.set_ylabel(label, rotation=270)
                     if self.hide_ticks == True:
@@ -2397,6 +2402,7 @@ class SnomMeasurement(FileHandler):
                         axis.set_yticks([])
                     if self.show_titles == True:
                         axis.set_title(title)
+                    
                     axis.axis('scaled')
                     counter += 1
 
@@ -2410,12 +2416,199 @@ class SnomMeasurement(FileHandler):
                 counter += 1
 
         plt.subplots_adjust(hspace=PlotDefinitions.hspace)
-        if self.tight_layout is True:
+        # fig.get_layout_engine().set(wspace=0.1)
+        if PlotDefinitions.tight_layout is True:
             plt.tight_layout()
+            # print('tight_layout')
+        # else:
+            # print('not using tight_layout')
         if PlotDefinitions.show_plot is True:
             plt.show()
         gc.collect()
     
+    def _plot_subplots_v2(self, subplots:list) -> None:
+        """This function plots the subplots. The plots are created in a grid, by default the grid is optimized for 3 by 3.
+        The layout changes dependent on the number of subplots of subplots and also the dimensions.
+        Wider subplots are prefferably created vertically, otherwise they are plotted horizontally. Probably subject to future changes...
+        
+        Args:
+            subplots (list): list of subplots to plot
+        """
+        number_of_axis = 9
+        number_of_subplots = len(subplots)
+
+        # find the optimal layout, if not user specified use a 3 column layout and add rows as needed
+        if self.nrows == 'auto' and self.ncols == 'auto':
+            #specify the way the subplots are organized
+            nrows = int((number_of_subplots-1)/np.sqrt(number_of_axis))+1
+            if nrows >=2:
+                ncols = int(np.sqrt(number_of_axis))
+            elif nrows == 1:
+                ncols = number_of_subplots
+            else:
+                print('Number of subplots must be lager than 0!')
+                exit()
+        elif self.nrows != 'auto' and self.ncols != 'auto':
+            nrows = self.nrows
+            ncols = self.ncols
+        else:
+            # seems like the user only defined one of the two... 
+            if self.nrows != 'auto' and self.ncols == 'auto':
+                nrows = self.nrows
+                # try to fill each row with same amount of cols
+                ncols = number_of_subplots // self.nrows
+                # check if we have any remaining subplots
+                if number_of_subplots % self.nrows != 0:
+                    ncols += 1
+            elif self.nrows == 'auto' and self.ncols != 'auto':
+                ncols = self.ncols
+                # try to fill each col with same amount of rows
+                nrows = number_of_subplots // self.ncols
+                # check if we have any remaining subplots
+                if number_of_subplots % self.ncols != 0:
+                    nrows += 1
+        
+        # get the plotting style from the mpl style file and apply it
+        self._load_mpl_style()
+
+        #create the figure with subplots
+        fig, axes = plt.subplots(nrows, ncols) # , constrained_layout=True    
+        fig.set_figheight(self.figsizey)
+        fig.set_figwidth(self.figsizex) 
+        
+        #start the plotting process
+        for i in range(ncols*nrows):
+            ax = fig.axes[i]
+            if i >= number_of_subplots:
+                # turn off unused axes and dont plot anything
+                # could be changed in future for dynamic layout but often not necessary
+                ax.axis('off')
+                continue
+            data = subplots[i]['data']
+            cmap = subplots[i]['cmap']
+            label = subplots[i]['label']
+            title = subplots[i]['title']
+            scalebar = subplots[i]['scalebar']
+            if scalebar is not None:
+                dx, units, dimension, scalebar_label, length_fraction, height_fraction, width_fraction, location, loc, pad, border_pad, sep, frameon, color, box_color, box_alpha, scale_loc, label_loc, font_properties, label_formatter, scale_formatter, fixed_value, fixed_units, animated, rotation = scalebar
+                scalebar = ScaleBar(dx, units, dimension, scalebar_label, length_fraction, height_fraction, width_fraction,
+                    location, loc, pad, border_pad, sep, frameon, color, box_color, box_alpha, scale_loc,
+                    label_loc, font_properties, label_formatter, scale_formatter, fixed_value, fixed_units, animated, rotation) 
+                ax.add_artist(scalebar)
+
+            #center the colorscale for real data around 0
+            # get minima and maxima from data:
+            flattened_data = data.flatten()
+            min_data = np.min(flattened_data)
+            max_data = np.max(flattened_data)
+            if self.real_indicator in title or self.imag_indicator in title: # for real part or imaginary part data
+                if self.file_type == 'FILETYPE6':
+                    data = set_nan_to_zero(data) #comsol data can contain nan values which are problematic for min and max
+                data_limit = get_largest_abs(min_data, max_data)
+                if PlotDefinitions.vlimit_real is None: PlotDefinitions.vlimit_real = data_limit
+                if PlotDefinitions.real_cbar_range is True:
+                    if PlotDefinitions.vlimit_real < data_limit: PlotDefinitions.vlimit_real = data_limit
+                    img = ax.pcolormesh(data, cmap=cmap, vmin=-PlotDefinitions.vlimit_real, vmax=PlotDefinitions.vlimit_real, rasterized=True)
+                else:
+                    img = ax.pcolormesh(data, cmap=cmap, vmin=-data_limit, vmax=data_limit, rasterized=True)
+            else:
+                if cmap == SNOM_phase and PlotDefinitions.full_phase_range is True: # for phase data
+                    vmin = 0
+                    vmax = 2*np.pi
+                    img = ax.pcolormesh(data, cmap=cmap, vmin=vmin, vmax=vmax, rasterized=True)
+                elif cmap == SNOM_phase and PlotDefinitions.full_phase_range is False:
+                    if PlotDefinitions.vmin_phase is None: PlotDefinitions.vmin_phase = min_data
+                    if PlotDefinitions.vmax_phase is None: PlotDefinitions.vmax_phase = max_data
+                    if PlotDefinitions.shared_phase_range is True:
+                        if PlotDefinitions.vmin_phase > min_data: PlotDefinitions.vmin_phase = min_data
+                        if PlotDefinitions.vmax_phase < max_data: PlotDefinitions.vmax_phase = max_data
+                    else:
+                        PlotDefinitions.vmin_phase = min_data
+                        PlotDefinitions.vmax_phase = max_data
+                    img = ax.pcolormesh(data, cmap=cmap, vmin=PlotDefinitions.vmin_phase, vmax=PlotDefinitions.vmax_phase, rasterized=True)
+                    
+                elif cmap == SNOM_amplitude and PlotDefinitions.amp_cbar_range is True:
+                    if PlotDefinitions.vmin_amp is None: PlotDefinitions.vmin_amp = min_data
+                    if PlotDefinitions.vmax_amp is None: PlotDefinitions.vmax_amp = max_data
+                    if min_data < PlotDefinitions.vmin_amp: PlotDefinitions.vmin_amp = min_data # update the min and max values in PlotDefinitions if new values are outside of range
+                    if max_data > PlotDefinitions.vmax_amp: PlotDefinitions.vmax_amp = max_data
+                    vmin = PlotDefinitions.vmin_amp
+                    vmax = PlotDefinitions.vmax_amp
+                    img = ax.pcolormesh(data, cmap=cmap, vmin=vmin, vmax=vmax, rasterized=True)
+                elif cmap == SNOM_height and PlotDefinitions.height_cbar_range is True:
+                    if PlotDefinitions.vmin_height is None: PlotDefinitions.vmin_height = min_data # initialize for the first time
+                    if PlotDefinitions.vmax_height is None: PlotDefinitions.vmax_height = max_data
+                    if min_data < PlotDefinitions.vmin_height: PlotDefinitions.vmin_height = min_data # update the min and max values in PlotDefinitions if new values are outside of range
+                    if max_data > PlotDefinitions.vmax_height: PlotDefinitions.vmax_height = max_data
+                    vmin = PlotDefinitions.vmin_height
+                    vmax = PlotDefinitions.vmax_height
+                    img = ax.pcolormesh(data, cmap=cmap, vmin=vmin, vmax=vmax, rasterized=True)
+                else:
+                    # print('not plotting full range phase')
+                    img = ax.pcolormesh(data, cmap=cmap, rasterized=True)
+            # invert y axis to fit to the scanning procedure which starts in the top left corner
+            ax.invert_yaxis()
+            divider = make_axes_locatable(ax)
+            # cax = divider.append_axes("right", size=f"{self.colorbar_width}%", pad=0.05) # size is the size of colorbar relative to original axis, 100% means same size, 10% means 10% of original
+            cax = divider.append_axes("right", size=f"{calculate_colorbar_size(fig, ax, self.colorbar_width)}%", pad=0.05) # size is the size of colorbar relative to original axis, 100% means same size, 10% means 10% of original
+            cbar = plt.colorbar(img, aspect=1, cax=cax)
+            # cbar = fig.colorbar(img, cax=cax, label=label)
+            # cbar = fig.colorbar(img, ax=axis)
+            cbar.ax.get_yaxis().labelpad = 15
+            cbar.ax.set_ylabel(label, rotation=270)
+            if self.hide_ticks == True:
+                # remove ticks on x and y axis, they only show pixelnumber anyways, better to add a scalebar
+                ax.set_xticks([])
+                ax.set_yticks([])
+            if self.show_titles == True:
+                ax.set_title(title)
+
+            ax.axis('scaled')
+
+            # legacy method to draw white pixels around masked areas, currently out of service because 
+            # the mask is not stored in the plot variable but for the whole measurement.
+            # repeated calls of the measurement instance would lead to problems
+            '''
+            if (cmap == SNOM_height) and ('_masked' in title) and ('_reduced' not in title):
+                # create a white border around the masked area, but show the full unmasked height data
+                border_width = 1
+                yres = len(data)
+                xres = len(data[0])
+                white_pixels = np.zeros((yres, xres))
+                for y in range(border_width, yres - border_width):
+                    for x in range(border_width, xres - border_width):
+                        mean = self._get_mean_value(self.mask_array, x, y, border_width)
+                        if (self.mask_array[y][x] == 0) and (0 < mean) and (mean < 1):
+                            white_pixels[y, x] = 100
+                # The idea is to plot a second pcolormesh on the same axis as the height data
+                # Only the pixels with a nonzero value are displayed, all other are set to zero opacity (alpha value)
+                ncolors = 2
+                color_array = plt.get_cmap('Greys')(range(ncolors))
+
+                # change alpha values
+                color_array[:,-1] = np.linspace(0.0,1.0,ncolors)
+
+                # create a colormap object
+                map_object = LinearSegmentedColormap.from_list(name='rainbow_alpha',colors=color_array)
+
+                # register this new colormap with matplotlib
+                try:
+                    plt.register_cmap(cmap=map_object)
+                except: pass
+                axis.pcolormesh(white_pixels, cmap='rainbow_alpha')
+            '''
+        # adjustments based on PlotDefinitions, in future should be based on plot parameters in external file, shared by snom-plotter gui
+        plt.subplots_adjust(hspace=PlotDefinitions.hspace)
+        # fig.get_layout_engine().set(wspace=0.1)
+        if PlotDefinitions.tight_layout is True:
+            plt.tight_layout()
+            # print('tight_layout')
+        # else:
+            # print('not using tight_layout')
+        if PlotDefinitions.show_plot is True:
+            plt.show()
+        gc.collect()
+
     def switch_supplots(self, first_id:int=None, second_id:int=None) -> None:
         """
         This function changes the position of the subplots.
@@ -2461,24 +2654,35 @@ class SnomMeasurement(FileHandler):
                 if self.channels[i] == self.scalebar_channels[j][0]:
                     scalebar = self.scalebar_channels[j][1]
             subplots.append(self._add_subplot(dataset[i], channels[i], scalebar))
-        self._plot_subplots(subplots)
+        # self._plot_subplots(subplots)
+        self._plot_subplots_v2(subplots)
 
-    def display_all_subplots(self) -> None:
+    def display_all_subplots(self, nrows='auto', ncols='auto') -> None:
         """
         This function displays all the subplots which have been created until this point.
+
+        Args:
+            nrows (int, optional): Number of rows for the subplots. Defaults to 'auto'.
+            ncols (int, optional): Number of columns for the subplots. Defaults to 'auto'.
         """
+        self.nrows = nrows
+        self.ncols = ncols
         self._load_all_subplots()
         self._plot_subplots(self.all_subplots)
         self.all_subplots = []
         gc.collect()
 
-    def display_channels(self, channels:list=None) -> None: 
+    def display_channels(self, channels:list=None, nrows='auto', ncols='auto') -> None: 
         """This function displays the channels in memory or the specified ones.
                 
         Args:
             channels (list, optional): List of channels to display. If not specified all channels from memory will be plotted. Defaults to None.
+            nrows (int, optional): Number of rows for the subplots. Defaults to 'auto'.
+            ncols (int, optional): Number of columns for the subplots. Defaults to 'auto'.
 
         """
+        self.nrows = nrows
+        self.ncols = ncols
         if channels == None:
             dataset = self.all_data
             plot_channels = self.channels
@@ -4220,6 +4424,11 @@ class SnomMeasurement(FileHandler):
                     index = self.channels.index(channel)
                     # set all values outside of the mask to zero and then cut all zero away from the outside with _auto_cut_channels(channels)
                     self.all_data[index] = np.multiply(self.all_data[index], self.mask_array)
+            else:
+                # if the user did not select a rectangle we don't want to cut anything
+                yres = len(data)
+                xres = len(data[0])
+                self.mask_array = np.ones((yres, xres))  
         # apply the auto cut function to remove masked areas around the data
         self._auto_cut_channels(channels, self.mask_array)
         gc.collect()
@@ -6027,7 +6236,7 @@ class Scan3D(FileHandler):
                 if counter >= number_of_channels: 
                     ax.axis('off')
                 counter += 1
-        if self.tight_layout is True:
+        if PlotDefinitions.tight_layout is True:
             plt.tight_layout()
         if PlotDefinitions.show_plot is True:
             plt.show()
@@ -6242,7 +6451,7 @@ class Scan3D(FileHandler):
             # remove ticks on x and y axis, they only show pixelnumber anyways, better to add a scalebar
             ax.set_xticks([])
             ax.set_yticks([])
-        if self.tight_layout is True:
+        if PlotDefinitions.tight_layout is True:
             plt.tight_layout()
         if PlotDefinitions.show_plot is True:
             plt.show()

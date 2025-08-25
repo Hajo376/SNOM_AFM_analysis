@@ -121,9 +121,12 @@ def test_cut():
 def test_cut_comsol():
     directory_name = 'tests/testdata/DLSPPW_bragg_8slits_Ex_ongold'
     channels = ['abs', 'arg', 'Z']
+    # PlotDefinitions.tight_layout = False
     measurement = SnomMeasurement(directory_name, channels)
-    measurement.cut_channels()
     measurement.display_channels()
+    measurement.cut_channels()
+    measurement.display_channels(ncols=3)
+    measurement.display_all_subplots()
 
 def test_height_masking():
     directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
