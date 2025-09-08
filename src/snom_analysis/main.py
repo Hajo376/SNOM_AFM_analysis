@@ -43,6 +43,8 @@ from matplotlib.animation import FuncAnimation
 from PIL import Image
 # for config file
 from configparser import ConfigParser
+# for profile selector
+import skimage as ski
 
 # import own functionality
 from .lib.snom_colormaps import SNOM_height, SNOM_amplitude, SNOM_phase, SNOM_realpart, all_colormaps
@@ -2800,6 +2802,7 @@ class SnomMeasurement(FileHandler):
         
         return channel_pairs
 
+    # todo will currently ignore channel list and only use it to check if channels are in memory, should be adapted such that only specified channels are blurred
     def gauss_filter_channels_complex(self, channels:list=None, scaling:int=4, sigma:int=2) -> None:
         """This fucton gauss filters the specified channels. If no channels are specified, all channels in memory will be used.
         The function is designed to work with complex data, where amplitude and phase are stored in separate channels.
@@ -3487,6 +3490,7 @@ class SnomMeasurement(FileHandler):
         plt.title('You clicked on the following pixel.')
         if PlotDefinitions.show_plot:
             plt.show()
+        self._write_to_logfile('get_pixel_coordinates', coordinates)
         return coordinates
 
     def get_pixel_value(self, channel, coordinates:list=None, zone:int=1) -> float:
@@ -3520,6 +3524,9 @@ class SnomMeasurement(FileHandler):
         y = coordinates[0][1]
         # get the mean value of the pixel and its neighbors
         pixel_value = self._get_mean_value(data, x, y, zone)
+        # add the coordinates to the logfile
+        self._write_to_logfile('get_pixel_value_coordinates', coordinates)
+        self._write_to_logfile('get_pixel_value_zone', zone)
         return pixel_value
 
     def _height_levelling_3point(self, height_data:np.array, coords:list=None, zone:int=1) -> np.array:
@@ -3655,7 +3662,8 @@ class SnomMeasurement(FileHandler):
                 data[y][x] -= y*slope
         return self._shift_phase_data(data, 0)
 
-    def correct_phase_drift(self, channels:list=None, export:bool=False, phase_slope:float=None, zone:int=1) -> None:
+    # todo this function needs work, should apply a linear fit instead of just comparing two values
+    def correct_phase_drift(self, channels:list=None, export:bool=False, phase_slope:float=None, zone:int=1, point_based:bool=True) -> None:
         """This function asks the user to click on two points which should have the same phase value.
         Only the slow drift in y-direction will be compensated. Could in future be extended to include a percentual drift compensation along the x-direction.
         But should usually not be necessary.
@@ -3667,6 +3675,9 @@ class SnomMeasurement(FileHandler):
                                 and it will prompt you with a preview to select two points to calculate the slope from
             zone (int, optional): defines the area which is used to calculate the mean around the click position in the preview,
                         0 means only the click position, 1 means the nearest 9 ...
+            point_based (bool, optional): if True the phase slope will be calculated based on two points the user clicks on, 
+                        if False the phase slope will be calculated from a linear fit to a profile between two points the user clicks on. 
+                        But careful, the profile will be along the y-direction in the middle of the two points.
         """
         self._initialize_data(channels)
         phase_data = None
@@ -3722,7 +3733,15 @@ class SnomMeasurement(FileHandler):
                     klick_coordinates[1] = second_corrd
                     mean_values[0] = mean_values[1]
                     mean_values[1] = second_mean
-                phase_slope = (mean_values[1] - mean_values[0])/(klick_coordinates[1][1] - klick_coordinates[0][1])
+                if point_based == True:
+                    phase_slope = (mean_values[1] - mean_values[0])/(klick_coordinates[1][1] - klick_coordinates[0][1])
+                else:
+                    # calculate the slope with a linear fit
+                    # get profile between the two points
+                    x_mean = int((klick_coordinates[0][0] + klick_coordinates[1][0])/2) # take the middle x value of the two points
+                    phase_profile = ski.measure.profile_line(phase_data.T, [x_mean, klick_coordinates[0][1]], [x_mean, klick_coordinates[1][1]], linewidth=zone**2) # somehow x and y are switched, therefore transpose the array
+                    flattened_profile = np.unwrap(phase_profile)
+                    phase_slope, intercept = np.polyfit(range(len(flattened_profile)), flattened_profile, 1)
                 leveled_phase_data = self._level_phase_slope(phase_data, phase_slope)
                 fig, ax = plt.subplots()
                 ax.pcolormesh(leveled_phase_data, cmap=SNOM_phase)
@@ -5733,11 +5752,13 @@ class SnomMeasurement(FileHandler):
         self.channels_label.append(channel_label)
 
     # not yet fully implemented, eg. the profile plot function is only ment for full horizontal or vertical profiles only
-    def test_profile_selection(self, channel:str=None) -> None:
+    def test_profile_selection(self, channel:str=None, selection:list = None) -> None:
         """Select a profile from the data. Allows the user to arbitrarily select a profile from the data.
 
         Args:
             channel (str, optional): channel to get the profile data from. Defaults to None.
+            selection (list, optional): Selection to use for the profile. Defaults to None. 
+                The selection must have the format [start, end, width].
 
         Returns:
             np.array, int, int, int: profile, start, end, width
@@ -5752,9 +5773,15 @@ class SnomMeasurement(FileHandler):
         # array_2d = z
         # plt.pcolormesh(array_2d)
         # plt.show()
-        profile, start, end, width = select_profile(array_2d, channel)
+        if selection is None:
+            profile, start, end, width = select_profile(array_2d, channel)
+        else:
+            start, end, width = selection
+            # create profile 
+            profile = ski.measure.profile_line(array_2d.T, start, end, linewidth=width) # somehow x and y are switched, therefore transpose the array
         # plt.plot(profile)
         # plt.show()
+        self._write_to_logfile('test_profile_selection', [channel, start, end, width])
         return profile, start, end, width
         '''self.profile_channel = channel
         self.profiles = [profile]
