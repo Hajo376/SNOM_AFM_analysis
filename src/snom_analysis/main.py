@@ -22,6 +22,7 @@
 from scipy.ndimage import gaussian_filter # one could implement a bunch more filters
 from scipy.optimize import curve_fit
 from struct import unpack, pack
+import re
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_point_clicker import clicker# used for getting coordinates from images
@@ -148,7 +149,7 @@ class FileHandler(PlotDefinitions):
             'preview_ampchannel': '<O2A>',
             'preview_phasechannel': '<O2P>',
             'preview_channels': ['O2A', 'O2P', 'Z C'],
-            'channels_to_delete': ['EA', 'EP', 'M', 'M0A', 'M2A', 'M3A', 'M4A', 'M5A', 'M0P', 'M2P', 'M3P', 'M4P', 'M5P', 'R-EA', 'R-EP', 'R-M', 'R-M0A', 'R-M2A', 'R-M3A', 'R-M4A', 'R-M5A', 'R-M0P', 'R-M2P', 'R-M3P', 'R-M4P', 'R-M5P', 'Z', 'R-Z'],
+            'mechanical_channels_to_delete': ['EA', 'EP', 'M', 'M0A', 'M2A', 'M3A', 'M4A', 'M5A', 'M0P', 'M2P', 'M3P', 'M4P', 'M5P', 'R-EA', 'R-EP', 'R-M', 'R-M0A', 'R-M2A', 'R-M3A', 'R-M4A', 'R-M5A', 'R-M0P', 'R-M2P', 'R-M3P', 'R-M4P', 'R-M5P', 'Z', 'R-Z', 'Z H', 'R-Z H', 'Z CH', 'R-Z CH'],
             'height_indicator': '<Z>',
             'amp_indicator': '<A>',
             'phase_indicator': '<P>',
@@ -234,7 +235,7 @@ class FileHandler(PlotDefinitions):
             'preview_ampchannel': '<O2A>',
             'preview_phasechannel': '<O2P>',
             'preview_channels': ['O2A', 'O2P', 'Z C'],
-            'channels_to_delete': ['EA', 'EP', 'M', 'M0A', 'M2A', 'M3A', 'M4A', 'M5A', 'M0P', 'M2P', 'M3P', 'M4P', 'M5P', 'R-EA', 'R-EP', 'R-M', 'R-M0A', 'R-M2A', 'R-M3A', 'R-M4A', 'R-M5A', 'R-M0P', 'R-M2P', 'R-M3P', 'R-M4P', 'R-M5P', 'Z', 'R-Z'],
+            'mechanical_channels_to_delete': ['EA', 'EP', 'M', 'M0A', 'M2A', 'M3A', 'M4A', 'M5A', 'M0P', 'M2P', 'M3P', 'M4P', 'M5P', 'R-EA', 'R-EP', 'R-M', 'R-M0A', 'R-M2A', 'R-M3A', 'R-M4A', 'R-M5A', 'R-M0P', 'R-M2P', 'R-M3P', 'R-M4P', 'R-M5P', 'Z', 'R-Z'],
             'height_indicator': '<Z>',
             'amp_indicator': '<A>',
             'phase_indicator': '<P>',
@@ -321,7 +322,7 @@ class FileHandler(PlotDefinitions):
             'preview_ampchannel': '<O2-F-abs>',
             'preview_phasechannel': '<O2-F-arg>',
             'preview_channels': ['O2-F-abs', 'O2-F-arg', 'MT-F-abs'],
-            'channels_to_delete': [],
+            'mechanical_channels_to_delete': [],
             'height_indicator': '<MT>',
             'amp_indicator': '<abs>',
             'phase_indicator': '<arg>',
@@ -388,7 +389,7 @@ class FileHandler(PlotDefinitions):
             'preview_ampchannel': '<O2-F-abs>',
             'preview_phasechannel': '<O2-F-arg>',
             'preview_channels': ['O2-F-abs', 'O2-F-arg', 'MT-F-abs'],
-            'channels_to_delete': [],
+            'mechanical_channels_to_delete': [],
             'height_indicator': '<MT>',
             'amp_indicator': '<abs>',
             'phase_indicator': '<arg>',
@@ -453,7 +454,7 @@ class FileHandler(PlotDefinitions):
             'preview_ampchannel': '<O2A>',
             'preview_phasechannel': '<O2P>',
             'preview_channels': ['O2A', 'O2P', 'Z C'],
-            'channels_to_delete': ['EA', 'EP', 'M', 'M0A', 'M2A', 'M3A', 'M4A', 'M5A', 'M0P', 'M2P', 'M3P', 'M4P', 'M5P', 'R-EA', 'R-EP', 'R-M', 'R-M0A', 'R-M2A', 'R-M3A', 'R-M4A', 'R-M5A', 'R-M0P', 'R-M2P', 'R-M3P', 'R-M4P', 'R-M5P', 'Z', 'R-Z'],
+            'mechanical_channels_to_delete': ['EA', 'EP', 'M', 'M0A', 'M2A', 'M3A', 'M4A', 'M5A', 'M0P', 'M2P', 'M3P', 'M4P', 'M5P', 'R-EA', 'R-EP', 'R-M', 'R-M0A', 'R-M2A', 'R-M3A', 'R-M4A', 'R-M5A', 'R-M0P', 'R-M2P', 'R-M3P', 'R-M4P', 'R-M5P', 'Z', 'R-Z'],
             'height_indicator': '<Z>',
             'amp_indicator': '<A>',
             'phase_indicator': '<P>',
@@ -540,7 +541,7 @@ class FileHandler(PlotDefinitions):
             'preview_ampchannel': '<abs>',
             'preview_phasechannel': '<arg>',
             'preview_channels': ['abs', 'arg'],
-            'channels_to_delete': [],
+            'mechanical_channels_to_delete': [],
             'height_indicator': '<Z>',
             'amp_indicator': '<abs>',
             'phase_indicator': '<arg>',
@@ -1592,7 +1593,7 @@ class FileHandler(PlotDefinitions):
         self.preview_ampchannel = self._get_from_config('preview_ampchannel')
         self.preview_phasechannel = self._get_from_config('preview_phasechannel')
         self.preview_channels = self._get_from_config('preview_channels')
-        self.channels_to_delete = self._get_from_config('channels_to_delete')
+        self.mechanical_channels_to_delete = self._get_from_config('mechanical_channels_to_delete')
         self.height_indicator = self._get_from_config('height_indicator')
         self.amp_indicator = self._get_from_config('amp_indicator')
         self.phase_indicator = self._get_from_config('phase_indicator')
@@ -1856,25 +1857,39 @@ class SnomMeasurement(FileHandler):
             images_folder (bool, optional): This will delete the images subfolder and its content. Defaults to True.
             gwy_file (bool, optional): This will delete the 'gwy' file if there is one. Defaults to True.
         """
+        # suffix can be raw or none
+        # delete mechanical channels but only the ones specified in the config file, eg the corrected height and first order mechanical amplitude and phase are not deleted
         if mechanical_channels:
-            for channel in self.channels_to_delete:
-                filepath = self.directory_name / Path(self.filename.name + f'{self.channel_prefix_default}{channel}{self.channel_suffix_default}.gsf')
-                if filepath.exists():
-                    print(f'Deleting {filepath}')
-                    os.remove(filepath)
+            for channel in self.mechanical_channels_to_delete:
+                filepath_1 = self.directory_name / Path(self.filename.name + f'{self.channel_prefix_default}{channel}{self.channel_suffix_default}.gsf')
+                filepath_2 = self.directory_name / Path(self.filename.name + f'{self.channel_prefix_default}{channel}{self.channel_suffix_custom}.gsf')
+                if filepath_1.exists():
+                    print(f'Deleting {filepath_1}')
+                    os.remove(filepath_1)
+                    continue
+                elif filepath_2.exists():
+                    print(f'Deleting {filepath_2}')
+                    os.remove(filepath_2)
+                    continue
                 else:
-                    print(f'File {filepath} does not exist, skipping deletion.')
-        
+                    print(f'File {filepath_1} or {filepath_2} do not exist, skipping deletion.')
+        # delete all optical channels
         if optical_channels:
             channels = self.amp_channels + self.phase_channels + self.real_channels + self.imag_channels
             for channel in channels:
-                filepath = self.directory_name / Path(self.filename.name + f'{self.channel_prefix_default}{channel}{self.channel_suffix_default}.gsf')
-                if filepath.exists():
-                    print(f'Deleting {filepath}')
-                    os.remove(filepath)
+                filepath_1 = self.directory_name / Path(self.filename.name + f'{self.channel_prefix_default}{channel}{self.channel_suffix_default}.gsf')
+                filepath_2 = self.directory_name / Path(self.filename.name + f'{self.channel_prefix_default}{channel}{self.channel_suffix_custom}.gsf')
+                if filepath_1.exists():
+                    print(f'Deleting {filepath_1}')
+                    os.remove(filepath_1)
+                    continue
+                elif filepath_2.exists():
+                    print(f'Deleting {filepath_2}')
+                    os.remove(filepath_2)
+                    continue
                 else:
-                    print(f'File {filepath} does not exist, skipping deletion.')
-        
+                    print(f'File {filepath_1} or {filepath_2} do not exist, skipping deletion.')
+        # delete the images subfolder, only contains small preview images
         if images_folder:
             images_folder = self.directory_name / 'Images'
             if images_folder.exists() and images_folder.is_dir():
@@ -1889,7 +1904,7 @@ class SnomMeasurement(FileHandler):
                 images_folder.rmdir()  # Remove the empty folder itself
             else:
                 print(f'Folder {images_folder} does not exist, skipping deletion.')
-        
+        # in newer versions of the software a gwy file is created which contains all the data in a single file which leads to a doubling of the data size
         if gwy_file:
             gwy_file = self.directory_name / Path(self.filename.name + '.gwy')
             if gwy_file.exists():
@@ -5793,6 +5808,44 @@ class SnomMeasurement(FileHandler):
         else:
             self.profile_orientation = 'unknown'
             print('The profile orientation could not be determined!')'''
+
+    def _get_all_filenames_in_directory(self) -> list:
+        """This function will return a list of all filenames in the directory.
+
+        Returns:
+            list: List of all filenames in the directory.
+        """
+        file_list = []
+        for file in self.directory_name.iterdir():
+            if file.is_file():
+                file_list.append(file.name)
+        return file_list
+
+    def text_regex_file_recognition(self, channel):
+        
+        # get all filenames in the directory
+        file_list = self._get_all_filenames_in_directory()
+        # go through all files and find the prefix and suffix for the specified channel
+        prefix = ''
+        suffix = ''
+        file_ending = self.file_ending
+        for file in file_list:
+            # pattern = self.filename.name + prefix + channel + suffix + file_ending
+            # create regex pattern
+            pattern = re.escape(self.filename.stem) + r'(.*)' + re.escape(channel) + r'(.*)' + re.escape(file_ending) + r'$'
+            match = re.match(pattern, file)
+            if match:
+                prefix = match.group(1)
+                suffix = match.group(2)
+                # filter out matches where the prefix contains the backwards indicator
+                if self.backwards_indicator in prefix:
+                    continue
+                # filter out matches where the suffix contains '_' (usually used as a part of the channel name)
+                if '_' in suffix:
+                    continue
+                print(f'Found prefix: <{prefix}>, suffix: <{suffix}> for channel: <{channel}>')
+                # break
+
 
 class ApproachCurve(FileHandler):
     """This class opens an approach curve measurement and handels all the approach curve related functions.
