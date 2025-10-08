@@ -312,7 +312,8 @@ def average_3d_scan():
     measurement.average_data()
     measurement.set_min_to_zero()
     measurement.display_cutplanes(axis='x', line=0, channels=['O2A', 'O2P'], auto_align=False)
-    measurement.display_cutplanes(axis='x', line=0, channels=['O3A', 'O3P'])
+    measurement.display_cutplanes(axis='x', line=0, channels=['O2A', 'O2P'], auto_align=True)
+    # measurement.display_cutplanes(axis='x', line=0, channels=['O3A', 'O3P'])
 
 def test_phase_drift_correction():
     directory = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
@@ -794,14 +795,14 @@ def main():
     # test_scalebar()
     # test_phaseshift()
     # compare_measurements()
-    correct_phase_drift()
+    # correct_phase_drift()
     # correct_phase_drift_nonlinear()
     # synccorrection()
     # test_aachen_files()
     # test_export_to_gsf()
     # test_gif()
     # test_3d_scan()
-    # average_3d_scan()
+    average_3d_scan()
     # test_phase_drift_correction()
     # test_amplitude_drift_correction()
     # test_height_drift_correction()
