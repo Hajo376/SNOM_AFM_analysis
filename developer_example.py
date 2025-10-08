@@ -483,13 +483,22 @@ def test_find_measurement_type():
 
 def test_delete_data():
     # the copy has to be remade everytime you want to delete data, otherwise the data will not be deleted
-    directory_name = 'tests/testdata/test_delete/2024-03-28 164507 PH just_incoupler_square'
+    # directory_name = 'tests/testdata/test_delete/2024-03-28 164507 PH just_incoupler_square'
+    directory_name = 'tests/testdata/test_delete/2025-07-18 130120 AFM gold_disc_test_1600nm'
     measurement = SnomMeasurement(directory_name)
     measurement.display_channels()
     measurement.delete_unwanted_files(mechanical_channels=True, optical_channels=True, images_folder=True, gwy_file=True)
     # measurement.cut_channels()
     # measurement.set_min_to_zero(['Z C'])
     # measurement.display_channels()
+
+def test_regex_recognition():
+    directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
+    channels = ['O2P', 'O2A', 'Z C']
+    measurement = SnomMeasurement(directory_name, channels)
+    print('all filenames: ', measurement._get_all_filenames_in_directory())
+    # print('prefix and suffix for channel Z C: ', measurement._get_prefix_and_suffix('Z C'))
+    measurement.text_regex_file_recognition('Z C_manipulated')
 
 #########################################
 #### Examples used in documentation: ####
@@ -816,7 +825,8 @@ def main():
     # test_comsol_height_data()
     # test_approach_curve()
     # test_find_measurement_type()
-    # test_delete_data()
+    test_delete_data()
+    # test_regex_recognition()
 
     ################################
     #### Documentation examples ####
