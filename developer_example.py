@@ -309,11 +309,13 @@ def average_3d_scan():
     channels = ['O2A', 'O2P', 'O3A', 'O3P', 'Z']
     measurement = Scan3D(directory, channels)
     PlotDefinitions.colorbar_width = 3
-    measurement.average_data()
-    measurement.set_min_to_zero()
-    measurement.display_cutplanes(axis='x', line=0, channels=['O2A', 'O2P'], auto_align=False)
-    measurement.display_cutplanes(axis='x', line=0, channels=['O2A', 'O2P'], auto_align=True)
-    # measurement.display_cutplanes(axis='x', line=0, channels=['O3A', 'O3P'])
+    # measurement.average_data()
+    # measurement.set_min_to_zero()
+    # measurement.display_cutplanes(axis='x', line=0, channels=['O2A', 'O2P'], auto_align=False)
+    # measurement.display_cutplanes(axis='x', line=0, channels=['O2A', 'O2P'], auto_align=True)
+    # measurement.display_cutplanes(axis='x', line=0, channels=['Z'])
+    measurement.generate_all_cutplane_data(axis='x', line=0)
+    measurement.display_cutplanes(axis='x', line=1, channels=['O2A', 'O2P'], auto_align=True)
 
 def test_phase_drift_correction():
     directory = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
@@ -825,7 +827,7 @@ def main():
     # test_comsol_height_data()
     # test_approach_curve()
     # test_find_measurement_type()
-    test_delete_data()
+    # test_delete_data()
     # test_regex_recognition()
 
     ################################
