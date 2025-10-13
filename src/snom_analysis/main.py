@@ -1633,8 +1633,24 @@ class FileHandler(PlotDefinitions):
         self.corrected_overlain_phase_channels = [channel+'_corrected_overlain' for channel in self.phase_channels]
         self.overlain_amp_channels = [channel+'_overlain' for channel in self.amp_channels]
         
+        # some file versions create channels with a appendix such as 'raw' which is only used for raw optical or mechanical data
+        # not the corrected height data for example
+        # make a list of all custom channels, so corrected height channels, and all channels created by the user
         self.all_channels_custom = self.height_channels + self.complex_channels + self.overlain_phase_channels + self.overlain_amp_channels + self.corrected_phase_channels + self.corrected_overlain_phase_channels
         self.all_channels_custom += [channel + self.channel_suffix_manipulated for channel in self.all_channels_default]
+
+    def _is_default_channel(self, channel:str) -> bool:
+        """This function returns True if the channel is a default channel, False otherwise.
+        Default channels are channels which are part of the default channels, meaning they are listed in the config file as phase, amplitude or height channels.
+        Args:
+            channel (str): channel name
+        Returns:
+            bool: True if the channel is a default channel, False otherwise.
+        """
+        if channel in self.all_channels_default:
+            return True
+        else:
+            return False
 
     def _is_custom_channel(self, channel:str) -> bool:
         """This function returns True if the channel is a custom channel, False otherwise.
@@ -1649,7 +1665,15 @@ class FileHandler(PlotDefinitions):
         if channel in self.all_channels_default:
             return False
         else:
-            return True
+            # check if channel is in custom channels
+            if channel in self.all_channels_custom:
+                return True
+            # check if channel has the custom suffix
+            elif self.channel_suffix_manipulated in channel:
+                return True
+            # might still be a user defined custom channel
+            else:
+                return True
 
     def _create_channel_tag_dict(self, channels:list=None):
         """This function reads in the header of the gsf file for the specified channel and extracts the tag values. The tag values are stored in a dictionary for each channel.
@@ -1665,7 +1689,21 @@ class FileHandler(PlotDefinitions):
         self.channel_tag_dict = []
         for channel in channels:
             channel_dict = {}
-            if channel in self.all_channels_default:
+            if self._is_custom_channel(channel):
+                suffix = self.channel_suffix_custom
+                prefix = self.channel_prefix_custom
+                channel_type = 'custom'
+            elif self._is_default_channel(channel):
+                suffix = self.channel_suffix_default
+                prefix = self.channel_prefix_default
+                channel_type = 'default'
+            else:
+                print(f'channel {channel} not found in default or custom channels!')
+                # assume it is a custom channel and try loading anyways
+                suffix = self.channel_suffix_custom
+                prefix = self.channel_prefix_custom
+                channel_type = 'custom'
+            '''if channel in self.all_channels_default:
                 suffix = self.channel_suffix_default
                 prefix = self.channel_prefix_default
                 channel_type = 'default'
@@ -1679,7 +1717,7 @@ class FileHandler(PlotDefinitions):
                 suffix = self.channel_suffix_custom
                 prefix = self.channel_prefix_custom
                 channel_type = 'custom'
-                # exit()
+                # exit()'''
             # we want to read the non binary part of the datafile
             if self.file_ending == '.gsf':
                 encod = 'latin1'
@@ -2015,7 +2053,21 @@ class SnomMeasurement(FileHandler):
             # check if channel is a default channel or something user made
             # if default use the standard naming convention
             # if user made dont use the '_raw' suffix
-            if channel in self.all_channels_default:
+            if self._is_custom_channel(channel):
+                suffix = self.channel_suffix_custom
+                prefix = self.channel_prefix_custom
+                channel_type = 'custom'
+            elif self._is_default_channel(channel):
+                suffix = self.channel_suffix_default
+                prefix = self.channel_prefix_default
+                channel_type = 'default'
+            else:
+                print(f'channel {channel} not found in default or custom channels!')
+                # assume it is a custom channel and try loading anyways
+                suffix = self.channel_suffix_custom
+                prefix = self.channel_prefix_custom
+                channel_type = 'custom'
+            '''if channel in self.all_channels_default:
                 suffix = self.channel_suffix_default
                 prefix = self.channel_prefix_default
                 channel_type = 'default'
@@ -2029,7 +2081,7 @@ class SnomMeasurement(FileHandler):
                 suffix = self.channel_suffix_custom
                 prefix = self.channel_prefix_custom
                 channel_type = 'custom'
-                # exit()
+                # exit()'''
             # check the readmode depending on the filetype
             # this also affects the way the data is read and processed
             if self.file_ending == '.gsf':
@@ -3124,8 +3176,6 @@ class SnomMeasurement(FileHandler):
                 # ignore the default appendix if the channel name already contains an appendix caused by manipulation 
                 if self.channel_suffix_overlain in channel:
                     appendix = ''
-                elif self.channel_suffix_synccorrected_phase in channel:
-                    appendix = ''
 
             filepath = self.directory_name / Path(self.filename.name + f'{prefix}{channel}{suffix}{appendix}.gsf')
             data = self.all_data[self.channels.index(channel)]
@@ -3193,8 +3243,6 @@ class SnomMeasurement(FileHandler):
             if self._is_custom_channel(channel):
                 # ignore the default appendix if the channel name already contains an appendix caused by manipulation 
                 if self.channel_suffix_overlain in channel:
-                    appendix = ''
-                elif self.channel_suffix_synccorrected_phase in channel:
                     appendix = ''
             
             filepath = self.directory_name / Path(self.filename.name + f'{prefix}{channel}{suffix}{appendix}.txt')
