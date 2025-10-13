@@ -1636,6 +1636,21 @@ class FileHandler(PlotDefinitions):
         self.all_channels_custom = self.height_channels + self.complex_channels + self.overlain_phase_channels + self.overlain_amp_channels + self.corrected_phase_channels + self.corrected_overlain_phase_channels
         self.all_channels_custom += [channel + self.channel_suffix_manipulated for channel in self.all_channels_default]
 
+    def _is_custom_channel(self, channel:str) -> bool:
+        """This function returns True if the channel is a custom channel, False otherwise.
+        Custom channels are channels which are not part of the default channels, but are created by the user.
+        This includes height channels, complex channels and overlain channels.
+
+        Args:
+            channel (str): channel name
+        Returns:
+            bool: True if the channel is a custom channel, False otherwise.
+        """
+        if channel in self.all_channels_default:
+            return False
+        else:
+            return True
+
     def _create_channel_tag_dict(self, channels:list=None):
         """This function reads in the header of the gsf file for the specified channel and extracts the tag values. The tag values are stored in a dictionary for each channel.
         This tag dict is very similar to the measurement_tag_dict, but the measurement_tag_dict is only created on the basis of the parameter file.
@@ -3075,27 +3090,43 @@ class SnomMeasurement(FileHandler):
         if channels == None:
             channels = self.channels
         for channel in channels:
+
+            # old:
+            '''
             # find out if channel is default or not
-            if channel in self.all_channels_default:
-                suffix = self.channel_suffix_default
-                prefix = self.channel_prefix_default
-                channel_type = 'default'
-            elif channel in self.all_channels_custom:
-                suffix = self.channel_suffix_custom
-                prefix = self.channel_prefix_custom
-                channel_type = 'custom'
-                # ignore the default appendix if the channel is not a default channel 
+            # if channel in self.all_channels_default:
+            #     suffix = self.channel_suffix_default
+            #     prefix = self.channel_prefix_default
+            #     channel_type = 'default'
+            # elif channel in self.all_channels_custom:
+            #     suffix = self.channel_suffix_custom
+            #     prefix = self.channel_prefix_custom
+            #     channel_type = 'custom'
+            #     # ignore the default appendix if the channel is not a default channel 
+            #     if self.channel_suffix_overlain in channel:
+            #         appendix = ''
+            #     elif self.channel_suffix_synccorrected_phase in channel:
+            #         appendix = ''
+            # else:
+            #     print('channel not found in default or custom channels\nNo appendix will be added to the filename')
+            #     # assume an unknown custom channel was encountered
+            #     suffix = self.channel_suffix_custom
+            #     prefix = self.channel_prefix_custom
+            #     channel_type = 'custom'
+            #     # sys.exit()
+            '''
+            # use the custom version of the prefix and suffix for all saves, we assume that all data which is saved has been modified in some way
+            # and should therefor be saved with the custom prefix and suffix even if no appendix is added
+            suffix = self.channel_suffix_custom
+            prefix = self.channel_prefix_custom
+            # check if the channel is custom
+            if self._is_custom_channel(channel):
+                # ignore the default appendix if the channel name already contains an appendix caused by manipulation 
                 if self.channel_suffix_overlain in channel:
                     appendix = ''
                 elif self.channel_suffix_synccorrected_phase in channel:
                     appendix = ''
-            else:
-                print('channel not found in default or custom channels\nNo appendix will be added to the filename')
-                # assume an unknown custom channel was encountered
-                suffix = self.channel_suffix_custom
-                prefix = self.channel_prefix_custom
-                channel_type = 'custom'
-                # sys.exit()
+
             filepath = self.directory_name / Path(self.filename.name + f'{prefix}{channel}{suffix}{appendix}.gsf')
             data = self.all_data[self.channels.index(channel)]
             XRes = len(data[0])
@@ -3130,22 +3161,41 @@ class SnomMeasurement(FileHandler):
         if channels == None:
             channels = self.channels
         for channel in channels:
-            if channel in self.all_channels_default:
-                suffix = self.channel_suffix_default
-                prefix = self.channel_prefix_default
-                channel_type = 'default'
-            elif channel in self.all_channels_custom:
-                suffix = self.channel_suffix_custom
-                prefix = self.channel_prefix_custom
-                channel_type = 'custom'
-                # ignore the default appendix if the channel is not a default channel 
+            # old:
+            '''
+            # find out if channel is default or not
+            # if channel in self.all_channels_default:
+            #     suffix = self.channel_suffix_default
+            #     prefix = self.channel_prefix_default
+            #     channel_type = 'default'
+            # elif channel in self.all_channels_custom:
+            #     suffix = self.channel_suffix_custom
+            #     prefix = self.channel_prefix_custom
+            #     channel_type = 'custom'
+            #     # ignore the default appendix if the channel is not a default channel 
+            #     if self.channel_suffix_overlain in channel:
+            #         appendix = ''
+            #     elif self.channel_suffix_synccorrected_phase in channel:
+            #         appendix = ''
+            # else:
+            #     print('channel not found in default or custom channels\nNo appendix will be added to the filename')
+            #     # assume an unknown custom channel was encountered
+            #     suffix = self.channel_suffix_custom
+            #     prefix = self.channel_prefix_custom
+            #     channel_type = 'custom'
+            #     # sys.exit()
+            '''
+            # use the custom version of the prefix and suffix for all saves, we assume that all data which is saved has been modified in some way
+            # and should therefor be saved with the custom prefix and suffix even if no appendix is added
+            suffix = self.channel_suffix_custom
+            prefix = self.channel_prefix_custom
+            # check if the channel is custom
+            if self._is_custom_channel(channel):
+                # ignore the default appendix if the channel name already contains an appendix caused by manipulation 
                 if self.channel_suffix_overlain in channel:
                     appendix = ''
                 elif self.channel_suffix_synccorrected_phase in channel:
                     appendix = ''
-            else:
-                print('channel not found in default or custom channels')
-                exit()
             
             filepath = self.directory_name / Path(self.filename.name + f'{prefix}{channel}{suffix}{appendix}.txt')
             data = self.all_data[self.channels.index(channel)]
@@ -4013,7 +4063,7 @@ class SnomMeasurement(FileHandler):
                 if self.amp_indicator in channels[i]:
                     # self.all_data[self.channels.index(channels[i])] = np.copy(self.all_data[self.channels.index(channels[i])])
                     reference_values = [np.mean(self.all_data[self.channels.index(channels[i])][j][reference_area[0]:reference_area[1]]) for j in range(len(self.all_data[self.channels.index(channels[i])]))]
-                    self.all_data[self.channels.index(channels[i])] = [(self.all_data[self.channels.index(channels[i])][j] / reference_values[j] * np.mean(reference_values)) for j in range(len(reference_values))]
+                    self.all_data[self.channels.index(channels[i])] = np.array([(self.all_data[self.channels.index(channels[i])][j] / reference_values[j] * np.mean(reference_values)) for j in range(len(reference_values))])
         else:
             print('Do you want to repeat the leveling?')
             user_input = self._user_input_bool()
