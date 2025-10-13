@@ -4102,7 +4102,7 @@ class SnomMeasurement(FileHandler):
                 if self.height_indicator in channels[i]:
                     # self.all_data[self.channels.index(channels[i])] = np.copy(self.all_data[self.channels.index(channels[i])])
                     reference_values = [np.mean(self.all_data[self.channels.index(channels[i])][j][reference_area[0]:reference_area[1]]) for j in range(len(self.all_data[self.channels.index(channels[i])]))]
-                    self.all_data[self.channels.index(channels[i])] = [(self.all_data[self.channels.index(channels[i])][j] / reference_values[j] * np.mean(reference_values)) for j in range(len(reference_values))]
+                    self.all_data[self.channels.index(channels[i])] = np.array([(self.all_data[self.channels.index(channels[i])][j] / reference_values[j] * np.mean(reference_values)) for j in range(len(reference_values))])
         else:
             print('Do you want to repeat the leveling?')
             user_input = self._user_input_bool()
