@@ -4952,7 +4952,7 @@ class SnomMeasurement(FileHandler):
         # get the profile data for amp and phase
         self.phase_profiles = self._get_profile(profiledata_phase, coordinates, orientation, width_phase)
         # test:
-        self._display_profile([self.phase_profiles[6], self.phase_profiles[16]])
+        self._display_profile([self.phase_profiles[0], self.phase_profiles[-1]])
 
         self.amp_profiles = self._get_profile(profiledata_amp, coordinates, orientation, width_amp)
         mean_amp = [np.mean(amp) for amp in self.amp_profiles]
@@ -4982,18 +4982,21 @@ class SnomMeasurement(FileHandler):
         plt.show()
         
     def _display_profile(self, profiles, ylabel=None, labels=None, linestyle='x', title=None):
+        print('Displaying profiles...')
+        print('profile channel: ', self.profile_channel)
+        print('current channels: ', self.channels)
         if self.profile_orientation == Definitions.horizontal:
-            xrange, yrange = self._get_channel_tag_dict_value(self.channels.index(self.profile_channel), ChannelTags.SCANAREA)
-            x_center_pos, y_center_pos = self._get_channel_tag_dict_value(self.channels.index(self.profile_channel), ChannelTags.SCANNERCENTERPOSITION)
-            xres, yres = self._get_channel_tag_dict_value(self.channels.index(self.profile_channel), ChannelTags.PIXELAREA)
+            xrange, yrange = self._get_channel_tag_dict_value(self.profile_channel, ChannelTags.SCANAREA)
+            x_center_pos, y_center_pos = self._get_channel_tag_dict_value(self.profile_channel, ChannelTags.SCANNERCENTERPOSITION)
+            xres, yres = self._get_channel_tag_dict_value(self.profile_channel, ChannelTags.PIXELAREA)
             xvalues = [x_center_pos - xrange/2 + x*(xrange/xres) for x in range(xres)]
             xlabel = 'X [µm]'
             if title == None:
                 title = 'Horizontal profiles of channel ' + self.profile_channel
         elif self.profile_orientation == Definitions.vertical:
-            xrange, yrange = self._get_channel_tag_dict_value(self.channels.index(self.profile_channel), ChannelTags.SCANAREA)
-            x_center_pos, y_center_pos = self._get_channel_tag_dict_value(self.channels.index(self.profile_channel), ChannelTags.SCANNERCENTERPOSITION)
-            xres, yres = self._get_channel_tag_dict_value(self.channels.index(self.profile_channel), ChannelTags.PIXELAREA)
+            xrange, yrange = self._get_channel_tag_dict_value(self.profile_channel, ChannelTags.SCANAREA)
+            x_center_pos, y_center_pos = self._get_channel_tag_dict_value(self.profile_channel, ChannelTags.SCANNERCENTERPOSITION)
+            xres, yres = self._get_channel_tag_dict_value(self.profile_channel, ChannelTags.PIXELAREA)
             xvalues = [y_center_pos - yrange/2 + y*(yrange/yres) for y in range(yres)]
             xlabel = 'Y [µm]'
             if title == None:
@@ -5006,12 +5009,11 @@ class SnomMeasurement(FileHandler):
                 ylabel = 'Amplitude [arb.u.]'
             elif self.height_indicator in self.profile_channel:
                 ylabel = 'Height [nm]'
-        for profile in profiles:
-            index = profiles.index(profile)
+        for index, profile in enumerate(profiles):
             if labels == None:
                 plt.plot(xvalues, profile, linestyle, label=f'Profile index: {index}')
             else:
-                plt.plot(xvalues, profile, linestyle, label=labels[profiles.index(profile)])
+                plt.plot(xvalues, profile, linestyle, label=labels[index])
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
         plt.title(title)

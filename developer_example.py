@@ -409,6 +409,14 @@ def test_profile_selector():
     # this tests a new funtion to select arbitrary profiles from the data, it is however not yet fully implemented
     # measurement.Display_Profiles()
 
+def test_ssh_profile_selector():
+    directory = 'tests/testdata/2023-03-16 151410 PH topol_fb_h100_nocomp_horizontalpol_10mufromcoupler'
+    channels = ['Z C', 'O2P_corrected', 'O2A']
+    measurement = SnomMeasurement(directory, channels)
+    measurement.gauss_filter_channels_complex()
+    coordinates = [[19, 19], [43, 20], [83, 20], [108, 21], [148, 22], [172, 19], [211, 21], [237, 20], [277, 21], [300, 21], [340, 21], [364, 21], [406, 21], [446, 21], [470, 20], [510, 21], [534, 21], [574, 20], [599, 22], [639, 21], [662, 21], [702, 23], [727, 22], [767, 24], [791, 23]]
+    measurement.select_profiles_SSH('O2A', 'O2P_corrected', 'Z C', coordinates=coordinates)
+
 def test_gauss_filter_v2():
     directory = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
     channels = ['Z C', 'O2P', 'O2A']
@@ -813,7 +821,7 @@ def main():
     # test_export_to_gsf()
     # test_gif()
     # test_3d_scan()
-    average_3d_scan()
+    # average_3d_scan()
     # test_phase_drift_correction()
     # test_amplitude_drift_correction()
     # test_height_drift_correction()
@@ -822,6 +830,7 @@ def main():
     # test_level_columnwise()
     # test_get_pixel_value()
     # test_profile_selector()
+    test_ssh_profile_selector()
     # test_gauss_filter_v2()
     # test_comsol_data()
     # test_comsol_height_data()
