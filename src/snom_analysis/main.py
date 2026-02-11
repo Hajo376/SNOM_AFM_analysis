@@ -1676,7 +1676,7 @@ class FileHandler(PlotDefinitions):
             else:
                 return True
 
-    def _create_channel_tag_dict(self, channels:Optional[list]=None):
+    def _create_channel_tag_dict(self, channels:Optional[list]=None) -> dict:
         """This function reads in the header of the gsf file for the specified channel and extracts the tag values. The tag values are stored in a dictionary for each channel.
         This tag dict is very similar to the measurement_tag_dict, but the measurement_tag_dict is only created on the basis of the parameter file.
         If individual channels have been modified this will only be stored in the channel_tag_dict.
@@ -1687,7 +1687,8 @@ class FileHandler(PlotDefinitions):
         if channels == None:
             channels = self.channels
         # create a list containing the tag dictionary for each channel
-        self.channel_tag_dict = []
+        # self.channel_tag_dict = []
+        channel_tag_dict = []
         for channel in channels:
             channel_dict = {}
             if self._is_custom_channel(channel):
@@ -1802,7 +1803,9 @@ class FileHandler(PlotDefinitions):
             # add pixel scaling to the channel dict, initially this is always 1
             channel_dict[ChannelTags.PIXELSCALING] = 1
                     
-            self.channel_tag_dict.append(channel_dict)
+            # self.channel_tag_dict.append(channel_dict)
+            channel_tag_dict.append(channel_dict)
+        return channel_tag_dict
     
     def _get_existing_channels(self, channels:list) -> list:
         """This function checks if the specified channels exist in the measurement.
@@ -1875,7 +1878,7 @@ class SnomMeasurement(FileHandler):
         else:
             self.channels = channels
             # update the channel tag dictionary, makes the program compatible with differrently sized datasets, like original data plus manipulated, eg. cut data
-            self._create_channel_tag_dict()
+            self.channel_tag_dict = self._create_channel_tag_dict()
             self.all_data, self.channels_label = self._load_data(channels) # could be changed to a single dictionary containing the data and the channel names
             xres = len(self.all_data[0][0])
             yres = len(self.all_data[0])
@@ -1973,15 +1976,23 @@ class SnomMeasurement(FileHandler):
         Args:
             channels (list): Channels to add to memory.
         """
+        # create channel tag dict for new channels, but keep old tag dict for channels in memory!
+        additional_channel_tag_dict = self._create_channel_tag_dict(channels)
+
+        # add the new list of dicts to the old list
+        self.channel_tag_dict += additional_channel_tag_dict
+
+        # update the memory channel identifiers
         self.channels += channels
-        # update the channel tag dictionary, makes the program compatible with differrently sized datasets, like original data plus manipulated, eg. cut data
-        self._create_channel_tag_dict(channels)
-        all_data, channels_label = self._load_data(channels)
-        for i in range(len(channels)):
-            self.all_data.append(all_data[i])
-            self.channels_label.append(channels_label[i])
-        # reset all the instance variables dependent on the data, but nor the ones responsible for plotting
-        # self.scaling_factor = 1
+
+        # load the data for the new channels and append to list in memory
+        additional_channel_data, additional_channel_label = self._load_data(channels)
+        self.all_data += additional_channel_data
+
+        # also add the new channel labels
+        self.channels_label += additional_channel_label
+
+        # also apply the autoscale if it was applied to the old measurements
         if self.autoscale == True:
             self.quadratic_pixels(channels)
 
@@ -3315,7 +3326,9 @@ class SnomMeasurement(FileHandler):
         """
         if self.autoscale == True:
             print('careful! The synccorretion does not work when autoscale is enabled.')
-            exit()
+            # exit()
+            # sys.exit()
+            return
         # now load all channels in memory for the synccorrection, but save the original data and channels and reinitialize the data lateron
         old_channels = self.channels.copy()
         old_data = self.all_data.copy()
@@ -6169,11 +6182,11 @@ class Scan3D(FileHandler):
         self._update_measurement_channel_indicators()
         # for some reason the naming convention does not always follow the default for the snom measurements of the same filetype
         try:
-            self._create_channel_tag_dict()
+            self.channel_tag_dict = self._create_channel_tag_dict()
         except:
             self.channel_suffix_default = ''
             try:
-                self._create_channel_tag_dict()
+                self.channel_tag_dict = self._create_channel_tag_dict()
             except:
                 print('The channel tag dict could not be created!')
                 exit()

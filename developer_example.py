@@ -86,6 +86,16 @@ Hajo Schill
 
 '''
 
+def test_add_channels():
+    directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
+    channels = ['O2P', 'O2A']
+    measurement = SnomMeasurement(directory_name, channels)
+    measurement.cut_channels(coords=[[6, 8], [43, 41]]) # apply a modification
+    measurement.display_channels()
+    measurement.add_channels(['Z C']) # add list of new channels, but keep old data in memory
+    measurement.display_channels()
+
+
 def test_realign():
     directory_name = 'tests/testdata/2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long'
     # Example to realign horizontal waveguides
@@ -227,7 +237,8 @@ def correct_phase_drift_nonlinear():
 def synccorrection():
     directory_name = 'tests/testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
     channels = ['O2P', 'O2A', 'Z C']
-    measurement = SnomMeasurement(directory_name, channels, autoscale=False)
+    # measurement = SnomMeasurement(directory_name, channels, autoscale=False)
+    measurement = SnomMeasurement(directory_name, channels, autoscale=True) # test exit() 
     # measurement.synccorrection(wavelength=1.6)
     measurement.synccorrection(wavelength=1.6, phasedir=1)
     # measurement.display_channels(['O2Re_corrected', 'O2A', 'Z C'])
@@ -807,6 +818,7 @@ def main():
     #######################################################################################
     #### Testes functions, which can be used to test the functionality of the package. ####
     #######################################################################################
+    test_add_channels()
     # test_realign()
     # test_cut()
     # test_cut_comsol()
@@ -830,7 +842,7 @@ def main():
     # test_level_columnwise()
     # test_get_pixel_value()
     # test_profile_selector()
-    test_ssh_profile_selector()
+    # test_ssh_profile_selector()
     # test_gauss_filter_v2()
     # test_comsol_data()
     # test_comsol_height_data()
