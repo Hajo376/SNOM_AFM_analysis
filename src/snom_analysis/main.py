@@ -3692,7 +3692,8 @@ class SnomMeasurement(FileHandler):
                 self._height_levelling_3point(height_data, coords=None, zone=zone)
             else:
                 # exit()
-                sys.exit('No levelling performed!')
+                # sys.exit('No levelling performed!')
+                return 
         self._write_to_logfile('height_leveling_coordinates', coords)
         # for the 3 point coordinates the height data is calculated over a small area around the clicked pixels to reduce deviations due to noise
         mean_values = [self._get_mean_value(height_data, coords[i][0], coords[i][1], zone) for i in range(len(coords))]
@@ -4255,8 +4256,12 @@ class SnomMeasurement(FileHandler):
             channels = self.channels
         for channel in channels:
             if channel in self.channels and self.height_indicator in channel:
-                self.all_data[self.channels.index(channel)] = self._height_levelling_3point(self.all_data[self.channels.index(channel)], coords)
-                self.channels_label[self.channels.index(channel)] += '_leveled' 
+                leveled_data = self._height_levelling_3point(self.all_data[self.channels.index(channel)], coords)
+                if leveled_data is None:
+                    print('No leveling performed!')
+                else:
+                    self.all_data[self.channels.index(channel)] = leveled_data
+                    self.channels_label[self.channels.index(channel)] += '_leveled' 
         gc.collect()
 
     def level_height_channels_forGui(self, channels:Optional[list]=None):# todo not used?
