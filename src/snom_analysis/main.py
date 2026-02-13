@@ -805,8 +805,8 @@ class FileHandler(PlotDefinitions):
                 return True
 
         # if no filetype was found return False
-        print('No filetype was found!')
-        exit()
+        # print('No filetype was found!')
+        sys.exit('No filetype was found!')
         return False
 
     def _find_measurement_type(self) -> None:
@@ -1719,7 +1719,7 @@ class FileHandler(PlotDefinitions):
                 suffix = self.channel_suffix_custom
                 prefix = self.channel_prefix_custom
                 channel_type = 'custom'
-                # exit()'''
+                # sys.exit()'''
             # we want to read the non binary part of the datafile
             if self.file_ending == '.gsf':
                 encod = 'latin1'
@@ -2093,7 +2093,7 @@ class SnomMeasurement(FileHandler):
                 suffix = self.channel_suffix_custom
                 prefix = self.channel_prefix_custom
                 channel_type = 'custom'
-                # exit()'''
+                # sys.exit()'''
             # check the readmode depending on the filetype
             # this also affects the way the data is read and processed
             if self.file_ending == '.gsf':
@@ -2267,8 +2267,8 @@ class SnomMeasurement(FileHandler):
             print('self.height_indicator: ', self.height_indicator)
             print('self.real_indicator: ', self.real_indicator)
             print('self.imag_indicator: ', self.imag_indicator)
-            print('In _add_subplot(), encountered unknown channel')
-            exit()
+            # print('In _add_subplot(), encountered unknown channel')
+            sys.exit('In _add_subplot(), encountered unknown channel')
         return cmap, label, title
 
     def _add_subplot(self, data:np.ndarray, channel:str, scalebar:Optional[list]=None) -> list:
@@ -2346,8 +2346,8 @@ class SnomMeasurement(FileHandler):
         elif nrows == 1:
             ncols = number_of_subplots
         else:
-            print('Number of subplots must be lager than 0!')
-            exit()
+            # print('Number of subplots must be lager than 0!')
+            sys.exit('Number of subplots must be lager than 0!')
 
         changed_orientation = False
         if number_of_subplots == 4:
@@ -2542,8 +2542,8 @@ class SnomMeasurement(FileHandler):
             elif nrows == 1:
                 ncols = number_of_subplots
             else:
-                print('Number of subplots must be lager than 0!')
-                exit()
+                # print('Number of subplots must be lager than 0!')
+                sys.exit('Number of subplots must be lager than 0!')
         elif self.nrows != 'auto' and self.ncols != 'auto':
             nrows = self.nrows
             ncols = self.ncols
@@ -2730,7 +2730,8 @@ class SnomMeasurement(FileHandler):
             print('Do you want to change the order again?')
             user_input = self._user_input_bool()
             if user_input == False:
-                exit()
+                # sys.exit(0)
+                return 
             else:
                 self.switch_supplots()
 
@@ -3480,7 +3481,7 @@ class SnomMeasurement(FileHandler):
                 print('Do you want to abort the masking procedure?')
                 abort = self._user_input_bool()
                 if abort == True:
-                    exit()'''
+                    sys.exit()'''
         return threshold
 
     def heigth_mask_channels(self, channels:Optional[list]=None, mask_channel:str=None, threshold:float=None) -> None:
@@ -3503,11 +3504,13 @@ class SnomMeasurement(FileHandler):
             if self.height_channel in self.channels:
                 mask_channel = self.height_channel
             else:
-                print('Please specify a mask channel!')
-                exit()
+                print('Please specify a height mask channel!')
+                # exit()
+                return
         if self.height_indicator not in mask_channel:
-            print('Please specify a height channel!')
-            exit()
+            print('Mask channel must be a height channel!')
+            # exit()
+            return
         else:
             height_data = self.all_data[self.channels.index(mask_channel)]                
 
@@ -3646,7 +3649,9 @@ class SnomMeasurement(FileHandler):
             if user_input == True:
                 self.get_pixel_value(channel, zone)
             else:
-                exit()
+                # exit()
+                print('No value read!')
+                return
         x = coordinates[0][0]
         y = coordinates[0][1]
         # get the mean value of the pixel and its neighbors
@@ -3684,9 +3689,10 @@ class SnomMeasurement(FileHandler):
             print('You need to specify 3 point coordinates! \nDo you want to try again?')
             user_input = self._user_input_bool()
             if user_input == True:
-                self._height_levelling_3point(height_data, coords, zone)
+                self._height_levelling_3point(height_data, coords=None, zone=zone)
             else:
-                exit()
+                # exit()
+                sys.exit('No levelling performed!')
         self._write_to_logfile('height_leveling_coordinates', coords)
         # for the 3 point coordinates the height data is calculated over a small area around the clicked pixels to reduce deviations due to noise
         mean_values = [self._get_mean_value(height_data, coords[i][0], coords[i][1], zone) for i in range(len(coords))]
@@ -3850,7 +3856,9 @@ class SnomMeasurement(FileHandler):
                     if user_input == True:
                         self.correct_phase_drift(channels, export, None)
                     else: 
-                        exit()
+                        # exit()
+                        print('No phase drift corrected!')
+                        return
                 mean_values = [self._get_mean_value(phase_data, klick_coordinates[i][0], klick_coordinates[i][1], zone) for i in range(len(klick_coordinates))]
                 #order points from top to bottom
                 if klick_coordinates[0][1] > klick_coordinates[1][1]:
@@ -3894,7 +3902,9 @@ class SnomMeasurement(FileHandler):
                         #start the leveling process again
                         self.correct_phase_drift()
                     else:
-                        exit()
+                        # exit()
+                        print('No phase drift corrected!')
+                        return
         gc.collect()
 
     def correct_phase_drift_nonlinear(self, channels:Optional[list]=None, reference_area:list = [None, None]) -> None:
@@ -4020,7 +4030,9 @@ class SnomMeasurement(FileHandler):
                 if user_input == True:
                     self.match_phase_offset(channels, reference_channel, 'manual')
                 else:
-                    exit()
+                    # exit()
+                    print('No phase offsets matched!')
+                    return
             reference_area = [[klick_coordinates[0][0] - manual_width,klick_coordinates[0][0] + manual_width],[klick_coordinates[0][1] - manual_width, klick_coordinates[0][1] + manual_width]]
         
         reference_data = self.all_data[self.channels.index(reference_channel)]
@@ -4135,7 +4147,9 @@ class SnomMeasurement(FileHandler):
                 #start the leveling process again
                 self.correct_amplitude_drift_nonlinear(channels, reference_area)
             else:
-                exit()
+                # exit()
+                print('No amplitude drift corrected!')
+                return
         gc.collect()
 
     def correct_height_drift_nonlinear(self, channels:Optional[list]=None, reference_area:list = [None, None]) -> None:
@@ -4224,7 +4238,9 @@ class SnomMeasurement(FileHandler):
                 #start the leveling process again
                 self.correct_height_drift_nonlinear(channels, reference_area)
             else:
-                exit()
+                # exit()
+                print('No height drift corrected!')
+                return
         gc.collect()
 
     def level_height_channels_3point(self, channels:Optional[list]=None, coords:list=None) -> None:
@@ -5342,8 +5358,8 @@ class SnomMeasurement(FileHandler):
         """
         # check if channels match, check for data type (amp, phase) and demodulation order
         if self.amp_indicator not in amp_channel or self.phase_indicator not in phase_channel:
-            print('The specified channels are not specified as needed!')
-            exit()
+            # print('The specified channels are not specified as needed!')
+            sys.exit('The specified channels are not specified as needed!')
         demodulation_amp = self._get_demodulation_num(amp_channel)
         demodulation_phase = self._get_demodulation_num(phase_channel)
         if demodulation_amp != demodulation_phase:
@@ -5366,8 +5382,8 @@ class SnomMeasurement(FileHandler):
         xres_amp, yres_amp = amp_dict[ChannelTags.PIXELAREA]
         xres_phase, yres_phase = phase_dict[ChannelTags.PIXELAREA]
         if xres_amp != xres_phase or yres_amp != yres_phase:
-            print('The data of the specified channels has different resolution!')
-            exit()
+            # print('The data of the specified channels has different resolution!')
+            sys.exit('The data of the specified channels has different resolution!')
         
         # create complex data:
         real_data = np.zeros((yres_amp, xres_amp))
@@ -5427,8 +5443,8 @@ class SnomMeasurement(FileHandler):
             realcolorpalette.append(255-i)
 
         if self.amp_indicator not in amp_channel or self.phase_indicator not in phase_channel:
-            print('The specified channels are not specified as needed!')
-            exit()
+            # print('The specified channels are not specified as needed!')
+            sys.exit('The specified channels are not specified as needed!')
         demodulation_amp = self._get_demodulation_num(amp_channel)
         demodulation_phase = self._get_demodulation_num(phase_channel)
         if demodulation_amp != demodulation_phase:
@@ -5448,8 +5464,8 @@ class SnomMeasurement(FileHandler):
         xres_amp, yres_amp = amp_dict[ChannelTags.PIXELAREA]
         xres_phase, yres_phase = phase_dict[ChannelTags.PIXELAREA]
         if xres_amp != xres_phase or yres_amp != yres_phase:
-            print('The data of the specified channels has different resolution!')
-            exit()
+            # print('The data of the specified channels has different resolution!')
+            sys.exit('The data of the specified channels has different resolution!')
         XRes, YRes = xres_amp, yres_amp
         flattened_amp = amp_data.flatten()
         maxval = max(flattened_amp)
@@ -5508,8 +5524,8 @@ class SnomMeasurement(FileHandler):
         # from matplotlib import cm
 
         if self.amp_indicator not in amp_channel or self.phase_indicator not in phase_channel:
-            print('The specified channels are not specified as needed!')
-            exit()
+            # print('The specified channels are not specified as needed!')
+            sys.exit('The specified channels are not specified as needed!')
         demodulation_amp = self._get_demodulation_num(amp_channel)
         demodulation_phase = self._get_demodulation_num(phase_channel)
         if demodulation_amp != demodulation_phase:
@@ -5529,8 +5545,8 @@ class SnomMeasurement(FileHandler):
         xres_amp, yres_amp = amp_dict[ChannelTags.PIXELAREA]
         xres_phase, yres_phase = phase_dict[ChannelTags.PIXELAREA]
         if xres_amp != xres_phase or yres_amp != yres_phase:
-            print('The data of the specified channels has different resolution!')
-            exit()
+            # print('The data of the specified channels has different resolution!')
+            sys.exit('The data of the specified channels has different resolution!')
         XRes, YRes = xres_amp, yres_amp
         flattened_amp = amp_data.flatten()
         maxval = max(flattened_amp)
@@ -5594,8 +5610,8 @@ class SnomMeasurement(FileHandler):
         frame_numer = frames
 
         if self.amp_indicator not in amp_channel or self.phase_indicator not in phase_channel:
-            print('The specified channels are not specified as needed!')
-            exit()
+            # print('The specified channels are not specified as needed!')
+            sys.exit('The specified channels are not specified as needed!')
         demodulation_amp = self._get_demodulation_num(amp_channel)
         demodulation_phase = self._get_demodulation_num(phase_channel)
         if demodulation_amp != demodulation_phase:
@@ -5615,8 +5631,8 @@ class SnomMeasurement(FileHandler):
         xres_amp, yres_amp = amp_dict[ChannelTags.PIXELAREA]
         xres_phase, yres_phase = phase_dict[ChannelTags.PIXELAREA]
         if xres_amp != xres_phase or yres_amp != yres_phase:
-            print('The data of the specified channels has different resolution!')
-            exit()
+            # print('The data of the specified channels has different resolution!')
+            sys.exit('The data of the specified channels has different resolution!')
         XRes, YRes = xres_amp, yres_amp
         flattened_amp = amp_data.flatten()
         maxval = max(flattened_amp)
@@ -5707,8 +5723,8 @@ class SnomMeasurement(FileHandler):
         data1 = self.all_data[self.channels.index(channel1)]
         data2 = self.all_data[self.channels.index(channel2)]
         if data1.shape != data2.shape:
-            print('The data of the specified channels has different resolution!')
-            exit()
+            # print('The data of the specified channels has different resolution!')
+            sys.exit('The data of the specified channels has different resolution!')
         result = data1 - data2
         self.channels.append(channel1 + '-' + channel2)
         self.all_data.append(result)
@@ -6188,8 +6204,8 @@ class Scan3D(FileHandler):
             try:
                 self.channel_tag_dict = self._create_channel_tag_dict()
             except:
-                print('The channel tag dict could not be created!')
-                exit()
+                # print('The channel tag dict could not be created!')
+                sys.exit('The channel tag dict could not be created!')
         # load the channels from the datafile
         self._load_data()
         # get the plotting style from the mpl style file
@@ -6764,7 +6780,9 @@ class Scan3D(FileHandler):
                 if user_input == True:
                     self.match_phase_offset(channels, reference_channel, 'manual', manual_width, axis, line)
                 else:
-                    exit()
+                    # exit()
+                    print('No phase offset matched!')
+                    return
             reference_area = [[klick_coordinates[0][0] - manual_width,klick_coordinates[0][0] + manual_width],[klick_coordinates[0][1] - manual_width, klick_coordinates[0][1] + manual_width]]
         
         reference_data = cutplane_data

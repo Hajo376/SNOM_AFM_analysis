@@ -138,6 +138,14 @@ def test_cut_comsol():
     measurement.display_channels(ncols=3)
     measurement.display_all_subplots()
 
+def height_levelling_3point():
+    directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
+    channels = ['O2P', 'O2A', 'Z C']
+    measurement = SnomMeasurement(directory_name, channels)
+    measurement.level_height_channels_3point()
+    # measurement.level_height_channels_3point(coords=[[12, 9], [13, 43], [42, 34]])
+    measurement.display_channels()
+
 def test_height_masking():
     directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
     channels = ['O2P', 'O2A', 'Z C']
@@ -818,9 +826,10 @@ def main():
     #######################################################################################
     #### Testes functions, which can be used to test the functionality of the package. ####
     #######################################################################################
-    test_add_channels()
+    # test_add_channels()
     # test_realign()
     # test_cut()
+    height_levelling_3point()
     # test_cut_comsol()
     # test_height_masking()
     # test_scalebar()
