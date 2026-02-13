@@ -63,6 +63,7 @@ from .lib.additional_functions import set_nan_to_zero, gauss_function, get_large
 # import definitions such as measurement and channel tags
 from .lib.definitions import Definitions, MeasurementTags, ChannelTags, PlotDefinitions, MeasurementTypes
 from .lib.height_masking import get_height_treshold
+from .lib.point_clicker import ImageClicker
  
 # new version is based on filehandler to do basic stuff and then a class for each different measurement type like snom/afm, approach curves, spectra etc.
 class FileHandler(PlotDefinitions):
@@ -1534,7 +1535,7 @@ class FileHandler(PlotDefinitions):
     def _is_height_channel(self, channel) -> bool:
         """This function returns True if the channel is a height channel, False otherwise."""
         optomechanical_indicator, indicator_index = self._get_optomechanical_indicator(channel)
-        if optomechanical_indicator == None and self.height_indicator in channel:
+        if optomechanical_indicator is None and self.height_indicator in channel:
             return True
         else:
             return False
@@ -1569,7 +1570,7 @@ class FileHandler(PlotDefinitions):
         if indicator_index != None: # if the index is None the channel is a height channel and has no demodulation number
             demodulation_num = int(channel[indicator_index +1 : indicator_index +2])
 
-        if demodulation_num == None and self._channel_has_demod_num(channel):
+        if demodulation_num is None and self._channel_has_demod_num(channel):
             # height channel for example has no demodulation number but should not cause an error
             print('demodulation number could not be found')
         return demodulation_num
@@ -1684,7 +1685,7 @@ class FileHandler(PlotDefinitions):
         Args:
             channel (str): channel name for which the tag values should be extracted
         """
-        if channels == None:
+        if channels is None:
             channels = self.channels
         # create a list containing the tag dictionary for each channel
         # self.channel_tag_dict = []
@@ -1851,7 +1852,7 @@ class SnomMeasurement(FileHandler):
         self.measurement_type = MeasurementTypes.SNOM
         super().__init__(directory_name, title)
         self._initialize_measurement_channel_indicators()
-        if channels == None: # the standard channels which will be used if no channels are specified
+        if channels is None: # the standard channels which will be used if no channels are specified
             channels = self.preview_channels
             # check if the preview channels are available, if not reduce the list to the existing channels
             channels = self._get_existing_channels(channels)
@@ -1872,7 +1873,7 @@ class SnomMeasurement(FileHandler):
         which is created automatically in the instance init method. If channels are specified, the instance data is overwritten.
         Channels must be specified as a list of channels."""
         # print(f'initialising channels: {channels}')
-        if channels == None:
+        if channels is None:
             #none means the channels specified in the instance creation should be used
             pass
         else:
@@ -2715,7 +2716,7 @@ class SnomMeasurement(FileHandler):
             first_id (int): the first id of the two subplots which should be switched
             second_id (int): the second id of the two subplots which should be switched
         """
-        if (first_id == None) or (second_id == None):
+        if (first_id is None) or (second_id is None):
             first_id = int(input('Please enter the id of the first image: '))
             second_id = int(input('Please enter the id of the second image: '))
         self._load_all_subplots()
@@ -2780,7 +2781,7 @@ class SnomMeasurement(FileHandler):
         """
         self.nrows = nrows
         self.ncols = ncols
-        if channels == None:
+        if channels is None:
             dataset = self.all_data
             plot_channels = self.channels
         else:
@@ -3152,7 +3153,7 @@ class SnomMeasurement(FileHandler):
         """
         if appendix == 'default':
             appendix = self.channel_suffix_manipulated
-        if channels == None:
+        if channels is None:
             channels = self.channels
         for channel in channels:
 
@@ -3221,7 +3222,7 @@ class SnomMeasurement(FileHandler):
         """
         if appendix == 'default':
             appendix = self.channel_suffix_manipulated
-        if channels == None:
+        if channels is None:
             channels = self.channels
         for channel in channels:
             # old:
@@ -3340,7 +3341,7 @@ class SnomMeasurement(FileHandler):
         all_channels = self.phase_channels + self.amp_channels
         self._initialize_data(all_channels)
         scanangle = self._get_measurement_tag_dict_value(MeasurementTags.ROTATION)[0]*np.pi/180
-        if phasedir == None:
+        if phasedir is None:
             phasedir = self._create_synccorr_preview(self.preview_phasechannel, wavelength)
         self._write_to_logfile('synccorrection_wavelength', wavelength)
         self._write_to_logfile('synccorrection_phasedir', phasedir)
@@ -3498,9 +3499,9 @@ class SnomMeasurement(FileHandler):
             mask_channel (str): The channel to use for the height mask, if not specified the height channel will be used
             threshold (float): Threshold value to create the height mask from. Default is None, the user can select the threshold with a slider.
         """
-        if channels == None:
+        if channels is None:
             channels = self.channels
-        if (mask_channel == None) or (mask_channel not in self.channels):
+        if (mask_channel is None) or (mask_channel not in self.channels):
             if self.height_channel in self.channels:
                 mask_channel = self.height_channel
             else:
@@ -3599,7 +3600,7 @@ class SnomMeasurement(FileHandler):
             cmap = SNOM_amplitude
         else:
             cmap = 'viridis'
-        fig, ax = plt.subplots()
+        '''fig, ax = plt.subplots()
         ax.pcolormesh(data, cmap=cmap)
         klicker = clicker(ax, ["event"], markers=["x"])
         ax.legend()
@@ -3619,47 +3620,42 @@ class SnomMeasurement(FileHandler):
         ax.invert_yaxis()
         plt.title('You clicked on the following pixel.')
         if PlotDefinitions.show_plot:
-            plt.show()
+            plt.show()'''
+        # clicker = ImageClicker(data, cmap, "Please click on the pixels you want to get the coordinates from and then press 'Accept'.")
+        # coordinates = clicker.coords
+        coordinates = self._get_klicker_coordinates(data, cmap, "Please click on the pixels you want to get the coordinates from and then press 'Accept'.")
         self._write_to_logfile('get_pixel_coordinates', coordinates)
         return coordinates
 
-    def get_pixel_value(self, channel, coordinates:list=None, zone:int=1) -> float:
-        """This function returns the pixel value of a channel at the specified coordinates.
+    def get_pixel_value(self, channel, coordinates:list=None, zone:int=1) -> list:
+        """This function returns the pixel values of a channel at the specified coordinates.
         The zone specifies the number of neighbors. 0 means only the pixel itself. 1 means the pixel and the 8 nearest pixels.
         2 means zone 1 plus the next 16, so a total of 25 with the pixel in the middle.
         If the channel is scaled the zone will be scaled as well.
         
         Args:
             channel (str): the channel to display
-            coordinates (list, optional): the pixel coordinates. Defaults to None.
+            coordinates (list, optional): the pixel coordinates [[x1, y1], [x2, y2], ...]. Defaults to None.
             zone (int, optional): the number of neighbors. Defaults to 1.
         
         Returns:
-            float: the pixel value
+            list: the pixel values
         """
         # adjust the zone if the data is scaled
         zone = zone*self._get_channel_scaling(self.channels.index(channel))
         # display the channel
         data = self.all_data[self.channels.index(channel)]
-        if coordinates == None:
+        if coordinates is None:
             coordinates = self.get_pixel_coordinates(channel)
-        if len(coordinates) != 1:
-            print('You need to specify one pixel coordinate! \nDo you want to try again?')
-            user_input = self._user_input_bool()
-            if user_input == True:
-                self.get_pixel_value(channel, zone)
-            else:
-                # exit()
-                print('No value read!')
-                return
-        x = coordinates[0][0]
-        y = coordinates[0][1]
-        # get the mean value of the pixel and its neighbors
-        pixel_value = self._get_mean_value(data, x, y, zone)
+        pixel_values = []
+        for coord in coordinates:
+            x = coord[0]
+            y = coord[1]
+            # get the mean value of the pixel and its neighbors and append to list
+            pixel_values.append(self._get_mean_value(data, x, y, zone))
         # add the coordinates to the logfile
-        self._write_to_logfile('get_pixel_value_coordinates', coordinates)
         self._write_to_logfile('get_pixel_value_zone', zone)
-        return pixel_value
+        return pixel_values
 
     def _height_levelling_3point(self, height_data:np.ndarray, coords:list=None, zone:int=1) -> np.ndarray:
         """This function levels the height data with a 3 point leveling.
@@ -3674,26 +3670,19 @@ class SnomMeasurement(FileHandler):
             np.ndarray: the leveled height data
         """
         # check if coordinates are given, then we don't need to display the image
-        if coords == None:
-            fig, ax = plt.subplots()
-            ax.pcolormesh(height_data, cmap=SNOM_height)
-            klicker = clicker(ax, ["event"], markers=["x"])
-            ax.legend()
-            ax.axis('scaled')
-            plt.title('3 Point leveling: please click on three points\nto specify the underground plane.')
-            if PlotDefinitions.show_plot:
-                plt.show()
-            klicker_coords = klicker.get_positions()['event'] #klicker returns a dictionary for the events
-            coords = [[round(element[0]), round(element[1])] for element in klicker_coords]
-        if len(coords) != 3:
-            print('You need to specify 3 point coordinates! \nDo you want to try again?')
-            user_input = self._user_input_bool()
-            if user_input == True:
-                self._height_levelling_3point(height_data, coords=None, zone=zone)
-            else:
-                # exit()
-                # sys.exit('No levelling performed!')
-                return 
+        if coords is None:
+            # let the user select 3 points until success or the users patience runs out
+            while True:
+                coords = self._get_klicker_coordinates(height_data, SNOM_height, "Click on three points to define the leveling plane and press 'Accept'.")
+                if len(coords) != 3:
+                    print('You need to specify 3 point coordinates! \nDo you want to try again?')
+                    user_input = self._user_input_bool()
+                    if user_input == False:
+                        return
+                else: break
+        elif len(coords) != 3:
+            print('You need to specify 3 point coordinates! No leveling performed!')
+            return 
         self._write_to_logfile('height_leveling_coordinates', coords)
         # for the 3 point coordinates the height data is calculated over a small area around the clicked pixels to reduce deviations due to noise
         mean_values = [self._get_mean_value(height_data, coords[i][0], coords[i][1], zone) for i in range(len(coords))]
@@ -3750,7 +3739,7 @@ class SnomMeasurement(FileHandler):
         
         return leveled_height_data
 
-    def _get_klicker_coordinates(data:np.ndarray, cmap, message:str):
+    def _get_klicker_coordinates_old(self, data:np.ndarray, cmap, message:str):
         """This function returns the pixel coordinates of the clicked pixel.
 
         Args:
@@ -3768,6 +3757,17 @@ class SnomMeasurement(FileHandler):
         klicker_coords = klicker.get_positions()['event'] #klicker returns a dictionary for the events
         klick_coordinates = [[round(element[0]), round(element[1])] for element in klicker_coords]
         return klick_coordinates
+    
+    def _get_klicker_coordinates(self, data:np.ndarray, cmap, message:str):
+        """This function returns the pixel coordinates of the clicked pixel.
+
+        Args:
+            data (np.ndarray): the data
+            cmap (str): the colormap
+            message (str): the message to display as the title
+        """
+        clicker = ImageClicker(data, cmap, message)
+        return clicker.coords
 
     def _height_levelling_3point_forGui(self, height_data, zone=1) -> np.ndarray:
         klick_coordinates = self._get_klicker_coordinates(height_data, SNOM_height, '3 Point leveling: please click on three points\nto specify the underground plane.')
@@ -3835,7 +3835,7 @@ class SnomMeasurement(FileHandler):
                         self.all_data[i] = self._level_phase_slope(self.all_data[i], phase_slope)
                         self.channels_label[i] += '_driftcomp'
             else:
-                fig, ax = plt.subplots()
+                '''fig, ax = plt.subplots()
                 img = ax.pcolormesh(phase_data, cmap=SNOM_phase)
                 klicker = clicker(ax, ["event"], markers=["x"])
                 ax.invert_yaxis()
@@ -3859,28 +3859,38 @@ class SnomMeasurement(FileHandler):
                     else: 
                         # exit()
                         print('No phase drift corrected!')
-                        return
-                mean_values = [self._get_mean_value(phase_data, klick_coordinates[i][0], klick_coordinates[i][1], zone) for i in range(len(klick_coordinates))]
+                        return'''
+                while True:
+                    coordinates = self._get_klicker_coordinates(phase_data, SNOM_phase, "Phase leveling: please select two points\nto specify the phase drift.")
+                    if (coordinates is None) or (len(coordinates) != 2):
+                        print('You must specify two points which should have the same phase, along the y-direction')
+                        print('Do you want to try again?')
+                        user_input = self._user_input_bool()
+                        if user_input == False: break
+                    else: break
+
+
+                mean_values = [self._get_mean_value(phase_data, coordinates[i][0], coordinates[i][1], zone) for i in range(len(coordinates))]
                 #order points from top to bottom
-                if klick_coordinates[0][1] > klick_coordinates[1][1]:
-                    second_corrd = klick_coordinates[0]
+                if coordinates[0][1] > coordinates[1][1]:
+                    second_corrd = coordinates[0]
                     second_mean = mean_values[0]
-                    klick_coordinates[0] = klick_coordinates[1]
-                    klick_coordinates[1] = second_corrd
+                    coordinates[0] = coordinates[1]
+                    coordinates[1] = second_corrd
                     mean_values[0] = mean_values[1]
                     mean_values[1] = second_mean
                 if point_based == True:
-                    phase_slope = (mean_values[1] - mean_values[0])/(klick_coordinates[1][1] - klick_coordinates[0][1])
+                    phase_slope = (mean_values[1] - mean_values[0])/(coordinates[1][1] - coordinates[0][1])
                 else:
                     # calculate the slope with a linear fit
                     # get profile between the two points
-                    x_mean = int((klick_coordinates[0][0] + klick_coordinates[1][0])/2) # take the middle x value of the two points
-                    phase_profile = ski.measure.profile_line(phase_data.T, [x_mean, klick_coordinates[0][1]], [x_mean, klick_coordinates[1][1]], linewidth=zone**2) # somehow x and y are switched, therefore transpose the array
+                    x_mean = int((coordinates[0][0] + coordinates[1][0])/2) # take the middle x value of the two points
+                    phase_profile = ski.measure.profile_line(phase_data.T, [x_mean, coordinates[0][1]], [x_mean, coordinates[1][1]], linewidth=zone**2) # somehow x and y are switched, therefore transpose the array
                     flattened_profile = np.unwrap(phase_profile)
                     phase_slope, intercept = np.polyfit(range(len(flattened_profile)), flattened_profile, 1)
                 leveled_phase_data = self._level_phase_slope(phase_data, phase_slope)
                 fig, ax = plt.subplots()
-                ax.pcolormesh(leveled_phase_data, cmap=SNOM_phase)
+                img = ax.pcolormesh(leveled_phase_data, cmap=SNOM_phase)
                 ax.invert_yaxis()
                 divider = make_axes_locatable(ax)
                 cax = divider.append_axes("right", size="5%", pad=0.05)
@@ -3936,9 +3946,9 @@ class SnomMeasurement(FileHandler):
         
         # cut out the reference area
         # if no area is specified just use the whole data
-        if reference_area[0] == None:
+        if reference_area[0] is None:
             reference_area[0] = 0 # left border
-        if reference_area[1] == None:
+        if reference_area[1] is None:
             reference_area[1] = len(phase_data[0]) # right border
 
         # get the phase values per column of the reference area, then flatten each column 
@@ -4003,7 +4013,7 @@ class SnomMeasurement(FileHandler):
         self._initialize_data(channels)
         # define local list of channels to use for leveling
         channels = self.channels
-        if reference_channel == None:
+        if reference_channel is None:
             for channel in channels:
                 if self.phase_indicator in channel:
                     reference_channel = channel
@@ -4092,9 +4102,9 @@ class SnomMeasurement(FileHandler):
         
         # cut out the reference area
         # if no area is specified just use the whole data
-        if reference_area[0] == None:
+        if reference_area[0] is None:
             reference_area[0] = 0
-        if reference_area[1] == None:
+        if reference_area[1] is None:
             reference_area[1] = len(amplitude_data[0])
         
         # iterate through the reference area and get the average amplitude value per row
@@ -4183,9 +4193,9 @@ class SnomMeasurement(FileHandler):
         # cut out the reference area
         # new version: let the user specify the reference area by moving two borders in the preview
         # if no area is specified just use the whole data
-        if reference_area[0] == None:
+        if reference_area[0] is None:
             reference_area[0] = 0
-        if reference_area[1] == None:
+        if reference_area[1] is None:
             reference_area[1] = len(height_data[0])
         
         # iterate through the reference area and get the average height value per row
@@ -4304,7 +4314,7 @@ class SnomMeasurement(FileHandler):
         """
         if channels is None:
             channels = self.channels
-        if shift == None:
+        if shift is None:
             shift_known = False
         else:
             shift_known = True
@@ -4803,7 +4813,7 @@ class SnomMeasurement(FileHandler):
         """
         if preview_channel is None:
             preview_channel = self.height_channel
-        if coordinates == None:
+        if coordinates is None:
             previewdata = self.all_data[self.channels.index(preview_channel)]
             coordinates = self._get_positions_from_plot(preview_channel, previewdata)
 
@@ -4938,7 +4948,7 @@ class SnomMeasurement(FileHandler):
         profiledata = self.all_data[self.channels.index(profile_channel)]
         previewdata = self.all_data[self.channels.index(preview_channel)]
 
-        if coordinates == None:
+        if coordinates is None:
             coordinates = self._get_profiles_Coordinates(profile_channel, profiledata, preview_channel, previewdata, orientation)
         
         print('The final profiles are shown in this plot.')
@@ -4975,7 +4985,7 @@ class SnomMeasurement(FileHandler):
         profiledata_phase = self.all_data[self.channels.index(profile_channel_phase)]
         previewdata = self.all_data[self.channels.index(preview_channel)]
         # get the profile coordinates
-        if coordinates == None:
+        if coordinates is None:
             coordinates = self._get_profiles_Coordinates(profile_channel_phase, profiledata_phase, preview_channel, previewdata, orientation)
         print(f'You selected the following coordinates: ', coordinates)
         print('The final profiles are shown in this plot.')
@@ -5026,7 +5036,7 @@ class SnomMeasurement(FileHandler):
             xres, yres = self._get_channel_tag_dict_value(self.profile_channel, ChannelTags.PIXELAREA)
             xvalues = [x_center_pos - xrange/2 + x*(xrange/xres) for x in range(xres)]
             xlabel = 'X [µm]'
-            if title == None:
+            if title is None:
                 title = 'Horizontal profiles of channel ' + self.profile_channel
         elif self.profile_orientation == Definitions.vertical:
             xrange, yrange = self._get_channel_tag_dict_value(self.profile_channel, ChannelTags.SCANAREA)
@@ -5034,10 +5044,10 @@ class SnomMeasurement(FileHandler):
             xres, yres = self._get_channel_tag_dict_value(self.profile_channel, ChannelTags.PIXELAREA)
             xvalues = [y_center_pos - yrange/2 + y*(yrange/yres) for y in range(yres)]
             xlabel = 'Y [µm]'
-            if title == None:
+            if title is None:
                 title = 'Vertical profiles of channel ' + self.profile_channel
         # find out y label:
-        if ylabel == None:
+        if ylabel is None:
             if self.phase_indicator in self.profile_channel:
                 ylabel = 'Phase'
             elif self.amp_indicator in self.profile_channel:
@@ -5045,7 +5055,7 @@ class SnomMeasurement(FileHandler):
             elif self.height_indicator in self.profile_channel:
                 ylabel = 'Height [nm]'
         for index, profile in enumerate(profiles):
-            if labels == None:
+            if labels is None:
                 plt.plot(xvalues, profile, linestyle, label=f'Profile index: {index}')
             else:
                 plt.plot(xvalues, profile, linestyle, label=labels[index])
@@ -5113,7 +5123,7 @@ class SnomMeasurement(FileHandler):
             channels [list]: list of channels the scaling should be applied to. If not specified the scaling will be applied to all channels
         """
         self._write_to_logfile('quadratic_pixels', True)
-        if channels == None:
+        if channels is None:
             channels = self.channels
         for channel in channels:
             if channel in self.channels:
@@ -5992,7 +6002,7 @@ class ApproachCurve(FileHandler):
     """
     def __init__(self, directory_name:str, channels:Optional[list]=None, title:str=None) -> None:
         self.measurement_type = MeasurementTypes.APPROACHCURVE
-        if channels == None:
+        if channels is None:
             channels = ['M1A']
         self.channels = channels.copy()
         self.x_channel = 'Z'
@@ -6085,7 +6095,7 @@ class ApproachCurve(FileHandler):
         """
         # get the plotting style from the mpl style file
         self._load_mpl_style()
-        if y_channels == None:
+        if y_channels is None:
             y_channels = self.channels
         x_channel = 'Z'
         
@@ -6113,7 +6123,7 @@ class ApproachCurve(FileHandler):
             y_channels (list, optional): List of channels to display. Defaults to None.
         """
         x_channel = 'Z'
-        if y_channels == None:
+        if y_channels is None:
             y_channels = self.channels
         y_data = []
         for channel in y_channels:
@@ -6189,7 +6199,7 @@ class Scan3D(FileHandler):
     def __init__(self, directory_name: str, channels:Optional[list]=None, title: str = None) -> None:
         self.measurement_type = MeasurementTypes.SCAN3D
         # set channelname if none is given
-        if channels == None:
+        if channels is None:
             channels = ['Z', 'O2A', 'O2P'] # if you want to plot approach curves 'Z' must be included!
         self.channels = channels.copy()
         self.x_channel = 'Z'
@@ -6277,7 +6287,7 @@ class Scan3D(FileHandler):
         Returns:
             np.ndarray: Data of the cutplane.
         """
-        if channel == None:
+        if channel is None:
             channel = self.channels[0]
         x,y,z = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
         data = self.all_data[channel].copy()
@@ -6300,7 +6310,7 @@ class Scan3D(FileHandler):
             self.all_cutplane_data[channel] = self.get_cutplane_data(axis=axis, line=line, channel=channel)
 
     def _create_subplot(self, axis:str='x', line:int=0, channel:str=None, auto_align:bool=False):
-        if channel == None:
+        if channel is None:
             channel = self.channels[0]
         cutplane_data = self.all_cutplane_data[channel]
         # sadly the data definitions for this filytype are off, eg. missing 'raw' suffix for 3D scan, also the channel headers are incomplete, z res is false
@@ -6391,7 +6401,7 @@ class Scan3D(FileHandler):
         """
         # get the plotting style from the mpl style file
         self._load_mpl_style()
-        if channels == None:
+        if channels is None:
             channels = self.channels
         number_of_channels = len(channels)
         if number_of_channels == 1:
@@ -6581,7 +6591,7 @@ class Scan3D(FileHandler):
         real_channel = f'O{demodulation}Re'
         # set the channel 
         channel = f'O{demodulation}Re'
-        if channel == None:
+        if channel is None:
             channel = self.channels[0]
         # create real part cutplane data
         self.all_cutplane_data[real_channel] = np.multiply(self.all_cutplane_data[f'O{demodulation}A'], np.cos(self.all_cutplane_data[f'O{demodulation}P']))
@@ -6681,12 +6691,12 @@ class Scan3D(FileHandler):
         return z_data[0]
 
     def display_approach_curve(self, x_pixel, y_pixel, x_channel:str=None, y_channels:Optional[list]=None):
-        if x_channel == None:
+        if x_channel is None:
             x_channel = 'Z'
         if x_channel not in self.channels:
             print('The specified x channel is not in the channels of the measurement! Can not display approach curve.')
             return None
-        if y_channels == None:
+        if y_channels is None:
             y_channels = self.channels
         x_data = self.all_data[x_channel][y_pixel][x_pixel]
         y_data = []
@@ -6756,7 +6766,7 @@ class Scan3D(FileHandler):
         # self._initialize_data(channels)
         # define local list of channels to use for leveling
         channels = self.channels
-        if reference_channel == None:
+        if reference_channel is None:
             for channel in channels:
                 if self.phase_indicator in channel:
                     reference_channel = channel
@@ -6844,7 +6854,7 @@ class Scan3D(FileHandler):
         if channels is None:
             channels = self.channels
         # self._initialize_data(channels)
-        if shift == None:
+        if shift is None:
             shift_known = False
         else:
             shift_known = True
@@ -6888,7 +6898,7 @@ class Scan3D(FileHandler):
         pass
 
     def average_data(self, channels:Optional[list]=None):
-        if channels == None:
+        if channels is None:
             channels = self.channels
         # create a cutplane of the data by averaging over the y axis
         # create a new data array with the averaged data
