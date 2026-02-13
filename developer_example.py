@@ -243,12 +243,14 @@ def correct_phase_drift_nonlinear():
     measurement.display_all_subplots()
     
 def synccorrection():
-    directory_name = 'tests/testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
+    # directory_name = 'tests/testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize' # lambda = 1.600 mu
+    directory_name = 'tests/testdata/2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long' # lambda = 0.970 mu
     channels = ['O2P', 'O2A', 'Z C']
     # measurement = SnomMeasurement(directory_name, channels, autoscale=False)
     measurement = SnomMeasurement(directory_name, channels, autoscale=True) # test exit() 
     # measurement.synccorrection(wavelength=1.6)
-    measurement.synccorrection(wavelength=1.6, phasedir=1)
+    measurement.synccorrection(wavelength=0.97)
+    # measurement.synccorrection(wavelength=1.6, phasedir=1)
     # measurement.display_channels(['O2Re_corrected', 'O2A', 'Z C'])
     measurement.initialize_channels(['O2P_corrected', 'O2A', 'Z C'])
     measurement.display_channels()
@@ -529,6 +531,15 @@ def test_regex_recognition():
     print('all filenames: ', measurement._get_all_filenames_in_directory())
     # print('prefix and suffix for channel Z C: ', measurement._get_prefix_and_suffix('Z C'))
     measurement.text_regex_file_recognition('Z C_manipulated')
+
+def test_channel_tag_dict():
+    directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
+    # directory_name = 'tests/testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
+    # directory_name = 'tests/testdata/2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long' 
+    channels = ['O2P']
+    measurement = SnomMeasurement(directory_name, channels, autoscale=False)
+    measurement.print_channel_tag_dict()
+
 
 #########################################
 #### Examples used in documentation: ####
@@ -836,9 +847,9 @@ def main():
     # test_scalebar()
     # test_phaseshift()
     # compare_measurements()
-    correct_phase_drift()
+    # correct_phase_drift()
     # correct_phase_drift_nonlinear()
-    # synccorrection()
+    synccorrection()
     # test_aachen_files()
     # test_export_to_gsf()
     # test_gif()
@@ -860,6 +871,7 @@ def main():
     # test_find_measurement_type()
     # test_delete_data()
     # test_regex_recognition()
+    # test_channel_tag_dict()
 
     ################################
     #### Documentation examples ####

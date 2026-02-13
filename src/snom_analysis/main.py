@@ -219,8 +219,8 @@ class FileHandler(PlotDefinitions):
                 'ROTATION': 'Neaspec_Angle',
                 'SCANAREA': ['XReal', 'YReal'],
                 'SCANNERCENTERPOSITION': ['XOffset', 'YOffset'],
-                'XYUNIT': 'XYUnit',
-                'ZUNIT': 'ZUnit',
+                'XYUNIT': 'XYUnits',
+                'ZUNIT': 'ZUnits',
                 'WAVENUMBERSCALING': 'Neaspec_WavenumberScaling',
             },
         }
@@ -305,8 +305,8 @@ class FileHandler(PlotDefinitions):
                 # 'ROTATION': 'Neaspec_Angle',
                 'SCANAREA': ['XReal', 'YReal'],
                 'SCANNERCENTERPOSITION': ['XOffset', 'YOffset'],
-                'XYUNIT': 'XYUnit',
-                'ZUNIT': 'ZUnit',
+                'XYUNIT': 'XYUnits',
+                'ZUNIT': 'ZUnits',
                 'WAVENUMBERSCALING': 'Neaspec_WavenumberScaling',
             },
         }
@@ -524,8 +524,8 @@ class FileHandler(PlotDefinitions):
                 # 'ROTATION': 'Neaspec_Angle',
                 'SCANAREA': ['XReal', 'YReal'],
                 'SCANNERCENTERPOSITION': ['XOffset', 'YOffset'],
-                'XYUNIT': 'XYUnit',
-                'ZUNIT': 'ZUnit',
+                'XYUNIT': 'XYUnits',
+                'ZUNIT': 'ZUnits',
                 'WAVENUMBERSCALING': 'Neaspec_WavenumberScaling',
             },
         }
@@ -1751,8 +1751,8 @@ class FileHandler(PlotDefinitions):
                     for i in range(len(channel_tag_enums)):
                         if key == channel_tag_enums[i].name:
                             channel_dict[channel_tag_enums[i]] = data
-
             else:
+                print(channel_tags)
                 for key, tag in channel_tags.items():
                     is_list = False
                     tag_value_found = False
@@ -3048,7 +3048,7 @@ class SnomMeasurement(FileHandler):
             self.all_data[channels[i]] = np.log(np.abs(np.fft.fftshift(FS))**2)
             self.channels_label[channels[i]] = self.channels_label[channels[i]] + '_fft'
 
-    def _create_header(self, channel, data=None, filetype='gsf'):
+    def _create_header(self, channel, filetype='gsf'):
         """This function creates the header for the gsf file. The header contains all necessary information for the gsf file.
         If the channel is in memory the channel tag dict will be used to get the necessary information.
         If not the measurement tag dict will be used to get the necessary information.
@@ -3062,22 +3062,26 @@ class SnomMeasurement(FileHandler):
         """
         # todo XOffset, YOffset dont work properly, also if the measurement is rotated or cut this is not considered so far
         # actually not shure if that isn't fixed by now...
-        if data is None:
-            # channel is not in memory, so the standard values will be used
-            data = self._load_data([channel])[0][0]
-            try: XReal, YReal = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
-            except: XReal, YReal, ZReal = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
-            Yincomplete = None
-            XYUnit = self._get_measurement_tag_dict_unit(MeasurementTags.SCANAREA)
-            rotation = self._get_measurement_tag_dict_value(MeasurementTags.ROTATION)[0]
-            XOffset, YOffset = self._get_measurement_tag_dict_value(MeasurementTags.SCANNERCENTERPOSITION)
-        else: 
-            # if channel is in memory it has to have a channel dict, where all necessary infos are stored
-            XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
-            Yincomplete = self._get_channel_tag_dict_value(channel, ChannelTags.YINCOMPLETE)[0]
-            XYUnit = self._get_channel_tag_dict_unit(channel, ChannelTags.XYUNIT)
-            rotation = self._get_channel_tag_dict_value(channel, ChannelTags.ROTATION)[0]
-            XOffset, YOffset = self._get_channel_tag_dict_value(channel, ChannelTags.SCANNERCENTERPOSITION)
+        
+        '''# channel is not in memory, so the standard values will be used
+        data = self._load_data([channel])[0][0]
+        try: XReal, YReal = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
+        except: XReal, YReal, ZReal = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
+        try: XRes, YRes = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
+        except: XRes, YRes, ZRes = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
+        Yincomplete = None
+        XYUnit = self._get_measurement_tag_dict_unit(MeasurementTags.SCANAREA)
+        rotation = self._get_measurement_tag_dict_value(MeasurementTags.ROTATION)[0]
+        XOffset, YOffset = self._get_measurement_tag_dict_value(MeasurementTags.SCANNERCENTERPOSITION)'''
+        
+        # if channel is in memory it has to have a channel dict, where all necessary infos are stored
+        XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
+        XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+        Yincomplete = self._get_channel_tag_dict_value(channel, ChannelTags.YINCOMPLETE)[0]
+        XYUnit = self._get_channel_tag_dict_unit(channel, ChannelTags.XYUNIT)
+        rotation = self._get_channel_tag_dict_value(channel, ChannelTags.ROTATION)[0]
+        XOffset, YOffset = self._get_channel_tag_dict_value(channel, ChannelTags.SCANNERCENTERPOSITION)
+
         # convert values to m if not already in m, and round to nm precision
         if XYUnit == 'nm':
             XReal = round(XReal * pow(10, -9), 9)
@@ -3099,8 +3103,8 @@ class SnomMeasurement(FileHandler):
             # try to get the rotation from the measurement tags
             rotation = self._get_measurement_tag_dict_value(MeasurementTags.ROTATION)[0]
             # if rotation is None: rotation = ''
-        XRes = len(data[0])
-        YRes  = len(data)
+        # XRes = len(data[0])
+        # YRes  = len(data)
         if filetype=='gsf':
             header = f'Gwyddion Simple Field 1.0\n'
         elif filetype=='txt':
@@ -3195,7 +3199,7 @@ class SnomMeasurement(FileHandler):
             data = self.all_data[self.channels.index(channel)]
             XRes = len(data[0])
             YRes  = len(data)
-            header, NUL = self._create_header(channel, data)
+            header, NUL = self._create_header(channel)
             file = open(filepath, 'bw')
             file.write(header.encode('utf-8'))
             file.write(NUL) # the NUL marks the end of the header and konsists of 0 characters in the first dataline
@@ -3263,7 +3267,7 @@ class SnomMeasurement(FileHandler):
             data = self.all_data[self.channels.index(channel)]
             XRes = len(data[0])
             YRes  = len(data)
-            header, NUL = self._create_header(channel, data, 'txt')
+            header, NUL = self._create_header(channel, 'txt')
             file = open(filepath, 'w')
             file.write(header)
             # file.write(NUL) # the NUL marks the end of the header and konsists of 0 characters in the first dataline
@@ -3274,7 +3278,7 @@ class SnomMeasurement(FileHandler):
             print(f'successfully saved channel {channel} to .txt')
         self._write_to_logfile('save_to_txt_appendix', appendix)
     
-    def _create_synccorr_preview(self, channel, wavelength, nouserinput=False) -> None:
+    def _create_synccorr_preview(self, channel, wavelength, scanangle, nouserinput=False) -> None:
         """
         This function is part of the synccorrection and creates a preview of the corrected data.
 
@@ -3283,7 +3287,7 @@ class SnomMeasurement(FileHandler):
             wavelength (float): wavelength in µm
             nouserinput (bool, optional): if True, the function will not ask for user input. Defaults to False.
         """
-        scanangle = self._get_measurement_tag_dict_value(MeasurementTags.ROTATION)[0]*np.pi/180
+        # scanangle = self._get_measurement_tag_dict_value(MeasurementTags.ROTATION)[0]*np.pi/180
         phasedir_positive = 1
         phasedir_negative = -1
         phase_data = self.all_data[self.channels.index(channel)]
@@ -3292,14 +3296,33 @@ class SnomMeasurement(FileHandler):
         phase_positive = np.zeros((YRes, XRes))
         phase_negative = np.zeros((YRes, XRes))
         phase_no_correction = np.zeros((YRes, XRes))
-        for y in range(0,YRes):
+        '''for y in range(0,YRes):
             for x in range(0,XRes):
                 xreal=x*self.XReal/XRes
                 yreal=y*self.YReal/YRes
                 #phase accumulated by movement of parabolic mirror only depends on 'x' direction
                 phase_no_correction[y][x] = phase_data[y][x]
                 phase_positive[y][x] = np.mod(phase_data[y][x] - phasedir_positive*(np.cos(-scanangle)*xreal + np.sin(-scanangle)*yreal)/wavelength*2*np.pi, 2*np.pi)
-                phase_negative[y][x] = np.mod(phase_data[y][x] - phasedir_negative*(np.cos(-scanangle)*xreal + np.sin(-scanangle)*yreal)/wavelength*2*np.pi, 2*np.pi)
+                phase_negative[y][x] = np.mod(phase_data[y][x] - phasedir_negative*(np.cos(-scanangle)*xreal + np.sin(-scanangle)*yreal)/wavelength*2*np.pi, 2*np.pi)'''
+        xres, yres, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+        xreal, yreal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
+        xyunit = self._get_channel_tag_dict_unit(channel, ChannelTags.XYUNIT)
+        self.print_channel_tag_dict()
+        if xyunit == 'm':
+            xreal *= pow(10, 6)
+            yreal *= pow(10, 6)
+        else:
+            sys.exit('unit unknown! can not proceed with synccorrection!')
+        for y in range(0,yres):
+            for x in range(0,xres):
+                # xreal=x*self.XReal/XRes
+                # yreal=y*self.YReal/YRes
+                xreal_mu=x*xreal/xres
+                yreal_mu=y*yreal/yres
+                #phase accumulated by movement of parabolic mirror only depends on 'x' direction
+                phase_no_correction[y][x] = phase_data[y][x]
+                phase_positive[y][x] = np.mod(phase_data[y][x] - phasedir_positive*(np.cos(-scanangle)*xreal_mu + np.sin(-scanangle)*yreal_mu)/wavelength*2*np.pi, 2*np.pi)
+                phase_negative[y][x] = np.mod(phase_data[y][x] - phasedir_negative*(np.cos(-scanangle)*xreal_mu + np.sin(-scanangle)*yreal_mu)/wavelength*2*np.pi, 2*np.pi)
         #create plots of the uncorrected and corrected images
         subplots = []
         subplots.append(self._add_subplot(phase_no_correction, channel))
@@ -3326,23 +3349,31 @@ class SnomMeasurement(FileHandler):
             phasedir (int, optional): the phase direction, leave out if not known and you will be prompted with a preview and can select the appropriate direction.
 
         """
-        if self.autoscale == True:
+        '''if self.autoscale == True:
             print('careful! The synccorretion does not work when autoscale is enabled.')
             # exit()
             # sys.exit()
-            return
+            return'''
         # now load all channels in memory for the synccorrection, but save the original data and channels and reinitialize the data lateron
         old_channels = self.channels.copy()
         old_data = self.all_data.copy()
         old_channel_tag_dict = self.channel_tag_dict.copy()
         old_channels_label = self.channels_label.copy()
         old_measurement_tag_dict = self.measurement_tag_dict.copy()
+        # also save autoscale setting, as it should be turned off otherwise data is saved with the scaling applied...
+        old_autoscale = self.autoscale
+        self.autoscale = False
         # load new channels for synccorrection
         all_channels = self.phase_channels + self.amp_channels
         self._initialize_data(all_channels)
-        scanangle = self._get_measurement_tag_dict_value(MeasurementTags.ROTATION)[0]*np.pi/180
+        try:
+            scanangle = self._get_measurement_tag_dict_value(MeasurementTags.ROTATION)[0]*np.pi/180
+        except:
+            print('Scan rotation angle could not be found! Proceeding with 0 deg!')
+            scanangle = 0
+        
         if phasedir is None:
-            phasedir = self._create_synccorr_preview(self.preview_phasechannel, wavelength)
+            phasedir = self._create_synccorr_preview(self.preview_phasechannel, wavelength, scanangle)
         self._write_to_logfile('synccorrection_wavelength', wavelength)
         self._write_to_logfile('synccorrection_phasedir', phasedir)
         header, NUL = self._create_header(self.preview_phasechannel) # channel for header just important to distinguish z axis unit either m or nothing
@@ -3354,15 +3385,22 @@ class SnomMeasurement(FileHandler):
             realf.write(header.encode('utf-8'))
             phasef.write(NUL) # add NUL terminator
             realf.write(NUL)
-            for y in range(0,self.YRes):
-                for x in range(0,self.XRes):
+            # get the resolution from the file header
+            xres, yres, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+            xreal, yreal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
+            xyunit = self._get_channel_tag_dict_unit(channel, ChannelTags.XYUNIT)
+            if xyunit == 'm':
+                xreal *= pow(10, 6)
+                yreal *= pow(10, 6)
+            for y in range(0,yres):
+                for x in range(0,xres):
                     #convert pixel number to realspace coordinates in µm
-                    xreal=x*self.XReal/self.XRes
-                    yreal=y*self.YReal/self.YRes
+                    xreal_mu=x*xreal/xres
+                    yreal_mu=y*yreal/yres
                     #open the phase, add pi to change the range from 0 to 2 pi and then substract the linear phase gradient, which depends on the scanangle!
                     amppixval = self.all_data[self.channels.index(self.amp_channels[i])][y][x]
                     phasepixval = self.all_data[self.channels.index(self.phase_channels[i])][y][x]
-                    phasepixval_corr = np.mod(phasepixval + np.pi - phasedir*(np.cos(-scanangle)*xreal + np.sin(-scanangle)*yreal)/wavelength*2*np.pi, 2*np.pi)
+                    phasepixval_corr = np.mod(phasepixval + np.pi - phasedir*(np.cos(-scanangle)*xreal_mu + np.sin(-scanangle)*yreal_mu)/wavelength*2*np.pi, 2*np.pi)
                     realpixval = amppixval*np.cos(phasepixval_corr)
                     phasef.write(pack("f",phasepixval_corr))
                     realf.write(pack("f",realpixval))
@@ -3374,6 +3412,7 @@ class SnomMeasurement(FileHandler):
         self.channel_tag_dict = old_channel_tag_dict
         self.channels_label = old_channels_label
         self.measurement_tag_dict = old_measurement_tag_dict
+        self.autoscale = old_autoscale
         gc.collect()
 
     def _gen_from_input_phasedir(self) -> int:
