@@ -319,8 +319,8 @@ def test_gif():
     # measurement.display_channels()
     # measurement.rotate_90_deg(orientation='left')
     # measurement.gauss_filter_channels_complex()
-    measurement.create_gif('O2A', 'O2P_corrected', frames=20, fps=10, dpi=100)
-    # measurement.create_gif_V2('O2A', 'O2P_corrected', 20, 10)
+    # measurement.create_gif('O2A', 'O2P_corrected', frames=20, fps=10, dpi=100)
+    measurement.create_gif_v2('O2A', 'O2P_corrected', 20, 10)
     # measurement.create_gif_Old('O2A', 'O2P_corrected', 20, 10)
     print('Testing of gif creation successful.')
 
@@ -882,9 +882,9 @@ def example_scan3d_2():
 
 
 def main():
-    #######################################################################################
-    #### Testes functions, which can be used to test the functionality of the package. ####
-    #######################################################################################
+    #####################################################################################
+    #### Test functions, which can be used to test the functionality of the package. ####
+    #####################################################################################
     # test_add_channels()
     # test_realign()
     # test_cut()
@@ -899,7 +899,7 @@ def main():
     # synccorrection()
     # test_aachen_files()
     # test_export_to_gsf()
-    # test_gif()
+    test_gif()
     # test_3d_scan()
     # average_3d_scan()
     # test_phase_drift_correction()

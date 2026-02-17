@@ -689,7 +689,7 @@ class FileHandler(PlotDefinitions):
             else:
                 print(f'Section {section} not found in config file!')
 
-    def _change_config(self, section:str, option:str, value):
+    def _change_config(self, option:str, section:str, value):
         """This function changes the config file.
 
         Args:
@@ -5128,74 +5128,9 @@ class SnomMeasurement(FileHandler):
         self.profile_channel = profile_channel
         self.profile_orientation = orientation
         return self.profiles
-
-    def select_profiles_SSH(self, profile_channel_amp:str, profile_channel_phase:str, preview_channel:Optional[str]=None, orientation:Definitions=Definitions.vertical, width_amp:int=10, width_phase:int=1, coordinates:list=None):
-        # Todo
-        """This function lets the user select a profile with given width in pixels and displays the data.
-        Specific function for ssh model measurements. This will create a plot of field per waveguide index for the topological array.
-        The field is calculated from the amplitude profiles times the cosine of the phasedifference to the central waveguide. 
-        Also a very specific function for me, will probably not make it into the final version of the software.
-
-        Args:
-            profile_channel_amp (str): amplitude channel for profile data
-            profile_channel_phase (str): phase channel for profile data
-            preview_channel (str, optional): channel to preview the profile positions. If not specified the height channel will be used for that. Defaults to None.
-            orientation (Definitions, optional): profiles can be horizontal or vertical. Defaults to Definitions.vertical.
-            width_amp (int, optional): width of the amplitude profile in pixels. Defaults to 10.
-            width_phase (int, optional): width of the phase profile in pixels. Defaults to 1.
-            coordinates (list, optional): if you already now the position of your profile you can also specify the coordinates and skip the selection. Defaults to None.
-        """
-        if preview_channel is None:
-            preview_channel = self.height_channel
-        if preview_channel not in self.channels or profile_channel_amp not in self.channels or profile_channel_phase not in self.channels:
-            print('The channels for preview and the profiles were not found in the memory, they will be loaded automatically.\nBe aware that all prior modifications will get deleted.')  
-            self._initialize_data([profile_channel_amp, profile_channel_phase, preview_channel])#this will negate any modifications done prior like blurr...
-        profiledata_amp = self.all_data[self.channels.index(profile_channel_amp)]
-        profiledata_phase = self.all_data[self.channels.index(profile_channel_phase)]
-        previewdata = self.all_data[self.channels.index(preview_channel)]
-        # get the profile coordinates
-        if coordinates is None:
-            coordinates = self._get_profiles_Coordinates(profile_channel_phase, profiledata_phase, preview_channel, previewdata, orientation)
-        print(f'You selected the following coordinates: ', coordinates)
-        print('The final profiles are shown in this plot.')
-        self._plot_data_and_profile_pos(profile_channel_phase, profiledata_phase, coordinates, orientation)
-        self._plot_data_and_profile_pos(profile_channel_amp, profiledata_amp, coordinates, orientation)
-        self.profile_channel = profile_channel_phase
-        self.profile_orientation = orientation
-
-        # get the profile data for amp and phase
-        self.phase_profiles = self._get_profile(profiledata_phase, coordinates, orientation, width_phase)
-        # test:
-        self._display_profile([self.phase_profiles[0], self.phase_profiles[-1]])
-
-        self.amp_profiles = self._get_profile(profiledata_amp, coordinates, orientation, width_amp)
-        mean_amp = [np.mean(amp) for amp in self.amp_profiles]
-        reference_index = int((len(self.phase_profiles)-1)/2)
-        # phase_difference_profiles = [Phase_Analysis.get_profile_difference(self.phase_profiles[reference_index], self.phase_profiles[i]) for i in range(len(self.phase_profiles))]
-        flattened_profiles = [phase_analysis.flatten_phase_profile(profile, +1) for profile in self.phase_profiles]
-        self._display_profile(flattened_profiles, linestyle='-', title='Flattened phase profiles') # display the flattened profiles
-        # phase_difference_profiles = [Phase_Analysis.get_profile_difference_2(self.phase_profiles[reference_index], self.phase_profiles[i]) for i in range(len(self.phase_profiles))]
-        phase_difference_profiles = [phase_analysis.get_profile_difference_2(flattened_profiles[reference_index], flattened_profiles[i]) for i in range(len(flattened_profiles))]
-        self._display_profile(phase_difference_profiles, linestyle='-', title='Phase difference to center wg') # display the phase difference profiles, no jumps close to 2 pi should occure or the average will lead to false values!
-        # mean_phase_differences = [np.mean(diff) for diff in phase_difference_profiles]# todo this does not work!
-        mean_phase_differences = [np.mean(diff) if np.mean(diff)>0 else np.mean(diff) + np.pi*2 for diff in phase_difference_profiles]# todo this does not work!
-        real_per_wg_index = [mean_amp[i]*np.cos(mean_phase_differences[i]) for i in range(len(self.phase_profiles))]
-        intensity_per_wg_index = [val**2 for val in real_per_wg_index]
-        wg_indices = np.arange(-reference_index, reference_index+1)
-        # print(wg_indices)
-        fig = plt.figure(figsize=[4,2])
-        plt.plot(wg_indices, real_per_wg_index, '-o', label='Real per wg index')
-        plt.hlines(0, xmin=-10, xmax=10, linestyles='--')
-        plt.ylabel(r'E$_z$ [arb.u]')
-        plt.xlabel('Waveguide index')
-        # plt.ylim([-0.04,0.04])
-        
-        plt.xticks(range(-reference_index, reference_index, 2))
-        plt.legend()
-        plt.tight_layout()
-        plt.show()
         
     def _display_profile(self, profiles, ylabel=None, labels=None, linestyle='x', title=None):
+        # work in progess...
         print('Displaying profiles...')
         print('profile channel: ', self.profile_channel)
         print('current channels: ', self.channels)
@@ -5749,7 +5684,7 @@ class SnomMeasurement(FileHandler):
         channel = 'O' + savefile_demod + 'R'
         # self.filename is actually a windows path element not a str filename, to get the string use: self.filename.name
         # print('savefile path: ', self.directory_name / Path(self.filename.name + f'{channel}_gif.gif'))
-        gif_path = self.directory_name / Path(self.filename.name + f'{channel}_gif.gif')
+        gif_path = self.directory_name / Path(self.filename.name + self.channel_prefix_default + f'{channel}.gif')
         frames[0].save(gif_path, format='GIF', append_images=frames[1:], save_all=True,duration=Duration, loop=0, dpi=dpi)
         # plt.show()
         # plt.close(fig)
@@ -5877,7 +5812,7 @@ class SnomMeasurement(FileHandler):
 
         channel = 'O' + savefile_demod + 'R'
         # Save the frames as a gif
-        imageio.mimsave(self.directory_name / Path(self.filename.name + f'{channel}_gif_v2.gif'), frames, fps=fps)
+        imageio.mimsave(self.directory_name / Path(self.filename.name + self.channel_prefix_default + f'{channel}_v2.gif'), frames, fps=fps)
         # alternative:
         # import imageio.v3 as iio
         # iio.imwrite(self.directory_name / Path(self.filename.name + f'{channel}_gif_withimwrite.gif'), frames, fps=fps)
@@ -5891,7 +5826,7 @@ class SnomMeasurement(FileHandler):
         # delete the figure
         plt.close(fig)
         # display the gif
-        self._display_gif(self.directory_name / Path(self.filename.name + f'{channel}_gif_v2.gif'), fps=fps)
+        self._display_gif(self.directory_name / Path(self.filename.name + self.channel_prefix_default + f'{channel}_v2.gif'), fps=fps)
 
     def substract_channels(self, channel1:str, channel2:str) -> None:
         """This function will substract the data of channel2 from channel1 and save the result in a new channel.
