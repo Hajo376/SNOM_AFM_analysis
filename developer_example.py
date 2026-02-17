@@ -94,6 +94,7 @@ def test_add_channels():
     measurement.display_channels()
     measurement.add_channels(['Z C']) # add list of new channels, but keep old data in memory
     measurement.display_channels()
+    print('Testing of add channels successful.')
 
 
 def test_realign():
@@ -119,6 +120,7 @@ def test_realign():
     # measurement.heigth_mask_channels()
     measurement.display_channels()
     # measurement.display_all_subplots()
+    print('Testing of realign successful.')
 
 def test_cut():
     directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
@@ -127,6 +129,7 @@ def test_cut():
     # measurement.cut_channels(autocut=False) # autocut will remove all empty lines and columns
     measurement.cut_channels(coords=[[6, 8], [43, 41]]) # autocut will remove all empty lines and columns
     measurement.display_channels()
+    print('Testing of cut successful.')
 
 def test_cut_comsol():
     directory_name = 'tests/testdata/DLSPPW_bragg_8slits_Ex_ongold'
@@ -137,14 +140,16 @@ def test_cut_comsol():
     measurement.cut_channels()
     measurement.display_channels(ncols=3)
     measurement.display_all_subplots()
+    print('Testing of cut of comsol data successful.')
 
-def height_levelling_3point():
+def height_leveling_3point():
     directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
     channels = ['O2P', 'O2A', 'Z C']
     measurement = SnomMeasurement(directory_name, channels)
     measurement.level_height_channels_3point()
     # measurement.level_height_channels_3point(coords=[[12, 9], [13, 43], [42, 34]])
     measurement.display_channels()
+    print('Testing of height leveling successful.')
 
 def test_height_masking():
     directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
@@ -155,6 +160,7 @@ def test_height_masking():
     # measurement.level_height_channels_3point(coords=[[42, 42], [84, 186], [184, 107]])
     # measurement.set_min_to_zero(['Z C'])
     # measurement.heigth_mask_channels(threshold=0.58)
+    print('Testing of height masking successful.')
 
     measurement.set_min_to_zero(['Z C'])
     measurement.level_height_channels_3point(coords=[[12, 9], [13, 43], [42, 34]])
@@ -182,6 +188,7 @@ def test_scalebar():
     # measurement.cut_channels(coords=[[20, 29], [174, 167]])
     # measurement.display_channels()    
     # measurement.display_all_subplots()
+    print('Testing of scalebar successful.')
     
 def test_phaseshift():
     directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
@@ -196,6 +203,7 @@ def test_phaseshift():
     measurement.shift_phase(shift=4.82)
     measurement.display_channels()
     measurement.display_all_subplots()
+    print('Testing of phase shift successful.')
 
 def compare_measurements():
     channels = ['O2A', 'O2P', 'Z C']
@@ -214,6 +222,8 @@ def compare_measurements():
         measurement.display_channels()
     # display measurements
     measurement.display_all_subplots()
+    PlotDefinitions.autodelete_all_subplots = True # set it back to True for the next measurements
+    print('Testing of comparison of measurements successful.')
 
 def correct_phase_drift():
     directory_name = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
@@ -228,6 +238,7 @@ def correct_phase_drift():
     # measurement.correct_phase_drift(phase_slope=0.016)
     measurement.display_channels()
     measurement.display_all_subplots()
+    print('Testing of phase drift correction successful.')
 
 def correct_phase_drift_nonlinear():
     directory_name = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
@@ -241,7 +252,8 @@ def correct_phase_drift_nonlinear():
     measurement.correct_phase_drift_nonlinear()
     measurement.display_channels()
     measurement.display_all_subplots()
-    
+    print('Testing of nonlinear phase drift correction successful.')
+
 def synccorrection():
     # directory_name = 'tests/testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize' # lambda = 1.600 mu
     directory_name = 'tests/testdata/2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long' # lambda = 0.970 mu
@@ -254,19 +266,20 @@ def synccorrection():
     # measurement.display_channels(['O2Re_corrected', 'O2A', 'Z C'])
     measurement.initialize_channels(['O2P_corrected', 'O2A', 'Z C'])
     measurement.display_channels()
+    print('Testing of sync correction successful.')
 
 def test_aachen_files():
     # limited support for aachen files, only ascii files are supported, could not load .dump files
     channels = ['O2-F-abs', 'O2-F-arg', 'MT-F-abs']
     directory_name = 'tests/testdata/2018-09-10_16-44-27_scan'
 
-    measurement = SnomMeasurement(directory_name, channels)
+    measurement = SnomMeasurement(directory_name, channels, autoscale=False)
     PlotDefinitions.full_phase_range = False
     # measurement.display_channels()
     # measurement.set_min_to_zero()
     # measurement.scale_channels()
     # measurement.gauss_filter_channels_complex() # will blurr the complex values of the specified channels, if optical
-    measurement.scalebar(['MT-F-abs'])
+    # measurement.scalebar(['MT-F-abs'])
     measurement.display_channels()
     # measurement.gauss_filter_channels() # not ideal, will just blurr all channels independently
     # measurement.correct_phase_drift()
@@ -282,6 +295,7 @@ def test_aachen_files():
     # measurement.display_all_subplots()
     # measurement.switch_supplots(2, 3)
     # measurement.display_all_subplots()
+    print('Testing of aachen files successful.')
 
 def test_export_to_gsf():
     directory_name = 'tests/testdata/2022-04-25 1227 PH pentamer_840nm_s50_2'
@@ -294,6 +308,7 @@ def test_export_to_gsf():
     measurement.cut_channels(autocut=True) # autocut will remove all empty lines and columns
     measurement.display_channels()
     measurement.save_to_gsf()
+    print('Testing of export to gsf successful.')
 
 def test_gif():
     directory_name =  'tests/testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
@@ -307,6 +322,7 @@ def test_gif():
     measurement.create_gif('O2A', 'O2P_corrected', frames=20, fps=10, dpi=100)
     # measurement.create_gif_V2('O2A', 'O2P_corrected', 20, 10)
     # measurement.create_gif_Old('O2A', 'O2P_corrected', 20, 10)
+    print('Testing of gif creation successful.')
 
 def test_3d_scan():
     directory = 'tests/testdata/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
@@ -324,6 +340,7 @@ def test_3d_scan():
     measurement.display_cutplanes(axis='x', line=0, channels=['O3P'])
     measurement.display_cutplane_realpart(axis='x', line=0, demodulation=2)
     measurement.display_cutplane_realpart(axis='x', line=0, demodulation=3)
+    print('Testing of 3D scan successful.')
 
 def average_3d_scan():
     directory = 'tests/testdata/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
@@ -337,6 +354,7 @@ def average_3d_scan():
     # measurement.display_cutplanes(axis='x', line=0, channels=['Z'])
     measurement.generate_all_cutplane_data(axis='x', line=0)
     measurement.display_cutplanes(axis='x', line=1, channels=['O2A', 'O2P'], auto_align=True)
+    print('Testing of averaging of 3D scan successful.')
 
 def test_phase_drift_correction():
     directory = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
@@ -349,6 +367,7 @@ def test_phase_drift_correction():
     # measurement.match_phase_offset(reference_channel='O2P', reference_area=[[142, 182], [587, 627]], manual_width=20)
     # measurement.shift_phase(shift=3.11)
     # measurement.display_channels()
+    print('Testing of phase drift correction successful.')
 
 def test_amplitude_drift_correction():
     directory = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
@@ -358,6 +377,7 @@ def test_amplitude_drift_correction():
     measurement.display_channels()
     measurement.correct_amplitude_drift_nonlinear(channels=['O2A', 'O3A', 'O4A'], reference_area=[0, 30])
     measurement.display_channels()
+    print('Testing of amplitude drift correction successful.')
 
 def test_height_drift_correction():
     directory = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
@@ -366,6 +386,7 @@ def test_height_drift_correction():
     measurement.display_channels()
     measurement.correct_height_drift_nonlinear(channels=['Z C'], reference_area=[0, 30])
     measurement.display_channels()
+    print('Testing of height drift correction successful.')
 
 def test_channel_substraction():
     directory = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
@@ -377,6 +398,7 @@ def test_channel_substraction():
     measurement.substract_channels('O3P', 'O4P')
     measurement.shift_phase(channels=['O3P-O4P'], shift=3.22)
     measurement.display_channels()
+    print('Testing of channel substraction successful.')
 
 def use_data_external_example():
     import matplotlib.pyplot as plt
@@ -401,6 +423,7 @@ def use_data_external_example():
     # but you could also use the build in functions for that
     measurement.print_measurement_tag_dict()
     measurement.print_channel_tag_dict()
+    print('Testing of use of data externaly successful.')
     
 def test_level_columnwise():
     directory = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
@@ -409,6 +432,7 @@ def test_level_columnwise():
     measurement.level_data_columnwise(channel_list=channels, selection=[32, 169, True, True])
     # its expected that phase jumps lead to problems, is not yet fully implemented
     measurement.display_channels() 
+    print('Testing of columnwise leveling successful.')
 
 def test_get_pixel_value():
     directory = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
@@ -419,6 +443,7 @@ def test_get_pixel_value():
     # val = measurement.get_pixel_value('Z C', coordinates=[[44, 473], [103, 304], [145, 393]])
     # val = measurement.get_pixel_value('Z C')
     print(val)
+    print('Testing of get pixel value successful.')
 
 def test_profile_selector():
     import matplotlib.pyplot as plt
@@ -430,6 +455,7 @@ def test_profile_selector():
     plt.show()
     # this tests a new funtion to select arbitrary profiles from the data, it is however not yet fully implemented
     # measurement.Display_Profiles()
+    print('Testing of profile selector successful.')
 
 def test_ssh_profile_selector():
     directory = 'tests/testdata/2023-03-16 151410 PH topol_fb_h100_nocomp_horizontalpol_10mufromcoupler'
@@ -438,6 +464,7 @@ def test_ssh_profile_selector():
     measurement.gauss_filter_channels_complex()
     coordinates = [[19, 19], [43, 20], [83, 20], [108, 21], [148, 22], [172, 19], [211, 21], [237, 20], [277, 21], [300, 21], [340, 21], [364, 21], [406, 21], [446, 21], [470, 20], [510, 21], [534, 21], [574, 20], [599, 22], [639, 21], [662, 21], [702, 23], [727, 22], [767, 24], [791, 23]]
     measurement.select_profiles_SSH('O2A', 'O2P_corrected', 'Z C', coordinates=coordinates)
+    print('Testing of SSH profile selector successful.')
 
 def test_gauss_filter_v2():
     directory = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
@@ -447,6 +474,7 @@ def test_gauss_filter_v2():
     measurement.scale_channels()
     measurement.gauss_filter_channels_complex()
     measurement.display_channels()
+    print('Testing of gauss filter v2 successful.')
 
 def test_comsol_data():
     directory = 'tests/testdata/DLSPPW_bragg_8slits_Ex_ongold'
@@ -454,6 +482,7 @@ def test_comsol_data():
     measurement = SnomMeasurement(directory)
     measurement.display_channels()
     # print('All channels: ', measurement.channels)
+    print('Testing of comsol data successful.')
 
 def test_comsol_height_data():
     import numpy as np
@@ -497,6 +526,7 @@ def test_comsol_height_data():
     # height_data = measurement.all_data[2]
     measurement.display_overlay('abs', 'Z', alpha=0.2)
     # measurement.save_to_gsf(['Z'], appendix='')
+    print('Testing of comsol height data successful.')
 
 def test_approach_curve():
     # directory_name = 'tests/testdata/2024-04-03 133202 PH AC topol_20mufromcoupler_right_interf_peak'
@@ -506,12 +536,14 @@ def test_approach_curve():
     measurement = ApproachCurve(directory_name, channels)
     measurement.set_min_to_zero()
     measurement.display_channels_v2()
+    print('Testing of approach curve successful.')
 
 def test_find_measurement_type():
     directory_name = 'tests/testdata/2024-05-08 151547 PH 3D single_wg_20mu_3d_10ypx'
     handler = FileHandler(directory_name)
     print(handler.measurement_type)
     print(handler.file_type)
+    print('Testing of find measurement type successful.')
 
 def test_delete_data():
     # the copy has to be remade everytime you want to delete data, otherwise the data will not be deleted
@@ -523,6 +555,7 @@ def test_delete_data():
     # measurement.cut_channels()
     # measurement.set_min_to_zero(['Z C'])
     # measurement.display_channels()
+    print('Testing of delete data successful.')
 
 def test_regex_recognition():
     directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
@@ -531,14 +564,28 @@ def test_regex_recognition():
     print('all filenames: ', measurement._get_all_filenames_in_directory())
     # print('prefix and suffix for channel Z C: ', measurement._get_prefix_and_suffix('Z C'))
     measurement.text_regex_file_recognition('Z C_manipulated')
+    print('Testing of regex recognition successful.')
 
 def test_channel_tag_dict():
-    directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
+    # directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
     # directory_name = 'tests/testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
-    # directory_name = 'tests/testdata/2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long' 
+    directory_name = 'tests/testdata/2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long' 
     channels = ['O2P']
     measurement = SnomMeasurement(directory_name, channels, autoscale=False)
     measurement.print_channel_tag_dict()
+    print('Testing of channel tag dict successful.')
+
+def no_parameter_file():
+    # directory_name = 'tests/testdata/no_parameterfile/2022-04-25 1212 PH pentamer_840nm_s50_1'
+    # directory_name = 'tests/testdata/no_parameterfile/2020-01-08 1337 PH denmark_skurve_02_synchronize'
+    directory_name = 'tests/testdata/no_parameterfile/2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long' 
+    channels = ['O2P']
+    measurement = SnomMeasurement(directory_name, channels, autoscale=False)
+    measurement.print_channel_tag_dict()
+    measurement.display_channels()
+    # measurement.print_measurement_tag_dict()
+    # measurement.synccorrection(1.6)
+    print('Testing of no parameter file successful.')
 
 
 #########################################
@@ -841,7 +888,7 @@ def main():
     # test_add_channels()
     # test_realign()
     # test_cut()
-    # height_levelling_3point()
+    # height_leveling_3point()
     # test_cut_comsol()
     # test_height_masking()
     # test_scalebar()
@@ -849,7 +896,7 @@ def main():
     # compare_measurements()
     # correct_phase_drift()
     # correct_phase_drift_nonlinear()
-    synccorrection()
+    # synccorrection()
     # test_aachen_files()
     # test_export_to_gsf()
     # test_gif()
@@ -872,6 +919,7 @@ def main():
     # test_delete_data()
     # test_regex_recognition()
     # test_channel_tag_dict()
+    # no_parameter_file()
 
     ################################
     #### Documentation examples ####

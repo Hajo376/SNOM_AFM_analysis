@@ -761,6 +761,8 @@ class FileHandler(PlotDefinitions):
         If the filetype is found the function returns True otherwise False.
         """
         filetypes = self._get_from_config(section='FILETYPES')
+
+        # try to identify the filetype by creating the measurement tag dict for the filetypes in the config file
         for key in filetypes:
             filetype = self._get_from_config(key, 'FILETYPES')
             # print('Trying to find filetype: ', filetype)
@@ -797,12 +799,44 @@ class FileHandler(PlotDefinitions):
                 try: self._create_channel_tag_dict([channels[0]])
                 except: 
                     succsess = False
-            self.file_type = None
             if succsess:
                 # the correct filetype has been found
                 # print(f'Filetype found: {filetype}')
                 self.file_type = filetype
                 # print('parameter dict was created successfully')                
+                return True
+            else: self.file_type = None
+
+        # if no filetype could be found based on the parameter file, try to create the channel tag dict and do not create a measurement tag dict
+        # print('No filetype found using parameter file! Trying with header only...')
+        for key in filetypes:
+            filetype = self._get_from_config(key, 'FILETYPES')
+            # print('Trying to find filetype: ', filetype)
+            # parameters_name = self._get_from_config('parameters_name', filetype)
+            # parameters_path = self.directory_name / Path(self.filename.name + parameters_name)
+
+            self.file_type = filetype
+            self._initialize_measurement_channel_indicators()
+
+            if self.measurement_type == MeasurementTypes.NONE:
+                self._find_measurement_type()
+            if self.measurement_type == MeasurementTypes.SNOM:
+                channels = self.all_channels_default # test all default channels
+                # it might be sufficient to probe one optical an the corrected height channel, sometimes the channel suffix changes
+                # some channels end with 'raw' some do not...
+                # try to create the channel tag dict for every existing channel, otherwise no the correct filetype is selected
+                succsess = False
+                channel_success = []
+                for channel in channels:
+                    try: self._create_channel_tag_dict([channel])
+                    except: channel_success.append(1) # 1 for false, 0 for true
+                    else: channel_success.append(0)
+                if 1 not in channel_success: succsess = True
+            self.file_type = None
+            if succsess:
+                # the correct filetype has been found
+                self.file_type = filetype
+                # print('channel dict was created successfully')                
                 return True
 
         # if no filetype was found return False
@@ -1113,11 +1147,14 @@ class FileHandler(PlotDefinitions):
     def print_measurement_tag_dict(self):
         """This function prints the measurement tag dict.
         """
-        print('-------------------------------')
-        print('Measurement tag dict:')
-        print('-------------------------------')
-        for key, value in self.measurement_tag_dict.items():
-            print(f'{key} = {value}')
+        try:
+            print('-------------------------------')
+            print('Measurement tag dict:')
+            print('-------------------------------')
+            for key, value in self.measurement_tag_dict.items():
+                print(f'{key} = {value}')
+        except:
+            print('No measurement tag dict found!')
 
     def print_channel_tag_dict(self, channel=None):
         """This function prints the channel tag dict.
@@ -1677,7 +1714,7 @@ class FileHandler(PlotDefinitions):
             else:
                 return True
 
-    def _create_channel_tag_dict(self, channels:Optional[list]=None) -> dict:
+    def _create_channel_tag_dict(self, channels:Optional[list]=None) -> list:
         """This function reads in the header of the gsf file for the specified channel and extracts the tag values. The tag values are stored in a dictionary for each channel.
         This tag dict is very similar to the measurement_tag_dict, but the measurement_tag_dict is only created on the basis of the parameter file.
         If individual channels have been modified this will only be stored in the channel_tag_dict.
@@ -1737,7 +1774,11 @@ class FileHandler(PlotDefinitions):
 
             try: channel_tags = self._get_from_config('channel_tags')
             except:
-                # seem like there are no channel tags in the config file
+                print('Channel tags not found! Can not create channel tag dict!')
+                # try to create the channel tag dict from the measurement tag dict
+                channel_tag_dict = self._create_channel_tag_dict_from_measurement_tag_dict(channels)
+                return channel_tag_dict
+                '''# seem like there are no channel tags in the config file
                 # so we will just use the measurement tags to initialize the channel tags
                 measurement_tags = self._get_from_config('measurement_tags', self.file_type)
                 measurement_tag_enums = list(MeasurementTags)
@@ -1750,9 +1791,9 @@ class FileHandler(PlotDefinitions):
                     # insert the data into the channel tag dict with the corresponding key wich is an enum of the channel tags class but has the same name as the measurement tag
                     for i in range(len(channel_tag_enums)):
                         if key == channel_tag_enums[i].name:
-                            channel_dict[channel_tag_enums[i]] = data
+                            channel_dict[channel_tag_enums[i]] = data'''
             else:
-                print(channel_tags)
+                # print(channel_tags)
                 for key, tag in channel_tags.items():
                     is_list = False
                     tag_value_found = False
@@ -1808,6 +1849,62 @@ class FileHandler(PlotDefinitions):
             channel_tag_dict.append(channel_dict)
         return channel_tag_dict
     
+    def _create_channel_tag_dict_from_measurement_tag_dict(self, channels:Optional[list]=None) -> list:
+        print('Creating channel tag dict from measurement tag dict...')
+        if channels is None:
+            channels = self.channels
+        # create a list containing the tag dictionary for each channel
+        channel_tags = None
+        measurement_tags = None
+        try:    channel_tags = self._get_from_config('channel_tags')
+        except: print('Channel tags not found! Can not create channel tag dict!')
+        # else:   print('channel tags', channel_tags)
+
+        try:    measurement_tags = self._get_from_config('measurement_tags')
+        except: print('Measurement tags not found! Can not create channel tag dict!')
+        # else:   print('Measurement tags', measurement_tags)
+
+        if channel_tags is None: channel_tags = measurement_tags
+
+        channel_dict = {}
+        for key, tag in channel_tags.items():
+            if key == 'PIXELAREA':
+                try: channel_dict[ChannelTags.PIXELAREA] = self.measurement_tag_dict[MeasurementTags.PIXELAREA]
+                except: pass
+            elif key == 'YINCOMPLETE':
+                try: channel_dict[ChannelTags.YINCOMPLETE] = self.measurement_tag_dict[MeasurementTags.YINCOMPLETE]
+                except: pass
+            elif key == 'SCANNERCENTERPOSITION':
+                try: channel_dict[ChannelTags.SCANNERCENTERPOSITION] = self.measurement_tag_dict[MeasurementTags.SCANNERCENTERPOSITION]
+                except: pass
+            elif key == 'ROTATION':
+                try: channel_dict[ChannelTags.ROTATION] = self.measurement_tag_dict[MeasurementTags.ROTATION]
+                except: pass
+            elif key == 'SCANAREA':
+                try: channel_dict[ChannelTags.SCANAREA] = self.measurement_tag_dict[MeasurementTags.SCANAREA]
+                except: pass
+            elif key == 'XYUNIT':
+                try: channel_dict[ChannelTags.XYUNIT] = self.measurement_tag_dict[MeasurementTags.XYUNIT]
+                except: pass
+            elif key == 'ZUNIT':
+                try: channel_dict[ChannelTags.ZUNIT] = self.measurement_tag_dict[MeasurementTags.ZUNIT]
+                except: pass
+            elif key == 'WAVENUMBERSCALING':
+                try: channel_dict[ChannelTags.WAVENUMBERSCALING] = self.measurement_tag_dict[MeasurementTags.WAVENUMBERSCALING]
+                except: pass
+        # add pixel scaling to the channel dict, initially this is always 1
+        channel_dict[ChannelTags.PIXELSCALING] = 1
+
+        # all channels have the identical channel tag dict since it is based on the measurement tag dict, so we just create a list containing the same dict for each channel
+        channel_tag_dict = []
+        for _ in channels:
+            channel_tag_dict.append(channel_dict)
+        return channel_tag_dict
+        
+        
+        
+            
+
     def _get_existing_channels(self, channels:list) -> list:
         """This function checks if the specified channels exist in the measurement.
         If not a reduced list of channels is returned which only contains the channels that exist.
@@ -2046,8 +2143,13 @@ class SnomMeasurement(FileHandler):
         for channel in channels:
             if channel in self.channels:
                 self.all_data[self.channels.index(channel)] = self._scale_array(self.all_data[self.channels.index(channel)], scaling)
-                XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
-                self._set_channel_tag_dict_value(channel, ChannelTags.PIXELAREA, [XReal*scaling, YReal*scaling])
+                # XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA) # Real should be the scan size not the pixel count...
+                XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+                # use the channel tag if possible
+                # try: XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+                # some filetypes may not have a channel tag dict, then take the resolution from the measurement tag dict...
+                # except: XRes, YRes, *args = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
+                self._set_channel_tag_dict_value(channel, ChannelTags.PIXELAREA, [XRes*scaling, YRes*scaling])
                 self._set_channel_tag_dict_value(channel, ChannelTags.PIXELSCALING, scaling)
             else:
                 print(f'Channel {channel} is not in memory! Please initiate the channels you want to use first!')
@@ -2115,6 +2217,10 @@ class SnomMeasurement(FileHandler):
             
             # get the resolution of the channel 
             XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+            # use the channel tag if possible
+            # try: XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+            # some filetypes may not have a channel tag dict, then take the resolution from the measurement tag dict...
+            # except: XRes, YRes, *args = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
             datasize=int(XRes*YRes*4)
             channel_data = np.zeros((YRes, XRes))
             # we knwo the resolution of the data from the header or parameter file
@@ -3063,24 +3169,26 @@ class SnomMeasurement(FileHandler):
         # todo XOffset, YOffset dont work properly, also if the measurement is rotated or cut this is not considered so far
         # actually not shure if that isn't fixed by now...
         
-        '''# channel is not in memory, so the standard values will be used
-        data = self._load_data([channel])[0][0]
-        try: XReal, YReal = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
-        except: XReal, YReal, ZReal = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
-        try: XRes, YRes = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
-        except: XRes, YRes, ZRes = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
-        Yincomplete = None
-        XYUnit = self._get_measurement_tag_dict_unit(MeasurementTags.SCANAREA)
-        rotation = self._get_measurement_tag_dict_value(MeasurementTags.ROTATION)[0]
-        XOffset, YOffset = self._get_measurement_tag_dict_value(MeasurementTags.SCANNERCENTERPOSITION)'''
-        
-        # if channel is in memory it has to have a channel dict, where all necessary infos are stored
         XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
         XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
         Yincomplete = self._get_channel_tag_dict_value(channel, ChannelTags.YINCOMPLETE)[0]
         XYUnit = self._get_channel_tag_dict_unit(channel, ChannelTags.XYUNIT)
-        rotation = self._get_channel_tag_dict_value(channel, ChannelTags.ROTATION)[0]
         XOffset, YOffset = self._get_channel_tag_dict_value(channel, ChannelTags.SCANNERCENTERPOSITION)
+        # use the channel tag if possible
+        # try: 
+        #     XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
+        #     XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+        #     Yincomplete = self._get_channel_tag_dict_value(channel, ChannelTags.YINCOMPLETE)[0]
+        #     XYUnit = self._get_channel_tag_dict_unit(channel, ChannelTags.XYUNIT)
+        #     XOffset, YOffset = self._get_channel_tag_dict_value(channel, ChannelTags.SCANNERCENTERPOSITION)
+        # some filetypes may not have a channel tag dict, then take the resolution from the measurement tag dict...
+        # except: 
+        #     XReal, YReal, *args = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
+        #     XRes, YRes, *args = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
+        #     Yincomplete = self._get_measurement_tag_dict_value(MeasurementTags.YINCOMPLETE)[0]
+        #     XYUnit = self._get_measurement_tag_dict_value(MeasurementTags.XYUNIT)
+        #     XOffset, YOffset = self._get_measurement_tag_dict_value(MeasurementTags.SCANNERCENTERPOSITION)
+        
 
         # convert values to m if not already in m, and round to nm precision
         if XYUnit == 'nm':
@@ -3099,10 +3207,16 @@ class SnomMeasurement(FileHandler):
             XOffset = round(XOffset, 9)
             YOffset = round(YOffset, 9)
         
-        if rotation is None:
+        # try to get the rotation value, not every filetype saves this...
+        rotation = None
+        try:
+            rotation = self._get_channel_tag_dict_value(channel, ChannelTags.ROTATION)[0]
+        except:
             # try to get the rotation from the measurement tags
-            rotation = self._get_measurement_tag_dict_value(MeasurementTags.ROTATION)[0]
-            # if rotation is None: rotation = ''
+            try:
+                rotation = self._get_measurement_tag_dict_value(MeasurementTags.ROTATION)[0]
+            except:
+                print('Rotation value not found! Proceeding without')
         # XRes = len(data[0])
         # YRes  = len(data)
         if filetype=='gsf':
@@ -3312,7 +3426,7 @@ class SnomMeasurement(FileHandler):
             xreal *= pow(10, 6)
             yreal *= pow(10, 6)
         else:
-            sys.exit('unit unknown! can not proceed with synccorrection!')
+            sys.exit('In synccorrection preview unknown unit encountered!\nCan not proceed with synccorrection!')
         for y in range(0,yres):
             for x in range(0,xres):
                 # xreal=x*self.XReal/XRes
@@ -3366,11 +3480,16 @@ class SnomMeasurement(FileHandler):
         # load new channels for synccorrection
         all_channels = self.phase_channels + self.amp_channels
         self._initialize_data(all_channels)
+        # try to get the scanangle from the channel tag dict of the first channel
         try:
-            scanangle = self._get_measurement_tag_dict_value(MeasurementTags.ROTATION)[0]*np.pi/180
-        except:
-            print('Scan rotation angle could not be found! Proceeding with 0 deg!')
-            scanangle = 0
+            scanangle = self._get_channel_tag_dict_value(all_channels[0], ChannelTags.ROTATION)[0]*np.pi/180
+        except:  
+            # if that fails use the rotation value from the measurement tag dict  
+            try:
+                scanangle = self._get_measurement_tag_dict_value(MeasurementTags.ROTATION)[0]*np.pi/180
+            except:
+                print('Scan rotation angle could not be found! Proceeding with 0 deg!')
+                scanangle = 0
         
         if phasedir is None:
             phasedir = self._create_synccorr_preview(self.preview_phasechannel, wavelength, scanangle)
@@ -3392,6 +3511,9 @@ class SnomMeasurement(FileHandler):
             if xyunit == 'm':
                 xreal *= pow(10, 6)
                 yreal *= pow(10, 6)
+            else:
+                print('In synccorrection encountered unknown unit type!')
+                return
             for y in range(0,yres):
                 for x in range(0,xres):
                     #convert pixel number to realspace coordinates in µm
@@ -4751,6 +4873,14 @@ class SnomMeasurement(FileHandler):
             XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
             XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
             pixel_scaling = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELSCALING)
+            # try: 
+            #     XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+            #     XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
+            #     pixel_scaling = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELSCALING)
+            # except: 
+            #     XRes, YRes, *args = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
+            #     XReal, YReal, *args = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
+            #     pixel_scaling = self._get_measurement_tag_dict_value(MeasurementTags.PIXELSCALING)
             dx = XReal/(XRes)
             scalebar_var = [dx, units, dimension, label, length_fraction, height_fraction, width_fraction,
                             location, loc, pad, border_pad, sep, frameon, color, box_color, box_alpha, scale_loc,
