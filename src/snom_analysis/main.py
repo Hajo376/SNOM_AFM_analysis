@@ -76,6 +76,7 @@ class FileHandler(PlotDefinitions):
         directory_name (str): The path of the directory where the measurement files are stored.
         title (str, optional): The title of the measurement. Defaults to None.
     """
+
     def __init__(self, directory_name:str, title: Optional[str]=None) -> None:
         self.measurement_type = MeasurementTypes.NONE
         self.directory_name = Path(directory_name)
@@ -91,7 +92,7 @@ class FileHandler(PlotDefinitions):
             print('Config file not found, creating a new one.')
             self._create_default_config() # create a default config file if not existing
         
-        self._initialize_file_type()
+        self._find_filetype()
         
     def _generate_savefolder(self):
         """Generate savefolder if not already existing. Careful, has to be the same one as for the snom plotter gui app.
@@ -109,11 +110,29 @@ class FileHandler(PlotDefinitions):
         self.plotting_parameters_path = self.save_folder / Path('plotting_parameters.json') # probably not a good idea to use the same folder as the snom plotter app
         self.config_path = self.save_folder / Path('config.ini')
         self.mpl_style_path = self.save_folder / Path('snom_analysis.mplstyle')
-     
-    def _initialize_file_type(self) -> None:
-        # try to find the filetype automatically
-        self._find_filetype() 
 
+    def _initialize_logfile(self) -> str:
+        # logfile_path = self.directory_name + '/python_manipulation_log.txt'
+        logfile_path = self.directory_name / Path('python_manipulation_log.txt')
+        file = open(logfile_path, 'a') # the new logdata will be appended to the existing file
+        now = datetime.now()
+        current_datetime = now.strftime("%d/%m/%Y %H:%M:%S")
+        file.write(current_datetime + '\n' + 'filename = ' + self.filename.name + '\n')
+        file.close()
+        return logfile_path
+
+    def _write_to_logfile(self, parameter_name:str, parameter):
+        file = open(self.logfile_path, 'a')
+        file.write(f'{parameter_name} = {parameter}\n')
+        file.close()
+
+    def _load_config(self):
+        """This function loads the config file and makes the config available through self.config.
+        """
+        self.config = ConfigParser()
+        with open(self.config_path, 'r') as f:
+            self.config.read_file(f)
+ 
     def _create_default_config(self):
         """This function creates a default config file in case the script is run for the first time or the old config file is missing.
         This can also be called to reset the config file to default settings. But all manual changes will be lost.
@@ -227,7 +246,7 @@ class FileHandler(PlotDefinitions):
         config['FILETYPE2'] = {
             'filetype': '<standard>',
             'parametertype': '<new_parameters_txt>',
-            'phase_channels': ['O0P','O1P','O2P','O3P','O4P','O5P','R-O0P''R-O1P','R-O2P','R-O3P','R-O4P','R-O5P'],
+            'phase_channels': ['O0P','O1P','O2P','O3P','O4P','O5P','R-O0P','R-O1P','R-O2P','R-O3P','R-O4P','R-O5P'],
             'amp_channels': ['O0A','O1A','O2A','O3A','O4A','O5A','R-O0A','R-O1A','R-O2A','R-O3A','R-O4A','R-O5A'],
             'real_channels': ['O0Re','O1Re', 'O2Re', 'O3Re', 'O4Re', 'O5Re', 'R-O0Re','R-O1Re', 'R-O2Re', 'R-O3Re', 'R-O4Re', 'R-O5Re'],
             'imag_channels': ['O0Im','O1Im', 'O2Im', 'O3Im', 'O4Im', 'O5Im', 'R-O0Im','R-O1Im', 'R-O2Im', 'R-O3Im', 'R-O4Im', 'R-O5Im'],
@@ -621,96 +640,6 @@ class FileHandler(PlotDefinitions):
         with open(self.config_path, 'w') as configfile:
             config.write(configfile)
         self.config = config
-
-    def _load_config(self):
-        """This function loads the config file and makes the config available throu self.config.
-        """
-        self.config = ConfigParser()
-        with open(self.config_path, 'r') as f:
-            self.config.read_file(f)
-
-    def _load_mpl_style(self):
-        if not Path.exists(self.mpl_style_path):
-            # generate default mpl style file
-            with open(self.mpl_style_path, 'w') as f:
-                f.write('axes.grid: False\n')
-                f.write('axes.grid.axis: both\n')
-                f.write('axes.grid.which: major\n')
-                f.write('grid.linestyle: -\n')
-                f.write('grid.linewidth: 0.5\n')
-                f.write('grid.color: black\n')
-                f.write('xtick.direction: in\n')
-                f.write('ytick.direction: in\n')
-                f.write('xtick.minor.visible: True\n')
-                f.write('ytick.minor.visible: True\n')
-                f.write('xtick.major.size: 5\n')
-                f.write('ytick.major.size: 5\n')
-                f.write('xtick.minor.size: 3\n')
-                f.write('ytick.minor.size: 3\n')
-                f.write('xtick.major.width: 0.5\n')
-                f.write('ytick.major.width: 0.5\n')
-                f.write('xtick.minor.width: 0.5\n')
-                f.write('ytick.minor.width: 0.5\n')
-                f.write('xtick.major.pad: 5\n')
-                f.write('ytick.major.pad: 5\n')
-                f.write('xtick.minor.pad: 5\n')
-                f.write('ytick.minor.pad: 5\n')
-                f.write('xtick.major.top: True\n')
-                f.write('ytick.major.right: True\n')
-                f.write('xtick.minor.top: True\n')
-                f.write('ytick.minor.right: True\n')
-                f.write('axes.linewidth: 0.5\n')
-                f.write('axes.edgecolor: black\n')
-                f.write('axes.labelcolor: black\n')
-                f.write('axes.labelsize: 12\n')
-                f.write('axes.labelweight: normal\n')
-                f.write('axes.labelpad: 4.0\n')
-                f.write('axes.formatter.limits: -7, 7\n')
-                f.write('axes.formatter.use_locale: False\n')
-                f.write('axes.formatter.use_mathtext: False\n')
-                f.write('axes.formatter.useoffset: True\n')
-                f.write('axes.formatter.offset_threshold: 4\n')
-                f.write('axes.formatter.min_exponent: 0\n')
-        plt.style.use(self.mpl_style_path)
-
-    def print_config(self, section: Optional[str]=None):
-        """This function prints the config file.
-        """
-        if section is None:
-            for section in self.config.sections():
-                print(section)
-                for option in self.config.options(section):
-                    print(f'{option} = {self.config.get(section, option)}')
-        else:
-            if section in self.config.sections():
-                print(section)
-                for option in self.config.options(section):
-                    print(f'{option} = {self.config.get(section, option)}')
-            else:
-                print(f'Section {section} not found in config file!')
-
-    def _change_config(self, option:str, section:str, value):
-        """This function changes the config file.
-
-        Args:
-            section (str): The section in the config file. Corresponds to the filetype, e.g. 'FILETYPE1'.
-            option (str): The option in the section, e.g. amplitude_channels.
-            value: The value to change, could be a string, int, float, list, dict, bool.
-        """
-        # if value is a string add quotes
-        if isinstance(value, str):
-            value = f'<{value}>'
-        try:
-            self.config[section][option] = value
-        except:
-            print('The specified section or option does not exist in the config file!')
-            try:
-                print('The available options are: ', self.config.options(section))
-            except:	
-                print('The available sections are: ', self.config.sections())
-        # update the config file        
-        with open(self.config_path, 'w') as configfile:
-            self.config.write(configfile)
     
     def _get_from_config(self, option:Optional[str]=None, section:Optional[str]=None):
         """This function gets the value of an option in a section of the config file.
@@ -749,11 +678,44 @@ class FileHandler(PlotDefinitions):
 
             return value
 
-    def _print_measurement_tags(self):
-        """This function prints the measurement tags.
+    def _change_config(self, option:str, section:str, value):
+        """This function changes the config file.
+
+        Args:
+            section (str): The section in the config file. Corresponds to the filetype, e.g. 'FILETYPE1'.
+            option (str): The option in the section, e.g. amplitude_channels.
+            value: The value to change, could be a string, int, float, list, dict, bool.
         """
-        # print the content of the measurement tags class
-        print('All measurement tags: ', list(MeasurementTags))
+        # if value is a string add quotes
+        if isinstance(value, str):
+            value = f'<{value}>'
+        try:
+            self.config[section][option] = value
+        except:
+            print('The specified section or option does not exist in the config file!')
+            try:
+                print('The available options are: ', self.config.options(section))
+            except:	
+                print('The available sections are: ', self.config.sections())
+        # update the config file        
+        with open(self.config_path, 'w') as configfile:
+            self.config.write(configfile)
+
+    def print_config(self, section: Optional[str]=None):
+        """This function prints the config file.
+        """
+        if section is None:
+            for section in self.config.sections():
+                print(section)
+                for option in self.config.options(section):
+                    print(f'{option} = {self.config.get(section, option)}')
+        else:
+            if section in self.config.sections():
+                print(section)
+                for option in self.config.options(section):
+                    print(f'{option} = {self.config.get(section, option)}')
+            else:
+                print(f'Section {section} not found in config file!')
 
     def _find_filetype(self) -> bool:
         """This function tries to find the correct filetype for the given file.
@@ -775,7 +737,6 @@ class FileHandler(PlotDefinitions):
                 # print('Measurement tag dict was created successfully')
             # the correct creation of teh measurement tag dict is not enough to determine the filetype
             # try to also to create the channel tag dict for one arbitrary channel
-            # self._initialize_file_type()
             self.file_type = filetype
             self._initialize_measurement_channel_indicators()
             # amp_channel = self._get_from_config('amp_channels', filetype)[0]
@@ -870,21 +831,12 @@ class FileHandler(PlotDefinitions):
             self.measurement_type = MeasurementTypes.NONE
         # print('Measurement type: ', self.measurement_type)
 
-    def _initialize_logfile(self) -> str:
-        # logfile_path = self.directory_name + '/python_manipulation_log.txt'
-        logfile_path = self.directory_name / Path('python_manipulation_log.txt')
-        file = open(logfile_path, 'a') # the new logdata will be appended to the existing file
-        now = datetime.now()
-        current_datetime = now.strftime("%d/%m/%Y %H:%M:%S")
-        file.write(current_datetime + '\n' + 'filename = ' + self.filename.name + '\n')
-        file.close()
-        return logfile_path
+    def _print_measurement_tags(self):
+        """This function prints the measurement tags.
+        """
+        # print the content of the measurement tags class
+        print('All measurement tags: ', list(MeasurementTags))
 
-    def _write_to_logfile(self, parameter_name:str, parameter):
-        file = open(self.logfile_path, 'a')
-        file.write(f'{parameter_name} = {parameter}\n')
-        file.close()
- 
     def _create_measurement_tag_dict(self, parameters_path:Path, filetype:str) -> bool:
         """This function creates a dictionary containing the measurement tags. The tags are extracted from the parameters file.
         If the tag dict cannot be created the function will return False otherwise True.
@@ -1156,6 +1108,222 @@ class FileHandler(PlotDefinitions):
         except:
             print('No measurement tag dict found!')
 
+    def _create_channel_tag_dict(self, channels:Optional[list]=None) -> list:
+        """This function reads in the header of the gsf file for the specified channel and extracts the tag values. The tag values are stored in a dictionary for each channel.
+        This tag dict is very similar to the measurement_tag_dict, but the measurement_tag_dict is only created on the basis of the parameter file.
+        If individual channels have been modified this will only be stored in the channel_tag_dict.
+
+        Args:
+            channel (str): channel name for which the tag values should be extracted
+        """
+        if channels is None:
+            channels = self.channels
+        # create a list containing the tag dictionary for each channel
+        # self.channel_tag_dict = []
+        channel_tag_dict = []
+        for channel in channels:
+            channel_dict = {}
+            if self._is_custom_channel(channel):
+                suffix = self.channel_suffix_custom
+                prefix = self.channel_prefix_custom
+                channel_type = 'custom'
+            elif self._is_default_channel(channel):
+                suffix = self.channel_suffix_default
+                prefix = self.channel_prefix_default
+                channel_type = 'default'
+            else:
+                print(f'channel {channel} not found in default or custom channels!')
+                # assume it is a custom channel and try loading anyways
+                suffix = self.channel_suffix_custom
+                prefix = self.channel_prefix_custom
+                channel_type = 'custom'
+            '''if channel in self.all_channels_default:
+                suffix = self.channel_suffix_default
+                prefix = self.channel_prefix_default
+                channel_type = 'default'
+            elif channel in self.all_channels_custom:
+                suffix = self.channel_suffix_custom
+                prefix = self.channel_prefix_custom
+                channel_type = 'custom'
+            else:
+                print(f'channel {channel} not found in default or custom channels!')
+                # assume it is a custom channel and try loading anyways
+                suffix = self.channel_suffix_custom
+                prefix = self.channel_prefix_custom
+                channel_type = 'custom'
+                # sys.exit()'''
+            # we want to read the non binary part of the datafile
+            if self.file_ending == '.gsf':
+                encod = 'latin1'
+            elif self.file_ending == '.ascii':
+                encod = 'latin1'
+            else:
+                pass
+                # not necessarily a problem, since the creation of the channel tag dict is also a test if the correct filetype was found
+                # print('file ending not supported')
+                # print('in _create_channel_tag_dict')
+            
+            # print(f'Creating channel tag dict for channel {channel} of type {channel_type} with prefix {prefix} and suffix {suffix}')
+            with open(self.directory_name / Path(self.filename.name + f'{prefix}{channel}{suffix}{self.file_ending}'), 'r', encoding=encod) as f:
+                content=f.read()
+
+
+            try: channel_tags = self._get_from_config('channel_tags')
+            except:
+                print('Channel tags not found! Can not create channel tag dict!')
+                # try to create the channel tag dict from the measurement tag dict
+                channel_tag_dict = self._create_channel_tag_dict_from_measurement_tag_dict(channels)
+                return channel_tag_dict
+                '''# seem like there are no channel tags in the config file
+                # so we will just use the measurement tags to initialize the channel tags
+                measurement_tags = self._get_from_config('measurement_tags', self.file_type)
+                measurement_tag_enums = list(MeasurementTags)
+                channel_tag_enums = list(ChannelTags)
+                for key, value in measurement_tags.items():
+                    # get the data from the measurement tag dict
+                    for i in range(len(measurement_tag_enums)):
+                        if key == measurement_tag_enums[i].name:
+                            data = self.measurement_tag_dict[measurement_tag_enums[i]]
+                    # insert the data into the channel tag dict with the corresponding key wich is an enum of the channel tags class but has the same name as the measurement tag
+                    for i in range(len(channel_tag_enums)):
+                        if key == channel_tag_enums[i].name:
+                            channel_dict[channel_tag_enums[i]] = data'''
+            else:
+                # print(channel_tags)
+                for key, tag in channel_tags.items():
+                    is_list = False
+                    tag_value_found = False
+                    value = None
+                    values = [None]
+                    if isinstance(tag, list):
+                        is_list = True
+                    # so far each tag contains a maximum of 2 values
+                    if is_list:
+                        values = []
+                        for element in tag:
+                            try: value = self._get_tagval(content, element)
+                            except: 
+                                values.append(None)
+                                tag_value_found = False
+                            else: 
+                                values.append(value)
+                                tag_value_found = True
+                    else:
+                        try: value = self._get_tagval(content, tag)
+                        except: value = None
+                        else: tag_value_found = True
+                        # try to find out if the value is a number or a unit
+                        try: float(value)
+                        except: pass
+                    # check if tag value was found
+                    if not tag_value_found:
+                        print(f'Could not find the tag value for {tag} in channel {channel}. You should probably check the config file.')
+                        continue
+                    if key == 'PIXELAREA':
+                        try: channel_dict[ChannelTags.PIXELAREA] = [int(values[0]), int(values[1]), int(values[2])]
+                        except: channel_dict[ChannelTags.PIXELAREA] = [int(values[0]), int(values[1])]
+                    elif key == 'YINCOMPLETE':
+                        channel_dict[ChannelTags.YINCOMPLETE] = int(value)
+                    elif key == 'SCANNERCENTERPOSITION':
+                        try: channel_dict[ChannelTags.SCANNERCENTERPOSITION] = [float(values[0]), float(values[1]), float(values[2])]
+                        except: channel_dict[ChannelTags.SCANNERCENTERPOSITION] = [float(values[0]), float(values[1])]
+                    elif key == 'ROTATION':
+                        channel_dict[ChannelTags.ROTATION] = float(value)
+                    elif key == 'SCANAREA':
+                        try: channel_dict[ChannelTags.SCANAREA] = [float(values[0]), float(values[1]), float(values[2])]
+                        except: channel_dict[ChannelTags.SCANAREA] = [float(values[0]), float(values[1])]
+                    elif key == 'XYUNIT':
+                        channel_dict[ChannelTags.XYUNIT] = value
+                    elif key == 'ZUNIT':
+                        channel_dict[ChannelTags.ZUNIT] = value
+                    elif key == 'WAVENUMBERSCALING':
+                        channel_dict[ChannelTags.WAVENUMBERSCALING] = float(value)
+            # add pixel scaling to the channel dict, initially this is always 1
+            channel_dict[ChannelTags.PIXELSCALING] = 1
+                    
+            # self.channel_tag_dict.append(channel_dict)
+            channel_tag_dict.append(channel_dict)
+        return channel_tag_dict
+
+    def _get_tagval(self, content, tag):
+        """This function gets the value of the tag listed in the file header"""
+        content_array = content.split('\n')
+        tag_array = []
+        tagval = 0 # if no tag val can be found return 0
+        for element in content_array:
+            if len(element) > 50: # its probably not part of the header anymore...
+                break
+            elif '=' not in element:
+                pass
+            else:
+                tag_pair = element.split('=')
+                # print(f'tag_pair = {tag_pair}')
+                tag_name = tag_pair[0].replace(' ', '')# remove possible ' ' characters
+                tag_val = tag_pair[1].replace(' ', '')# remove possible ' ' characters
+                tag_array.append([tag_name, tag_val])
+        for i in range(len(tag_array)):
+            is_unit = False
+            try: float(tag_array[i][1])
+            except: is_unit = True
+            if tag_array[i][0] == tag:
+                if is_unit:
+                    tagval = tag_array[i][1]
+                else:
+                    tagval = float(tag_array[i][1])
+        return tagval
+    
+    def _create_channel_tag_dict_from_measurement_tag_dict(self, channels:Optional[list]=None) -> list:
+        print('Creating channel tag dict from measurement tag dict...')
+        if channels is None:
+            channels = self.channels
+        # create a list containing the tag dictionary for each channel
+        channel_tags = None
+        measurement_tags = None
+        try:    channel_tags = self._get_from_config('channel_tags')
+        except: print('Channel tags not found! Can not create channel tag dict!')
+        # else:   print('channel tags', channel_tags)
+
+        try:    measurement_tags = self._get_from_config('measurement_tags')
+        except: print('Measurement tags not found! Can not create channel tag dict!')
+        # else:   print('Measurement tags', measurement_tags)
+
+        if channel_tags is None: channel_tags = measurement_tags
+
+        channel_dict = {}
+        for key, tag in channel_tags.items():
+            if key == 'PIXELAREA':
+                try: channel_dict[ChannelTags.PIXELAREA] = self.measurement_tag_dict[MeasurementTags.PIXELAREA]
+                except: pass
+            elif key == 'YINCOMPLETE':
+                try: channel_dict[ChannelTags.YINCOMPLETE] = self.measurement_tag_dict[MeasurementTags.YINCOMPLETE]
+                except: pass
+            elif key == 'SCANNERCENTERPOSITION':
+                try: channel_dict[ChannelTags.SCANNERCENTERPOSITION] = self.measurement_tag_dict[MeasurementTags.SCANNERCENTERPOSITION]
+                except: pass
+            elif key == 'ROTATION':
+                try: channel_dict[ChannelTags.ROTATION] = self.measurement_tag_dict[MeasurementTags.ROTATION]
+                except: pass
+            elif key == 'SCANAREA':
+                try: channel_dict[ChannelTags.SCANAREA] = self.measurement_tag_dict[MeasurementTags.SCANAREA]
+                except: pass
+            elif key == 'XYUNIT':
+                try: channel_dict[ChannelTags.XYUNIT] = self.measurement_tag_dict[MeasurementTags.XYUNIT]
+                except: pass
+            elif key == 'ZUNIT':
+                try: channel_dict[ChannelTags.ZUNIT] = self.measurement_tag_dict[MeasurementTags.ZUNIT]
+                except: pass
+            elif key == 'WAVENUMBERSCALING':
+                try: channel_dict[ChannelTags.WAVENUMBERSCALING] = self.measurement_tag_dict[MeasurementTags.WAVENUMBERSCALING]
+                except: pass
+        # add pixel scaling to the channel dict, initially this is always 1
+        channel_dict[ChannelTags.PIXELSCALING] = 1
+
+        # all channels have the identical channel tag dict since it is based on the measurement tag dict, so we just create a list containing the same dict for each channel
+        channel_tag_dict = []
+        for _ in channels:
+            channel_tag_dict.append(channel_dict)
+        return channel_tag_dict
+
     def print_channel_tag_dict(self, channel=None):
         """This function prints the channel tag dict.
 
@@ -1175,102 +1343,7 @@ class FileHandler(PlotDefinitions):
                 print('-------------------------------')
                 for key, value in self.channel_tag_dict[self.channels.index(channel)].items():
                     print(f'{key} = {value}')
-
-    def _replace_plotting_parameter_placeholders(self, dictionary:dict, placeholders:dict) -> dict:
-        """This function replaces the placeholders in the plotting parameters dictionary with the actual values. 
-        Afterwards it replaces the colormap placeholders with the actual colormaps.
-
-        Args:
-            dictionary (dict): plotting parameters dictionary
-            placeholders (dict): dictionary containing the string definition of the placeholder and its value
-
-        Returns:
-            dict: the updated plotting parameters dictionary
-        """
-        # colormaps = {"<SNOM_amplitude>": SNOM_amplitude,
-        #             "<SNOM_height>": SNOM_height,
-        #             "<SNOM_phase>": SNOM_phase,
-        #             "<SNOM_realpart>": SNOM_realpart}
-        
-        # first iterate through all placeholders and replace them in the dictionary
-        for placeholder in placeholders:
-            value = placeholders[placeholder]
-            for key in dictionary:
-                if placeholder in dictionary[key]:
-                    dictionary[key] = dictionary[key].replace(placeholder, value)
-                    # print('replaced channel!')
-        # replace colormaps
-        for key in dictionary:
-            for colormap in all_colormaps:
-                if colormap in dictionary[key]:
-                    dictionary[key] = all_colormaps[colormap]
-                    break
-        return dictionary
-
-    def _get_plotting_parameters(self) -> dict:
-        """This will load the plotting parameters dictionary from the plotting_parameters.json file. If the file does not exist, it will be created with default values.
-        The dictionary contains definitions for the colormaps, the colormap labels and the titles of the subplots. It also contains placeholders, which can be replaced by the actual values.
-        The user can change the values in the plotting_parameters.json file to customize the plotting.
-
-        Returns:
-            dict: plotting parameters dictionary
-        """
-        try:
-            with open(self.plotting_parameters_path, 'r') as file:
-                plotting_parameters = json.load(file)
-        except:
-            self._generate_default_plotting_parameters()
-            with open(self.plotting_parameters_path, 'r') as file:
-                plotting_parameters = json.load(file)
-        return plotting_parameters
-    
-    def _generate_default_plotting_parameters(self):
-        dictionary = {
-            "amplitude_cmap": "<SNOM_amplitude>",
-            "amplitude_cbar_label": "Amplitude (arb.u.)",
-            "amplitude_title": "<channel>",
-            "phase_cmap": "<SNOM_phase>",
-            "phase_cbar_label": "Phase (rad)",
-            "phase_title": "<channel>",
-            "phase_positive_title": "Positively corrected phase <channel>",
-            "phase_negative_title": "Negatively corrected phase <channel>",
-            "height_cmap": "<SNOM_height>",
-            "height_cbar_label": "Height (nm)",
-            "height_title": "<channel>",
-            "real_cmap": "<SNOM_realpart>",
-            "real_cbar_label": "E (arb.u.)",
-            "real_title_real": "<channel>",
-            "real_title_imag": "<channel>",
-            "fourier_cmap": "viridis",
-            "fourier_cbar_label": "Intensity (arb.u.)",
-            "fourier_title": "Fourier transform",
-            "gauss_blurred_title": "Blurred <channel>"
-        }
-        # Todo: add more parameters to the dictionary
-        # make a similar file for the snom plotter app and overwrite the defaults from the snom anlaysis package
-        # make it possible to add mutliple sets of parameters, each for a different filetype
-        '''
-        channel indicators
-        channel labels
-        channel prefixes
-        channel suffixes
-        file endings (.gsf, .txt, .ascii, ...)
-        synccorrected channel indicator
-        manipulated channel indicator
-        filetype indicator? (standard, aachen, comsol, ...)
-        parameters type indicator? (txt, html, gsf)
-        add all plotting parameters
-        enable/disable logfiles
-        standard channels
-        also add the default values for the loading of the data like:
-            phaseoffset
-            rounding_decimal (amp, phase, height, ...)
-            scaling
-        allow to add a list of custom channels which will be added to all_channels_custom
-        '''
-        with open(self.plotting_parameters_path, 'w') as file:
-            json.dump(dictionary, file, indent=4)
-   
+  
     def _get_channel_tag_dict_value(self, channel:str, tag:ChannelTags) -> Optional[list]:
         """This function returns the value of the specified tag for the specified channel. If the tag is not found, it will return None.
 
@@ -1490,33 +1563,6 @@ class FileHandler(PlotDefinitions):
         else:
             self.measurement_tag_dict[tag][0] = value
 
-    def _get_tagval(self, content, tag):
-        """This function gets the value of the tag listed in the file header"""
-        content_array = content.split('\n')
-        tag_array = []
-        tagval = 0 # if no tag val can be found return 0
-        for element in content_array:
-            if len(element) > 50: # its probably not part of the header anymore...
-                break
-            elif '=' not in element:
-                pass
-            else:
-                tag_pair = element.split('=')
-                # print(f'tag_pair = {tag_pair}')
-                tag_name = tag_pair[0].replace(' ', '')# remove possible ' ' characters
-                tag_val = tag_pair[1].replace(' ', '')# remove possible ' ' characters
-                tag_array.append([tag_name, tag_val])
-        for i in range(len(tag_array)):
-            is_unit = False
-            try: float(tag_array[i][1])
-            except: is_unit = True
-            if tag_array[i][0] == tag:
-                if is_unit:
-                    tagval = tag_array[i][1]
-                else:
-                    tagval = float(tag_array[i][1])
-        return tagval
-
     def _get_optomechanical_indicator(self, channel) -> tuple:
         """This function returns the optomechanical indicator of the channel and its index in the channel name.
         Meaning it tries to find out wether the cannel is an optical or mechanical channel."""
@@ -1544,38 +1590,6 @@ class FileHandler(PlotDefinitions):
             indicator = None
             indicator_index = None
         return indicator, indicator_index
-
-    def _is_amp_channel(self, channel) -> bool:
-        """This function returns True if the channel is an amplitude channel, False otherwise."""
-        optomechanical_indicator, indicator_index = self._get_optomechanical_indicator(channel)
-        if optomechanical_indicator == self.optical_indicator and self.amp_indicator in channel:
-            return True
-        else:
-            return False
-            
-    def _is_phase_channel(self, channel) -> bool:
-        """This function returns True if the channel is a phase channel, False otherwise."""
-        optomechanical_indicator, indicator_index = self._get_optomechanical_indicator(channel)
-        if optomechanical_indicator == self.optical_indicator and self.phase_indicator in channel:
-            return True
-        else:
-            return False
-
-    def _is_complex_channel(self, channel) -> bool:
-        """This function returns True if the channel is a complex channel, False otherwise."""
-        optomechanical_indicator, indicator_index = self._get_optomechanical_indicator(channel)
-        if optomechanical_indicator == self.optical_indicator and (self.real_indicator in channel or self.imag_indicator in channel):
-            return True
-        else:
-            return False
-
-    def _is_height_channel(self, channel) -> bool:
-        """This function returns True if the channel is a height channel, False otherwise."""
-        optomechanical_indicator, indicator_index = self._get_optomechanical_indicator(channel)
-        if optomechanical_indicator is None and self.height_indicator in channel:
-            return True
-        else:
-            return False
 
     def _channel_has_demod_num(self, channel) -> Optional[bool]:
         """This function returns True if the channel has a demodulation number, False otherwise.
@@ -1611,7 +1625,102 @@ class FileHandler(PlotDefinitions):
             # height channel for example has no demodulation number but should not cause an error
             print('demodulation number could not be found')
         return demodulation_num
+  
+    def _is_amp_channel(self, channel) -> bool:
+        """This function returns True if the channel is an amplitude channel, False otherwise."""
+        optomechanical_indicator, indicator_index = self._get_optomechanical_indicator(channel)
+        if optomechanical_indicator == self.optical_indicator and self.amp_indicator in channel:
+            return True
+        else:
+            return False
+            
+    def _is_phase_channel(self, channel) -> bool:
+        """This function returns True if the channel is a phase channel, False otherwise."""
+        optomechanical_indicator, indicator_index = self._get_optomechanical_indicator(channel)
+        if optomechanical_indicator == self.optical_indicator and self.phase_indicator in channel:
+            return True
+        else:
+            return False
+
+    def _is_complex_channel(self, channel) -> bool:
+        """This function returns True if the channel is a complex channel, False otherwise."""
+        optomechanical_indicator, indicator_index = self._get_optomechanical_indicator(channel)
+        if optomechanical_indicator == self.optical_indicator and (self.real_indicator in channel or self.imag_indicator in channel):
+            return True
+        else:
+            return False
+
+    def _is_height_channel(self, channel) -> bool:
+        """This function returns True if the channel is a height channel, False otherwise."""
+        optomechanical_indicator, indicator_index = self._get_optomechanical_indicator(channel)
+        if optomechanical_indicator is None and self.height_indicator in channel:
+            return True
+        else:
+            return False
+
+    def _is_default_channel(self, channel:str) -> bool:
+        """This function returns True if the channel is a default channel, False otherwise.
+        Default channels are channels which are part of the default channels, meaning they are listed in the config file as phase, amplitude or height channels.
+        Args:
+            channel (str): channel name
+        Returns:
+            bool: True if the channel is a default channel, False otherwise.
+        """
+        if channel in self.all_channels_default:
+            return True
+        else:
+            return False
+
+    def _is_custom_channel(self, channel:str) -> bool:
+        """This function returns True if the channel is a custom channel, False otherwise.
+        Custom channels are channels which are not part of the default channels, but are created by the user.
+        This includes height channels, complex channels and overlain channels.
+
+        Args:
+            channel (str): channel name
+        Returns:
+            bool: True if the channel is a custom channel, False otherwise.
+        """
+        if channel in self.all_channels_default:
+            return False
+        else:
+            # check if channel is in custom channels
+            if channel in self.all_channels_custom:
+                return True
+            # check if channel has the custom suffix
+            elif self.channel_suffix_manipulated in channel:
+                return True
+            # might still be a user defined custom channel
+            else:
+                return True
+        
+    def _get_existing_channels(self, channels:list) -> list:
+        """This function checks if the specified channels exist in the measurement.
+        If not a reduced list of channels is returned which only contains the channels that exist.
     
+
+        Args:
+            channels (list): List of channels to check
+
+        Returns:
+            list: List of channels that exist in the measurement
+        """
+        # try to load the data for the specified channels
+        existing_channels = []
+        for channel in channels:
+            if channel in self.all_channels_default:
+                suffix = self.channel_suffix_default
+                prefix = self.channel_prefix_default
+            elif channel in self.all_channels_custom:
+                suffix = self.channel_suffix_custom
+                prefix = self.channel_prefix_custom
+            # check if the channel exists in the measurement
+            filepath = self.directory_name / Path(self.filename.name + f'{prefix}{channel}{suffix}.gsf')
+            # print(f'Checking if {filepath} exists...')
+            if filepath.exists():
+                existing_channels.append(channel)
+        return existing_channels
+  
     def _initialize_measurement_channel_indicators(self):
         """This function initializes the channel indicators for the measurement channels.
         More precisely it loades all the parameters from the config file.
@@ -1678,260 +1787,162 @@ class FileHandler(PlotDefinitions):
         self.all_channels_custom = self.height_channels + self.complex_channels + self.overlain_phase_channels + self.overlain_amp_channels + self.corrected_phase_channels + self.corrected_overlain_phase_channels
         self.all_channels_custom += [channel + self.channel_suffix_manipulated for channel in self.all_channels_default]
 
-    def _is_default_channel(self, channel:str) -> bool:
-        """This function returns True if the channel is a default channel, False otherwise.
-        Default channels are channels which are part of the default channels, meaning they are listed in the config file as phase, amplitude or height channels.
-        Args:
-            channel (str): channel name
+    def _load_mpl_style(self):
+        if not Path.exists(self.mpl_style_path):
+            # generate default mpl style file
+            with open(self.mpl_style_path, 'w') as f:
+                f.write('axes.grid: False\n')
+                f.write('axes.grid.axis: both\n')
+                f.write('axes.grid.which: major\n')
+                f.write('grid.linestyle: -\n')
+                f.write('grid.linewidth: 0.5\n')
+                f.write('grid.color: black\n')
+                f.write('xtick.direction: in\n')
+                f.write('ytick.direction: in\n')
+                f.write('xtick.minor.visible: True\n')
+                f.write('ytick.minor.visible: True\n')
+                f.write('xtick.major.size: 5\n')
+                f.write('ytick.major.size: 5\n')
+                f.write('xtick.minor.size: 3\n')
+                f.write('ytick.minor.size: 3\n')
+                f.write('xtick.major.width: 0.5\n')
+                f.write('ytick.major.width: 0.5\n')
+                f.write('xtick.minor.width: 0.5\n')
+                f.write('ytick.minor.width: 0.5\n')
+                f.write('xtick.major.pad: 5\n')
+                f.write('ytick.major.pad: 5\n')
+                f.write('xtick.minor.pad: 5\n')
+                f.write('ytick.minor.pad: 5\n')
+                f.write('xtick.major.top: True\n')
+                f.write('ytick.major.right: True\n')
+                f.write('xtick.minor.top: True\n')
+                f.write('ytick.minor.right: True\n')
+                f.write('axes.linewidth: 0.5\n')
+                f.write('axes.edgecolor: black\n')
+                f.write('axes.labelcolor: black\n')
+                f.write('axes.labelsize: 12\n')
+                f.write('axes.labelweight: normal\n')
+                f.write('axes.labelpad: 4.0\n')
+                f.write('axes.formatter.limits: -7, 7\n')
+                f.write('axes.formatter.use_locale: False\n')
+                f.write('axes.formatter.use_mathtext: False\n')
+                f.write('axes.formatter.useoffset: True\n')
+                f.write('axes.formatter.offset_threshold: 4\n')
+                f.write('axes.formatter.min_exponent: 0\n')
+        plt.style.use(self.mpl_style_path)
+
+    def _get_plotting_parameters(self) -> dict:
+        """This will load the plotting parameters dictionary from the plotting_parameters.json file. If the file does not exist, it will be created with default values.
+        The dictionary contains definitions for the colormaps, the colormap labels and the titles of the subplots. It also contains placeholders, which can be replaced by the actual values.
+        The user can change the values in the plotting_parameters.json file to customize the plotting.
+
         Returns:
-            bool: True if the channel is a default channel, False otherwise.
+            dict: plotting parameters dictionary
         """
-        if channel in self.all_channels_default:
-            return True
-        else:
-            return False
-
-    def _is_custom_channel(self, channel:str) -> bool:
-        """This function returns True if the channel is a custom channel, False otherwise.
-        Custom channels are channels which are not part of the default channels, but are created by the user.
-        This includes height channels, complex channels and overlain channels.
-
-        Args:
-            channel (str): channel name
-        Returns:
-            bool: True if the channel is a custom channel, False otherwise.
-        """
-        if channel in self.all_channels_default:
-            return False
-        else:
-            # check if channel is in custom channels
-            if channel in self.all_channels_custom:
-                return True
-            # check if channel has the custom suffix
-            elif self.channel_suffix_manipulated in channel:
-                return True
-            # might still be a user defined custom channel
-            else:
-                return True
-
-    def _create_channel_tag_dict(self, channels:Optional[list]=None) -> list:
-        """This function reads in the header of the gsf file for the specified channel and extracts the tag values. The tag values are stored in a dictionary for each channel.
-        This tag dict is very similar to the measurement_tag_dict, but the measurement_tag_dict is only created on the basis of the parameter file.
-        If individual channels have been modified this will only be stored in the channel_tag_dict.
-
-        Args:
-            channel (str): channel name for which the tag values should be extracted
-        """
-        if channels is None:
-            channels = self.channels
-        # create a list containing the tag dictionary for each channel
-        # self.channel_tag_dict = []
-        channel_tag_dict = []
-        for channel in channels:
-            channel_dict = {}
-            if self._is_custom_channel(channel):
-                suffix = self.channel_suffix_custom
-                prefix = self.channel_prefix_custom
-                channel_type = 'custom'
-            elif self._is_default_channel(channel):
-                suffix = self.channel_suffix_default
-                prefix = self.channel_prefix_default
-                channel_type = 'default'
-            else:
-                print(f'channel {channel} not found in default or custom channels!')
-                # assume it is a custom channel and try loading anyways
-                suffix = self.channel_suffix_custom
-                prefix = self.channel_prefix_custom
-                channel_type = 'custom'
-            '''if channel in self.all_channels_default:
-                suffix = self.channel_suffix_default
-                prefix = self.channel_prefix_default
-                channel_type = 'default'
-            elif channel in self.all_channels_custom:
-                suffix = self.channel_suffix_custom
-                prefix = self.channel_prefix_custom
-                channel_type = 'custom'
-            else:
-                print(f'channel {channel} not found in default or custom channels!')
-                # assume it is a custom channel and try loading anyways
-                suffix = self.channel_suffix_custom
-                prefix = self.channel_prefix_custom
-                channel_type = 'custom'
-                # sys.exit()'''
-            # we want to read the non binary part of the datafile
-            if self.file_ending == '.gsf':
-                encod = 'latin1'
-            elif self.file_ending == '.ascii':
-                encod = 'latin1'
-            else:
-                pass
-                # not necessarily a problem, since the creation of the channel tag dict is also a test if the correct filetype was found
-                # print('file ending not supported')
-                # print('in _create_channel_tag_dict')
-            with open(self.directory_name / Path(self.filename.name + f'{prefix}{channel}{suffix}{self.file_ending}'), 'r', encoding=encod) as f:
-                content=f.read()
-
-
-            try: channel_tags = self._get_from_config('channel_tags')
-            except:
-                print('Channel tags not found! Can not create channel tag dict!')
-                # try to create the channel tag dict from the measurement tag dict
-                channel_tag_dict = self._create_channel_tag_dict_from_measurement_tag_dict(channels)
-                return channel_tag_dict
-                '''# seem like there are no channel tags in the config file
-                # so we will just use the measurement tags to initialize the channel tags
-                measurement_tags = self._get_from_config('measurement_tags', self.file_type)
-                measurement_tag_enums = list(MeasurementTags)
-                channel_tag_enums = list(ChannelTags)
-                for key, value in measurement_tags.items():
-                    # get the data from the measurement tag dict
-                    for i in range(len(measurement_tag_enums)):
-                        if key == measurement_tag_enums[i].name:
-                            data = self.measurement_tag_dict[measurement_tag_enums[i]]
-                    # insert the data into the channel tag dict with the corresponding key wich is an enum of the channel tags class but has the same name as the measurement tag
-                    for i in range(len(channel_tag_enums)):
-                        if key == channel_tag_enums[i].name:
-                            channel_dict[channel_tag_enums[i]] = data'''
-            else:
-                # print(channel_tags)
-                for key, tag in channel_tags.items():
-                    is_list = False
-                    tag_value_found = False
-                    value = None
-                    values = [None]
-                    if isinstance(tag, list):
-                        is_list = True
-                    # so far each tag contains a maximum of 2 values
-                    if is_list:
-                        values = []
-                        for element in tag:
-                            try: value = self._get_tagval(content, element)
-                            except: 
-                                values.append(None)
-                                tag_value_found = False
-                            else: 
-                                values.append(value)
-                                tag_value_found = True
-                    else:
-                        try: value = self._get_tagval(content, tag)
-                        except: value = None
-                        else: tag_value_found = True
-                        # try to find out if the value is a number or a unit
-                        try: float(value)
-                        except: pass
-                    # check if tag value was found
-                    if not tag_value_found:
-                        print(f'Could not find the tag value for {tag} in channel {channel}. You should probably check the config file.')
-                        continue
-                    if key == 'PIXELAREA':
-                        try: channel_dict[ChannelTags.PIXELAREA] = [int(values[0]), int(values[1]), int(values[2])]
-                        except: channel_dict[ChannelTags.PIXELAREA] = [int(values[0]), int(values[1])]
-                    elif key == 'YINCOMPLETE':
-                        channel_dict[ChannelTags.YINCOMPLETE] = int(value)
-                    elif key == 'SCANNERCENTERPOSITION':
-                        try: channel_dict[ChannelTags.SCANNERCENTERPOSITION] = [float(values[0]), float(values[1]), float(values[2])]
-                        except: channel_dict[ChannelTags.SCANNERCENTERPOSITION] = [float(values[0]), float(values[1])]
-                    elif key == 'ROTATION':
-                        channel_dict[ChannelTags.ROTATION] = float(value)
-                    elif key == 'SCANAREA':
-                        try: channel_dict[ChannelTags.SCANAREA] = [float(values[0]), float(values[1]), float(values[2])]
-                        except: channel_dict[ChannelTags.SCANAREA] = [float(values[0]), float(values[1])]
-                    elif key == 'XYUNIT':
-                        channel_dict[ChannelTags.XYUNIT] = value
-                    elif key == 'ZUNIT':
-                        channel_dict[ChannelTags.ZUNIT] = value
-                    elif key == 'WAVENUMBERSCALING':
-                        channel_dict[ChannelTags.WAVENUMBERSCALING] = float(value)
-            # add pixel scaling to the channel dict, initially this is always 1
-            channel_dict[ChannelTags.PIXELSCALING] = 1
-                    
-            # self.channel_tag_dict.append(channel_dict)
-            channel_tag_dict.append(channel_dict)
-        return channel_tag_dict
+        try:
+            with open(self.plotting_parameters_path, 'r') as file:
+                plotting_parameters = json.load(file)
+        except:
+            self._generate_default_plotting_parameters()
+            with open(self.plotting_parameters_path, 'r') as file:
+                plotting_parameters = json.load(file)
+        return plotting_parameters
     
-    def _create_channel_tag_dict_from_measurement_tag_dict(self, channels:Optional[list]=None) -> list:
-        print('Creating channel tag dict from measurement tag dict...')
-        if channels is None:
-            channels = self.channels
-        # create a list containing the tag dictionary for each channel
-        channel_tags = None
-        measurement_tags = None
-        try:    channel_tags = self._get_from_config('channel_tags')
-        except: print('Channel tags not found! Can not create channel tag dict!')
-        # else:   print('channel tags', channel_tags)
+    def _generate_default_plotting_parameters(self):
+        dictionary = {
+            "amplitude_cmap": "<SNOM_amplitude>",
+            "amplitude_cbar_label": "Amplitude (arb.u.)",
+            "amplitude_title": "<channel>",
+            "phase_cmap": "<SNOM_phase>",
+            "phase_cbar_label": "Phase (rad)",
+            "phase_title": "<channel>",
+            "phase_positive_title": "Positively corrected phase <channel>",
+            "phase_negative_title": "Negatively corrected phase <channel>",
+            "height_cmap": "<SNOM_height>",
+            "height_cbar_label": "Height (nm)",
+            "height_title": "<channel>",
+            "real_cmap": "<SNOM_realpart>",
+            "real_cbar_label": "E (arb.u.)",
+            "real_title_real": "<channel>",
+            "real_title_imag": "<channel>",
+            "fourier_cmap": "viridis",
+            "fourier_cbar_label": "Intensity (arb.u.)",
+            "fourier_title": "Fourier transform",
+            "gauss_blurred_title": "Blurred <channel>"
+        }
+        # Todo: add more parameters to the dictionary
+        # make a similar file for the snom plotter app and overwrite the defaults from the snom anlaysis package
+        # make it possible to add mutliple sets of parameters, each for a different filetype
+        '''
+        channel indicators
+        channel labels
+        channel prefixes
+        channel suffixes
+        file endings (.gsf, .txt, .ascii, ...)
+        synccorrected channel indicator
+        manipulated channel indicator
+        filetype indicator? (standard, aachen, comsol, ...)
+        parameters type indicator? (txt, html, gsf)
+        add all plotting parameters
+        enable/disable logfiles
+        standard channels
+        also add the default values for the loading of the data like:
+            phaseoffset
+            rounding_decimal (amp, phase, height, ...)
+            scaling
+        allow to add a list of custom channels which will be added to all_channels_custom
+        '''
+        with open(self.plotting_parameters_path, 'w') as file:
+            json.dump(dictionary, file, indent=4)
 
-        try:    measurement_tags = self._get_from_config('measurement_tags')
-        except: print('Measurement tags not found! Can not create channel tag dict!')
-        # else:   print('Measurement tags', measurement_tags)
-
-        if channel_tags is None: channel_tags = measurement_tags
-
-        channel_dict = {}
-        for key, tag in channel_tags.items():
-            if key == 'PIXELAREA':
-                try: channel_dict[ChannelTags.PIXELAREA] = self.measurement_tag_dict[MeasurementTags.PIXELAREA]
-                except: pass
-            elif key == 'YINCOMPLETE':
-                try: channel_dict[ChannelTags.YINCOMPLETE] = self.measurement_tag_dict[MeasurementTags.YINCOMPLETE]
-                except: pass
-            elif key == 'SCANNERCENTERPOSITION':
-                try: channel_dict[ChannelTags.SCANNERCENTERPOSITION] = self.measurement_tag_dict[MeasurementTags.SCANNERCENTERPOSITION]
-                except: pass
-            elif key == 'ROTATION':
-                try: channel_dict[ChannelTags.ROTATION] = self.measurement_tag_dict[MeasurementTags.ROTATION]
-                except: pass
-            elif key == 'SCANAREA':
-                try: channel_dict[ChannelTags.SCANAREA] = self.measurement_tag_dict[MeasurementTags.SCANAREA]
-                except: pass
-            elif key == 'XYUNIT':
-                try: channel_dict[ChannelTags.XYUNIT] = self.measurement_tag_dict[MeasurementTags.XYUNIT]
-                except: pass
-            elif key == 'ZUNIT':
-                try: channel_dict[ChannelTags.ZUNIT] = self.measurement_tag_dict[MeasurementTags.ZUNIT]
-                except: pass
-            elif key == 'WAVENUMBERSCALING':
-                try: channel_dict[ChannelTags.WAVENUMBERSCALING] = self.measurement_tag_dict[MeasurementTags.WAVENUMBERSCALING]
-                except: pass
-        # add pixel scaling to the channel dict, initially this is always 1
-        channel_dict[ChannelTags.PIXELSCALING] = 1
-
-        # all channels have the identical channel tag dict since it is based on the measurement tag dict, so we just create a list containing the same dict for each channel
-        channel_tag_dict = []
-        for _ in channels:
-            channel_tag_dict.append(channel_dict)
-        return channel_tag_dict
-        
-        
-        
-            
-
-    def _get_existing_channels(self, channels:list) -> list:
-        """This function checks if the specified channels exist in the measurement.
-        If not a reduced list of channels is returned which only contains the channels that exist.
-    
+    def _replace_plotting_parameter_placeholders(self, dictionary:dict, placeholders:dict) -> dict:
+        """This function replaces the placeholders in the plotting parameters dictionary with the actual values. 
+        Afterwards it replaces the colormap placeholders with the actual colormaps.
 
         Args:
-            channels (list): List of channels to check
+            dictionary (dict): plotting parameters dictionary
+            placeholders (dict): dictionary containing the string definition of the placeholder and its value
 
         Returns:
-            list: List of channels that exist in the measurement
+            dict: the updated plotting parameters dictionary
         """
-        # try to load the data for the specified channels
-        existing_channels = []
-        for channel in channels:
-            if channel in self.all_channels_default:
-                suffix = self.channel_suffix_default
-                prefix = self.channel_prefix_default
-            elif channel in self.all_channels_custom:
-                suffix = self.channel_suffix_custom
-                prefix = self.channel_prefix_custom
-            # check if the channel exists in the measurement
-            filepath = self.directory_name / Path(self.filename.name + f'{prefix}{channel}{suffix}.gsf')
-            # print(f'Checking if {filepath} exists...')
-            if filepath.exists():
-                existing_channels.append(channel)
-        return existing_channels
-            
+        # colormaps = {"<SNOM_amplitude>": SNOM_amplitude,
+        #             "<SNOM_height>": SNOM_height,
+        #             "<SNOM_phase>": SNOM_phase,
+        #             "<SNOM_realpart>": SNOM_realpart}
+        
+        # first iterate through all placeholders and replace them in the dictionary
+        for placeholder in placeholders:
+            value = placeholders[placeholder]
+            for key in dictionary:
+                if placeholder in dictionary[key]:
+                    dictionary[key] = dictionary[key].replace(placeholder, value)
+                    # print('replaced channel!')
+        # replace colormaps
+        for key in dictionary:
+            for colormap in all_colormaps:
+                if colormap in dictionary[key]:
+                    dictionary[key] = all_colormaps[colormap]
+                    break
+        return dictionary
+        
+    def _user_input_bool(self) -> bool: 
+        """This function asks the user to input yes or no and returns a boolean value."""
+        user_input = input('Please type y for yes or n for no. \nInput: ')
+        if user_input == 'y':
+            user_bool = True
+        elif user_input == 'n':
+            user_bool = False
+        return user_bool
+
+    def _user_input(self, message:str):
+        """This function confronts the user with the specified message and returns the user input
+
+        Args:
+            message (str): the message to display
+        """
+        return input(message)
+             
 
 # this could be split in AFM and SNOM measurement classes where AFM has all the base functions and SNOM inherits from it
 # make it easier for AFM users to finde the functions they need
@@ -1960,15 +1971,22 @@ class SnomMeasurement(FileHandler):
                 channels = self._get_existing_channels(channels)
         self.channels = channels.copy() # make sure to copy the list to avoid changing the original list     
         self.autoscale = autoscale
-        self._initialize_data(self.channels)
+        self.initialize_channels(self.channels)
         if PlotDefinitions.autodelete_all_subplots: self._delete_all_subplots() # automatically delete old subplots
         # get the plotting style from the mpl style file
         self._load_mpl_style()
     
-    def _initialize_data(self, channels=None) -> None:
+    #######################################
+    #### Basic data handling functions ####
+    #######################################
+    def initialize_channels(self, channels:Optional[list]=None) -> None:
         """This function initializes the data in memory. If no channels are specified the already existing data is used,
         which is created automatically in the instance init method. If channels are specified, the instance data is overwritten.
-        Channels must be specified as a list of channels."""
+        Channels must be specified as a list of channels.
+        
+        Args:
+            channels [list]: a list containing the channels you want to initialize
+        """
         # print(f'initialising channels: {channels}')
         if channels is None:
             #none means the channels specified in the instance creation should be used
@@ -1987,86 +2005,6 @@ class SnomMeasurement(FileHandler):
             self.mask_array = [] # not shure if it's best to reset the mask...
             self.align_points = None
             self.scalebar_channels = []    
-
-    def initialize_channels(self, channels:list) -> None:
-        """This function will load the data from the specified channels and replace the ones in memory.
-        
-        Args:
-            channels [list]: a list containing the channels you want to initialize
-        """
-        self._initialize_data(channels)
-
-    def delete_unwanted_files(self, mechanical_channels=True, optical_channels=False, images_folder=True, gwy_file=True) -> None:
-        """Delete unwanted files to reduce the size of the measurement folder.
-        Careful! This will delete files from the measurement folder, so make sure to have a backup of the data before running this function.
-        If you select mechanical_channels, all mechanical channels will be deleted. This does not include the mechanical amplitude and phase of the first demodulation
-        and not the corrected height channels. This is the recommended choice for SNOM users.
-        If you select optical_channels, all optical channels will be deleted. This in combination with mechanical_channels is the recommended choice for AFM only users.
-        If you select images_folder, the images folder will be deleted. This is the recommended choice for all users as you probably don't use the small preview images.
-        If you select gwy_file, the gwy file will be deleted. This is the recommended choice for all users as you probably don't use the gwy file and it contains an 
-        additional copy of all channels.
-
-        Args:
-            mechanical_channels (bool, optional): Mechanical channels to delete, excluded are mechanical amp and phase and corrected height. Defaults to True.
-            optical_channels (bool, optional): Optical channels to delete, this will delete all default optical channels. Defaults to False.
-            images_folder (bool, optional): This will delete the images subfolder and its content. Defaults to True.
-            gwy_file (bool, optional): This will delete the 'gwy' file if there is one. Defaults to True.
-        """
-        # suffix can be raw or none
-        # delete mechanical channels but only the ones specified in the config file, eg the corrected height and first order mechanical amplitude and phase are not deleted
-        if mechanical_channels:
-            for channel in self.mechanical_channels_to_delete:
-                filepath_1 = self.directory_name / Path(self.filename.name + f'{self.channel_prefix_default}{channel}{self.channel_suffix_default}.gsf')
-                filepath_2 = self.directory_name / Path(self.filename.name + f'{self.channel_prefix_default}{channel}{self.channel_suffix_custom}.gsf')
-                if filepath_1.exists():
-                    print(f'Deleting {filepath_1}')
-                    os.remove(filepath_1)
-                    continue
-                elif filepath_2.exists():
-                    print(f'Deleting {filepath_2}')
-                    os.remove(filepath_2)
-                    continue
-                else:
-                    print(f'File {filepath_1} or {filepath_2} do not exist, skipping deletion.')
-        # delete all optical channels
-        if optical_channels:
-            channels = self.amp_channels + self.phase_channels + self.real_channels + self.imag_channels
-            for channel in channels:
-                filepath_1 = self.directory_name / Path(self.filename.name + f'{self.channel_prefix_default}{channel}{self.channel_suffix_default}.gsf')
-                filepath_2 = self.directory_name / Path(self.filename.name + f'{self.channel_prefix_default}{channel}{self.channel_suffix_custom}.gsf')
-                if filepath_1.exists():
-                    print(f'Deleting {filepath_1}')
-                    os.remove(filepath_1)
-                    continue
-                elif filepath_2.exists():
-                    print(f'Deleting {filepath_2}')
-                    os.remove(filepath_2)
-                    continue
-                else:
-                    print(f'File {filepath_1} or {filepath_2} do not exist, skipping deletion.')
-        # delete the images subfolder, only contains small preview images
-        if images_folder:
-            images_folder = self.directory_name / 'Images'
-            if images_folder.exists() and images_folder.is_dir():
-                print(f'Deleting folder {images_folder}')
-                for item in images_folder.iterdir():
-                    if item.is_file():
-                        print(f'Deleting file {item}')
-                        item.unlink()
-                    elif item.is_dir():
-                        print(f'Deleting subfolder {item}')
-                        item.rmdir()
-                images_folder.rmdir()  # Remove the empty folder itself
-            else:
-                print(f'Folder {images_folder} does not exist, skipping deletion.')
-        # in newer versions of the software a gwy file is created which contains all the data in a single file which leads to a doubling of the data size
-        if gwy_file:
-            gwy_file = self.directory_name / Path(self.filename.name + '.gwy')
-            if gwy_file.exists():
-                print(f'Deleting {gwy_file}')
-                os.remove(gwy_file)
-            else:
-                print(f'File {gwy_file} does not exist, skipping deletion.')
 
     def add_channels(self, channels:list) -> None:
         """This function will add the specified channels to memory without changing the already existing ones.
@@ -2093,66 +2031,6 @@ class SnomMeasurement(FileHandler):
         # also apply the autoscale if it was applied to the old measurements
         if self.autoscale == True:
             self.quadratic_pixels(channels)
-
-    def _load_all_subplots(self) -> None:
-        """Load all subplots from memory (located under home/SNOM_Analysis/all_subplots.p).
-        """
-        try:
-            with open(self.all_subplots_path, 'rb') as file:
-                self.all_subplots = pkl.load(file)
-        except: self.all_subplots = []
-         
-    def _export_all_subplots(self) -> None:
-        """Export all subplots to memory.
-        """
-        with open(self.all_subplots_path, 'wb') as file:
-            pkl.dump(self.all_subplots, file)
-        self.all_subplots = []
-
-    def _delete_all_subplots(self):
-        """Delete the subplot memory. Should be done always if new measurement row is investigated.
-        """
-        try:
-            os.remove(self.all_subplots_path)
-        except: pass
-        self.all_subplots = []
-        
-    def _scale_array(self, array, scaling) -> np.ndarray:
-        """This function scales a given 2D Array, it thus creates 'scaling'**2 subpixels per pixel.
-        The scaled array is returned."""
-        yres = len(array)
-        xres = len(array[0])
-        scaled_array = np.zeros((yres*scaling, xres*scaling))
-        for i in range(len(array)):
-            for j in range(len(array[0])):
-                for k in range(scaling):
-                    for l in range(scaling):
-                        scaled_array[i*scaling + k][j*scaling + l] = array[i][j]
-        return scaled_array
-
-    def scale_channels(self, channels:Optional[list]=None, scaling:int=4) -> None:
-        """This function scales all the data in memory or the specified channels.
-                
-        Args:
-            channels (list, optional): List of channels to scale. If not specified all channels in memory will be scaled. Defaults to None.
-            scaling (int, optional): Defines scaling factor. Each pixel will be scaled to scaling**2 subpixels. Defaults to 4.
-        """
-        if channels is None:
-            channels = self.channels
-        self._write_to_logfile('scaling', scaling)
-        for channel in channels:
-            if channel in self.channels:
-                self.all_data[self.channels.index(channel)] = self._scale_array(self.all_data[self.channels.index(channel)], scaling)
-                # XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA) # Real should be the scan size not the pixel count...
-                XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
-                # use the channel tag if possible
-                # try: XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
-                # some filetypes may not have a channel tag dict, then take the resolution from the measurement tag dict...
-                # except: XRes, YRes, *args = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
-                self._set_channel_tag_dict_value(channel, ChannelTags.PIXELAREA, [XRes*scaling, YRes*scaling])
-                self._set_channel_tag_dict_value(channel, ChannelTags.PIXELSCALING, scaling)
-            else:
-                print(f'Channel {channel} is not in memory! Please initiate the channels you want to use first!')
 
     def _load_data(self, channels:list) -> list:
         """Loads all binary data of the specified channels and returns them in a list plus the dictionary with the channel information.
@@ -2297,27 +2175,342 @@ class SnomMeasurement(FileHandler):
             data_dict.append(channels[i])
         return all_binary_data, data_dict
 
-    def set_min_to_zero(self, channels:Optional[list]=None) -> None:
-        """This function sets the min value of the specified channels to zero.
-                
-        Args:
-            channels (list, optional): List of channels to set min value to zero. If not specified this will apply to all height channels in memory. Defaults to None.
-        """
-        if channels is None:
-            channels = []
-            for channel in self.channels:
-                if self.height_indicator in channel:
-                    channels.append(channel)
+    def _create_header(self, channel, filetype='gsf'):
+        """This function creates the header for the gsf file. The header contains all necessary information for the gsf file.
+        If the channel is in memory the channel tag dict will be used to get the necessary information.
+        If not the measurement tag dict will be used to get the necessary information.
+        If possible it is always better to use the channel tag dict, because it contains more specific information about the channel.
+        And issues can occure if the units in the measurement tag dict are not the same as in the channel tag dict.
 
-        self._write_to_logfile('set_min_to_zero', True)
+        Args:
+            channel (str): channel name
+            data (np.ndarray, optional): the data to save, if not specified the data will be loaded from the file. Defaults to None.
+            filetype (str, optional): the filetype to save the data. Defaults to 'gsf'.
+        """
+        # todo XOffset, YOffset dont work properly, also if the measurement is rotated or cut this is not considered so far
+        # actually not shure if that isn't fixed by now...
+        
+        XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
+        XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+        Yincomplete = self._get_channel_tag_dict_value(channel, ChannelTags.YINCOMPLETE)[0]
+        XYUnit = self._get_channel_tag_dict_unit(channel, ChannelTags.XYUNIT)
+        XOffset, YOffset = self._get_channel_tag_dict_value(channel, ChannelTags.SCANNERCENTERPOSITION)
+        # use the channel tag if possible
+        # try: 
+        #     XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
+        #     XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+        #     Yincomplete = self._get_channel_tag_dict_value(channel, ChannelTags.YINCOMPLETE)[0]
+        #     XYUnit = self._get_channel_tag_dict_unit(channel, ChannelTags.XYUNIT)
+        #     XOffset, YOffset = self._get_channel_tag_dict_value(channel, ChannelTags.SCANNERCENTERPOSITION)
+        # some filetypes may not have a channel tag dict, then take the resolution from the measurement tag dict...
+        # except: 
+        #     XReal, YReal, *args = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
+        #     XRes, YRes, *args = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
+        #     Yincomplete = self._get_measurement_tag_dict_value(MeasurementTags.YINCOMPLETE)[0]
+        #     XYUnit = self._get_measurement_tag_dict_value(MeasurementTags.XYUNIT)
+        #     XOffset, YOffset = self._get_measurement_tag_dict_value(MeasurementTags.SCANNERCENTERPOSITION)
+        
+
+        # convert values to m if not already in m, and round to nm precision
+        if XYUnit == 'nm':
+            XReal = round(XReal * pow(10, -9), 9)
+            YReal = round(YReal * pow(10, -9), 9)
+            XOffset = round(XOffset * pow(10, -9), 9)
+            YOffset = round(YOffset * pow(10, -9), 9)
+        elif XYUnit == 'µm' or XYUnit == 'um':
+            XReal = round(XReal * pow(10, -6), 9)
+            YReal = round(YReal * pow(10, -6), 9)
+            XOffset = round(XOffset * pow(10, -6), 9)
+            YOffset = round(YOffset * pow(10, -6), 9)
+        elif XYUnit == 'm':
+            XReal = round(XReal, 9)
+            YReal = round(YReal, 9)
+            XOffset = round(XOffset, 9)
+            YOffset = round(YOffset, 9)
+        
+        # try to get the rotation value, not every filetype saves this...
+        rotation = None
+        try:
+            rotation = self._get_channel_tag_dict_value(channel, ChannelTags.ROTATION)[0]
+        except:
+            # try to get the rotation from the measurement tags
+            try:
+                rotation = self._get_measurement_tag_dict_value(MeasurementTags.ROTATION)[0]
+            except:
+                print('Rotation value not found! Proceeding without')
+        # XRes = len(data[0])
+        # YRes  = len(data)
+        if filetype=='gsf':
+            header = f'Gwyddion Simple Field 1.0\n'
+        elif filetype=='txt':
+            header = 'Simple Textfile, floats seperated by spaces\n'
+        else:
+            header = ''
+        header += f'Title={self.measurement_title}\n'
+        # round everything to nm
+        # but careful, header tag dict and channel tag dict values are sometimes in nm, sometimes in m, so we have to check that
+        channel_tags = self._get_from_config('channel_tags')
+        # use original channel tags from config file, such that new headers can be created with the same tags
+        header += f'{channel_tags['PIXELAREA'][0]}={int(XRes)}\n{channel_tags['PIXELAREA'][1]}={int(YRes)}\n'
+        if Yincomplete is not None:
+            header += f'{channel_tags['YINCOMPLETE']}={Yincomplete}\n'
+        header += f'{channel_tags['SCANAREA'][0]}={XReal}\n{channel_tags['SCANAREA'][1]}={YReal}\n'
+        header += f'{channel_tags['SCANNERCENTERPOSITION'][0]}={XOffset}\n{channel_tags['SCANNERCENTERPOSITION'][1]}={YOffset}\n'
+        if rotation is not None and 'ROTATION' in channel_tags:
+            header += f'{channel_tags['ROTATION']}={round(rotation)}\n' # header is optional, not each filetype has it...
+        header += f'{channel_tags['XYUNIT']}=m\n'
+        if self.height_indicator in channel:
+            header += f'{channel_tags['ZUNIT'][0]}=m\n'
+        else:
+            header += f'{channel_tags['ZUNIT'][0]}=\n'
+        # header += f'XRes={int(XRes)}\nYRes={int(YRes)}\n'
+        # header += f'XReal={XReal}\nYReal={YReal}\n'
+        # header += f'XOffset={XOffset}\nYOffset={YOffset}\n'
+        # if rotation is not None:
+        #     header += f'Rotation={round(rotation)}\n' # header is optional, not each filetype has it...
+        # header += f'XYUnits=m\n'
+        # if self.height_indicator in channel:
+        #     header += 'ZUnits=m\n'
+        # else:
+        #     header += 'ZUnits=\n'
+        # lenght = header.count('\n')
+        length = len(header)
+        number = 4 - ((length) % 4)
+        NUL = b'\0'
+        for i in range(number -1):
+            NUL += b'\0' # add NUL terminator
+        return header, NUL
+
+    def save_to_gsf(self, channels:Optional[list]=None, appendix:str='default'):
+        """This function is ment to save all specified channels to external .gsf files.
+        
+        Args:
+            channels (list, optional):    list of the channels to be saved, if not specified, all channels in memory are saved.
+                                Careful! The data will be saved as it is right now, so with all the manipulations.
+                                Therefor the data should be saved with an appendix in the filename to keep the original data.
+            appendix (str, optional):     appendix/suffix to add to the filename, default is the default specified in the config of the current filetype.
+        """
+        if appendix == 'default':
+            appendix = self.channel_suffix_manipulated
+        if channels is None:
+            channels = self.channels
         for channel in channels:
-            if channel in self.channels:
-                data = self.all_data[self.channels.index(channel)]
-                flattened_data = data.flatten()
-                data_min = min(flattened_data)
-                self.all_data[self.channels.index(channel)] = data - data_min
+
+            # old:
+            '''
+            # find out if channel is default or not
+            # if channel in self.all_channels_default:
+            #     suffix = self.channel_suffix_default
+            #     prefix = self.channel_prefix_default
+            #     channel_type = 'default'
+            # elif channel in self.all_channels_custom:
+            #     suffix = self.channel_suffix_custom
+            #     prefix = self.channel_prefix_custom
+            #     channel_type = 'custom'
+            #     # ignore the default appendix if the channel is not a default channel 
+            #     if self.channel_suffix_overlain in channel:
+            #         appendix = ''
+            #     elif self.channel_suffix_synccorrected_phase in channel:
+            #         appendix = ''
+            # else:
+            #     print('channel not found in default or custom channels\nNo appendix will be added to the filename')
+            #     # assume an unknown custom channel was encountered
+            #     suffix = self.channel_suffix_custom
+            #     prefix = self.channel_prefix_custom
+            #     channel_type = 'custom'
+            #     # sys.exit()
+            '''
+            # use the custom version of the prefix and suffix for all saves, we assume that all data which is saved has been modified in some way
+            # and should therefor be saved with the custom prefix and suffix even if no appendix is added
+            suffix = self.channel_suffix_custom
+            prefix = self.channel_prefix_custom
+            # check if the channel is custom
+            if self._is_custom_channel(channel):
+                # ignore the default appendix if the channel name already contains an appendix caused by manipulation 
+                if self.channel_suffix_overlain in channel:
+                    appendix = ''
+
+            filepath = self.directory_name / Path(self.filename.name + f'{prefix}{channel}{suffix}{appendix}.gsf')
+            data = self.all_data[self.channels.index(channel)]
+            XRes = len(data[0])
+            YRes  = len(data)
+            header, NUL = self._create_header(channel)
+            file = open(filepath, 'bw')
+            file.write(header.encode('utf-8'))
+            file.write(NUL) # the NUL marks the end of the header and konsists of 0 characters in the first dataline
+            if self.height_indicator in channel:
+                for y in range(YRes):
+                    for x in range(XRes):
+                        file.write(pack('f', round(data[y][x],5)*pow(10,-9)))
             else:
-                print('At least one of the specified channels is not in memory! You probably should initialize the channels first.')
+                for y in range(YRes):
+                    for x in range(XRes):
+                        file.write(pack('f', round(data[y][x], 5)))
+            file.close()
+            print(f'successfully saved channel {channel} to .gsf')
+        self._write_to_logfile('save_to_gsf_appendix', appendix)
+
+    def save_to_txt(self, channels:Optional[list]=None, appendix:str='default'):
+        """This function is ment to save all specified channels to external .txt files.
+        
+        Args:
+            channels (list, optional):    list of the channels to be saved, if not specified, all channels in memory are saved
+                                Careful! The data will be saved as it is right now, so with all the manipulations.
+                                Therefor the data will have an '_manipulated' appendix in the filename.
+            appendix (str, optional):     appendix to add to the filename, default is the default specified in the config of the current filetype.
+        """
+        if appendix == 'default':
+            appendix = self.channel_suffix_manipulated
+        if channels is None:
+            channels = self.channels
+        for channel in channels:
+            # old:
+            '''
+            # find out if channel is default or not
+            # if channel in self.all_channels_default:
+            #     suffix = self.channel_suffix_default
+            #     prefix = self.channel_prefix_default
+            #     channel_type = 'default'
+            # elif channel in self.all_channels_custom:
+            #     suffix = self.channel_suffix_custom
+            #     prefix = self.channel_prefix_custom
+            #     channel_type = 'custom'
+            #     # ignore the default appendix if the channel is not a default channel 
+            #     if self.channel_suffix_overlain in channel:
+            #         appendix = ''
+            #     elif self.channel_suffix_synccorrected_phase in channel:
+            #         appendix = ''
+            # else:
+            #     print('channel not found in default or custom channels\nNo appendix will be added to the filename')
+            #     # assume an unknown custom channel was encountered
+            #     suffix = self.channel_suffix_custom
+            #     prefix = self.channel_prefix_custom
+            #     channel_type = 'custom'
+            #     # sys.exit()
+            '''
+            # use the custom version of the prefix and suffix for all saves, we assume that all data which is saved has been modified in some way
+            # and should therefor be saved with the custom prefix and suffix even if no appendix is added
+            suffix = self.channel_suffix_custom
+            prefix = self.channel_prefix_custom
+            # check if the channel is custom
+            if self._is_custom_channel(channel):
+                # ignore the default appendix if the channel name already contains an appendix caused by manipulation 
+                if self.channel_suffix_overlain in channel:
+                    appendix = ''
+            
+            filepath = self.directory_name / Path(self.filename.name + f'{prefix}{channel}{suffix}{appendix}.txt')
+            data = self.all_data[self.channels.index(channel)]
+            XRes = len(data[0])
+            YRes  = len(data)
+            header, NUL = self._create_header(channel, 'txt')
+            file = open(filepath, 'w')
+            file.write(header)
+            # file.write(NUL) # the NUL marks the end of the header and konsists of 0 characters in the first dataline
+            for y in range(YRes):
+                for x in range(XRes):
+                    file.write(f'{round(data[y][x], 5)} ')
+            file.close()
+            print(f'successfully saved channel {channel} to .txt')
+        self._write_to_logfile('save_to_txt_appendix', appendix)
+ 
+    def delete_unwanted_files(self, mechanical_channels=True, optical_channels=False, images_folder=True, gwy_file=True) -> None:
+        """Delete unwanted files to reduce the size of the measurement folder.
+        Careful! This will delete files from the measurement folder, so make sure to have a backup of the data before running this function.
+        If you select mechanical_channels, all mechanical channels will be deleted. This does not include the mechanical amplitude and phase of the first demodulation
+        and not the corrected height channels. This is the recommended choice for SNOM users.
+        If you select optical_channels, all optical channels will be deleted. This in combination with mechanical_channels is the recommended choice for AFM only users.
+        If you select images_folder, the images folder will be deleted. This is the recommended choice for all users as you probably don't use the small preview images.
+        If you select gwy_file, the gwy file will be deleted. This is the recommended choice for all users as you probably don't use the gwy file and it contains an 
+        additional copy of all channels.
+
+        Args:
+            mechanical_channels (bool, optional): Mechanical channels to delete, excluded are mechanical amp and phase and corrected height. Defaults to True.
+            optical_channels (bool, optional): Optical channels to delete, this will delete all default optical channels. Defaults to False.
+            images_folder (bool, optional): This will delete the images subfolder and its content. Defaults to True.
+            gwy_file (bool, optional): This will delete the 'gwy' file if there is one. Defaults to True.
+        """
+        # suffix can be raw or none
+        # delete mechanical channels but only the ones specified in the config file, eg the corrected height and first order mechanical amplitude and phase are not deleted
+        if mechanical_channels:
+            for channel in self.mechanical_channels_to_delete:
+                filepath_1 = self.directory_name / Path(self.filename.name + f'{self.channel_prefix_default}{channel}{self.channel_suffix_default}.gsf')
+                filepath_2 = self.directory_name / Path(self.filename.name + f'{self.channel_prefix_default}{channel}{self.channel_suffix_custom}.gsf')
+                if filepath_1.exists():
+                    print(f'Deleting {filepath_1}')
+                    os.remove(filepath_1)
+                    continue
+                elif filepath_2.exists():
+                    print(f'Deleting {filepath_2}')
+                    os.remove(filepath_2)
+                    continue
+                else:
+                    print(f'File {filepath_1} or {filepath_2} do not exist, skipping deletion.')
+        # delete all optical channels
+        if optical_channels:
+            channels = self.amp_channels + self.phase_channels + self.real_channels + self.imag_channels
+            for channel in channels:
+                filepath_1 = self.directory_name / Path(self.filename.name + f'{self.channel_prefix_default}{channel}{self.channel_suffix_default}.gsf')
+                filepath_2 = self.directory_name / Path(self.filename.name + f'{self.channel_prefix_default}{channel}{self.channel_suffix_custom}.gsf')
+                if filepath_1.exists():
+                    print(f'Deleting {filepath_1}')
+                    os.remove(filepath_1)
+                    continue
+                elif filepath_2.exists():
+                    print(f'Deleting {filepath_2}')
+                    os.remove(filepath_2)
+                    continue
+                else:
+                    print(f'File {filepath_1} or {filepath_2} do not exist, skipping deletion.')
+        # delete the images subfolder, only contains small preview images
+        if images_folder:
+            images_folder = self.directory_name / 'Images'
+            if images_folder.exists() and images_folder.is_dir():
+                print(f'Deleting folder {images_folder}')
+                for item in images_folder.iterdir():
+                    if item.is_file():
+                        print(f'Deleting file {item}')
+                        item.unlink()
+                    elif item.is_dir():
+                        print(f'Deleting subfolder {item}')
+                        item.rmdir()
+                images_folder.rmdir()  # Remove the empty folder itself
+            else:
+                print(f'Folder {images_folder} does not exist, skipping deletion.')
+        # in newer versions of the software a gwy file is created which contains all the data in a single file which leads to a doubling of the data size
+        if gwy_file:
+            gwy_file = self.directory_name / Path(self.filename.name + '.gwy')
+            if gwy_file.exists():
+                print(f'Deleting {gwy_file}')
+                os.remove(gwy_file)
+            else:
+                print(f'File {gwy_file} does not exist, skipping deletion.')
+
+    ###########################################
+    #### Plotting related helper functions ####
+    ###########################################
+
+    def _load_all_subplots(self) -> None:
+        """Load all subplots from memory (located under home/SNOM_Analysis/all_subplots.p).
+        """
+        try:
+            with open(self.all_subplots_path, 'rb') as file:
+                self.all_subplots = pkl.load(file)
+        except: self.all_subplots = []
+         
+    def _export_all_subplots(self) -> None:
+        """Export all subplots to memory.
+        """
+        with open(self.all_subplots_path, 'wb') as file:
+            pkl.dump(self.all_subplots, file)
+        self.all_subplots = []
+
+    def _delete_all_subplots(self):
+        """Delete the subplot memory. Should be done always if new measurement row is investigated.
+        """
+        try:
+            os.remove(self.all_subplots_path)
+        except: pass
+        self.all_subplots = []
 
     def _get_plotting_values(self, channel:str) -> tuple:
         """This function returns the colormap, the colormap label and the title for the specified channel.
@@ -2942,6 +3135,514 @@ class SnomMeasurement(FileHandler):
         plt.show()
         gc.collect()
 
+    #####################################
+    #### Data manipulation functions ####
+    #####################################
+
+    #### Basic functions ####
+    #~~~~~~~~~~~~~~~~~~~~~~~#
+
+    def create_new_channel(self, data, channel_name:str, channel_tag_dict:dict, channel_label:Optional[str]=None) -> None:
+        """This function will create a new channel from the specified data and add it to memory.
+
+        Args:
+            data (np.ndarray): Data array to create the new channel from.
+            channel_name (str): Name of the new channel.
+            channel_tag_dict (dict): Channel tag dictionary for the new channel.
+            channel_label (str, optional): Label for the new channel. Defaults to None.
+        """
+        if channel_label is None:
+            channel_label = channel_name
+        self.channels.append(channel_name)
+        self.all_data.append(data)
+        self.channel_tag_dict.append(channel_tag_dict)
+        self.channels_label.append(channel_label)
+
+    def _scale_array(self, array, scaling) -> np.ndarray:
+        """This function scales a given 2D Array, it thus creates 'scaling'**2 subpixels per pixel.
+        The scaled array is returned."""
+        yres = len(array)
+        xres = len(array[0])
+        scaled_array = np.zeros((yres*scaling, xres*scaling))
+        for i in range(len(array)):
+            for j in range(len(array[0])):
+                for k in range(scaling):
+                    for l in range(scaling):
+                        scaled_array[i*scaling + k][j*scaling + l] = array[i][j]
+        return scaled_array
+
+    def scale_channels(self, channels:Optional[list]=None, scaling:int=4) -> None:
+        """This function scales all the data in memory or the specified channels.
+                
+        Args:
+            channels (list, optional): List of channels to scale. If not specified all channels in memory will be scaled. Defaults to None.
+            scaling (int, optional): Defines scaling factor. Each pixel will be scaled to scaling**2 subpixels. Defaults to 4.
+        """
+        if channels is None:
+            channels = self.channels
+        self._write_to_logfile('scaling', scaling)
+        for channel in channels:
+            if channel in self.channels:
+                self.all_data[self.channels.index(channel)] = self._scale_array(self.all_data[self.channels.index(channel)], scaling)
+                # XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA) # Real should be the scan size not the pixel count...
+                XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+                # use the channel tag if possible
+                # try: XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+                # some filetypes may not have a channel tag dict, then take the resolution from the measurement tag dict...
+                # except: XRes, YRes, *args = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
+                self._set_channel_tag_dict_value(channel, ChannelTags.PIXELAREA, [XRes*scaling, YRes*scaling])
+                self._set_channel_tag_dict_value(channel, ChannelTags.PIXELSCALING, scaling)
+            else:
+                print(f'Channel {channel} is not in memory! Please initiate the channels you want to use first!')
+
+    def set_min_to_zero(self, channels:Optional[list]=None) -> None:
+        """This function sets the min value of the specified channels to zero.
+                
+        Args:
+            channels (list, optional): List of channels to set min value to zero. If not specified this will apply to all height channels in memory. Defaults to None.
+        """
+        if channels is None:
+            channels = []
+            for channel in self.channels:
+                if self.height_indicator in channel:
+                    channels.append(channel)
+
+        self._write_to_logfile('set_min_to_zero', True)
+        for channel in channels:
+            if channel in self.channels:
+                data = self.all_data[self.channels.index(channel)]
+                flattened_data = data.flatten()
+                data_min = min(flattened_data)
+                self.all_data[self.channels.index(channel)] = data - data_min
+            else:
+                print('At least one of the specified channels is not in memory! You probably should initialize the channels first.')
+    
+    def _get_channel_scaling(self, channel_id) -> int :
+        """This function checks if an instance channel is scaled and returns the scaling factor.
+        
+        Args:
+            channel_id (int): the channel index
+        """
+        channel_yres = len(self.all_data[channel_id])
+        return int(channel_yres/self.YRes)
+
+    def _create_height_mask_preview(self, mask_array) -> None:
+        """This function creates a preview of the height masking.
+        The preview is based on all channels in the instance
+        
+        Args:
+            mask_array (np.ndarray): the mask array to preview
+        """
+        channels = self.channels
+        dataset = self.all_data
+        subplots = []
+        for i in range(len(dataset)):
+            masked_array = np.multiply(dataset[i], mask_array)
+            subplots.append(self._add_subplot(np.copy(masked_array), channels[i]))
+        self._plot_subplots(subplots)
+        # remove the preview subplots from the memory
+        self.remove_last_subplots(3)
+
+    def _create_mask_array(self, height_data:np.ndarray, threshold:float) -> np.ndarray:
+        """This function takes the height data and a threshold value to create a mask array containing 0 and 1 values.
+
+        Args:
+            height_data (np.ndarray): the height data
+            threshold (float): the threshold value
+        
+        Returns:
+            np.ndarray: the mask array
+        """
+        height_flattened = height_data.flatten()
+        height_threshold = threshold*(max(height_flattened)-min(height_flattened))+min(height_flattened)
+
+        # create an array containing 0 and 1 depending on wether the height value is below or above threshold
+        mask_array = np.copy(height_data)
+        yres = len(height_data)
+        xres = len(height_data[0])
+        for y in range(yres):
+            for x in range(xres):
+                value = 0
+                if height_data[y][x] >= height_threshold:
+                    value = 1
+                mask_array[y][x] = value
+        return mask_array
+
+    def _get_height_treshold(self, height_data:np.ndarray) -> float:
+        """This function returns the height threshold value. The user is prompted with a preview of the mask array and can adjust the threshold using a slider.
+        
+        Args:
+            height_data (np.ndarray): the height data
+        
+        Returns:
+            float: the new threshold [0-1]
+        """
+        threshold = round(get_height_treshold(height_data), 2)
+        '''self._create_height_mask_preview(mask_array)
+        print('Do you want to use these parameters to mask the data?')
+        mask_data = self._user_input_bool()
+        if mask_data == False:
+            print('Do you want to change the treshold?')
+            change_treshold = self._user_input_bool()
+            if change_treshold == True:
+                print(f'The old threshold was {threshold}')
+                threshold = float(input('Please enter the new treshold value: '))
+                mask_array = self._create_mask_array(height_data, threshold)
+                self._get_height_treshold(height_data, mask_array, threshold)
+            else:
+                print('Do you want to abort the masking procedure?')
+                abort = self._user_input_bool()
+                if abort == True:
+                    sys.exit()'''
+        return threshold
+
+    def heigth_mask_channels(self, channels:Optional[list]=None, mask_channel:str=None, threshold:float=None) -> None:
+        """
+        The treshold factor should be between 0 and 1. It sets the threshold for the height pixels.
+        Every pixel below threshold will be set to 0. This also applies for all other channels. 
+        You can either specify specific channels to mask or if you don't specify channels,
+        all standard channels will be masked. If export is False only the channels in self.channels will be masked
+        and nothing will be exported. 
+        For this function to also work with scaled data the height channel has to be specified and scaled as well!
+                
+        Args:
+            channels (list): list of channels, will override the already existing channels
+            mask_channel (str): The channel to use for the height mask, if not specified the height channel will be used
+            threshold (float): Threshold value to create the height mask from. Default is None, the user can select the threshold with a slider.
+        """
+        if channels is None:
+            channels = self.channels
+        if (mask_channel is None) or (mask_channel not in self.channels):
+            if self.height_channel in self.channels:
+                mask_channel = self.height_channel
+            else:
+                print('Please specify a height mask channel!')
+                # exit()
+                return
+        if self.height_indicator not in mask_channel:
+            print('Mask channel must be a height channel!')
+            # exit()
+            return
+        else:
+            height_data = self.all_data[self.channels.index(mask_channel)]                
+
+        if threshold is None:
+            threshold = self._get_height_treshold(height_data)
+
+        mask_array = self._create_mask_array(height_data, threshold)
+        self.mask_array = mask_array # todo, mask array must be saved as part of the image, otherwise multiple measurement creations will use the same mask
+
+        self._write_to_logfile('height_masking_threshold', threshold)
+        for channel in channels:
+            if channel not in self.channels:
+                print(f'Channel {channel} is not in memory! Please initiate the channels you want to use first!')
+            self.all_data[self.channels.index(channel)] = np.multiply(self.all_data[self.channels.index(channel)], mask_array)
+            self.channels_label[self.channels.index(channel)] = self.channels_label[self.channels.index(channel)] + '_masked'
+            
+        # dataset = self.all_data
+        # for i in range(len(dataset)):
+        #     if self.height_channel not in self.channels_label[i]:
+        #         self.all_data[i] = np.multiply(dataset[i], mask_array)
+        #     self.channels_label[i] = self.channels_label[i] + '_masked'
+        print('Channels in memory have been masked!')
+
+    def _get_klicker_coordinates_old(self, data:np.ndarray, cmap, message:str):
+        """This function returns the pixel coordinates of the clicked pixel.
+
+        Args:
+            data (np.ndarray): the data
+            cmap (str): the colormap
+            message (str): the message to display as the title
+        """
+        fig, ax = plt.subplots()
+        ax.pcolormesh(data, cmap=cmap)
+        klicker = clicker(ax, ["event"], markers=["x"])
+        ax.legend()
+        ax.axis('scaled')
+        plt.title(message)
+        plt.show()
+        klicker_coords = klicker.get_positions()['event'] #klicker returns a dictionary for the events
+        klick_coordinates = [[round(element[0]), round(element[1])] for element in klicker_coords]
+        return klick_coordinates
+    
+    def _get_klicker_coordinates(self, data:np.ndarray, cmap, message:str):
+        """This function returns the pixel coordinates of the clicked pixel.
+
+        Args:
+            data (np.ndarray): the data
+            cmap (str): the colormap
+            message (str): the message to display as the title
+        """
+        clicker = ImageClicker(data, cmap, message)
+        return clicker.coords
+
+    def cut_channels(self, channels:Optional[list]=None, preview_channel:Optional[str]=None, autocut:bool=False, coords:Optional[list]=None, reset_mask:bool=True) -> None:
+        """This function cuts the specified channels to the specified region. If no coordinates are specified you will be prompted with a window to select an area.
+        If you created a mask previously for this instance the old mask will be reused! Otherwise you should manually change the reset_mask parameter to True.
+
+        Args:
+            channels (list, optional): List of channels you want to cut. If not specified all channels in memory will be cut. Defaults to None.
+            preview_channel (str, optional): The channel to display for the area selection. If not specified the height channel will be used if it is in memory,
+                otherwise the first of the specified channels will be used. Defaults to None
+            autocut (bool, optional): If set to 'True' the program will automatically try to remove zero lines and columns, which can result from masking.
+            coords (list, optional): If you already now the coordinates ([[x1,y1], [x2,y2]]), e.g. top left and bottom right coordinate of the rectangle to which you want to cut your data. 
+                Defaults to None.
+            reset_mask (bool, optional): If you dont want to reuse an old mask set to True. Defaults to False.
+        """
+        if channels is None:
+            channels = self.channels # if nothing is specified, the cut will be applied to all channels in memory!
+        # check if height channel in channels and apply mask to it, until now it has not been masked in order to show the mask in the image
+        if preview_channel is None:
+            if (self.height_channel in channels):
+                preview_channel = self.height_channel
+            else:
+                preview_channel = channels[0]
+
+        # apply the already existing mask if possible.  
+        if reset_mask == False:  
+            if (len(self.mask_array) > 0):
+                for channel in channels:
+                    index = self.channels.index(channel)
+                    self.all_data[index] = np.multiply(self.all_data[index], self.mask_array)
+                    # self.channels[index] += '_reduced'
+            else:
+                print('There does not seem to be an old mask... ')
+        # generate new mask by selecting a region in the preview channel
+        elif autocut is False:
+            data = self.all_data[self.channels.index(preview_channel)]
+            # get the coordinates of the selection rectangle
+            if coords is None:
+                coords = select_rectangle(data, preview_channel)
+            # check if coords are none, if so, the user has canceled the selection
+            if coords is not None:
+                self._write_to_logfile('cut_coords', coords)
+                # use the selection to create a mask and multiply to all channels, then apply auto_cut function
+                yres = len(data)
+                xres = len(data[0])
+                self.mask_array = np.zeros((yres, xres))
+                for y in range(yres):
+                    if y in range(coords[0][1], coords[1][1]):
+                        for x in range(xres):
+                            if x in range(coords[0][0], coords[1][0]):
+                                self.mask_array[y][x] = 1
+                for channel in channels:
+                    index = self.channels.index(channel)
+                    # set all values outside of the mask to zero and then cut all zero away from the outside with _auto_cut_channels(channels)
+                    self.all_data[index] = np.multiply(self.all_data[index], self.mask_array)
+            else:
+                # if the user did not select a rectangle we don't want to cut anything
+                yres = len(data)
+                xres = len(data[0])
+                self.mask_array = np.ones((yres, xres))  
+        # apply the auto cut function to remove masked areas around the data
+        self._auto_cut_channels(channels, self.mask_array)
+        gc.collect()
+
+    def _auto_cut_channels(self, channels:Optional[list]=None, mask_array:np.ndarray=None) -> None:
+        """This function automatically cuts away all rows and lines which are only filled with zeros.
+        This function applies to all channels in memory.
+
+        Args:
+            channels (list, optional): List of channels to apply the cut to. If not specified all channels in memory will be used. Defaults to None.
+        """
+        if channels is None:
+            channels = self.channels
+        
+        # get the new size of the reduced channels
+        # reduced_data = self._auto_cut_data(self.all_data[0])
+        reduced_data = self._auto_cut_data(mask_array)
+        yres = len(reduced_data)
+        xres = len(reduced_data[0])
+        for channel in channels:
+            index = self.channels.index(channel)
+            # get the old size of the data
+            xres, yres, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+            xreal, yreal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
+            self.all_data[index] = self._auto_cut_data(self.all_data[index], mask_array)
+            xres_new = len(self.all_data[index][0])
+            yres_new = len(self.all_data[index])
+            xreal_new = xreal*xres_new/xres
+            yreal_new = yreal*yres_new/yres
+            # save new resolution and scan area in channel tag dict:
+            self._set_channel_tag_dict_value(channel, ChannelTags.PIXELAREA, [xres_new, yres_new])
+            self._set_channel_tag_dict_value(channel, ChannelTags.SCANAREA, [xreal_new, yreal_new])
+            # add new appendix to channel
+            self.channels_label[index] += '_reduced'
+        self._write_to_logfile('cut', 'autocut')
+
+    def _auto_cut_data(self, data, mask_array:np.ndarray=None) -> np.ndarray:
+        """This function cuts the data and removes zero values from the outside."""
+        xres = len(data[0])
+        yres = len(data)
+        # find empty columns and rows to delete:
+        columns = []
+        rows = []
+        if mask_array is not None:
+            # if a mask array is given, use it to find empty columns and rows
+            for x in range(xres):
+                if np.all(mask_array[:, x] == 0):
+                    columns.append(x)
+            for y in range(yres):
+                if np.all(mask_array[y, :] == 0):
+                    rows.append(y)
+
+        else:    
+            for x in range(xres):
+                add_to_columns = True
+                for y in range(yres):
+                    if data[y][x] != 0:
+                        add_to_columns = False
+                if add_to_columns == True:
+                    columns.append(x)
+            rows = []
+            for y in range(yres):
+                add_to_rows = True
+                for x in range(xres):
+                    if data[y][x] != 0:
+                        add_to_rows = False
+                if add_to_rows == True:
+                    rows.append(y)
+        
+        # create reduced data array
+        x_reduced = xres - len(columns)
+        y_reduced = yres - len(rows)
+        data_reduced = np.zeros((y_reduced, x_reduced))
+        # iterate through all pixels and check if they are in rows and columns, then add them to the reduced data array
+        count_x = 0
+        count_y = 0
+        for y in range(yres):
+            if y not in rows:
+                for x in range(xres):
+                    if x not in columns:
+                        data_reduced[count_y][count_x] = data[y][x] 
+                        count_x += 1
+                count_x = 0
+                count_y += 1
+        return data_reduced
+
+    def scalebar(self, channels:list=[], units="m", dimension="si-length", label=None, length_fraction=None, height_fraction=None, width_fraction=None,
+            location=None, loc=None, pad=None, border_pad=None, sep=None, frameon=None, color=None, box_color=None, box_alpha=None, scale_loc=None,
+            label_loc=None, font_properties=None, label_formatter=None, scale_formatter=None, fixed_value=None, fixed_units=None, animated=False, rotation=None):
+        """Adds a scalebar to all specified channels.
+        
+        Args:
+            channels (list): List of channels the scalebar should be added to.
+                various definitions for the scalebar, please look up 'matplotlib_scalebar.scalebar' for more information
+        """
+        
+        # scalebar = ScaleBar(dx, units, dimension, label, length_fraction, height_fraction, width_fraction,
+            # location, loc, pad, border_pad, sep, frameon, color, box_color, box_alpha, scale_loc,
+            # label_loc, font_properties, label_formatter, scale_formatter, fixed_value, fixed_units, animated, rotation)
+        
+        
+        count = 0
+        for channel in self.channels:
+            XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+            XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
+            pixel_scaling = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELSCALING)
+            # try: 
+            #     XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+            #     XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
+            #     pixel_scaling = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELSCALING)
+            # except: 
+            #     XRes, YRes, *args = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
+            #     XReal, YReal, *args = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
+            #     pixel_scaling = self._get_measurement_tag_dict_value(MeasurementTags.PIXELSCALING)
+            dx = XReal/(XRes)
+            scalebar_var = [dx, units, dimension, label, length_fraction, height_fraction, width_fraction,
+                            location, loc, pad, border_pad, sep, frameon, color, box_color, box_alpha, scale_loc,
+                            label_loc, font_properties, label_formatter, scale_formatter, fixed_value, fixed_units, animated, rotation]
+            if (channel in channels) or (len(channels)==0):
+                self.scalebar_channels.append([channel, scalebar_var])                
+            else:
+                self.scalebar_channels.append([channel, None])                
+            count += 1
+
+    def rotate_90_deg(self, orientation:str = 'right'):
+        """This function will rotate all data in memory by 90 degrees.
+
+        Args:
+            orientation (str, optional): rotate clockwise ('right') or counter clockwise ('left'). Defaults to 'right'.
+        """
+        if orientation == 'right':
+            axes=(1,0)
+            self._write_to_logfile('rotation', +90)
+        elif orientation == 'left':
+            axes=(0,1)
+            self._write_to_logfile('rotation', -90)
+        #rotate data:
+        all_data = self.all_data.copy()
+        # initialize data array
+        self.all_data = []
+        for channel in self.channels:
+            # flip pixelarea and scanarea as well
+            XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
+            self._set_channel_tag_dict_value(channel, ChannelTags.SCANAREA, [YReal, XReal])
+            XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+            self._set_channel_tag_dict_value(channel, ChannelTags.PIXELAREA, [YRes, XRes])
+            self.all_data.append(np.rot90(all_data[self.channels.index(channel)], axes=axes))
+
+    def _scale_data_xy(self, data:np.ndarray, scale_x:int, scale_y:int) -> np.ndarray:
+        XRes = len(data[0])
+        YRes = len(data)
+        new_data = np.zeros((YRes*scale_y, XRes*scale_x))
+        for y in range(YRes):
+            for i in range(scale_y):
+                for x in range(XRes):
+                    for j in range(scale_x):
+                        new_data[y*scale_y + i][x*scale_x + j]= data[y][x]
+        return new_data
+
+    def quadratic_pixels(self, channels:Optional[list]=None):
+        """This function scales the data such that each pixel is quadratic, eg. the physical dimensions are equal.
+        This is important because the pixels will be set to quadratic in the plotting function.
+        However make shure that the pixel scaling x relative to y is an integer, otherwise the scaling will not work properly.
+        This function will be applied to all channels in memory automatically when creating a measurement instance if autoscale is set to True.
+        
+        Args:
+            channels [list]: list of channels the scaling should be applied to. If not specified the scaling will be applied to all channels
+        """
+        self._write_to_logfile('quadratic_pixels', True)
+        if channels is None:
+            channels = self.channels
+        for channel in channels:
+            if channel in self.channels:
+                XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
+                XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
+                pixel_size_x = round(XReal/XRes *1000000000) # pixel size in nm
+                pixel_size_y = round(YReal/YRes *1000000000)
+                scale_x = 1
+                scale_y = 1
+                # if pixel_size_x < pixel_size_y:
+                #     scale_y = int(pixel_size_y/pixel_size_x)
+                # elif pixel_size_x > pixel_size_y:
+                #     scale_x = int(pixel_size_x/pixel_size_y)
+                # if pixel_size_x/scale_x != pixel_size_y/scale_y:
+                    # print('The pixel size does not fit perfectly, you probably chose weired resolution values. You should probably not use this function then...\nScaling the data anyways!')
+                # self.all_data[self.channels.index(channel)] = self._scale_data_xy(self.all_data[self.channels.index(channel)], scale_x, scale_y)
+                # self._set_channel_tag_dict_value(channel, ChannelTags.PIXELAREA, [XRes*scale_x, YRes*scale_y])
+                ###### New method using pillow to scale the image with interpolation, better if the scaling is not an integer
+                # one could also implement a method using pillow to scale the image with interpolation, better if the scaling is not an integer
+                rescaling = False
+                if pixel_size_x < pixel_size_y:
+                    # scale_y, rest = divmod(pixel_size_y, pixel_size_x)
+                    xres = XRes
+                    yres = int(YRes*pixel_size_y/pixel_size_x)
+                    rescaling = True
+                elif pixel_size_x > pixel_size_y:
+                    # scale_x, rest = divmod(pixel_size_x, pixel_size_y)
+                    yres = YRes
+                    xres = int(XRes*pixel_size_x/pixel_size_y)
+                    rescaling = True
+                if rescaling:
+                    img = Image.fromarray(self.all_data[self.channels.index(channel)])
+                    img = img.resize((xres, yres), Image.Resampling.NEAREST)
+                    self.all_data[self.channels.index(channel)] = np.array(img)
+                    self._set_channel_tag_dict_value(channel, ChannelTags.PIXELAREA, [xres, yres])
+
+    #### Filtering functions ####
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
     def _gauss_blurr_data(self, array, sigma) -> np.ndarray:
         """Applies a gaussian blurr to the specified array, with a specified sigma. The blurred data is returned as a np.ndarray."""
         return gaussian_filter(array, sigma)
@@ -3118,7 +3819,7 @@ class SnomMeasurement(FileHandler):
         Args:
             channels [list]: list of channels, will override the already existing channels
         """
-        self._initialize_data(channels)
+        self.initialize_channels(channels)
         self._write_to_logfile('fourier_filter', True)
         channels_to_filter = []
         for i in range(len(self.amp_channels)):
@@ -3154,244 +3855,9 @@ class SnomMeasurement(FileHandler):
             self.all_data[channels[i]] = np.log(np.abs(np.fft.fftshift(FS))**2)
             self.channels_label[channels[i]] = self.channels_label[channels[i]] + '_fft'
 
-    def _create_header(self, channel, filetype='gsf'):
-        """This function creates the header for the gsf file. The header contains all necessary information for the gsf file.
-        If the channel is in memory the channel tag dict will be used to get the necessary information.
-        If not the measurement tag dict will be used to get the necessary information.
-        If possible it is always better to use the channel tag dict, because it contains more specific information about the channel.
-        And issues can occure if the units in the measurement tag dict are not the same as in the channel tag dict.
+    #### Data correction functions ####
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-        Args:
-            channel (str): channel name
-            data (np.ndarray, optional): the data to save, if not specified the data will be loaded from the file. Defaults to None.
-            filetype (str, optional): the filetype to save the data. Defaults to 'gsf'.
-        """
-        # todo XOffset, YOffset dont work properly, also if the measurement is rotated or cut this is not considered so far
-        # actually not shure if that isn't fixed by now...
-        
-        XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
-        XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
-        Yincomplete = self._get_channel_tag_dict_value(channel, ChannelTags.YINCOMPLETE)[0]
-        XYUnit = self._get_channel_tag_dict_unit(channel, ChannelTags.XYUNIT)
-        XOffset, YOffset = self._get_channel_tag_dict_value(channel, ChannelTags.SCANNERCENTERPOSITION)
-        # use the channel tag if possible
-        # try: 
-        #     XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
-        #     XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
-        #     Yincomplete = self._get_channel_tag_dict_value(channel, ChannelTags.YINCOMPLETE)[0]
-        #     XYUnit = self._get_channel_tag_dict_unit(channel, ChannelTags.XYUNIT)
-        #     XOffset, YOffset = self._get_channel_tag_dict_value(channel, ChannelTags.SCANNERCENTERPOSITION)
-        # some filetypes may not have a channel tag dict, then take the resolution from the measurement tag dict...
-        # except: 
-        #     XReal, YReal, *args = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
-        #     XRes, YRes, *args = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
-        #     Yincomplete = self._get_measurement_tag_dict_value(MeasurementTags.YINCOMPLETE)[0]
-        #     XYUnit = self._get_measurement_tag_dict_value(MeasurementTags.XYUNIT)
-        #     XOffset, YOffset = self._get_measurement_tag_dict_value(MeasurementTags.SCANNERCENTERPOSITION)
-        
-
-        # convert values to m if not already in m, and round to nm precision
-        if XYUnit == 'nm':
-            XReal = round(XReal * pow(10, -9), 9)
-            YReal = round(YReal * pow(10, -9), 9)
-            XOffset = round(XOffset * pow(10, -9), 9)
-            YOffset = round(YOffset * pow(10, -9), 9)
-        elif XYUnit == 'µm' or XYUnit == 'um':
-            XReal = round(XReal * pow(10, -6), 9)
-            YReal = round(YReal * pow(10, -6), 9)
-            XOffset = round(XOffset * pow(10, -6), 9)
-            YOffset = round(YOffset * pow(10, -6), 9)
-        elif XYUnit == 'm':
-            XReal = round(XReal, 9)
-            YReal = round(YReal, 9)
-            XOffset = round(XOffset, 9)
-            YOffset = round(YOffset, 9)
-        
-        # try to get the rotation value, not every filetype saves this...
-        rotation = None
-        try:
-            rotation = self._get_channel_tag_dict_value(channel, ChannelTags.ROTATION)[0]
-        except:
-            # try to get the rotation from the measurement tags
-            try:
-                rotation = self._get_measurement_tag_dict_value(MeasurementTags.ROTATION)[0]
-            except:
-                print('Rotation value not found! Proceeding without')
-        # XRes = len(data[0])
-        # YRes  = len(data)
-        if filetype=='gsf':
-            header = f'Gwyddion Simple Field 1.0\n'
-        elif filetype=='txt':
-            header = 'Simple Textfile, floats seperated by spaces\n'
-        else:
-            header = ''
-        header += f'Title={self.measurement_title}\n'
-        # round everything to nm
-        # but careful, header tag dict and channel tag dict values are sometimes in nm, sometimes in m, so we have to check that
-        channel_tags = self._get_from_config('channel_tags')
-        # use original channel tags from config file, such that new headers can be created with the same tags
-        header += f'{channel_tags['PIXELAREA'][0]}={int(XRes)}\n{channel_tags['PIXELAREA'][1]}={int(YRes)}\n'
-        if Yincomplete is not None:
-            header += f'{channel_tags['YINCOMPLETE']}={Yincomplete}\n'
-        header += f'{channel_tags['SCANAREA'][0]}={XReal}\n{channel_tags['SCANAREA'][1]}={YReal}\n'
-        header += f'{channel_tags['SCANNERCENTERPOSITION'][0]}={XOffset}\n{channel_tags['SCANNERCENTERPOSITION'][1]}={YOffset}\n'
-        if rotation is not None and 'ROTATION' in channel_tags:
-            header += f'{channel_tags['ROTATION']}={round(rotation)}\n' # header is optional, not each filetype has it...
-        header += f'{channel_tags['XYUNIT']}=m\n'
-        if self.height_indicator in channel:
-            header += f'{channel_tags['ZUNIT'][0]}=m\n'
-        else:
-            header += f'{channel_tags['ZUNIT'][0]}=\n'
-        # header += f'XRes={int(XRes)}\nYRes={int(YRes)}\n'
-        # header += f'XReal={XReal}\nYReal={YReal}\n'
-        # header += f'XOffset={XOffset}\nYOffset={YOffset}\n'
-        # if rotation is not None:
-        #     header += f'Rotation={round(rotation)}\n' # header is optional, not each filetype has it...
-        # header += f'XYUnits=m\n'
-        # if self.height_indicator in channel:
-        #     header += 'ZUnits=m\n'
-        # else:
-        #     header += 'ZUnits=\n'
-        # lenght = header.count('\n')
-        length = len(header)
-        number = 4 - ((length) % 4)
-        NUL = b'\0'
-        for i in range(number -1):
-            NUL += b'\0' # add NUL terminator
-        return header, NUL
-
-    def save_to_gsf(self, channels:Optional[list]=None, appendix:str='default'):
-        """This function is ment to save all specified channels to external .gsf files.
-        
-        Args:
-            channels (list, optional):    list of the channels to be saved, if not specified, all channels in memory are saved.
-                                Careful! The data will be saved as it is right now, so with all the manipulations.
-                                Therefor the data should be saved with an appendix in the filename to keep the original data.
-            appendix (str, optional):     appendix/suffix to add to the filename, default is the default specified in the config of the current filetype.
-        """
-        if appendix == 'default':
-            appendix = self.channel_suffix_manipulated
-        if channels is None:
-            channels = self.channels
-        for channel in channels:
-
-            # old:
-            '''
-            # find out if channel is default or not
-            # if channel in self.all_channels_default:
-            #     suffix = self.channel_suffix_default
-            #     prefix = self.channel_prefix_default
-            #     channel_type = 'default'
-            # elif channel in self.all_channels_custom:
-            #     suffix = self.channel_suffix_custom
-            #     prefix = self.channel_prefix_custom
-            #     channel_type = 'custom'
-            #     # ignore the default appendix if the channel is not a default channel 
-            #     if self.channel_suffix_overlain in channel:
-            #         appendix = ''
-            #     elif self.channel_suffix_synccorrected_phase in channel:
-            #         appendix = ''
-            # else:
-            #     print('channel not found in default or custom channels\nNo appendix will be added to the filename')
-            #     # assume an unknown custom channel was encountered
-            #     suffix = self.channel_suffix_custom
-            #     prefix = self.channel_prefix_custom
-            #     channel_type = 'custom'
-            #     # sys.exit()
-            '''
-            # use the custom version of the prefix and suffix for all saves, we assume that all data which is saved has been modified in some way
-            # and should therefor be saved with the custom prefix and suffix even if no appendix is added
-            suffix = self.channel_suffix_custom
-            prefix = self.channel_prefix_custom
-            # check if the channel is custom
-            if self._is_custom_channel(channel):
-                # ignore the default appendix if the channel name already contains an appendix caused by manipulation 
-                if self.channel_suffix_overlain in channel:
-                    appendix = ''
-
-            filepath = self.directory_name / Path(self.filename.name + f'{prefix}{channel}{suffix}{appendix}.gsf')
-            data = self.all_data[self.channels.index(channel)]
-            XRes = len(data[0])
-            YRes  = len(data)
-            header, NUL = self._create_header(channel)
-            file = open(filepath, 'bw')
-            file.write(header.encode('utf-8'))
-            file.write(NUL) # the NUL marks the end of the header and konsists of 0 characters in the first dataline
-            if self.height_indicator in channel:
-                for y in range(YRes):
-                    for x in range(XRes):
-                        file.write(pack('f', round(data[y][x],5)*pow(10,-9)))
-            else:
-                for y in range(YRes):
-                    for x in range(XRes):
-                        file.write(pack('f', round(data[y][x], 5)))
-            file.close()
-            print(f'successfully saved channel {channel} to .gsf')
-        self._write_to_logfile('save_to_gsf_appendix', appendix)
-
-    def save_to_txt(self, channels:Optional[list]=None, appendix:str='default'):
-        """This function is ment to save all specified channels to external .txt files.
-        
-        Args:
-            channels (list, optional):    list of the channels to be saved, if not specified, all channels in memory are saved
-                                Careful! The data will be saved as it is right now, so with all the manipulations.
-                                Therefor the data will have an '_manipulated' appendix in the filename.
-            appendix (str, optional):     appendix to add to the filename, default is the default specified in the config of the current filetype.
-        """
-        if appendix == 'default':
-            appendix = self.channel_suffix_manipulated
-        if channels is None:
-            channels = self.channels
-        for channel in channels:
-            # old:
-            '''
-            # find out if channel is default or not
-            # if channel in self.all_channels_default:
-            #     suffix = self.channel_suffix_default
-            #     prefix = self.channel_prefix_default
-            #     channel_type = 'default'
-            # elif channel in self.all_channels_custom:
-            #     suffix = self.channel_suffix_custom
-            #     prefix = self.channel_prefix_custom
-            #     channel_type = 'custom'
-            #     # ignore the default appendix if the channel is not a default channel 
-            #     if self.channel_suffix_overlain in channel:
-            #         appendix = ''
-            #     elif self.channel_suffix_synccorrected_phase in channel:
-            #         appendix = ''
-            # else:
-            #     print('channel not found in default or custom channels\nNo appendix will be added to the filename')
-            #     # assume an unknown custom channel was encountered
-            #     suffix = self.channel_suffix_custom
-            #     prefix = self.channel_prefix_custom
-            #     channel_type = 'custom'
-            #     # sys.exit()
-            '''
-            # use the custom version of the prefix and suffix for all saves, we assume that all data which is saved has been modified in some way
-            # and should therefor be saved with the custom prefix and suffix even if no appendix is added
-            suffix = self.channel_suffix_custom
-            prefix = self.channel_prefix_custom
-            # check if the channel is custom
-            if self._is_custom_channel(channel):
-                # ignore the default appendix if the channel name already contains an appendix caused by manipulation 
-                if self.channel_suffix_overlain in channel:
-                    appendix = ''
-            
-            filepath = self.directory_name / Path(self.filename.name + f'{prefix}{channel}{suffix}{appendix}.txt')
-            data = self.all_data[self.channels.index(channel)]
-            XRes = len(data[0])
-            YRes  = len(data)
-            header, NUL = self._create_header(channel, 'txt')
-            file = open(filepath, 'w')
-            file.write(header)
-            # file.write(NUL) # the NUL marks the end of the header and konsists of 0 characters in the first dataline
-            for y in range(YRes):
-                for x in range(XRes):
-                    file.write(f'{round(data[y][x], 5)} ')
-            file.close()
-            print(f'successfully saved channel {channel} to .txt')
-        self._write_to_logfile('save_to_txt_appendix', appendix)
-    
     def _create_synccorr_preview(self, channel, wavelength, scanangle, nouserinput=False) -> None:
         """
         This function is part of the synccorrection and creates a preview of the corrected data.
@@ -3479,7 +3945,7 @@ class SnomMeasurement(FileHandler):
         self.autoscale = False
         # load new channels for synccorrection
         all_channels = self.phase_channels + self.amp_channels
-        self._initialize_data(all_channels)
+        self.initialize_channels(all_channels)
         # try to get the scanangle from the channel tag dict of the first channel
         try:
             scanangle = self._get_channel_tag_dict_value(all_channels[0], ChannelTags.ROTATION)[0]*np.pi/180
@@ -3549,275 +4015,10 @@ class SnomMeasurement(FileHandler):
         else:
             print('Wrong letter! Please try again.')
             self._gen_from_input_phasedir()
+
+    #### Leveling functions ####
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~#
     
-    def _get_channel_scaling(self, channel_id) -> int :
-        """This function checks if an instance channel is scaled and returns the scaling factor.
-        
-        Args:
-            channel_id (int): the channel index
-        """
-        channel_yres = len(self.all_data[channel_id])
-        return int(channel_yres/self.YRes)
-
-    def _create_height_mask_preview(self, mask_array) -> None:
-        """This function creates a preview of the height masking.
-        The preview is based on all channels in the instance
-        
-        Args:
-            mask_array (np.ndarray): the mask array to preview
-        """
-        channels = self.channels
-        dataset = self.all_data
-        subplots = []
-        for i in range(len(dataset)):
-            masked_array = np.multiply(dataset[i], mask_array)
-            subplots.append(self._add_subplot(np.copy(masked_array), channels[i]))
-        self._plot_subplots(subplots)
-        # remove the preview subplots from the memory
-        self.remove_last_subplots(3)
-        
-    def _user_input_bool(self) -> bool: 
-        """This function asks the user to input yes or no and returns a boolean value."""
-        user_input = input('Please type y for yes or n for no. \nInput: ')
-        if user_input == 'y':
-            user_bool = True
-        elif user_input == 'n':
-            user_bool = False
-        return user_bool
-
-    def _user_input(self, message:str):
-        """This function confronts the user with the specified message and returns the user input
-
-        Args:
-            message (str): the message to display
-        """
-        return input(message)
-
-    def _create_mask_array(self, height_data:np.ndarray, threshold:float) -> np.ndarray:
-        """This function takes the height data and a threshold value to create a mask array containing 0 and 1 values.
-
-        Args:
-            height_data (np.ndarray): the height data
-            threshold (float): the threshold value
-        
-        Returns:
-            np.ndarray: the mask array
-        """
-        height_flattened = height_data.flatten()
-        height_threshold = threshold*(max(height_flattened)-min(height_flattened))+min(height_flattened)
-
-        # create an array containing 0 and 1 depending on wether the height value is below or above threshold
-        mask_array = np.copy(height_data)
-        yres = len(height_data)
-        xres = len(height_data[0])
-        for y in range(yres):
-            for x in range(xres):
-                value = 0
-                if height_data[y][x] >= height_threshold:
-                    value = 1
-                mask_array[y][x] = value
-        return mask_array
-
-    def _get_height_treshold(self, height_data:np.ndarray) -> float:
-        """This function returns the height threshold value. The user is prompted with a preview of the mask array and can adjust the threshold using a slider.
-        
-        Args:
-            height_data (np.ndarray): the height data
-        
-        Returns:
-            float: the new threshold [0-1]
-        """
-        threshold = round(get_height_treshold(height_data), 2)
-        '''self._create_height_mask_preview(mask_array)
-        print('Do you want to use these parameters to mask the data?')
-        mask_data = self._user_input_bool()
-        if mask_data == False:
-            print('Do you want to change the treshold?')
-            change_treshold = self._user_input_bool()
-            if change_treshold == True:
-                print(f'The old threshold was {threshold}')
-                threshold = float(input('Please enter the new treshold value: '))
-                mask_array = self._create_mask_array(height_data, threshold)
-                self._get_height_treshold(height_data, mask_array, threshold)
-            else:
-                print('Do you want to abort the masking procedure?')
-                abort = self._user_input_bool()
-                if abort == True:
-                    sys.exit()'''
-        return threshold
-
-    def heigth_mask_channels(self, channels:Optional[list]=None, mask_channel:str=None, threshold:float=None) -> None:
-        """
-        The treshold factor should be between 0 and 1. It sets the threshold for the height pixels.
-        Every pixel below threshold will be set to 0. This also applies for all other channels. 
-        You can either specify specific channels to mask or if you don't specify channels,
-        all standard channels will be masked. If export is False only the channels in self.channels will be masked
-        and nothing will be exported. 
-        For this function to also work with scaled data the height channel has to be specified and scaled as well!
-                
-        Args:
-            channels (list): list of channels, will override the already existing channels
-            mask_channel (str): The channel to use for the height mask, if not specified the height channel will be used
-            threshold (float): Threshold value to create the height mask from. Default is None, the user can select the threshold with a slider.
-        """
-        if channels is None:
-            channels = self.channels
-        if (mask_channel is None) or (mask_channel not in self.channels):
-            if self.height_channel in self.channels:
-                mask_channel = self.height_channel
-            else:
-                print('Please specify a height mask channel!')
-                # exit()
-                return
-        if self.height_indicator not in mask_channel:
-            print('Mask channel must be a height channel!')
-            # exit()
-            return
-        else:
-            height_data = self.all_data[self.channels.index(mask_channel)]                
-
-        if threshold is None:
-            threshold = self._get_height_treshold(height_data)
-
-        mask_array = self._create_mask_array(height_data, threshold)
-        self.mask_array = mask_array # todo, mask array must be saved as part of the image, otherwise multiple measurement creations will use the same mask
-
-        self._write_to_logfile('height_masking_threshold', threshold)
-        for channel in channels:
-            if channel not in self.channels:
-                print(f'Channel {channel} is not in memory! Please initiate the channels you want to use first!')
-            self.all_data[self.channels.index(channel)] = np.multiply(self.all_data[self.channels.index(channel)], mask_array)
-            self.channels_label[self.channels.index(channel)] = self.channels_label[self.channels.index(channel)] + '_masked'
-            
-        # dataset = self.all_data
-        # for i in range(len(dataset)):
-        #     if self.height_channel not in self.channels_label[i]:
-        #         self.all_data[i] = np.multiply(dataset[i], mask_array)
-        #     self.channels_label[i] = self.channels_label[i] + '_masked'
-        print('Channels in memory have been masked!')
-
-    def _check_pixel_position(self, xres:int, yres:int, x:int, y:int) -> bool:
-        """This function checks if the pixel position is within the bounds.
-        
-        Args:
-            xres (int): x resolution
-            yres (int): y resolution
-            x (int): x coordinate
-            y (int): y coordinate
-        
-        Returns:
-            bool: True if the pixel position is within the bounds, False otherwise
-        """
-        if x < 0 or x > xres:
-            return False
-        elif y < 0 or y > yres:
-            return False
-        else: return True
-
-    def _get_mean_value(self, data:np.ndarray, x_coord:int, y_coord:int, zone:int) -> float:
-        """This function returns the mean value of the pixel and its nearest neighbors.
-        The zone specifies the number of neighbors. 1 means the pixel and the 8 nearest pixels.
-        2 means zone 1 plus the next 16, so a total of 25 with the pixel in the middle. 
-
-        Args:
-            data (np.ndarray): the data
-            x_coord (int): x coordinate
-            y_coord (int): y coordinate
-            zone (int): the number of neighbors
-
-        Returns:
-            float: the mean value
-        """
-        xres = len(data[0])
-        yres = len(data)
-        size = 2*zone + 1
-        mean = 0
-        count = 0
-        for y in range(size):
-            for x in range(size):
-                y_pixel = int(y_coord -(size-1)/2 + y)
-                x_pixel = int(x_coord -(size-1)/2 + x)
-                if self._check_pixel_position(xres, yres, x_pixel, y_pixel) == True:
-                    mean += data[y_pixel][x_pixel]
-                    count += 1
-        return mean/count
-
-    def get_pixel_coordinates(self, channel) -> list:
-        """This function returns the pixel coordinates of the clicked pixel.
-        
-        Args:
-            channel (str): the channel to display
-            
-        Returns:
-            list: the pixel coordinates
-        """
-        data = self.all_data[self.channels.index(channel)]
-        # identify the colormap
-        if self.height_indicator in channel:
-            cmap = SNOM_height
-        elif self.phase_indicator in channel:
-            cmap = SNOM_phase
-        elif self.amp_indicator in channel:
-            cmap = SNOM_amplitude
-        else:
-            cmap = 'viridis'
-        '''fig, ax = plt.subplots()
-        ax.pcolormesh(data, cmap=cmap)
-        klicker = clicker(ax, ["event"], markers=["x"])
-        ax.legend()
-        ax.axis('scaled')
-        ax.invert_yaxis()
-        plt.title('Please click on the pixel you want to get the coordinates from.')
-        if PlotDefinitions.show_plot:
-            plt.show()
-        klicker_coords = klicker.get_positions()['event'] #klicker returns a dictionary for the events
-        coordinates = [[round(element[0]), round(element[1])] for element in klicker_coords]
-        # display image with the clicked pixel
-        fig, ax = plt.subplots()
-        ax.pcolormesh(data, cmap=cmap)
-        ax.plot(coordinates[0][0], coordinates[0][1], 'rx')
-        ax.legend()
-        ax.axis('scaled')
-        ax.invert_yaxis()
-        plt.title('You clicked on the following pixel.')
-        if PlotDefinitions.show_plot:
-            plt.show()'''
-        # clicker = ImageClicker(data, cmap, "Please click on the pixels you want to get the coordinates from and then press 'Accept'.")
-        # coordinates = clicker.coords
-        coordinates = self._get_klicker_coordinates(data, cmap, "Please click on the pixels you want to get the coordinates from and then press 'Accept'.")
-        self._write_to_logfile('get_pixel_coordinates', coordinates)
-        return coordinates
-
-    def get_pixel_value(self, channel, coordinates:list=None, zone:int=1) -> list:
-        """This function returns the pixel values of a channel at the specified coordinates.
-        The zone specifies the number of neighbors. 0 means only the pixel itself. 1 means the pixel and the 8 nearest pixels.
-        2 means zone 1 plus the next 16, so a total of 25 with the pixel in the middle.
-        If the channel is scaled the zone will be scaled as well.
-        
-        Args:
-            channel (str): the channel to display
-            coordinates (list, optional): the pixel coordinates [[x1, y1], [x2, y2], ...]. Defaults to None.
-            zone (int, optional): the number of neighbors. Defaults to 1.
-        
-        Returns:
-            list: the pixel values
-        """
-        # adjust the zone if the data is scaled
-        zone = zone*self._get_channel_scaling(self.channels.index(channel))
-        # display the channel
-        data = self.all_data[self.channels.index(channel)]
-        if coordinates is None:
-            coordinates = self.get_pixel_coordinates(channel)
-        pixel_values = []
-        for coord in coordinates:
-            x = coord[0]
-            y = coord[1]
-            # get the mean value of the pixel and its neighbors and append to list
-            pixel_values.append(self._get_mean_value(data, x, y, zone))
-        # add the coordinates to the logfile
-        self._write_to_logfile('get_pixel_value_zone', zone)
-        return pixel_values
-
     def _height_levelling_3point(self, height_data:np.ndarray, coords:list=None, zone:int=1) -> np.ndarray:
         """This function levels the height data with a 3 point leveling.
         The user has to click on three points to specify the underground plane.
@@ -3900,36 +4101,6 @@ class SnomMeasurement(FileHandler):
         
         return leveled_height_data
 
-    def _get_klicker_coordinates_old(self, data:np.ndarray, cmap, message:str):
-        """This function returns the pixel coordinates of the clicked pixel.
-
-        Args:
-            data (np.ndarray): the data
-            cmap (str): the colormap
-            message (str): the message to display as the title
-        """
-        fig, ax = plt.subplots()
-        ax.pcolormesh(data, cmap=cmap)
-        klicker = clicker(ax, ["event"], markers=["x"])
-        ax.legend()
-        ax.axis('scaled')
-        plt.title(message)
-        plt.show()
-        klicker_coords = klicker.get_positions()['event'] #klicker returns a dictionary for the events
-        klick_coordinates = [[round(element[0]), round(element[1])] for element in klicker_coords]
-        return klick_coordinates
-    
-    def _get_klicker_coordinates(self, data:np.ndarray, cmap, message:str):
-        """This function returns the pixel coordinates of the clicked pixel.
-
-        Args:
-            data (np.ndarray): the data
-            cmap (str): the colormap
-            message (str): the message to display as the title
-        """
-        clicker = ImageClicker(data, cmap, message)
-        return clicker.coords
-
     def _height_levelling_3point_forGui(self, height_data, zone=1) -> np.ndarray:
         klick_coordinates = self._get_klicker_coordinates(height_data, SNOM_height, '3 Point leveling: please click on three points\nto specify the underground plane.')
         if len(klick_coordinates) != 3:
@@ -3974,7 +4145,7 @@ class SnomMeasurement(FileHandler):
                         if False the phase slope will be calculated from a linear fit to a profile between two points the user clicks on. 
                         But careful, the profile will be along the y-direction in the middle of the two points.
         """
-        self._initialize_data(channels)
+        self.initialize_channels(channels)
         phase_data = None
         if self.preview_phasechannel in self.channels:
             phase_data = np.copy(self.all_data[self.channels.index(self.preview_phasechannel)])
@@ -4094,7 +4265,7 @@ class SnomMeasurement(FileHandler):
         """
 
         # if a list of channels is specified those will be loaded and the old ones will be overwritten
-        self._initialize_data(channels)
+        self.initialize_channels(channels)
         # define local list of channels to use for leveling
         channels = self.channels
         phase_data = None
@@ -4171,7 +4342,7 @@ class SnomMeasurement(FileHandler):
             manual_width (int, optional): The width of the manual reference area. Only applies if reference_area='manual'. Defaults to 5.
         """
         # if a list of channels is specified those will be loaded and the old ones will be overwritten
-        self._initialize_data(channels)
+        self.initialize_channels(channels)
         # define local list of channels to use for leveling
         channels = self.channels
         if reference_channel is None:
@@ -4250,7 +4421,7 @@ class SnomMeasurement(FileHandler):
         """
 
         # if a list of channels is specified those will be loaded and the old ones will be overwritten
-        self._initialize_data(channels)
+        self.initialize_channels(channels)
         # define local list of channels to use for leveling
         channels = self.channels
         amplitude_data = None
@@ -4340,7 +4511,7 @@ class SnomMeasurement(FileHandler):
 
         # zone = int(zone*self.scaling_factor/4) #automatically enlargen the zone if the data has been scaled by more than a factor of 4
         # if a list of channels is specified those will be loaded and the old ones will be overwritten
-        self._initialize_data(channels)
+        self.initialize_channels(channels)
         # define local list of channels to use for leveling
         channels = self.channels
         height_data = None
@@ -4614,7 +4785,7 @@ class SnomMeasurement(FileHandler):
             threshold (float, optional): threshold, all values below will be set to zero to better estimate the mean index position. Defaults to 0.5.
         
         """
-        self._initialize_data(channels)
+        self.initialize_channels(channels)
         # store the bounds in the instance so the plotting algorithm can access them
         # get the bounds from drawing a rectangle:
         if self.height_channel in self.channels:
@@ -4709,561 +4880,6 @@ class SnomMeasurement(FileHandler):
                 self._set_channel_tag_dict_value(self.channels[i], ChannelTags.SCANAREA, [xreal_new, yreal, *args])
         gc.collect()
 
-    def cut_channels(self, channels:Optional[list]=None, preview_channel:Optional[str]=None, autocut:bool=False, coords:Optional[list]=None, reset_mask:bool=True) -> None:
-        """This function cuts the specified channels to the specified region. If no coordinates are specified you will be prompted with a window to select an area.
-        If you created a mask previously for this instance the old mask will be reused! Otherwise you should manually change the reset_mask parameter to True.
-
-        Args:
-            channels (list, optional): List of channels you want to cut. If not specified all channels in memory will be cut. Defaults to None.
-            preview_channel (str, optional): The channel to display for the area selection. If not specified the height channel will be used if it is in memory,
-                otherwise the first of the specified channels will be used. Defaults to None
-            autocut (bool, optional): If set to 'True' the program will automatically try to remove zero lines and columns, which can result from masking.
-            coords (list, optional): If you already now the coordinates ([[x1,y1], [x2,y2]]), e.g. top left and bottom right coordinate of the rectangle to which you want to cut your data. 
-                Defaults to None.
-            reset_mask (bool, optional): If you dont want to reuse an old mask set to True. Defaults to False.
-        """
-        if channels is None:
-            channels = self.channels # if nothing is specified, the cut will be applied to all channels in memory!
-        # check if height channel in channels and apply mask to it, until now it has not been masked in order to show the mask in the image
-        if preview_channel is None:
-            if (self.height_channel in channels):
-                preview_channel = self.height_channel
-            else:
-                preview_channel = channels[0]
-
-        # apply the already existing mask if possible.  
-        if reset_mask == False:  
-            if (len(self.mask_array) > 0):
-                for channel in channels:
-                    index = self.channels.index(channel)
-                    self.all_data[index] = np.multiply(self.all_data[index], self.mask_array)
-                    # self.channels[index] += '_reduced'
-            else:
-                print('There does not seem to be an old mask... ')
-        # generate new mask by selecting a region in the preview channel
-        elif autocut is False:
-            data = self.all_data[self.channels.index(preview_channel)]
-            # get the coordinates of the selection rectangle
-            if coords is None:
-                coords = select_rectangle(data, preview_channel)
-            # check if coords are none, if so, the user has canceled the selection
-            if coords is not None:
-                self._write_to_logfile('cut_coords', coords)
-                # use the selection to create a mask and multiply to all channels, then apply auto_cut function
-                yres = len(data)
-                xres = len(data[0])
-                self.mask_array = np.zeros((yres, xres))
-                for y in range(yres):
-                    if y in range(coords[0][1], coords[1][1]):
-                        for x in range(xres):
-                            if x in range(coords[0][0], coords[1][0]):
-                                self.mask_array[y][x] = 1
-                for channel in channels:
-                    index = self.channels.index(channel)
-                    # set all values outside of the mask to zero and then cut all zero away from the outside with _auto_cut_channels(channels)
-                    self.all_data[index] = np.multiply(self.all_data[index], self.mask_array)
-            else:
-                # if the user did not select a rectangle we don't want to cut anything
-                yres = len(data)
-                xres = len(data[0])
-                self.mask_array = np.ones((yres, xres))  
-        # apply the auto cut function to remove masked areas around the data
-        self._auto_cut_channels(channels, self.mask_array)
-        gc.collect()
-
-    def _auto_cut_channels(self, channels:Optional[list]=None, mask_array:np.ndarray=None) -> None:
-        """This function automatically cuts away all rows and lines which are only filled with zeros.
-        This function applies to all channels in memory.
-
-        Args:
-            channels (list, optional): List of channels to apply the cut to. If not specified all channels in memory will be used. Defaults to None.
-        """
-        if channels is None:
-            channels = self.channels
-        
-        # get the new size of the reduced channels
-        # reduced_data = self._auto_cut_data(self.all_data[0])
-        reduced_data = self._auto_cut_data(mask_array)
-        yres = len(reduced_data)
-        xres = len(reduced_data[0])
-        for channel in channels:
-            index = self.channels.index(channel)
-            # get the old size of the data
-            xres, yres, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
-            xreal, yreal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
-            self.all_data[index] = self._auto_cut_data(self.all_data[index], mask_array)
-            xres_new = len(self.all_data[index][0])
-            yres_new = len(self.all_data[index])
-            xreal_new = xreal*xres_new/xres
-            yreal_new = yreal*yres_new/yres
-            # save new resolution and scan area in channel tag dict:
-            self._set_channel_tag_dict_value(channel, ChannelTags.PIXELAREA, [xres_new, yres_new])
-            self._set_channel_tag_dict_value(channel, ChannelTags.SCANAREA, [xreal_new, yreal_new])
-            # add new appendix to channel
-            self.channels_label[index] += '_reduced'
-        self._write_to_logfile('cut', 'autocut')
-
-    def _auto_cut_data(self, data, mask_array:np.ndarray=None) -> np.ndarray:
-        """This function cuts the data and removes zero values from the outside."""
-        xres = len(data[0])
-        yres = len(data)
-        # find empty columns and rows to delete:
-        columns = []
-        rows = []
-        if mask_array is not None:
-            # if a mask array is given, use it to find empty columns and rows
-            for x in range(xres):
-                if np.all(mask_array[:, x] == 0):
-                    columns.append(x)
-            for y in range(yres):
-                if np.all(mask_array[y, :] == 0):
-                    rows.append(y)
-
-        else:    
-            for x in range(xres):
-                add_to_columns = True
-                for y in range(yres):
-                    if data[y][x] != 0:
-                        add_to_columns = False
-                if add_to_columns == True:
-                    columns.append(x)
-            rows = []
-            for y in range(yres):
-                add_to_rows = True
-                for x in range(xres):
-                    if data[y][x] != 0:
-                        add_to_rows = False
-                if add_to_rows == True:
-                    rows.append(y)
-        
-        # create reduced data array
-        x_reduced = xres - len(columns)
-        y_reduced = yres - len(rows)
-        data_reduced = np.zeros((y_reduced, x_reduced))
-        # iterate through all pixels and check if they are in rows and columns, then add them to the reduced data array
-        count_x = 0
-        count_y = 0
-        for y in range(yres):
-            if y not in rows:
-                for x in range(xres):
-                    if x not in columns:
-                        data_reduced[count_y][count_x] = data[y][x] 
-                        count_x += 1
-                count_x = 0
-                count_y += 1
-        return data_reduced
-
-    def scalebar(self, channels:list=[], units="m", dimension="si-length", label=None, length_fraction=None, height_fraction=None, width_fraction=None,
-            location=None, loc=None, pad=None, border_pad=None, sep=None, frameon=None, color=None, box_color=None, box_alpha=None, scale_loc=None,
-            label_loc=None, font_properties=None, label_formatter=None, scale_formatter=None, fixed_value=None, fixed_units=None, animated=False, rotation=None):
-        """Adds a scalebar to all specified channels.
-        
-        Args:
-            channels (list): List of channels the scalebar should be added to.
-                various definitions for the scalebar, please look up 'matplotlib_scalebar.scalebar' for more information
-        """
-        
-        # scalebar = ScaleBar(dx, units, dimension, label, length_fraction, height_fraction, width_fraction,
-            # location, loc, pad, border_pad, sep, frameon, color, box_color, box_alpha, scale_loc,
-            # label_loc, font_properties, label_formatter, scale_formatter, fixed_value, fixed_units, animated, rotation)
-        
-        
-        count = 0
-        for channel in self.channels:
-            XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
-            XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
-            pixel_scaling = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELSCALING)
-            # try: 
-            #     XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
-            #     XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
-            #     pixel_scaling = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELSCALING)
-            # except: 
-            #     XRes, YRes, *args = self._get_measurement_tag_dict_value(MeasurementTags.PIXELAREA)
-            #     XReal, YReal, *args = self._get_measurement_tag_dict_value(MeasurementTags.SCANAREA)
-            #     pixel_scaling = self._get_measurement_tag_dict_value(MeasurementTags.PIXELSCALING)
-            dx = XReal/(XRes)
-            scalebar_var = [dx, units, dimension, label, length_fraction, height_fraction, width_fraction,
-                            location, loc, pad, border_pad, sep, frameon, color, box_color, box_alpha, scale_loc,
-                            label_loc, font_properties, label_formatter, scale_formatter, fixed_value, fixed_units, animated, rotation]
-            if (channel in channels) or (len(channels)==0):
-                self.scalebar_channels.append([channel, scalebar_var])                
-            else:
-                self.scalebar_channels.append([channel, None])                
-            count += 1
-
-    def rotate_90_deg(self, orientation:str = 'right'):
-        """This function will rotate all data in memory by 90 degrees.
-
-        Args:
-            orientation (str, optional): rotate clockwise ('right') or counter clockwise ('left'). Defaults to 'right'.
-        """
-        if orientation == 'right':
-            axes=(1,0)
-            self._write_to_logfile('rotation', +90)
-        elif orientation == 'left':
-            axes=(0,1)
-            self._write_to_logfile('rotation', -90)
-        #rotate data:
-        all_data = self.all_data.copy()
-        # initialize data array
-        self.all_data = []
-        for channel in self.channels:
-            # flip pixelarea and scanarea as well
-            XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
-            self._set_channel_tag_dict_value(channel, ChannelTags.SCANAREA, [YReal, XReal])
-            XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
-            self._set_channel_tag_dict_value(channel, ChannelTags.PIXELAREA, [YRes, XRes])
-            self.all_data.append(np.rot90(all_data[self.channels.index(channel)], axes=axes))
-
-    def _get_positions_from_plot(self, channel, data, coordinates:Optional[list]=None, orientation=None) -> list:
-        # Todo redundant to the get clicker corrdinates function?!
-        if self.phase_indicator in channel:
-            cmap = SNOM_phase
-        elif self.amp_indicator in channel:
-            cmap = SNOM_amplitude
-        elif self.height_indicator in channel:
-            cmap = SNOM_height
-
-        fig, ax = plt.subplots()
-        img = ax.pcolormesh(data, cmap=cmap)
-        klicker = clicker(ax, ["event"], markers=["x"])
-        ax.invert_yaxis()
-        divider = make_axes_locatable(ax)
-        cax = divider.append_axes("right", size="5%", pad=0.05)
-        cbar = plt.colorbar(img, cax=cax)
-        cbar.ax.get_yaxis().labelpad = 15
-        cbar.ax.set_ylabel(channel, rotation=270)
-        ax.legend()
-        ax.axis('scaled')
-        if coordinates != None and orientation != None:
-            self._plot_profile_lines(data, ax, coordinates, orientation)
-        plt.title('Please select one or more points to continue.')
-        plt.tight_layout()
-        plt.show()
-        klicker_coords = klicker.get_positions()['event'] #klicker returns a dictionary for the events
-        klick_coordinates = [[round(element[0]), round(element[1])] for element in klicker_coords]
-        return klick_coordinates
-
-    def _get_profile(self, data, coordinates:list, orientation:Definitions, width:int) -> list:
-        YRes = len(data)
-        XRes = len(data[0])
-        all_profiles = []
-        for coord in coordinates:
-            profile = []
-            if orientation == Definitions.vertical:
-                for y in range(YRes):
-                    value = 0
-                    for x in range(int(coord[0] - width/2), int(coord[0] + width/2)):
-                        value += data[y][x]
-                    value = value/width
-                    profile.append(value)
-            if orientation == Definitions.horizontal:
-                for x in range(XRes):
-                    value = 0
-                    for y in range(int(coord[1] - width/2), int(coord[1] + width/2)):
-                        value += data[y][x]
-                    value = value/width
-                    profile.append(value)
-            all_profiles.append(profile)
-        return all_profiles
-
-    def select_profile(self, profile_channel:str, preview_channel:Optional[str]=None, orientation:Definitions=Definitions.vertical, width:int=10, phase_orientation:int=1, coordinates:list=None):
-        # Todo
-        """This function lets the user select a profile with given width in pixels and displays the data.
-        This is quite unfinished and only allows for profiles which extend over the whole image in the x-direction or y-direction.
-
-        Args:
-            profile_channel (str): channel to use for profile data extraction
-            preview_channel (str, optional): channel to preview the profile positions. If not specified the height channel will be used for that. Defaults to None.
-            orientation (Definitions, optional): profiles can be horizontal or vertical. Defaults to Definitions.vertical.
-            width (int, optional): width of the profile in pixels, will calculate the mean. Defaults to 10.
-            phase_orientation (int, optional): only relevant for phase profiles. Necessary for the flattening to work properly. Defaults to 1.
-            coordinates (list, optional): if you already now the position of your profile you can also specify the coordinates and skip the selection. Defaults to None.
-        """
-        if preview_channel is None:
-            preview_channel = self.height_channel
-        if coordinates is None:
-            previewdata = self.all_data[self.channels.index(preview_channel)]
-            coordinates = self._get_positions_from_plot(preview_channel, previewdata)
-
-        profiledata = self.all_data[self.channels.index(profile_channel)]
-
-        cmap = SNOM_phase
-        fig, ax = plt.subplots()
-        img = ax.pcolormesh(profiledata, cmap=cmap)
-        ax.invert_yaxis()
-        divider = make_axes_locatable(ax)
-        cax = divider.append_axes("right", size="5%", pad=0.05)
-        cbar = plt.colorbar(img, cax=cax)
-        cbar.ax.get_yaxis().labelpad = 15
-        cbar.ax.set_ylabel('phase', rotation=270)
-        ax.legend()
-        ax.axis('scaled')
-        xcoord = [coord[0] for coord in coordinates]
-        ycoord = [coord[1] for coord in coordinates]
-        if orientation == Definitions.vertical:
-            ax.vlines(xcoord, ymin=0, ymax=len(profiledata))
-        elif orientation == Definitions.horizontal:
-            ax.hlines(ycoord, xmin=0, xmax=len(profiledata[0]))
-        plt.title('You chose the following line profiles')
-        plt.tight_layout()
-        plt.show()
-        # it would be nice to be able to add non pcolormesh plots to the subplotslist
-        # self.all_subplots.append()
-
-        profiles = self._get_profile(profiledata, coordinates, orientation, width)
-        for profile in profiles:
-            xvalues = np.linspace(0, 10, len(profile))
-            plt.plot(xvalues, profile, 'x')
-        plt.title('Phase profiles')
-        plt.tight_layout()
-        plt.show()
-
-        flattened_profiles = [phase_analysis.flatten_phase_profile(profile, phase_orientation) for profile in profiles]
-        for profile in flattened_profiles:
-            xvalues = np.linspace(0, 10, len(profile))
-            plt.plot(xvalues, profile)
-        plt.title('Flattened phase profiles')
-        plt.tight_layout()
-        plt.show()
-
-        difference_profile = phase_analysis.get_profile_difference(profiles[0], profiles[1])
-        # difference_profile = get_profile_difference(flattened_profiles[0], flattened_profiles[1])
-        xres, yres = self._get_channel_tag_dict_value(self.channels.index(profile_channel), ChannelTags.PIXELAREA)
-        xreal, yreal = self._get_channel_tag_dict_value(self.channels.index(profile_channel), ChannelTags.SCANAREA)
-        pixel_scaling = self._get_channel_tag_dict_value(self.channels.index(profile_channel), ChannelTags.PIXELSCALING)
-        xvalues = [i*yreal/yres/pixel_scaling for i in range(yres*pixel_scaling)]
-        plt.plot(xvalues, difference_profile)
-        plt.xlabel('Y [µm]')
-        plt.ylabel('Phase difference')
-        plt.ylim(ymin=0, ymax=2*np.pi)
-        plt.title('Phase difference')
-        plt.tight_layout()
-        plt.show()
-        gc.collect()
-
-    def _plot_data_and_profile_pos(self, channel, data, coordinates, orientation):
-        if self.phase_indicator in channel:
-            cmap = SNOM_phase
-        elif self.amp_indicator in channel:
-            cmap = SNOM_amplitude
-        elif self.height_indicator in channel:
-            cmap = SNOM_height
-        fig, ax = plt.subplots()
-        img = ax.pcolormesh(data, cmap=cmap)
-        ax.invert_yaxis()
-        divider = make_axes_locatable(ax)
-        cax = divider.append_axes("right", size="5%", pad=0.05)
-        cbar = plt.colorbar(img, cax=cax)
-        cbar.ax.get_yaxis().labelpad = 15
-        cbar.ax.set_ylabel('phase', rotation=270)
-        ax.legend()
-        ax.axis('scaled')
-        self._plot_profile_lines(data, ax, coordinates, orientation)
-        plt.title('You chose the following line profiles')
-        plt.tight_layout()
-        plt.show()
-
-    def _plot_profile_lines(self, data, ax, coordinates, orientation):
-        xcoord = [coord[0] for coord in coordinates]
-        ycoord = [coord[1] for coord in coordinates]
-        if orientation == Definitions.vertical:
-            ax.vlines(xcoord, ymin=0, ymax=len(data))
-        elif orientation == Definitions.horizontal:
-            ax.hlines(ycoord, xmin=0, xmax=len(data[0]))
-
-    def _get_profiles_Coordinates(self, profile_channel, profiledata, preview_channel, previewdata, orientation, redo:bool=False, coordinates=None, redo_coordinates=None):
-        if redo == False:
-            coordinates = self._get_positions_from_plot(preview_channel, previewdata)
-        else:
-            display_coordinates = [coordinates[i] for i in range(len(coordinates)) if i not in redo_coordinates]# remove coordinates to redo and plot the other ones while selecton is active
-            redone_coordinates = self._get_positions_from_plot(preview_channel, previewdata, display_coordinates, orientation)
-            count = 0
-            for index in redo_coordinates:
-                coordinates[index] = redone_coordinates[count]
-                count += 1
-
-        self._plot_data_and_profile_pos(profile_channel, profiledata, coordinates, orientation)
-        print('Are you satisfied with the profile positions? Or would you like to change one ore more profile positions?')
-        user_input_bool = self._user_input_bool() 
-        if user_input_bool == False:
-            user_input = self._user_input('Please enter the indices of the profiles you like to redo, separated by a space character e.g. (0 1 3 11 ...)\nYour indices: ') 
-            redo_coordinates = user_input.split(' ')
-            redo_coordinates = [int(coord) for coord in redo_coordinates]
-            print('coordinates to redo: ', redo_coordinates)
-            print('Please select the new positons only for the indices you selected and in the same ordering, those were: ', redo_coordinates)
-            coordinates = self._get_profiles_Coordinates(profile_channel, profiledata, preview_channel, previewdata, orientation, redo=True, coordinates=coordinates, redo_coordinates=redo_coordinates)
-        
-        return coordinates
-
-    def select_profiles(self, profile_channel:str, preview_channel:Optional[str]=None, orientation:Definitions=Definitions.vertical, width:int=10, coordinates:Optional[list]=None):
-        # Todo
-        """This function lets the user select multiple profiles with given width in pixels and displays the data.
-        Also unfinished, but allows for the selection of multiple profiles.
-
-        Args:
-            profile_channel (str): channel to use for profile data extraction
-            preview_channel (str, optional): channel to preview the profile positions. If not specified the height channel will be used for that. Defaults to None.
-            orientation (Definitions, optional): profiles can be horizontal or vertical. Defaults to Definitions.vertical.
-            width (int, optional): width of the profile in pixels, will calculate the mean. Defaults to 10.
-            coordinates (list, optional): if you already now the position of your profile you can also specify the coordinates and skip the selection. Defaults to None.
-
-        """
-        if preview_channel is None:
-            preview_channel = self.height_channel
-        if preview_channel not in self.channels and profile_channel not in self.channels:
-            print('The channels for preview and the profiles were not found in the memory, they will be loaded automatically.\nBe aware that all prior modifications will get deleted.')  
-            self._initialize_data([profile_channel, preview_channel])#this will negate any modifications done prior like blurr...
-        profiledata = self.all_data[self.channels.index(profile_channel)]
-        previewdata = self.all_data[self.channels.index(preview_channel)]
-
-        if coordinates is None:
-            coordinates = self._get_profiles_Coordinates(profile_channel, profiledata, preview_channel, previewdata, orientation)
-        
-        print('The final profiles are shown in this plot.')
-        self._plot_data_and_profile_pos(profile_channel, profiledata, coordinates, orientation)
-        # get the profile data and save to class variables
-        # additional infos are also stored and can be used by plotting and analysis functions
-        self.profiles = self._get_profile(profiledata, coordinates, orientation, width)
-        self.profile_channel = profile_channel
-        self.profile_orientation = orientation
-        return self.profiles
-        
-    def _display_profile(self, profiles, ylabel=None, labels=None, linestyle='x', title=None):
-        # work in progess...
-        print('Displaying profiles...')
-        print('profile channel: ', self.profile_channel)
-        print('current channels: ', self.channels)
-        if self.profile_orientation == Definitions.horizontal:
-            xrange, yrange = self._get_channel_tag_dict_value(self.profile_channel, ChannelTags.SCANAREA)
-            x_center_pos, y_center_pos = self._get_channel_tag_dict_value(self.profile_channel, ChannelTags.SCANNERCENTERPOSITION)
-            xres, yres = self._get_channel_tag_dict_value(self.profile_channel, ChannelTags.PIXELAREA)
-            xvalues = [x_center_pos - xrange/2 + x*(xrange/xres) for x in range(xres)]
-            xlabel = 'X [µm]'
-            if title is None:
-                title = 'Horizontal profiles of channel ' + self.profile_channel
-        elif self.profile_orientation == Definitions.vertical:
-            xrange, yrange = self._get_channel_tag_dict_value(self.profile_channel, ChannelTags.SCANAREA)
-            x_center_pos, y_center_pos = self._get_channel_tag_dict_value(self.profile_channel, ChannelTags.SCANNERCENTERPOSITION)
-            xres, yres = self._get_channel_tag_dict_value(self.profile_channel, ChannelTags.PIXELAREA)
-            xvalues = [y_center_pos - yrange/2 + y*(yrange/yres) for y in range(yres)]
-            xlabel = 'Y [µm]'
-            if title is None:
-                title = 'Vertical profiles of channel ' + self.profile_channel
-        # find out y label:
-        if ylabel is None:
-            if self.phase_indicator in self.profile_channel:
-                ylabel = 'Phase'
-            elif self.amp_indicator in self.profile_channel:
-                ylabel = 'Amplitude [arb.u.]'
-            elif self.height_indicator in self.profile_channel:
-                ylabel = 'Height [nm]'
-        for index, profile in enumerate(profiles):
-            if labels is None:
-                plt.plot(xvalues, profile, linestyle, label=f'Profile index: {index}')
-            else:
-                plt.plot(xvalues, profile, linestyle, label=labels[index])
-        plt.xlabel(xlabel)
-        plt.ylabel(ylabel)
-        plt.title(title)
-        plt.legend()
-        plt.tight_layout()
-        plt.show()
-
-    def display_profiles(self, ylabel:Optional[str]=None, labels:Optional[list]=None):
-        """This function will display all current profiles from memory.
-
-        Args:
-            ylabel (str, optional): label of the y axis. The x axis label is in µm per default. Defaults to None.
-            labels (list, optional): the description of the profiles. Will be displayed in the legend. Defaults to None.
-        """
-        self._display_profile(self.profiles)
-        gc.collect()
-
-    def display_flattened_profile(self, phase_orientation:int):
-        """This function will flatten all profiles in memory and display them. Only useful for phase profiles!
-
-        Args:
-            phase_orientation (int): direction of the phase, must be '1' or '-1'
-        """
-        flattened_profiles = [phase_analysis.flatten_phase_profile(profile, phase_orientation) for profile in self.profiles]
-        self._display_profile(flattened_profiles)
-        gc.collect()
-
-    def display_phase_difference(self, reference_index:int):
-        """This function will calculate the phase difference of all profiles relative to the profile specified by the reference index.
-
-        Args:
-            reference_index (int): index of the reference profile. Basically the nth-1 selected profile.
-        """
-        difference_profiles = [phase_analysis.get_profile_difference(self.profiles[reference_index], self.profiles[i]) for i in range(len(self.profiles)) if i != reference_index]
-        labels = ['Wg index ' + str(i) for i in range(len(difference_profiles))]
-        self._display_profile(difference_profiles, 'Phase difference', labels)
-        gc.collect()
-
-    def _get_mean_phase_difference(self, profiles, reference_index:int):
-        difference_profiles = [phase_analysis.get_profile_difference(profiles[reference_index], profiles[i]) for i in range(len(profiles)) if i != reference_index]
-        mean_differences = [np.mean(diff) for diff in difference_profiles]
-        return mean_differences
-
-    def _scale_data_xy(self, data:np.ndarray, scale_x:int, scale_y:int) -> np.ndarray:
-        XRes = len(data[0])
-        YRes = len(data)
-        new_data = np.zeros((YRes*scale_y, XRes*scale_x))
-        for y in range(YRes):
-            for i in range(scale_y):
-                for x in range(XRes):
-                    for j in range(scale_x):
-                        new_data[y*scale_y + i][x*scale_x + j]= data[y][x]
-        return new_data
-
-    def quadratic_pixels(self, channels:Optional[list]=None):
-        """This function scales the data such that each pixel is quadratic, eg. the physical dimensions are equal.
-        This is important because the pixels will be set to quadratic in the plotting function.
-        However make shure that the pixel scaling x relative to y is an integer, otherwise the scaling will not work properly.
-        This function will be applied to all channels in memory automatically when creating a measurement instance if autoscale is set to True.
-        
-        Args:
-            channels [list]: list of channels the scaling should be applied to. If not specified the scaling will be applied to all channels
-        """
-        self._write_to_logfile('quadratic_pixels', True)
-        if channels is None:
-            channels = self.channels
-        for channel in channels:
-            if channel in self.channels:
-                XRes, YRes, *args = self._get_channel_tag_dict_value(channel, ChannelTags.PIXELAREA)
-                XReal, YReal, *args = self._get_channel_tag_dict_value(channel, ChannelTags.SCANAREA)
-                pixel_size_x = round(XReal/XRes *1000000000) # pixel size in nm
-                pixel_size_y = round(YReal/YRes *1000000000)
-                scale_x = 1
-                scale_y = 1
-                # if pixel_size_x < pixel_size_y:
-                #     scale_y = int(pixel_size_y/pixel_size_x)
-                # elif pixel_size_x > pixel_size_y:
-                #     scale_x = int(pixel_size_x/pixel_size_y)
-                # if pixel_size_x/scale_x != pixel_size_y/scale_y:
-                    # print('The pixel size does not fit perfectly, you probably chose weired resolution values. You should probably not use this function then...\nScaling the data anyways!')
-                # self.all_data[self.channels.index(channel)] = self._scale_data_xy(self.all_data[self.channels.index(channel)], scale_x, scale_y)
-                # self._set_channel_tag_dict_value(channel, ChannelTags.PIXELAREA, [XRes*scale_x, YRes*scale_y])
-                ###### New method using pillow to scale the image with interpolation, better if the scaling is not an integer
-                # one could also implement a method using pillow to scale the image with interpolation, better if the scaling is not an integer
-                rescaling = False
-                if pixel_size_x < pixel_size_y:
-                    # scale_y, rest = divmod(pixel_size_y, pixel_size_x)
-                    xres = XRes
-                    yres = int(YRes*pixel_size_y/pixel_size_x)
-                    rescaling = True
-                elif pixel_size_x > pixel_size_y:
-                    # scale_x, rest = divmod(pixel_size_x, pixel_size_y)
-                    yres = YRes
-                    xres = int(XRes*pixel_size_x/pixel_size_y)
-                    rescaling = True
-                if rescaling:
-                    img = Image.fromarray(self.all_data[self.channels.index(channel)])
-                    img = img.resize((xres, yres), Image.Resampling.NEAREST)
-                    self.all_data[self.channels.index(channel)] = np.array(img)
-                    self._set_channel_tag_dict_value(channel, ChannelTags.PIXELAREA, [xres, yres])
-
     def overlay_forward_and_backward_channels(self, height_channel_forward:str, height_channel_backward:str, channels:Optional[list]=None):
         """This function is ment to overlay the backwards and forwards version of the specified channels.
         The function will create a mean version which can then be displayed and saved. Note that the new version will be larger then the previous ones.
@@ -5285,7 +4901,7 @@ class SnomMeasurement(FileHandler):
         for channel in channels:
             all_channels.extend([channel, self.backwards_indicator + channel])
         all_channels.extend([height_channel_forward, height_channel_backward])
-        self._initialize_data(all_channels)
+        self.initialize_channels(all_channels)
 
         self.set_min_to_zero([height_channel_forward, height_channel_backward])
         
@@ -5540,294 +5156,6 @@ class SnomMeasurement(FileHandler):
             self.channels_label.append(imag_channel)
         gc.collect()
 
-    def create_gif_old(self, amp_channel:str, phase_channel:str, frames:int=20, fps:int=10) -> None:
-        """Old gif creation method.
-
-        Args:
-            amp_channel (str): _description_
-            phase_channel (str): _description_
-            frames (int, optional): _description_. Defaults to 20.
-            fps (int, optional): _description_. Defaults to 10.
-        """
-        # Todo
-        framenumbers=frames
-        Duration=1000/fps # in ms
-
-        realcolorpalette=[]
-        # old color palette
-        for i in range(0,255):
-            realcolorpalette.append(i)
-            if (i<127): realcolorpalette.append(i)
-            else: realcolorpalette.append(255-i)
-            realcolorpalette.append(255-i)
-
-        if self.amp_indicator not in amp_channel or self.phase_indicator not in phase_channel:
-            # print('The specified channels are not specified as needed!')
-            sys.exit('The specified channels are not specified as needed!')
-        demodulation_amp = self._get_demodulation_num(amp_channel)
-        demodulation_phase = self._get_demodulation_num(phase_channel)
-        if demodulation_amp != demodulation_phase:
-            print('The channels you specified are not from the same demodulation order!\nProceeding anyways...')
-            savefile_demod = str(demodulation_amp + ':' + demodulation_phase)
-        else:
-            savefile_demod = str(demodulation_amp)
-        # check if channels are in memory, if not load the data
-        if amp_channel not in self.channels or phase_channel not in self.channels:
-            print('The channels for amplitude or phase were not found in the memory, they will be loaded automatically.\nBe aware that all prior modifications will get deleted.')
-            # reload all channels
-            self._initialize_data([amp_channel, phase_channel])
-        amp_data = self.all_data[self.channels.index(amp_channel)]
-        amp_dict = self.channel_tag_dict[self.channels.index(amp_channel)]
-        phase_data = self.all_data[self.channels.index(phase_channel)]
-        phase_dict = self.channel_tag_dict[self.channels.index(phase_channel)]
-        xres_amp, yres_amp = amp_dict[ChannelTags.PIXELAREA]
-        xres_phase, yres_phase = phase_dict[ChannelTags.PIXELAREA]
-        if xres_amp != xres_phase or yres_amp != yres_phase:
-            # print('The data of the specified channels has different resolution!')
-            sys.exit('The data of the specified channels has different resolution!')
-        XRes, YRes = xres_amp, yres_amp
-        flattened_amp = amp_data.flatten()
-        maxval = max(flattened_amp)
-
-        frames=[]
-        for i in range(0,framenumbers):
-            phase=i*2*np.pi/framenumbers
-            repixels=[]
-            colorpixels=[]
-            for j in range(0,YRes):
-                for k in range(XRes):
-                    repixval=amp_data[j][k]*np.cos(phase_data[j][k]-phase)/maxval
-                    repixels.append(repixval+1)
-            img = Image.new('L', (XRes,YRes))
-            # img = Image.fromarray(repixels)
-            img.putdata(repixels,256/2,0)
-            img.putpalette(realcolorpalette)
-            #img=img.rotate(angle)
-            #img=img.crop([int(YRes*np.sin(absangle)),int(XRes*np.sin(absangle)),int(XRes-YRes*np.sin(absangle)),int(YRes-XRes*np.sin(absangle))])
-            #img.putdata(colorpixels,256,0)
-            frames.append(img)
-        channel = 'O' + savefile_demod + 'R'
-        # self.filename is actually a windows path element not a str filename, to get the string use: self.filename.name
-        # print('savefile path: ', self.directory_name / Path(self.filename.name + f'{channel}_gif.gif'))
-        frames[0].save(self.directory_name / Path(self.filename.name + f'{channel}_gif_old.gif'), format='GIF', append_images=frames[1:], save_all=True,duration=Duration, loop=0)
-        self._display_gif(self.directory_name / Path(self.filename.name + f'{channel}_gif_old.gif'), fps=fps)
-
-    def create_gif(self, amp_channel:str, phase_channel:str, frames:int=20, fps:int=10, dpi=100) -> Path:
-        """This function will create a gif from the amplitude and phase channel you specify. The gif will show the animated realpart by repeatedly adding a phase shift.
-        The gif will be saved in the same directory as the measurement file and displayed afterwards.
-
-        Args:
-            amp_channel (str): Amplitude channel.
-            phase_channel (str): Phase channel.
-            frames (int, optional): Number of frames the gif should have. Defaults to 20.
-            fps (int, optional): Frames per second. Defaults to 10.
-            dpi (int, optional): Dots per inch. Defaults to 100.
-        
-        Returns:
-            Path: Path to the saved gif.
-        """
-        framenumbers=frames
-        Duration=1000/fps # in ms
-
-        realcolorpalette=[]
-        # old color palette
-        for i in range(0,255):
-            realcolorpalette.append(i)
-            if (i<127): realcolorpalette.append(i)
-            else: realcolorpalette.append(255-i)
-            realcolorpalette.append(255-i)
-        # convert cmap to colorpalette
-        # realcolorpalette = SNOM_realpart
-        # import matplotlib as mpl
-        # norm = mpl.colors.Normalize()
-        # from matplotlib import cm
-
-        if self.amp_indicator not in amp_channel or self.phase_indicator not in phase_channel:
-            # print('The specified channels are not specified as needed!')
-            sys.exit('The specified channels are not specified as needed!')
-        demodulation_amp = self._get_demodulation_num(amp_channel)
-        demodulation_phase = self._get_demodulation_num(phase_channel)
-        if demodulation_amp != demodulation_phase:
-            print('The channels you specified are not from the same demodulation order!\nProceeding anyways...')
-            savefile_demod = str(demodulation_amp + ':' + demodulation_phase)
-        else:
-            savefile_demod = str(demodulation_amp)
-        # check if channels are in memory, if not load the data
-        if amp_channel not in self.channels or phase_channel not in self.channels:
-            print('The channels for amplitude or phase were not found in the memory, they will be loaded automatically.\nBe aware that all prior modifications will get deleted.')
-            # reload all channels
-            self._initialize_data([amp_channel, phase_channel])
-        amp_data = self.all_data[self.channels.index(amp_channel)]
-        amp_dict = self.channel_tag_dict[self.channels.index(amp_channel)]
-        phase_data = self.all_data[self.channels.index(phase_channel)]
-        phase_dict = self.channel_tag_dict[self.channels.index(phase_channel)]
-        xres_amp, yres_amp = amp_dict[ChannelTags.PIXELAREA]
-        xres_phase, yres_phase = phase_dict[ChannelTags.PIXELAREA]
-        if xres_amp != xres_phase or yres_amp != yres_phase:
-            # print('The data of the specified channels has different resolution!')
-            sys.exit('The data of the specified channels has different resolution!')
-        XRes, YRes = xres_amp, yres_amp
-        flattened_amp = amp_data.flatten()
-        maxval = max(flattened_amp)
-
-        frames=[]
-        for i in range(0,framenumbers):
-            phase=i*2*np.pi/framenumbers
-            repixels=[]
-            for j in range(0,YRes):
-                for k in range(XRes):
-                    repixval=amp_data[j][k]*np.cos(phase_data[j][k]-phase)/maxval
-                    repixels.append(repixval+0.5)
-            data = np.array(repixels).reshape(YRes, XRes)
-            img = Image.fromarray(SNOM_realpart(data, bytes=True))
-            frames.append(img)
-        channel = 'O' + savefile_demod + 'R'
-        # self.filename is actually a windows path element not a str filename, to get the string use: self.filename.name
-        # print('savefile path: ', self.directory_name / Path(self.filename.name + f'{channel}_gif.gif'))
-        gif_path = self.directory_name / Path(self.filename.name + self.channel_prefix_default + f'{channel}.gif')
-        frames[0].save(gif_path, format='GIF', append_images=frames[1:], save_all=True,duration=Duration, loop=0, dpi=dpi)
-        # plt.show()
-        # plt.close(fig)
-        if PlotDefinitions.show_plot:
-            self._display_gif(gif_path, fps=fps)
-        return gif_path
-
-    def _display_gif(self, gif_path, fps=10):
-        # Load the gif
-        frames = imageio.mimread(gif_path)
-
-        # Create a figure and axis
-        fig, ax = plt.subplots()
-
-        # Create a function to update the frame
-        def update_image(frame):
-            ax.clear()
-            ax.imshow(frames[frame])
-            # dont show frame around the image
-            ax.axis('off')
-
-        # Hide the axes
-        ax.axis('off')
-
-        # Create the animation
-        ani = FuncAnimation(fig, update_image, frames=len(frames), interval=1000/fps, repeat=True)
-
-        # Display the animation
-        plt.show()
-
-    def create_gif_v2(self, amp_channel:str, phase_channel:str, frames:int=20, fps:int=10) -> None:
-        # Todo i dont even remember which version is best^^
-        """This function will create a gif from the amplitude and phase channel you specify. The gif will show the animated realpart by repeatedly adding a phase shift.
-        The gif will be saved in the same directory as the measurement file and displayed afterwards.
-
-        Args:
-            amp_channel (str): Amplitude channel.
-            phase_channel (str): Phase channel.
-            frames (int, optional): Number of frames the gif should have. Defaults to 20.
-            fps (int, optional): Frames per second. Defaults to 10.
-        """
-        frame_numer = frames
-
-        if self.amp_indicator not in amp_channel or self.phase_indicator not in phase_channel:
-            # print('The specified channels are not specified as needed!')
-            sys.exit('The specified channels are not specified as needed!')
-        demodulation_amp = self._get_demodulation_num(amp_channel)
-        demodulation_phase = self._get_demodulation_num(phase_channel)
-        if demodulation_amp != demodulation_phase:
-            print('The channels you specified are not from the same demodulation order!\nProceeding anyways...')
-            savefile_demod = str(demodulation_amp + ':' + demodulation_phase)
-        else:
-            savefile_demod = str(demodulation_amp)
-        # check if channels are in memory, if not load the data
-        if amp_channel not in self.channels or phase_channel not in self.channels:
-            print('The channels for amplitude or phase were not found in the memory, they will be loaded automatically.\nBe aware that all prior modifications will get deleted.')
-            # reload all channels
-            self._initialize_data([amp_channel, phase_channel])
-        amp_data = self.all_data[self.channels.index(amp_channel)]
-        amp_dict = self.channel_tag_dict[self.channels.index(amp_channel)]
-        phase_data = self.all_data[self.channels.index(phase_channel)]
-        phase_dict = self.channel_tag_dict[self.channels.index(phase_channel)]
-        xres_amp, yres_amp = amp_dict[ChannelTags.PIXELAREA]
-        xres_phase, yres_phase = phase_dict[ChannelTags.PIXELAREA]
-        if xres_amp != xres_phase or yres_amp != yres_phase:
-            # print('The data of the specified channels has different resolution!')
-            sys.exit('The data of the specified channels has different resolution!')
-        XRes, YRes = xres_amp, yres_amp
-        flattened_amp = amp_data.flatten()
-        maxval = max(flattened_amp)
-        cmap = SNOM_realpart
-
-        # create real data for all frames
-        self.all_real_data = []
-        for i in range(0, frame_numer):
-            phase = i*2*np.pi/frame_numer
-            real_data = np.zeros((YRes, XRes))
-            for j in range(0, YRes):
-                for k in range(XRes):
-                    real_data[j][k] = amp_data[j][k]*np.cos(phase_data[j][k]-phase)/maxval
-            self.all_real_data.append(real_data)
-
-        # Create figure and axis
-        # figsize = 10
-        # figsizex = 10
-        # figsizey = 10*YRes/XRes
-        fig, ax = plt.subplots(tight_layout=True) #, figsize=(figsizex, figsizey)
-        
-        # Create empty list to store the frames
-        frames = []
-        # Create the frames
-        for i in range(frame_numer):
-            ax.clear()
-            data = self.all_real_data[i]
-            self.cax = ax.pcolormesh(data, cmap=cmap, vmin=-maxval*1.1, vmax=maxval*1.1)
-            # self.cax = ax.imshow(data, cmap=cmap, aspect='equal', vmin=-maxval*1.1, vmax=maxval*1.1)
-            ax.set_aspect('equal')
-            ax.invert_yaxis()
-            ax.set_title('Frame {}'.format(i))
-            if i == 0: # create colorbar only once
-                divider = make_axes_locatable(ax)
-                cax = divider.append_axes("right", size=f"{2}%", pad=0.05)
-            cbar = plt.colorbar(self.cax, cax=cax)
-            cbar.ax.get_yaxis().labelpad = 15
-            cbar.ax.set_ylabel('Ez [arb.u.]', rotation=270)
-            # remove ticks on x and y axis, they only show pixelnumber anyways, better to add a scalebar
-            ax.set_xticks([])
-            ax.set_yticks([])
-            # disable the black frame around the image
-            ax.spines['top'].set_visible(False)
-            ax.spines['bottom'].set_visible(False)
-            ax.spines['left'].set_visible(False)
-            ax.spines['right'].set_visible(False)
-            # remove the whitespace around the image
-            # ax.margins(0)
-            # ax.margins(x=0, y=0)
-            # ax.spines[['right', 'top']].set_visible(False)
-            # disable the black frame around the colorbar
-            cbar.outline.set_visible(False)
-            fig.canvas.draw()
-            image = np.frombuffer(fig.canvas.tostring_rgb(), dtype='uint8')
-            image = image.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-            frames.append(image)
-
-
-        channel = 'O' + savefile_demod + 'R'
-        # Save the frames as a gif
-        imageio.mimsave(self.directory_name / Path(self.filename.name + self.channel_prefix_default + f'{channel}_v2.gif'), frames, fps=fps)
-        # alternative:
-        # import imageio.v3 as iio
-        # iio.imwrite(self.directory_name / Path(self.filename.name + f'{channel}_gif_withimwrite.gif'), frames, fps=fps)
-        # try with writer:
-        # writer = imageio.get_writer(self.directory_name / Path(self.filename.name + f'{channel}_gif_with_writer.gif'), fps = fps)
-
-        # for im in frames:
-        #     writer.append_data(im)
-        # writer.close()
-
-        # delete the figure
-        plt.close(fig)
-        # display the gif
-        self._display_gif(self.directory_name / Path(self.filename.name + self.channel_prefix_default + f'{channel}_v2.gif'), fps=fps)
-
     def substract_channels(self, channel1:str, channel2:str) -> None:
         """This function will substract the data of channel2 from channel1 and save the result in a new channel.
         The new channel will be named channel1-channel2.
@@ -5838,7 +5166,7 @@ class SnomMeasurement(FileHandler):
         """
         if channel1 not in self.channels or channel2 not in self.channels:
             print('The specified channels are not in memory, they will be loaded automatically.')
-            self._initialize_data([channel1, channel2])
+            self.initialize_channels([channel1, channel2])
         data1 = self.all_data[self.channels.index(channel1)]
         data2 = self.all_data[self.channels.index(channel2)]
         if data1.shape != data2.shape:
@@ -5999,21 +5327,711 @@ class SnomMeasurement(FileHandler):
             self.channels_label[self.channels.index(channel)] = channel + '_leveled'
         self._write_to_logfile('level_data_columnwise_selection', [channel_list, [elem for elem in selection]])
 
-    def create_new_channel(self, data, channel_name:str, channel_tag_dict:dict, channel_label:Optional[str]=None) -> None:
-        """This function will create a new channel from the specified data and add it to memory.
+    #########################################################
+    #### Additonal functions that do not change the data ####
+    #########################################################
+
+    def create_gif(self, amp_channel:str, phase_channel:str, frames:int=20, fps:int=10, dpi=100) -> Path:
+        """This function will create a gif from the amplitude and phase channel you specify. The gif will show the animated realpart by repeatedly adding a phase shift.
+        The gif will be saved in the same directory as the measurement file and displayed afterwards.
 
         Args:
-            data (np.ndarray): Data array to create the new channel from.
-            channel_name (str): Name of the new channel.
-            channel_tag_dict (dict): Channel tag dictionary for the new channel.
-            channel_label (str, optional): Label for the new channel. Defaults to None.
+            amp_channel (str): Amplitude channel.
+            phase_channel (str): Phase channel.
+            frames (int, optional): Number of frames the gif should have. Defaults to 20.
+            fps (int, optional): Frames per second. Defaults to 10.
+            dpi (int, optional): Dots per inch. Defaults to 100.
+        
+        Returns:
+            Path: Path to the saved gif.
         """
-        if channel_label is None:
-            channel_label = channel_name
-        self.channels.append(channel_name)
-        self.all_data.append(data)
-        self.channel_tag_dict.append(channel_tag_dict)
-        self.channels_label.append(channel_label)
+        framenumbers=frames
+        Duration=1000/fps # in ms
+
+        realcolorpalette=[]
+        # old color palette
+        for i in range(0,255):
+            realcolorpalette.append(i)
+            if (i<127): realcolorpalette.append(i)
+            else: realcolorpalette.append(255-i)
+            realcolorpalette.append(255-i)
+        # convert cmap to colorpalette
+        # realcolorpalette = SNOM_realpart
+        # import matplotlib as mpl
+        # norm = mpl.colors.Normalize()
+        # from matplotlib import cm
+
+        if self.amp_indicator not in amp_channel or self.phase_indicator not in phase_channel:
+            # print('The specified channels are not specified as needed!')
+            sys.exit('The specified channels are not specified as needed!')
+        demodulation_amp = self._get_demodulation_num(amp_channel)
+        demodulation_phase = self._get_demodulation_num(phase_channel)
+        if demodulation_amp != demodulation_phase:
+            print('The channels you specified are not from the same demodulation order!\nProceeding anyways...')
+            savefile_demod = str(demodulation_amp + ':' + demodulation_phase)
+        else:
+            savefile_demod = str(demodulation_amp)
+        # check if channels are in memory, if not load the data
+        if amp_channel not in self.channels or phase_channel not in self.channels:
+            print('The channels for amplitude or phase were not found in the memory, they will be loaded automatically.\nBe aware that all prior modifications will get deleted.')
+            # reload all channels
+            self.initialize_channels([amp_channel, phase_channel])
+        amp_data = self.all_data[self.channels.index(amp_channel)]
+        amp_dict = self.channel_tag_dict[self.channels.index(amp_channel)]
+        phase_data = self.all_data[self.channels.index(phase_channel)]
+        phase_dict = self.channel_tag_dict[self.channels.index(phase_channel)]
+        xres_amp, yres_amp = amp_dict[ChannelTags.PIXELAREA]
+        xres_phase, yres_phase = phase_dict[ChannelTags.PIXELAREA]
+        if xres_amp != xres_phase or yres_amp != yres_phase:
+            # print('The data of the specified channels has different resolution!')
+            sys.exit('The data of the specified channels has different resolution!')
+        XRes, YRes = xres_amp, yres_amp
+        flattened_amp = amp_data.flatten()
+        maxval = max(flattened_amp)
+
+        frames=[]
+        for i in range(0,framenumbers):
+            phase=i*2*np.pi/framenumbers
+            repixels=[]
+            for j in range(0,YRes):
+                for k in range(XRes):
+                    repixval=amp_data[j][k]*np.cos(phase_data[j][k]-phase)/maxval
+                    repixels.append(repixval+0.5)
+            data = np.array(repixels).reshape(YRes, XRes)
+            img = Image.fromarray(SNOM_realpart(data, bytes=True))
+            frames.append(img)
+        channel = 'O' + savefile_demod + 'R'
+        # self.filename is actually a windows path element not a str filename, to get the string use: self.filename.name
+        # print('savefile path: ', self.directory_name / Path(self.filename.name + f'{channel}_gif.gif'))
+        gif_path = self.directory_name / Path(self.filename.name + self.channel_prefix_default + f'{channel}.gif')
+        frames[0].save(gif_path, format='GIF', append_images=frames[1:], save_all=True,duration=Duration, loop=0, dpi=dpi)
+        # plt.show()
+        # plt.close(fig)
+        if PlotDefinitions.show_plot:
+            self._display_gif(gif_path, fps=fps)
+        return gif_path
+
+    def _display_gif(self, gif_path, fps=10):
+        # Load the gif
+        frames = imageio.mimread(gif_path)
+
+        # Create a figure and axis
+        fig, ax = plt.subplots()
+
+        # Create a function to update the frame
+        def update_image(frame):
+            ax.clear()
+            ax.imshow(frames[frame])
+            # dont show frame around the image
+            ax.axis('off')
+
+        # Hide the axes
+        ax.axis('off')
+
+        # Create the animation
+        ani = FuncAnimation(fig, update_image, frames=len(frames), interval=1000/fps, repeat=True)
+
+        # Display the animation
+        plt.show()
+
+    # todo: delete the old gif versions?
+    def create_gif_v2(self, amp_channel:str, phase_channel:str, frames:int=20, fps:int=10) -> None:
+        # Todo i dont even remember which version is best^^
+        """This function will create a gif from the amplitude and phase channel you specify. The gif will show the animated realpart by repeatedly adding a phase shift.
+        The gif will be saved in the same directory as the measurement file and displayed afterwards.
+
+        Args:
+            amp_channel (str): Amplitude channel.
+            phase_channel (str): Phase channel.
+            frames (int, optional): Number of frames the gif should have. Defaults to 20.
+            fps (int, optional): Frames per second. Defaults to 10.
+        """
+        frame_numer = frames
+
+        if self.amp_indicator not in amp_channel or self.phase_indicator not in phase_channel:
+            # print('The specified channels are not specified as needed!')
+            sys.exit('The specified channels are not specified as needed!')
+        demodulation_amp = self._get_demodulation_num(amp_channel)
+        demodulation_phase = self._get_demodulation_num(phase_channel)
+        if demodulation_amp != demodulation_phase:
+            print('The channels you specified are not from the same demodulation order!\nProceeding anyways...')
+            savefile_demod = str(demodulation_amp + ':' + demodulation_phase)
+        else:
+            savefile_demod = str(demodulation_amp)
+        # check if channels are in memory, if not load the data
+        if amp_channel not in self.channels or phase_channel not in self.channels:
+            print('The channels for amplitude or phase were not found in the memory, they will be loaded automatically.\nBe aware that all prior modifications will get deleted.')
+            # reload all channels
+            self.initialize_channels([amp_channel, phase_channel])
+        amp_data = self.all_data[self.channels.index(amp_channel)]
+        amp_dict = self.channel_tag_dict[self.channels.index(amp_channel)]
+        phase_data = self.all_data[self.channels.index(phase_channel)]
+        phase_dict = self.channel_tag_dict[self.channels.index(phase_channel)]
+        xres_amp, yres_amp = amp_dict[ChannelTags.PIXELAREA]
+        xres_phase, yres_phase = phase_dict[ChannelTags.PIXELAREA]
+        if xres_amp != xres_phase or yres_amp != yres_phase:
+            # print('The data of the specified channels has different resolution!')
+            sys.exit('The data of the specified channels has different resolution!')
+        XRes, YRes = xres_amp, yres_amp
+        flattened_amp = amp_data.flatten()
+        maxval = max(flattened_amp)
+        cmap = SNOM_realpart
+
+        # create real data for all frames
+        self.all_real_data = []
+        for i in range(0, frame_numer):
+            phase = i*2*np.pi/frame_numer
+            real_data = np.zeros((YRes, XRes))
+            for j in range(0, YRes):
+                for k in range(XRes):
+                    real_data[j][k] = amp_data[j][k]*np.cos(phase_data[j][k]-phase)/maxval
+            self.all_real_data.append(real_data)
+
+        # Create figure and axis
+        # figsize = 10
+        # figsizex = 10
+        # figsizey = 10*YRes/XRes
+        fig, ax = plt.subplots(tight_layout=True) #, figsize=(figsizex, figsizey)
+        
+        # Create empty list to store the frames
+        frames = []
+        # Create the frames
+        for i in range(frame_numer):
+            ax.clear()
+            data = self.all_real_data[i]
+            self.cax = ax.pcolormesh(data, cmap=cmap, vmin=-maxval*1.1, vmax=maxval*1.1)
+            # self.cax = ax.imshow(data, cmap=cmap, aspect='equal', vmin=-maxval*1.1, vmax=maxval*1.1)
+            ax.set_aspect('equal')
+            ax.invert_yaxis()
+            ax.set_title('Frame {}'.format(i))
+            if i == 0: # create colorbar only once
+                divider = make_axes_locatable(ax)
+                cax = divider.append_axes("right", size=f"{2}%", pad=0.05)
+            cbar = plt.colorbar(self.cax, cax=cax)
+            cbar.ax.get_yaxis().labelpad = 15
+            cbar.ax.set_ylabel('Ez [arb.u.]', rotation=270)
+            # remove ticks on x and y axis, they only show pixelnumber anyways, better to add a scalebar
+            ax.set_xticks([])
+            ax.set_yticks([])
+            # disable the black frame around the image
+            ax.spines['top'].set_visible(False)
+            ax.spines['bottom'].set_visible(False)
+            ax.spines['left'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            # remove the whitespace around the image
+            # ax.margins(0)
+            # ax.margins(x=0, y=0)
+            # ax.spines[['right', 'top']].set_visible(False)
+            # disable the black frame around the colorbar
+            cbar.outline.set_visible(False)
+            fig.canvas.draw()
+            image = np.frombuffer(fig.canvas.tostring_rgb(), dtype='uint8')
+            image = image.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+            frames.append(image)
+
+
+        channel = 'O' + savefile_demod + 'R'
+        # Save the frames as a gif
+        imageio.mimsave(self.directory_name / Path(self.filename.name + self.channel_prefix_default + f'{channel}_v2.gif'), frames, fps=fps)
+        # alternative:
+        # import imageio.v3 as iio
+        # iio.imwrite(self.directory_name / Path(self.filename.name + f'{channel}_gif_withimwrite.gif'), frames, fps=fps)
+        # try with writer:
+        # writer = imageio.get_writer(self.directory_name / Path(self.filename.name + f'{channel}_gif_with_writer.gif'), fps = fps)
+
+        # for im in frames:
+        #     writer.append_data(im)
+        # writer.close()
+
+        # delete the figure
+        plt.close(fig)
+        # display the gif
+        self._display_gif(self.directory_name / Path(self.filename.name + self.channel_prefix_default + f'{channel}_v2.gif'), fps=fps)
+
+    def create_gif_old(self, amp_channel:str, phase_channel:str, frames:int=20, fps:int=10) -> None:
+        """Old gif creation method.
+
+        Args:
+            amp_channel (str): _description_
+            phase_channel (str): _description_
+            frames (int, optional): _description_. Defaults to 20.
+            fps (int, optional): _description_. Defaults to 10.
+        """
+        # Todo
+        framenumbers=frames
+        Duration=1000/fps # in ms
+
+        realcolorpalette=[]
+        # old color palette
+        for i in range(0,255):
+            realcolorpalette.append(i)
+            if (i<127): realcolorpalette.append(i)
+            else: realcolorpalette.append(255-i)
+            realcolorpalette.append(255-i)
+
+        if self.amp_indicator not in amp_channel or self.phase_indicator not in phase_channel:
+            # print('The specified channels are not specified as needed!')
+            sys.exit('The specified channels are not specified as needed!')
+        demodulation_amp = self._get_demodulation_num(amp_channel)
+        demodulation_phase = self._get_demodulation_num(phase_channel)
+        if demodulation_amp != demodulation_phase:
+            print('The channels you specified are not from the same demodulation order!\nProceeding anyways...')
+            savefile_demod = str(demodulation_amp + ':' + demodulation_phase)
+        else:
+            savefile_demod = str(demodulation_amp)
+        # check if channels are in memory, if not load the data
+        if amp_channel not in self.channels or phase_channel not in self.channels:
+            print('The channels for amplitude or phase were not found in the memory, they will be loaded automatically.\nBe aware that all prior modifications will get deleted.')
+            # reload all channels
+            self.initialize_channels([amp_channel, phase_channel])
+        amp_data = self.all_data[self.channels.index(amp_channel)]
+        amp_dict = self.channel_tag_dict[self.channels.index(amp_channel)]
+        phase_data = self.all_data[self.channels.index(phase_channel)]
+        phase_dict = self.channel_tag_dict[self.channels.index(phase_channel)]
+        xres_amp, yres_amp = amp_dict[ChannelTags.PIXELAREA]
+        xres_phase, yres_phase = phase_dict[ChannelTags.PIXELAREA]
+        if xres_amp != xres_phase or yres_amp != yres_phase:
+            # print('The data of the specified channels has different resolution!')
+            sys.exit('The data of the specified channels has different resolution!')
+        XRes, YRes = xres_amp, yres_amp
+        flattened_amp = amp_data.flatten()
+        maxval = max(flattened_amp)
+
+        frames=[]
+        for i in range(0,framenumbers):
+            phase=i*2*np.pi/framenumbers
+            repixels=[]
+            colorpixels=[]
+            for j in range(0,YRes):
+                for k in range(XRes):
+                    repixval=amp_data[j][k]*np.cos(phase_data[j][k]-phase)/maxval
+                    repixels.append(repixval+1)
+            img = Image.new('L', (XRes,YRes))
+            # img = Image.fromarray(repixels)
+            img.putdata(repixels,256/2,0)
+            img.putpalette(realcolorpalette)
+            #img=img.rotate(angle)
+            #img=img.crop([int(YRes*np.sin(absangle)),int(XRes*np.sin(absangle)),int(XRes-YRes*np.sin(absangle)),int(YRes-XRes*np.sin(absangle))])
+            #img.putdata(colorpixels,256,0)
+            frames.append(img)
+        channel = 'O' + savefile_demod + 'R'
+        # self.filename is actually a windows path element not a str filename, to get the string use: self.filename.name
+        # print('savefile path: ', self.directory_name / Path(self.filename.name + f'{channel}_gif.gif'))
+        frames[0].save(self.directory_name / Path(self.filename.name + f'{channel}_gif_old.gif'), format='GIF', append_images=frames[1:], save_all=True,duration=Duration, loop=0)
+        self._display_gif(self.directory_name / Path(self.filename.name + f'{channel}_gif_old.gif'), fps=fps)
+
+    def _check_pixel_position(self, xres:int, yres:int, x:int, y:int) -> bool:
+        """This function checks if the pixel position is within the bounds.
+        
+        Args:
+            xres (int): x resolution
+            yres (int): y resolution
+            x (int): x coordinate
+            y (int): y coordinate
+        
+        Returns:
+            bool: True if the pixel position is within the bounds, False otherwise
+        """
+        if x < 0 or x > xres:
+            return False
+        elif y < 0 or y > yres:
+            return False
+        else: return True
+
+    def _get_mean_value(self, data:np.ndarray, x_coord:int, y_coord:int, zone:int) -> float:
+        """This function returns the mean value of the pixel and its nearest neighbors.
+        The zone specifies the number of neighbors. 1 means the pixel and the 8 nearest pixels.
+        2 means zone 1 plus the next 16, so a total of 25 with the pixel in the middle. 
+
+        Args:
+            data (np.ndarray): the data
+            x_coord (int): x coordinate
+            y_coord (int): y coordinate
+            zone (int): the number of neighbors
+
+        Returns:
+            float: the mean value
+        """
+        xres = len(data[0])
+        yres = len(data)
+        size = 2*zone + 1
+        mean = 0
+        count = 0
+        for y in range(size):
+            for x in range(size):
+                y_pixel = int(y_coord -(size-1)/2 + y)
+                x_pixel = int(x_coord -(size-1)/2 + x)
+                if self._check_pixel_position(xres, yres, x_pixel, y_pixel) == True:
+                    mean += data[y_pixel][x_pixel]
+                    count += 1
+        return mean/count
+
+    def get_pixel_coordinates(self, channel) -> list:
+        """This function returns the pixel coordinates of the clicked pixel.
+        
+        Args:
+            channel (str): the channel to display
+            
+        Returns:
+            list: the pixel coordinates
+        """
+        data = self.all_data[self.channels.index(channel)]
+        # identify the colormap
+        if self.height_indicator in channel:
+            cmap = SNOM_height
+        elif self.phase_indicator in channel:
+            cmap = SNOM_phase
+        elif self.amp_indicator in channel:
+            cmap = SNOM_amplitude
+        else:
+            cmap = 'viridis'
+        '''fig, ax = plt.subplots()
+        ax.pcolormesh(data, cmap=cmap)
+        klicker = clicker(ax, ["event"], markers=["x"])
+        ax.legend()
+        ax.axis('scaled')
+        ax.invert_yaxis()
+        plt.title('Please click on the pixel you want to get the coordinates from.')
+        if PlotDefinitions.show_plot:
+            plt.show()
+        klicker_coords = klicker.get_positions()['event'] #klicker returns a dictionary for the events
+        coordinates = [[round(element[0]), round(element[1])] for element in klicker_coords]
+        # display image with the clicked pixel
+        fig, ax = plt.subplots()
+        ax.pcolormesh(data, cmap=cmap)
+        ax.plot(coordinates[0][0], coordinates[0][1], 'rx')
+        ax.legend()
+        ax.axis('scaled')
+        ax.invert_yaxis()
+        plt.title('You clicked on the following pixel.')
+        if PlotDefinitions.show_plot:
+            plt.show()'''
+        # clicker = ImageClicker(data, cmap, "Please click on the pixels you want to get the coordinates from and then press 'Accept'.")
+        # coordinates = clicker.coords
+        coordinates = self._get_klicker_coordinates(data, cmap, "Please click on the pixels you want to get the coordinates from and then press 'Accept'.")
+        self._write_to_logfile('get_pixel_coordinates', coordinates)
+        return coordinates
+
+    def get_pixel_value(self, channel, coordinates:list=None, zone:int=1) -> list:
+        """This function returns the pixel values of a channel at the specified coordinates.
+        The zone specifies the number of neighbors. 0 means only the pixel itself. 1 means the pixel and the 8 nearest pixels.
+        2 means zone 1 plus the next 16, so a total of 25 with the pixel in the middle.
+        If the channel is scaled the zone will be scaled as well.
+        
+        Args:
+            channel (str): the channel to display
+            coordinates (list, optional): the pixel coordinates [[x1, y1], [x2, y2], ...]. Defaults to None.
+            zone (int, optional): the number of neighbors. Defaults to 1.
+        
+        Returns:
+            list: the pixel values
+        """
+        # adjust the zone if the data is scaled
+        zone = zone*self._get_channel_scaling(self.channels.index(channel))
+        # display the channel
+        data = self.all_data[self.channels.index(channel)]
+        if coordinates is None:
+            coordinates = self.get_pixel_coordinates(channel)
+        pixel_values = []
+        for coord in coordinates:
+            x = coord[0]
+            y = coord[1]
+            # get the mean value of the pixel and its neighbors and append to list
+            pixel_values.append(self._get_mean_value(data, x, y, zone))
+        # add the coordinates to the logfile
+        self._write_to_logfile('get_pixel_value_zone', zone)
+        return pixel_values
+
+    def _get_positions_from_plot(self, channel, data, coordinates:Optional[list]=None, orientation=None) -> list:
+        # Todo redundant to the get clicker corrdinates function?!
+        if self.phase_indicator in channel:
+            cmap = SNOM_phase
+        elif self.amp_indicator in channel:
+            cmap = SNOM_amplitude
+        elif self.height_indicator in channel:
+            cmap = SNOM_height
+
+        fig, ax = plt.subplots()
+        img = ax.pcolormesh(data, cmap=cmap)
+        klicker = clicker(ax, ["event"], markers=["x"])
+        ax.invert_yaxis()
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+        cbar = plt.colorbar(img, cax=cax)
+        cbar.ax.get_yaxis().labelpad = 15
+        cbar.ax.set_ylabel(channel, rotation=270)
+        ax.legend()
+        ax.axis('scaled')
+        if coordinates != None and orientation != None:
+            self._plot_profile_lines(data, ax, coordinates, orientation)
+        plt.title('Please select one or more points to continue.')
+        plt.tight_layout()
+        plt.show()
+        klicker_coords = klicker.get_positions()['event'] #klicker returns a dictionary for the events
+        klick_coordinates = [[round(element[0]), round(element[1])] for element in klicker_coords]
+        return klick_coordinates
+
+    def _get_profile(self, data, coordinates:list, orientation:Definitions, width:int) -> list:
+        YRes = len(data)
+        XRes = len(data[0])
+        all_profiles = []
+        for coord in coordinates:
+            profile = []
+            if orientation == Definitions.vertical:
+                for y in range(YRes):
+                    value = 0
+                    for x in range(int(coord[0] - width/2), int(coord[0] + width/2)):
+                        value += data[y][x]
+                    value = value/width
+                    profile.append(value)
+            if orientation == Definitions.horizontal:
+                for x in range(XRes):
+                    value = 0
+                    for y in range(int(coord[1] - width/2), int(coord[1] + width/2)):
+                        value += data[y][x]
+                    value = value/width
+                    profile.append(value)
+            all_profiles.append(profile)
+        return all_profiles
+
+    def select_profile(self, profile_channel:str, preview_channel:Optional[str]=None, orientation:Definitions=Definitions.vertical, width:int=10, phase_orientation:int=1, coordinates:list=None):
+        # Todo
+        """This function lets the user select a profile with given width in pixels and displays the data.
+        This is quite unfinished and only allows for profiles which extend over the whole image in the x-direction or y-direction.
+
+        Args:
+            profile_channel (str): channel to use for profile data extraction
+            preview_channel (str, optional): channel to preview the profile positions. If not specified the height channel will be used for that. Defaults to None.
+            orientation (Definitions, optional): profiles can be horizontal or vertical. Defaults to Definitions.vertical.
+            width (int, optional): width of the profile in pixels, will calculate the mean. Defaults to 10.
+            phase_orientation (int, optional): only relevant for phase profiles. Necessary for the flattening to work properly. Defaults to 1.
+            coordinates (list, optional): if you already now the position of your profile you can also specify the coordinates and skip the selection. Defaults to None.
+        """
+        if preview_channel is None:
+            preview_channel = self.height_channel
+        if coordinates is None:
+            previewdata = self.all_data[self.channels.index(preview_channel)]
+            coordinates = self._get_positions_from_plot(preview_channel, previewdata)
+
+        profiledata = self.all_data[self.channels.index(profile_channel)]
+
+        cmap = SNOM_phase
+        fig, ax = plt.subplots()
+        img = ax.pcolormesh(profiledata, cmap=cmap)
+        ax.invert_yaxis()
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+        cbar = plt.colorbar(img, cax=cax)
+        cbar.ax.get_yaxis().labelpad = 15
+        cbar.ax.set_ylabel('phase', rotation=270)
+        ax.legend()
+        ax.axis('scaled')
+        xcoord = [coord[0] for coord in coordinates]
+        ycoord = [coord[1] for coord in coordinates]
+        if orientation == Definitions.vertical:
+            ax.vlines(xcoord, ymin=0, ymax=len(profiledata))
+        elif orientation == Definitions.horizontal:
+            ax.hlines(ycoord, xmin=0, xmax=len(profiledata[0]))
+        plt.title('You chose the following line profiles')
+        plt.tight_layout()
+        plt.show()
+        # it would be nice to be able to add non pcolormesh plots to the subplotslist
+        # self.all_subplots.append()
+
+        profiles = self._get_profile(profiledata, coordinates, orientation, width)
+        for profile in profiles:
+            xvalues = np.linspace(0, 10, len(profile))
+            plt.plot(xvalues, profile, 'x')
+        plt.title('Phase profiles')
+        plt.tight_layout()
+        plt.show()
+
+        flattened_profiles = [phase_analysis.flatten_phase_profile(profile, phase_orientation) for profile in profiles]
+        for profile in flattened_profiles:
+            xvalues = np.linspace(0, 10, len(profile))
+            plt.plot(xvalues, profile)
+        plt.title('Flattened phase profiles')
+        plt.tight_layout()
+        plt.show()
+
+        difference_profile = phase_analysis.get_profile_difference(profiles[0], profiles[1])
+        # difference_profile = get_profile_difference(flattened_profiles[0], flattened_profiles[1])
+        xres, yres = self._get_channel_tag_dict_value(self.channels.index(profile_channel), ChannelTags.PIXELAREA)
+        xreal, yreal = self._get_channel_tag_dict_value(self.channels.index(profile_channel), ChannelTags.SCANAREA)
+        pixel_scaling = self._get_channel_tag_dict_value(self.channels.index(profile_channel), ChannelTags.PIXELSCALING)
+        xvalues = [i*yreal/yres/pixel_scaling for i in range(yres*pixel_scaling)]
+        plt.plot(xvalues, difference_profile)
+        plt.xlabel('Y [µm]')
+        plt.ylabel('Phase difference')
+        plt.ylim(ymin=0, ymax=2*np.pi)
+        plt.title('Phase difference')
+        plt.tight_layout()
+        plt.show()
+        gc.collect()
+
+    def _plot_data_and_profile_pos(self, channel, data, coordinates, orientation):
+        if self.phase_indicator in channel:
+            cmap = SNOM_phase
+        elif self.amp_indicator in channel:
+            cmap = SNOM_amplitude
+        elif self.height_indicator in channel:
+            cmap = SNOM_height
+        fig, ax = plt.subplots()
+        img = ax.pcolormesh(data, cmap=cmap)
+        ax.invert_yaxis()
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+        cbar = plt.colorbar(img, cax=cax)
+        cbar.ax.get_yaxis().labelpad = 15
+        cbar.ax.set_ylabel('phase', rotation=270)
+        ax.legend()
+        ax.axis('scaled')
+        self._plot_profile_lines(data, ax, coordinates, orientation)
+        plt.title('You chose the following line profiles')
+        plt.tight_layout()
+        plt.show()
+
+    def _plot_profile_lines(self, data, ax, coordinates, orientation):
+        xcoord = [coord[0] for coord in coordinates]
+        ycoord = [coord[1] for coord in coordinates]
+        if orientation == Definitions.vertical:
+            ax.vlines(xcoord, ymin=0, ymax=len(data))
+        elif orientation == Definitions.horizontal:
+            ax.hlines(ycoord, xmin=0, xmax=len(data[0]))
+
+    def _get_profiles_Coordinates(self, profile_channel, profiledata, preview_channel, previewdata, orientation, redo:bool=False, coordinates=None, redo_coordinates=None):
+        if redo == False:
+            coordinates = self._get_positions_from_plot(preview_channel, previewdata)
+        else:
+            display_coordinates = [coordinates[i] for i in range(len(coordinates)) if i not in redo_coordinates]# remove coordinates to redo and plot the other ones while selecton is active
+            redone_coordinates = self._get_positions_from_plot(preview_channel, previewdata, display_coordinates, orientation)
+            count = 0
+            for index in redo_coordinates:
+                coordinates[index] = redone_coordinates[count]
+                count += 1
+
+        self._plot_data_and_profile_pos(profile_channel, profiledata, coordinates, orientation)
+        print('Are you satisfied with the profile positions? Or would you like to change one ore more profile positions?')
+        user_input_bool = self._user_input_bool() 
+        if user_input_bool == False:
+            user_input = self._user_input('Please enter the indices of the profiles you like to redo, separated by a space character e.g. (0 1 3 11 ...)\nYour indices: ') 
+            redo_coordinates = user_input.split(' ')
+            redo_coordinates = [int(coord) for coord in redo_coordinates]
+            print('coordinates to redo: ', redo_coordinates)
+            print('Please select the new positons only for the indices you selected and in the same ordering, those were: ', redo_coordinates)
+            coordinates = self._get_profiles_Coordinates(profile_channel, profiledata, preview_channel, previewdata, orientation, redo=True, coordinates=coordinates, redo_coordinates=redo_coordinates)
+        
+        return coordinates
+
+    def select_profiles(self, profile_channel:str, preview_channel:Optional[str]=None, orientation:Definitions=Definitions.vertical, width:int=10, coordinates:Optional[list]=None):
+        # Todo
+        """This function lets the user select multiple profiles with given width in pixels and displays the data.
+        Also unfinished, but allows for the selection of multiple profiles.
+
+        Args:
+            profile_channel (str): channel to use for profile data extraction
+            preview_channel (str, optional): channel to preview the profile positions. If not specified the height channel will be used for that. Defaults to None.
+            orientation (Definitions, optional): profiles can be horizontal or vertical. Defaults to Definitions.vertical.
+            width (int, optional): width of the profile in pixels, will calculate the mean. Defaults to 10.
+            coordinates (list, optional): if you already now the position of your profile you can also specify the coordinates and skip the selection. Defaults to None.
+
+        """
+        if preview_channel is None:
+            preview_channel = self.height_channel
+        if preview_channel not in self.channels and profile_channel not in self.channels:
+            print('The channels for preview and the profiles were not found in the memory, they will be loaded automatically.\nBe aware that all prior modifications will get deleted.')  
+            self.initialize_channels([profile_channel, preview_channel])#this will negate any modifications done prior like blurr...
+        profiledata = self.all_data[self.channels.index(profile_channel)]
+        previewdata = self.all_data[self.channels.index(preview_channel)]
+
+        if coordinates is None:
+            coordinates = self._get_profiles_Coordinates(profile_channel, profiledata, preview_channel, previewdata, orientation)
+        
+        print('The final profiles are shown in this plot.')
+        self._plot_data_and_profile_pos(profile_channel, profiledata, coordinates, orientation)
+        # get the profile data and save to class variables
+        # additional infos are also stored and can be used by plotting and analysis functions
+        self.profiles = self._get_profile(profiledata, coordinates, orientation, width)
+        self.profile_channel = profile_channel
+        self.profile_orientation = orientation
+        return self.profiles
+        
+    def _display_profile(self, profiles, ylabel=None, labels=None, linestyle='x', title=None):
+        # work in progess...
+        print('Displaying profiles...')
+        print('profile channel: ', self.profile_channel)
+        print('current channels: ', self.channels)
+        if self.profile_orientation == Definitions.horizontal:
+            xrange, yrange = self._get_channel_tag_dict_value(self.profile_channel, ChannelTags.SCANAREA)
+            x_center_pos, y_center_pos = self._get_channel_tag_dict_value(self.profile_channel, ChannelTags.SCANNERCENTERPOSITION)
+            xres, yres = self._get_channel_tag_dict_value(self.profile_channel, ChannelTags.PIXELAREA)
+            xvalues = [x_center_pos - xrange/2 + x*(xrange/xres) for x in range(xres)]
+            xlabel = 'X [µm]'
+            if title is None:
+                title = 'Horizontal profiles of channel ' + self.profile_channel
+        elif self.profile_orientation == Definitions.vertical:
+            xrange, yrange = self._get_channel_tag_dict_value(self.profile_channel, ChannelTags.SCANAREA)
+            x_center_pos, y_center_pos = self._get_channel_tag_dict_value(self.profile_channel, ChannelTags.SCANNERCENTERPOSITION)
+            xres, yres = self._get_channel_tag_dict_value(self.profile_channel, ChannelTags.PIXELAREA)
+            xvalues = [y_center_pos - yrange/2 + y*(yrange/yres) for y in range(yres)]
+            xlabel = 'Y [µm]'
+            if title is None:
+                title = 'Vertical profiles of channel ' + self.profile_channel
+        # find out y label:
+        if ylabel is None:
+            if self.phase_indicator in self.profile_channel:
+                ylabel = 'Phase'
+            elif self.amp_indicator in self.profile_channel:
+                ylabel = 'Amplitude [arb.u.]'
+            elif self.height_indicator in self.profile_channel:
+                ylabel = 'Height [nm]'
+        for index, profile in enumerate(profiles):
+            if labels is None:
+                plt.plot(xvalues, profile, linestyle, label=f'Profile index: {index}')
+            else:
+                plt.plot(xvalues, profile, linestyle, label=labels[index])
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        plt.title(title)
+        plt.legend()
+        plt.tight_layout()
+        plt.show()
+
+    def display_profiles(self, ylabel:Optional[str]=None, labels:Optional[list]=None):
+        """This function will display all current profiles from memory.
+
+        Args:
+            ylabel (str, optional): label of the y axis. The x axis label is in µm per default. Defaults to None.
+            labels (list, optional): the description of the profiles. Will be displayed in the legend. Defaults to None.
+        """
+        self._display_profile(self.profiles)
+        gc.collect()
+
+    def display_flattened_profile(self, phase_orientation:int):
+        """This function will flatten all profiles in memory and display them. Only useful for phase profiles!
+
+        Args:
+            phase_orientation (int): direction of the phase, must be '1' or '-1'
+        """
+        flattened_profiles = [phase_analysis.flatten_phase_profile(profile, phase_orientation) for profile in self.profiles]
+        self._display_profile(flattened_profiles)
+        gc.collect()
+
+    def display_phase_difference(self, reference_index:int):
+        """This function will calculate the phase difference of all profiles relative to the profile specified by the reference index.
+
+        Args:
+            reference_index (int): index of the reference profile. Basically the nth-1 selected profile.
+        """
+        difference_profiles = [phase_analysis.get_profile_difference(self.profiles[reference_index], self.profiles[i]) for i in range(len(self.profiles)) if i != reference_index]
+        labels = ['Wg index ' + str(i) for i in range(len(difference_profiles))]
+        self._display_profile(difference_profiles, 'Phase difference', labels)
+        gc.collect()
+
+    def _get_mean_phase_difference(self, profiles, reference_index:int):
+        difference_profiles = [phase_analysis.get_profile_difference(profiles[reference_index], profiles[i]) for i in range(len(profiles)) if i != reference_index]
+        mean_differences = [np.mean(diff) for diff in difference_profiles]
+        return mean_differences
 
     # not yet fully implemented, eg. the profile plot function is only ment for full horizontal or vertical profiles only
     def test_profile_selection(self, channel:Optional[str]=None, selection:Optional[list] = None) -> None:
@@ -6867,7 +6885,7 @@ class Scan3D(FileHandler):
             manual_width (int, optional): The width of the manual reference area. Only applies if reference_area='manual'. Defaults to 5.
         """
         # if a list of channels is specified those will be loaded and the old ones will be overwritten
-        # self._initialize_data(channels)
+        # self.initialize_channels(channels)
         # define local list of channels to use for leveling
         channels = self.channels
         if reference_channel is None:
@@ -6957,7 +6975,7 @@ class Scan3D(FileHandler):
         """
         if channels is None:
             channels = self.channels
-        # self._initialize_data(channels)
+        # self.initialize_channels(channels)
         if shift is None:
             shift_known = False
         else:

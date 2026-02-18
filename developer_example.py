@@ -319,8 +319,9 @@ def test_gif():
     # measurement.display_channels()
     # measurement.rotate_90_deg(orientation='left')
     # measurement.gauss_filter_channels_complex()
-    # measurement.create_gif('O2A', 'O2P_corrected', frames=20, fps=10, dpi=100)
-    measurement.create_gif_v2('O2A', 'O2P_corrected', 20, 10)
+    measurement.create_gif('O2A', 'O2P_corrected', frames=20, fps=10, dpi=100)
+    # old version, to be removed ...
+    # measurement.create_gif_v2('O2A', 'O2P_corrected', 20, 10)
     # measurement.create_gif_Old('O2A', 'O2P_corrected', 20, 10)
     print('Testing of gif creation successful.')
 
@@ -456,15 +457,6 @@ def test_profile_selector():
     # this tests a new funtion to select arbitrary profiles from the data, it is however not yet fully implemented
     # measurement.Display_Profiles()
     print('Testing of profile selector successful.')
-
-def test_ssh_profile_selector():
-    directory = 'tests/testdata/2023-03-16 151410 PH topol_fb_h100_nocomp_horizontalpol_10mufromcoupler'
-    channels = ['Z C', 'O2P_corrected', 'O2A']
-    measurement = SnomMeasurement(directory, channels)
-    measurement.gauss_filter_channels_complex()
-    coordinates = [[19, 19], [43, 20], [83, 20], [108, 21], [148, 22], [172, 19], [211, 21], [237, 20], [277, 21], [300, 21], [340, 21], [364, 21], [406, 21], [446, 21], [470, 20], [510, 21], [534, 21], [574, 20], [599, 22], [639, 21], [662, 21], [702, 23], [727, 22], [767, 24], [791, 23]]
-    measurement.select_profiles_SSH('O2A', 'O2P_corrected', 'Z C', coordinates=coordinates)
-    print('Testing of SSH profile selector successful.')
 
 def test_gauss_filter_v2():
     directory = 'tests/testdata/2024-07-25 114001 PH pmma_wedge_on_gold_thin_970nm'
@@ -899,7 +891,7 @@ def main():
     # synccorrection()
     # test_aachen_files()
     # test_export_to_gsf()
-    test_gif()
+    # test_gif()
     # test_3d_scan()
     # average_3d_scan()
     # test_phase_drift_correction()
@@ -910,7 +902,6 @@ def main():
     # test_level_columnwise()
     # test_get_pixel_value()
     # test_profile_selector()
-    # test_ssh_profile_selector()
     # test_gauss_filter_v2()
     # test_comsol_data()
     # test_comsol_height_data()
@@ -919,7 +910,7 @@ def main():
     # test_delete_data()
     # test_regex_recognition()
     # test_channel_tag_dict()
-    # no_parameter_file()
+    no_parameter_file()
 
     ################################
     #### Documentation examples ####
