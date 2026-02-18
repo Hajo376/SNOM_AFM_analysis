@@ -18,6 +18,7 @@ src/snom_analysis/lib/file_handling.py
 src/snom_analysis/lib/height_masking.py
 src/snom_analysis/lib/phase_analysis.py
 src/snom_analysis/lib/phase_slider.py
+src/snom_analysis/lib/point_clicker.py
 src/snom_analysis/lib/profile.py
 src/snom_analysis/lib/profile_selector.py
 src/snom_analysis/lib/realign.py
