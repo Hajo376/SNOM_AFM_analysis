@@ -1273,6 +1273,18 @@ class FileHandler(PlotDefinitions):
         return tagval
     
     def _create_channel_tag_dict_from_measurement_tag_dict(self, channels:Optional[list]=None) -> list:
+        """Create the necessary channel tag dictionary from the measurement tag dictionary.
+        Gets called when data files do not contain the necessary channel tags in the header. 
+        The channel dictionaries are created based on the measurement tag dict, so all channels have the same channel tag dict. 
+        This is not ideal, but it is better than not having any channel tag dict at all. 
+        When saving the data is saved in a format with a the channel tag dict as a header.
+
+        Args:
+            channels (Optional[list], optional): Channels to create channel tag dicts for. Defaults to None.
+
+        Returns:
+            list: List of channel tag dictionaries.
+        """
         print('Creating channel tag dict from measurement tag dict...')
         if channels is None:
             channels = self.channels
@@ -1979,6 +1991,7 @@ class SnomMeasurement(FileHandler):
     #######################################
     #### Basic data handling functions ####
     #######################################
+
     def initialize_channels(self, channels:Optional[list]=None) -> None:
         """This function initializes the data in memory. If no channels are specified the already existing data is used,
         which is created automatically in the instance init method. If channels are specified, the instance data is overwritten.
@@ -2031,6 +2044,22 @@ class SnomMeasurement(FileHandler):
         # also apply the autoscale if it was applied to the old measurements
         if self.autoscale == True:
             self.quadratic_pixels(channels)
+
+    def create_new_channel(self, data, channel_name:str, channel_tag_dict:dict, channel_label:Optional[str]=None) -> None:
+        """This function will create a new channel from the specified data and add it to memory.
+
+        Args:
+            data (np.ndarray): Data array to create the new channel from.
+            channel_name (str): Name of the new channel.
+            channel_tag_dict (dict): Channel tag dictionary for the new channel.
+            channel_label (str, optional): Label for the new channel. Defaults to None.
+        """
+        if channel_label is None:
+            channel_label = channel_name
+        self.channels.append(channel_name)
+        self.all_data.append(data)
+        self.channel_tag_dict.append(channel_tag_dict)
+        self.channels_label.append(channel_label)
 
     def _load_data(self, channels:list) -> list:
         """Loads all binary data of the specified channels and returns them in a list plus the dictionary with the channel information.
@@ -3141,22 +3170,6 @@ class SnomMeasurement(FileHandler):
 
     #### Basic functions ####
     #~~~~~~~~~~~~~~~~~~~~~~~#
-
-    def create_new_channel(self, data, channel_name:str, channel_tag_dict:dict, channel_label:Optional[str]=None) -> None:
-        """This function will create a new channel from the specified data and add it to memory.
-
-        Args:
-            data (np.ndarray): Data array to create the new channel from.
-            channel_name (str): Name of the new channel.
-            channel_tag_dict (dict): Channel tag dictionary for the new channel.
-            channel_label (str, optional): Label for the new channel. Defaults to None.
-        """
-        if channel_label is None:
-            channel_label = channel_name
-        self.channels.append(channel_name)
-        self.all_data.append(data)
-        self.channel_tag_dict.append(channel_tag_dict)
-        self.channels_label.append(channel_label)
 
     def _scale_array(self, array, scaling) -> np.ndarray:
         """This function scales a given 2D Array, it thus creates 'scaling'**2 subpixels per pixel.

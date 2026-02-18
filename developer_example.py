@@ -579,6 +579,29 @@ def no_parameter_file():
     # measurement.synccorrection(1.6)
     print('Testing of no parameter file successful.')
 
+def print_dicts_and_config():
+    # directory_name = 'tests/testdata/2022-04-25 1212 PH pentamer_840nm_s50_1'
+    # directory_name = 'tests/testdata/2020-01-08 1337 PH denmark_skurve_02_synchronize'
+    directory_name = 'tests/testdata/2022-04-29 1613 PH topol_FB_horizontal_interf_synchronize_nanoFTIR_mixedres_long' 
+    channels = ['O2P']
+    measurement = SnomMeasurement(directory_name, channels, autoscale=False)
+    measurement.print_channel_tag_dict()
+    measurement.print_measurement_tag_dict()
+    # the confic contains a lot of information, mainly a section of the available file types
+    # and then a section for each file type with the corresponding regex patterns, 
+    # which are used to recognize the files in the measurement folder
+    # get the file types:
+    measurement.print_config("FILETYPES")
+    # print the section for the first file type:
+    measurement.print_config("FILETYPE1")
+    # if none of the file types works for your data you can also add your own file type to the config file, 
+    # which is located in your home folder. Make sure to follow the same structure as the existing file types 
+    # and change the string values accordingly. The tags need to be exactly the same as in the header of your data files 
+    # and the parameter file, otherwise the files will not be recognized. 
+    # Make a copy of the config file or add your filetype to the '_create_default_config' function in the code, 
+    # to ensure that your changes are not overwritten when the config file is updated in the future.
+    print('Testing of print statements successful.')
+
 
 #########################################
 #### Examples used in documentation: ####
@@ -910,7 +933,8 @@ def main():
     # test_delete_data()
     # test_regex_recognition()
     # test_channel_tag_dict()
-    no_parameter_file()
+    # no_parameter_file()
+    print_dicts_and_config()
 
     ################################
     #### Documentation examples ####
